@@ -9,7 +9,6 @@ IDE_BUILD_TREE = $$QTC_BUILD
 
 include(ros_project_manager_dependencies.pri)
 include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
-#include($$QTCREATOR_SOURCES/src/plugins/coreplugin/coreplugin_dependencies.pri)
 
 HEADERS = \
     ros_project_wizard.h \
