@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="text/x-ros-project">
+    <sub-class-of type="text/plain"/>
+    <comment>ROS Qt Creator Project file</comment>
+    <glob pattern="*.ros_creator"/>
+  </mime-type>
+
+  <mime-type type="application/vnd.qtcreator.ros.files">
+    <sub-class-of type="text/plain"/>
+    <comment>ROS Project Files</comment>
+    <glob pattern="*.ros_files"/>
+  </mime-type>
+
+  <mime-type type="application/vnd.qtcreator.ros.includes">
+    <sub-class-of type="text/plain"/>
+    <comment>ROS Project Include Paths</comment>
+    <glob pattern="*.ros_includes"/>
+  </mime-type>
+
+  <mime-type type="application/vnd.qtcreator.ros.config">
+    <sub-class-of type="text/plain"/>
+    <comment>ROS Project Configuration File</comment>
+    <glob pattern="*.ros_config"/>
+  </mime-type>
+
+</mime-info>
