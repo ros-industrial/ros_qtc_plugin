@@ -123,7 +123,7 @@ bool ROSMakeStep::init(QList<const BuildStep *> &earlierSteps)
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
     pp->setEnvironment(env);
-    pp->setCommand(makeCommand(bc->environment()));
+    pp->setCommand(makeCommand());
     pp->setArguments(allArguments());
     pp->resolveAll();
 
@@ -179,15 +179,12 @@ QString ROSMakeStep::allArguments() const
     return args;
 }
 
-QString ROSMakeStep::makeCommand(const Utils::Environment &environment) const
+QString ROSMakeStep::makeCommand() const
 {
     QString command = m_makeCommand;
-    if (command.isEmpty()) {
-        ToolChain *tc = ToolChainKitInformation::toolChain(target()->kit());
-        if (tc)
-            command = tc->makeCommand(environment);
-        else
-            command = QLatin1String("make");
+    if (command.isEmpty())
+    {
+      command = QLatin1String("catkin_make");
     }
     return command;
 }
@@ -282,7 +279,7 @@ void ROSMakeStepConfigWidget::updateMakeOverrrideLabel()
     if (!bc)
         bc = m_makeStep->target()->activeBuildConfiguration();
 
-    m_ui->makeLabel->setText(tr("Override %1:").arg(QDir::toNativeSeparators(m_makeStep->makeCommand(bc->environment()))));
+    m_ui->makeLabel->setText(tr("Override %1:").arg(QDir::toNativeSeparators(m_makeStep->makeCommand())));
 }
 
 void ROSMakeStepConfigWidget::updateDetails()
@@ -295,7 +292,7 @@ void ROSMakeStepConfigWidget::updateDetails()
     param.setMacroExpander(bc->macroExpander());
     param.setWorkingDirectory(bc->buildDirectory().toString());
     param.setEnvironment(bc->environment());
-    param.setCommand(m_makeStep->makeCommand(bc->environment()));
+    param.setCommand(m_makeStep->makeCommand());
     param.setArguments(m_makeStep->allArguments());
     m_summaryText = param.summary(displayName());
     emit updateSummary();

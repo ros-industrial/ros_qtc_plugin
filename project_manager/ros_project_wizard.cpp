@@ -40,10 +40,14 @@
 #include <QApplication>
 #include <QDebug>
 #include <QDir>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QPainter>
 #include <QPixmap>
 #include <QStyle>
+#include <QProcess>
+#include <QXmlStreamReader>
+
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -143,42 +147,86 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
 
     const ROSProjectWizardDialog *wizard = qobject_cast<const ROSProjectWizardDialog *>(w);
     const QString projectPath = wizard->path();
-    const QDir dir(projectPath);
+    const QDir wsDir(projectPath);
+    const QDir srcDir(projectPath + QLatin1String("/src"));
+    const QDir bldDir(projectPath + QLatin1String("/build"));
+    const QDir devDir(projectPath + QLatin1String("/devel"));
     const QString projectName = wizard->projectName();
-    const QString creatorFileName = QFileInfo(dir, projectName + QLatin1String(".ros_creator")).absoluteFilePath();
-    const QString filesFileName = QFileInfo(dir, projectName + QLatin1String(".ros_files")).absoluteFilePath();
-    const QString includesFileName = QFileInfo(dir, projectName + QLatin1String(".ros_includes")).absoluteFilePath();
-    const QString configFileName = QFileInfo(dir, projectName + QLatin1String(".ros_config")).absoluteFilePath();
-    const QStringList paths = wizard->selectedPaths();
+    const QString creatorFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros_creator")).absoluteFilePath();
+    const QString filesFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros_files")).absoluteFilePath();
+    const QString includesFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros_includes")).absoluteFilePath();
+    const QString configFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros_config")).absoluteFilePath();
 
-    Utils::MimeDatabase mdb;
-    Utils::MimeType headerTy = mdb.mimeTypeForName(QLatin1String("text/x-chdr"));
+    // Get all file in the workspace source directory
+    QStringList workspaceFiles;
+    QDirIterator it(srcDir, QDirIterator::Subdirectories);
+    while (it.hasNext())
+    {
+      QDir curDir(it.next());
+      QStringList dirFiles = curDir.entryList(QDir::NoDotAndDotDot | QDir::Files);
+      curDir.makeAbsolute();
+      foreach (const QString &str, dirFiles)
+      {
+        workspaceFiles.append(curDir.filePath(str));
+      }
+    }
 
-    QStringList nameFilters = headerTy.globPatterns();
+    // Generate CodeBlocks Project File
+    QString cmd = QLatin1String(" cmake ") + srcDir.absolutePath() + QLatin1String(" -G \"CodeBlocks - Unix Makefiles\"");
+    QProcess runCmake;
+    runCmake.setWorkingDirectory(bldDir.absolutePath());
+    runCmake.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << cmd);
+    runCmake.waitForBytesWritten();
+    runCmake.waitForFinished();
+    if (runCmake.exitStatus() == QProcess::CrashExit)
+    {
+      qDebug() << runCmake.errorString();
+    }
+    else
+    {
+      qDebug() << runCmake.readAll();
+    }
 
+    // Parse CodeBlocks Project File
+    // Need to search for all of the tags <Add directory="include path" />
     QStringList includePaths;
-    foreach (const QString &path, paths) {
-        QFileInfo fileInfo(path);
-        QDir thisDir(fileInfo.absoluteFilePath());
+    QXmlStreamReader cbpXml;
+    QFile cbpFile(bldDir.filePath(QLatin1String("Project.cbp")));
+    if (!cbpFile.open(QFile::ReadOnly | QFile::Text))
+    {
+      qDebug() << "Error opening CodeBlocks Project File";
+    }
 
-        if (! thisDir.entryList(nameFilters, QDir::Files).isEmpty()) {
-            QString relative = dir.relativeFilePath(path);
-            if (relative.isEmpty())
-                relative = QLatin1Char('.');
-            includePaths.append(relative);
+    cbpXml.setDevice(&cbpFile);
+    cbpXml.readNext();
+    while(!cbpXml.atEnd())
+    {
+      if(cbpXml.isStartElement())
+      {
+        if(cbpXml.name() == QLatin1String("Add"))
+        {
+          foreach(const QXmlStreamAttribute &attr, cbpXml.attributes())
+          {
+            if(attr.name().toString() == QLatin1String("directory"))
+            {
+              QString attribute_value = attr.value().toString();
+              if(!includePaths.contains(attribute_value))
+              {
+                includePaths.append(attribute_value);
+              }
+            }
+          }
         }
+      }
+      cbpXml.readNext();
     }
 
     Core::GeneratedFile generatedCreatorFile(creatorFileName);
     generatedCreatorFile.setContents(QLatin1String("[General]\n"));
     generatedCreatorFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
 
-    QStringList sources = wizard->selectedFiles();
-    for (int i = 0; i < sources.length(); ++i)
-        sources[i] = dir.relativeFilePath(sources[i]);
-
     Core::GeneratedFile generatedFilesFile(filesFileName);
-    generatedFilesFile.setContents(sources.join(QLatin1Char('\n')));
+    generatedFilesFile.setContents(workspaceFiles.join(QLatin1Char('\n')));
 
     Core::GeneratedFile generatedIncludesFile(includesFileName);
     generatedIncludesFile.setContents(includePaths.join(QLatin1Char('\n')));
