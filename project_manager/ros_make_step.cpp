@@ -32,7 +32,6 @@
 #include "ros_project_constants.h"
 #include "ros_project.h"
 #include "ui_ros_make_step.h"
-#include "ros_build_configuration.h"
 
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/buildsteplist.h>
@@ -94,15 +93,43 @@ void ROSMakeStep::ctor()
                                                       ROS_MS_DISPLAY_NAME));
 }
 
+ROSBuildConfiguration *ROSMakeStep::rosBuildConfiguration() const
+{
+    return static_cast<ROSBuildConfiguration *>(buildConfiguration());
+}
+
+ROSBuildConfiguration *ROSMakeStep::targetsActiveBuildConfiguration() const
+{
+    return static_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
+}
+
+//ROSBuildConfiguration *ROSMakeStep::targetsActiveRunConfiguration() const
+//{
+//    return qobject_cast<ROSRunConfiguration *>(target()->activeRunConfiguration());
+//}
+
+//void ROSMakeStep::activeBuildConfigurationChanged()
+//{
+//    if (m_activeConfiguration)
+//        disconnect(m_activeConfiguration, &CMakeBuildConfiguration::useNinjaChanged, this, &MakeStep::makeCommandChanged);
+
+//    m_activeConfiguration = targetsActiveBuildConfiguration();
+
+//    if (m_activeConfiguration)
+//        connect(m_activeConfiguration, &CMakeBuildConfiguration::useNinjaChanged, this, &MakeStep::makeCommandChanged);
+
+//    emit makeCommandChanged();
+//}
+
 ROSMakeStep::~ROSMakeStep()
 {
 }
 
 bool ROSMakeStep::init(QList<const BuildStep *> &earlierSteps)
 {
-    BuildConfiguration *bc = buildConfiguration();
+    ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (!bc)
-        bc = target()->activeBuildConfiguration();
+        bc = targetsActiveBuildConfiguration();
     if (!bc)
         emit addTask(Task::buildConfigurationMissingTask());
 
@@ -124,7 +151,7 @@ bool ROSMakeStep::init(QList<const BuildStep *> &earlierSteps)
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
     pp->setEnvironment(env);
     pp->setCommand(makeCommand());
-    pp->setArguments(allArguments());
+    pp->setArguments(allArguments(bc->initialArguments()));
     pp->resolveAll();
 
     // If we are cleaning, then make can fail with an error code, but that doesn't mean
@@ -172,9 +199,11 @@ bool ROSMakeStep::fromMap(const QVariantMap &map)
     return BuildStep::fromMap(map);
 }
 
-QString ROSMakeStep::allArguments() const
+QString ROSMakeStep::allArguments(QString initial_arguments) const
 {
     QString args = m_makeArguments;
+    args.prepend(initial_arguments + QLatin1Char(' '));
+
     Utils::QtcProcess::addArgs(&args, m_buildTargets);
     return args;
 }
@@ -186,6 +215,7 @@ QString ROSMakeStep::makeCommand() const
     {
       command = QLatin1String("catkin_make");
     }
+
     return command;
 }
 
@@ -284,16 +314,16 @@ void ROSMakeStepConfigWidget::updateMakeOverrrideLabel()
 
 void ROSMakeStepConfigWidget::updateDetails()
 {
-    BuildConfiguration *bc = m_makeStep->buildConfiguration();
+    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
     if (!bc)
-        bc = m_makeStep->target()->activeBuildConfiguration();
+        bc = m_makeStep->targetsActiveBuildConfiguration();
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
     param.setWorkingDirectory(bc->buildDirectory().toString());
     param.setEnvironment(bc->environment());
     param.setCommand(m_makeStep->makeCommand());
-    param.setArguments(m_makeStep->allArguments());
+    param.setArguments(m_makeStep->allArguments(bc->initialArguments()));
     m_summaryText = param.summary(displayName());
     emit updateSummary();
 }

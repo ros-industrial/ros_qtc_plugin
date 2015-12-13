@@ -32,4 +32,5 @@ SOURCES = \
     ros_project_files_editor.cpp
 
 RESOURCES += ros_project.qrc
-FORMS += ros_make_step.ui
+FORMS += ros_make_step.ui \
+    ros_build_configuration.ui

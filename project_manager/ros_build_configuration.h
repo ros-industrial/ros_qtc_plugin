@@ -33,6 +33,15 @@
 
 #include <projectexplorer/buildconfiguration.h>
 #include <projectexplorer/namedwidget.h>
+#include <projectexplorer/buildinfo.h>
+#include <projectexplorer/kit.h>
+#include <projectexplorer/target.h>
+#include <projectexplorer/project.h>
+#include <utils/environment.h>
+#include <utils/qtcassert.h>
+#include <QLabel>
+#include <QComboBox>
+#include <QPushButton>
 
 namespace Utils {
 class FileName;
@@ -44,6 +53,8 @@ namespace Internal {
 
 class ROSBuildConfigurationFactory;
 class ROSBuildSettingsWidget;
+class ROSBuildInfo;
+namespace Ui { class ROSBuildConfiguration; }
 
 class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
 {
@@ -54,14 +65,34 @@ public:
     explicit ROSBuildConfiguration(ProjectExplorer::Target *parent);
 
     ProjectExplorer::NamedWidget *createConfigWidget();
+    QList<ProjectExplorer::NamedWidget *> createSubConfigWidgets();
 
     BuildType buildType() const;
+
+    QVariantMap toMap() const;
+
+    void setInitialArguments(const QString &arguments);
+    QString initialArguments() const;
+
+    void setDevelDirectory(const Utils::FileName &dir);
+    Utils::FileName develDirectory() const;
+
+    void sourceWorkspace();
 
 protected:
     ROSBuildConfiguration(ProjectExplorer::Target *parent, ROSBuildConfiguration *source);
     ROSBuildConfiguration(ProjectExplorer::Target *parent, Core::Id id);
 
+    bool fromMap(const QVariantMap &map);
+
     friend class ROSBuildSettingsWidget;
+
+private:
+    QString m_initialArguments;
+    QString m_rosDistribution;
+    Utils::FileName m_develDirectory;
+    ProjectExplorer::NamedWidget *m_buildEnvironmentWidget;
+
 };
 
 class ROSBuildConfigurationFactory : public ProjectExplorer::IBuildConfigurationFactory
@@ -87,7 +118,15 @@ public:
 
 private:
     bool canHandle(const ProjectExplorer::Target *t) const;
-    ProjectExplorer::BuildInfo *createBuildInfo(const ProjectExplorer::Kit *k, const Utils::FileName &buildDir) const;
+
+    enum BuildType { BuildTypeNone = 0,
+                     BuildTypeDebug = 1,
+                     BuildTypeRelease = 2,
+                     BuildTypeRelWithDebInfo = 3,
+                     BuildTypeMinSizeRel = 4,
+                     BuildTypeLast = 5 };
+
+    ROSBuildInfo *createBuildInfo(const ProjectExplorer::Kit *k, const QString &projectPath, BuildType type) const;
 };
 
 class ROSBuildSettingsWidget : public ProjectExplorer::NamedWidget
@@ -98,12 +137,33 @@ public:
     ROSBuildSettingsWidget(ROSBuildConfiguration *bc);
 
 private slots:
-    void buildDirectoryChanged();
-    void environmentHasChanged();
+    void on_source_pushButton_clicked();
 
 private:
-    Utils::PathChooser *m_pathChooser;
+    Ui::ROSBuildConfiguration *m_ui;
     ROSBuildConfiguration *m_buildConfiguration;
+};
+
+class ROSBuildInfo : public ProjectExplorer::BuildInfo
+{
+public:
+    ROSBuildInfo(const ProjectExplorer::IBuildConfigurationFactory *f) :
+        ProjectExplorer::BuildInfo(f) { }
+
+    ROSBuildInfo(const Internal::ROSBuildConfiguration *bc) :
+        ProjectExplorer::BuildInfo(ProjectExplorer::IBuildConfigurationFactory::find(bc->target()))
+    {
+        displayName = bc->displayName();
+        buildDirectory = bc->buildDirectory();
+        kitId = bc->target()->kit()->id();
+        environment = bc->environment();
+        develDirectory = bc->develDirectory();
+        arguments = bc->initialArguments();
+    }
+
+    Utils::Environment environment;
+    Utils::FileName develDirectory;
+    QString arguments;
 };
 
 } // namespace Internal

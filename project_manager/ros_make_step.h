@@ -32,6 +32,7 @@
 #define ROSMAKESTEP_H
 
 #include <projectexplorer/abstractprocessstep.h>
+#include "ros_build_configuration.h"
 
 QT_BEGIN_NAMESPACE
 class QListWidgetItem;
@@ -40,8 +41,8 @@ QT_END_NAMESPACE
 namespace ROSProjectManager {
 namespace Internal {
 
-class GenericMakeStepConfigWidget;
-class GenericMakeStepFactory;
+class ROSMakeStepConfigWidget;
+class ROSMakeStepFactory;
 namespace Ui { class ROSMakeStep; }
 
 class ROSMakeStep : public ProjectExplorer::AbstractProcessStep
@@ -57,12 +58,13 @@ public:
 
     bool init(QList<const BuildStep *> &earlierSteps);
     void run(QFutureInterface<bool> &fi);
+    ROSBuildConfiguration *rosBuildConfiguration() const;
 
     ProjectExplorer::BuildStepConfigWidget *createConfigWidget();
     bool immutable() const;
     bool buildsTarget(const QString &target) const;
     void setBuildTarget(const QString &target, bool on);
-    QString allArguments() const;
+    QString allArguments(QString initial_arguments) const;
     QString makeCommand() const;
 
     void setClean(bool clean);
@@ -73,10 +75,12 @@ public:
 protected:
     ROSMakeStep(ProjectExplorer::BuildStepList *parent, ROSMakeStep *bs);
     ROSMakeStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
+    QStringList automaticallyAddedArguments() const;
     bool fromMap(const QVariantMap &map);
 
 private:
     void ctor();
+    ROSBuildConfiguration *targetsActiveBuildConfiguration() const;
 
     QStringList m_buildTargets;
     QString m_makeArguments;
