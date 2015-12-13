@@ -42,7 +42,6 @@ class PathChooser;
 namespace ROSProjectManager {
 namespace Internal {
 
-class ROSTarget;
 class ROSBuildConfigurationFactory;
 class ROSBuildSettingsWidget;
 
