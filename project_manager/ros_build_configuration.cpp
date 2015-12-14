@@ -41,7 +41,6 @@
 #include <projectexplorer/kitinformation.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/toolchain.h>
-#include <projectexplorer/buildenvironmentwidget.h>
 #include <utils/mimetypes/mimedatabase.h>
 #include <utils/pathchooser.h>
 #include <utils/qtcassert.h>
@@ -125,21 +124,29 @@ void ROSBuildConfiguration::sourceWorkspace()
   source_devel.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << cmd);
   source_devel.waitForBytesWritten();
   source_devel.waitForFinished();
+
   if (source_devel.exitStatus() == QProcess::CrashExit)
   {
     qDebug() << source_devel.errorString();
   }
   else
   {
-    Utils::Environment new_env = Utils::Environment(source_devel.systemEnvironment());
-    new_env.set(QLatin1String("PWD"), ws_dir);
+    QList<Utils::EnvironmentItem> current_env = userEnvironmentChanges();
+    Utils::Environment source_env = Utils::Environment(source_devel.systemEnvironment());
+    source_env.set(QLatin1String("PWD"), ws_dir);
 
-    QList<Utils::EnvironmentItem> diff = environment().diff(new_env);
+    // Need to check if additional user changes are not overwritten
+    QList<Utils::EnvironmentItem> diff = baseEnvironment().diff(source_env);
+
     if (!diff.isEmpty())
     {
+      foreach(Utils::EnvironmentItem it, current_env)
+      {
+        source_env.appendOrSet(it.name, it.value);
+      }
+
+      diff = baseEnvironment().diff(source_env);
       setUserEnvironmentChanges(diff);
-      //Need to create my own BuildEnvironmentWidget and connect to userEnviromentChanges
-      //So these changes are reflected in the GUI
     }
   }
 
@@ -152,8 +159,7 @@ NamedWidget *ROSBuildConfiguration::createConfigWidget()
 
 QList<NamedWidget *> ROSBuildConfiguration::createSubConfigWidgets()
 {
-  //Need to create my own BuildEnvironmentWidget and connect to userEnviromentChanges
-  return QList<NamedWidget *>() << new BuildEnvironmentWidget(this);;
+  return QList<NamedWidget *>() << new ROSBuildEnvironmentWidget(this);
 }
 
 /*!
@@ -363,9 +369,61 @@ ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
     setDisplayName(tr("ROS Manager"));
 }
 
-void ROSProjectManager::Internal::ROSBuildSettingsWidget::on_source_pushButton_clicked()
+void ROSBuildSettingsWidget::on_source_pushButton_clicked()
 {
     m_buildConfiguration->sourceWorkspace();
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+// ROSBuildEnvironmentWidget
+////////////////////////////////////////////////////////////////////////////////////
+
+ROSBuildEnvironmentWidget::ROSBuildEnvironmentWidget(BuildConfiguration *bc)
+    : m_buildConfiguration(0)
+{
+    QVBoxLayout *vbox = new QVBoxLayout(this);
+    vbox->setMargin(0);
+    m_clearSystemEnvironmentCheckBox = new QCheckBox(this);
+    m_clearSystemEnvironmentCheckBox->setText(tr("Clear system environment"));
+
+    m_buildEnvironmentWidget = new EnvironmentWidget(this, m_clearSystemEnvironmentCheckBox);
+    vbox->addWidget(m_buildEnvironmentWidget);
+
+    connect(m_buildEnvironmentWidget, SIGNAL(userChangesChanged()),
+            this, SLOT(environmentModelUserChangesChanged()));
+    connect(m_clearSystemEnvironmentCheckBox, SIGNAL(toggled(bool)),
+            this, SLOT(clearSystemEnvironmentCheckBoxClicked(bool)));
+
+    m_buildConfiguration = bc;
+
+    connect(m_buildConfiguration->target(), SIGNAL(environmentChanged()),
+            this, SLOT(environmentChanged()));
+
+    m_clearSystemEnvironmentCheckBox->setChecked(!m_buildConfiguration->useSystemEnvironment());
+    m_buildEnvironmentWidget->setBaseEnvironment(m_buildConfiguration->baseEnvironment());
+    m_buildEnvironmentWidget->setBaseEnvironmentText(m_buildConfiguration->baseEnvironmentText());
+    m_buildEnvironmentWidget->setUserChanges(m_buildConfiguration->userEnvironmentChanges());
+
+    setDisplayName(tr("Build Environment"));
+}
+
+void ROSBuildEnvironmentWidget::environmentModelUserChangesChanged()
+{
+    m_buildConfiguration->setUserEnvironmentChanges(m_buildEnvironmentWidget->userChanges());
+}
+
+void ROSBuildEnvironmentWidget::clearSystemEnvironmentCheckBoxClicked(bool checked)
+{
+    m_buildConfiguration->setUseSystemEnvironment(!checked);
+    m_buildEnvironmentWidget->setBaseEnvironment(m_buildConfiguration->baseEnvironment());
+    m_buildEnvironmentWidget->setBaseEnvironmentText(m_buildConfiguration->baseEnvironmentText());
+}
+
+void ROSBuildEnvironmentWidget::environmentChanged()
+{
+    m_buildEnvironmentWidget->setBaseEnvironment(m_buildConfiguration->baseEnvironment());
+    m_buildEnvironmentWidget->setBaseEnvironmentText(m_buildConfiguration->baseEnvironmentText());
+    m_buildEnvironmentWidget->setUserChanges(m_buildConfiguration->userEnvironmentChanges());
 }
 
 } // namespace Internal

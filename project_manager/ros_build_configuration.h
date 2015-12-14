@@ -37,11 +37,10 @@
 #include <projectexplorer/kit.h>
 #include <projectexplorer/target.h>
 #include <projectexplorer/project.h>
+#include <projectexplorer/environmentwidget.h>
 #include <utils/environment.h>
 #include <utils/qtcassert.h>
-#include <QLabel>
-#include <QComboBox>
-#include <QPushButton>
+#include <QCheckBox>
 
 namespace Utils {
 class FileName;
@@ -142,6 +141,24 @@ private slots:
 private:
     Ui::ROSBuildConfiguration *m_ui;
     ROSBuildConfiguration *m_buildConfiguration;
+};
+
+class ROSBuildEnvironmentWidget : public ProjectExplorer::NamedWidget
+{
+  Q_OBJECT
+
+public:
+  ROSBuildEnvironmentWidget(ProjectExplorer::BuildConfiguration *bc);
+
+private slots:
+  void environmentModelUserChangesChanged();
+  void clearSystemEnvironmentCheckBoxClicked(bool checked);
+  void environmentChanged();
+
+protected:
+  ProjectExplorer::EnvironmentWidget *m_buildEnvironmentWidget;
+  QCheckBox *m_clearSystemEnvironmentCheckBox;
+  ProjectExplorer::BuildConfiguration *m_buildConfiguration;
 };
 
 class ROSBuildInfo : public ProjectExplorer::BuildInfo

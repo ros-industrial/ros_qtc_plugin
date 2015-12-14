@@ -20,7 +20,7 @@
    <item row="0" column="0">
     <widget class="QLabel" name="ros_version_label">
      <property name="text">
-      <string>ROS Version:</string>
+      <string>ROS Distribution:</string>
      </property>
     </widget>
    </item>
