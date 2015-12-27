@@ -29,6 +29,8 @@
 ****************************************************************************/
 
 #include "ros_project_wizard.h"
+#include "ros_utils.h"
+#include "ui_ros_import_wizard_page.h"
 
 #include <coreplugin/icore.h>
 #include <projectexplorer/projectexplorerconstants.h>
@@ -36,6 +38,7 @@
 
 #include <utils/filewizardpage.h>
 #include <utils/mimetypes/mimedatabase.h>
+#include <utils/wizard.h>
 
 #include <QApplication>
 #include <QDebug>
@@ -47,10 +50,12 @@
 #include <QStyle>
 #include <QProcess>
 #include <QXmlStreamReader>
+#include <QPlainTextEdit>
 
 
 namespace ROSProjectManager {
 namespace Internal {
+
 
 static const char *const ConfigFileTemplate =
         "// Add predefined macros for your project here. For example:\n"
@@ -70,37 +75,224 @@ ROSProjectWizardDialog::ROSProjectWizardDialog(const Core::BaseFileWizardFactory
     setWindowTitle(tr("Import Existing ROS Project"));
 
     // first page
-    m_firstPage = new Utils::FileWizardPage;
+    m_firstPage = new ROSImportWizardPage;
     m_firstPage->setTitle(tr("Project Name and Location"));
-    m_firstPage->setFileNameLabel(tr("Project name:"));
-    m_firstPage->setPathLabel(tr("Location:"));
+
     addPage(m_firstPage);
-}
-
-QString ROSProjectWizardDialog::path() const
-{
-    return m_firstPage->path();
-}
-
-QStringList ROSProjectWizardDialog::selectedPaths() const
-{
-    return QStringList();
-}
-
-QStringList ROSProjectWizardDialog::selectedFiles() const
-{
-    return QStringList();
-}
-
-void ROSProjectWizardDialog::setPath(const QString &path)
-{
-    m_firstPage->setPath(path);
 }
 
 QString ROSProjectWizardDialog::projectName() const
 {
-    return m_firstPage->fileName();
+    return m_firstPage->projectName();
 }
+
+Utils::FileName ROSProjectWizardDialog::workspaceDirectory() const
+{
+    return m_firstPage->workspaceDirectory();
+}
+
+void ROSProjectWizardDialog::setWorkspaceDirectory(const QString &path)
+{
+    m_firstPage->setWorkspaceDirectory(path);
+}
+
+Utils::FileName ROSProjectWizardDialog::develDirectory() const
+{
+    return m_firstPage->develDirectory();
+}
+
+Utils::FileName ROSProjectWizardDialog::buildDirectory() const
+{
+    return m_firstPage->buildDirectory();
+}
+
+Utils::FileName ROSProjectWizardDialog::sourceDirectory() const
+{
+    return m_firstPage->sourceDirectory();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// ROSFileWizardPage
+//
+//////////////////////////////////////////////////////////////////////////////
+class ROSImportWizardPagePrivate
+{
+public:
+    ROSImportWizardPagePrivate();
+    Ui::ROSImportWizardPage m_ui;
+    bool m_complete;
+
+};
+
+ROSImportWizardPagePrivate::ROSImportWizardPagePrivate() :
+    m_complete(false)
+{
+}
+
+
+ROSImportWizardPage::ROSImportWizardPage(QWidget *parent) :
+    WizardPage(parent),
+    d(new ROSImportWizardPagePrivate),
+    m_hasValidCodeBlocksProjectFile(false)
+{
+    d->m_ui.setupUi(this);
+    d->m_ui.distributionComboBox->addItems(ROSUtils::installedDistributions());
+
+    connect(d->m_ui.pathChooser, &Utils::PathChooser::validChanged,
+            this, &ROSImportWizardPage::slotProjectPathValidChanged);
+    connect(d->m_ui.nameLineEdit, &Utils::FancyLineEdit::validChanged,
+            this, &ROSImportWizardPage::slotProjectNameValidChanged);
+
+    connect(d->m_ui.pathChooser, &Utils::PathChooser::pathChanged,
+            this, &ROSImportWizardPage::slotProjectPathChanged);
+
+    connect(d->m_ui.generateProjectFileButton, &QPushButton::pressed,
+            this, &ROSImportWizardPage::slotGenerateCodeBlocksProjectFile);
+
+    connect(d->m_ui.pathChooser, &Utils::PathChooser::returnPressed,
+            this, &ROSImportWizardPage::slotActivated);
+    connect(d->m_ui.nameLineEdit, &Utils::FancyLineEdit::validReturnPressed,
+            this, &ROSImportWizardPage::slotActivated);
+
+}
+
+ROSImportWizardPage::~ROSImportWizardPage()
+{
+    delete d;
+    delete m_runCmake;
+}
+
+QString ROSImportWizardPage::projectName() const
+{
+    return d->m_ui.nameLineEdit->text();
+}
+
+void ROSImportWizardPage::setWorkspaceDirectory(const QString &path)
+{
+    d->m_ui.pathChooser->setPath(path);
+}
+
+bool ROSImportWizardPage::isComplete() const
+{
+    return d->m_complete;
+}
+
+bool ROSImportWizardPage::forceFirstCapitalLetterForFileName() const
+{
+    return d->m_ui.nameLineEdit->forceFirstCapitalLetter();
+}
+
+void ROSImportWizardPage::setForceFirstCapitalLetterForFileName(bool b)
+{
+    d->m_ui.nameLineEdit->setForceFirstCapitalLetter(b);
+}
+
+Utils::FileName ROSImportWizardPage::workspaceDirectory() const
+{
+  return m_wsDir;
+}
+
+Utils::FileName ROSImportWizardPage::buildDirectory() const
+{
+  return m_bldDir;
+}
+
+Utils::FileName ROSImportWizardPage::sourceDirectory() const
+{
+  return m_srcDir;
+}
+
+Utils::FileName ROSImportWizardPage::develDirectory() const
+{
+  return m_devDir;
+}
+
+void ROSImportWizardPage::slotGenerateCodeBlocksProjectFile()
+{
+  // Generate CodeBlocks Project File
+  m_runCmake = new QProcess();
+  connect(m_runCmake, SIGNAL(readyReadStandardOutput()),this, SLOT(slotUpdateStdText()));
+  connect(m_runCmake, SIGNAL(readyReadStandardError()),this, SLOT(slotUpdateStdError()));
+  m_hasValidCodeBlocksProjectFile = false;
+  if (ROSUtils::sourceWorkspace(m_runCmake, m_wsDir, d->m_ui.distributionComboBox->currentText()))
+  {
+    if (ROSUtils::generateCodeBlocksProjectFile(m_runCmake, m_srcDir, m_bldDir))
+    {
+      m_hasValidCodeBlocksProjectFile = true;
+    }
+  }
+  validChangedHelper();
+  slotActivated();
+}
+
+void ROSImportWizardPage::slotUpdateStdText()
+{
+  QByteArray strdata = m_runCmake->readAllStandardOutput();
+  d->m_ui.outputTextEdit->append(QString::fromLatin1(strdata.data()).simplified());
+  QCoreApplication::processEvents();
+}
+
+void ROSImportWizardPage::slotUpdateStdError()
+{
+  QByteArray strdata = m_runCmake->readAllStandardError();
+  d->m_ui.outputTextEdit->append(QString::fromLatin1(strdata.data()).simplified());
+  QCoreApplication::processEvents();
+}
+
+void ROSImportWizardPage::slotProjectNameValidChanged()
+{
+  validChangedHelper();
+}
+
+void ROSImportWizardPage::slotProjectPathChanged(const QString &path)
+{
+  Q_UNUSED(path)
+  m_hasValidCodeBlocksProjectFile = false;
+
+  if (d->m_ui.pathChooser->isValid())
+  {
+    m_wsDir = Utils::FileName::fromString(d->m_ui.pathChooser->path());
+    m_bldDir = Utils::FileName::fromString(d->m_ui.pathChooser->path() + QLatin1String("/build"));
+    m_srcDir = Utils::FileName::fromString(d->m_ui.pathChooser->path() + QLatin1String("/src"));
+    m_devDir = Utils::FileName::fromString(d->m_ui.pathChooser->path() + QLatin1String("/devel"));
+
+    d->m_ui.generateProjectFileButton->setEnabled(true);
+  }
+  else
+  {
+    d->m_ui.generateProjectFileButton->setEnabled(false);
+  }
+
+  validChangedHelper();
+}
+
+void ROSImportWizardPage::slotProjectPathValidChanged()
+{
+  validChangedHelper();
+}
+
+
+void ROSImportWizardPage::validChangedHelper()
+{
+    const bool newComplete = d->m_ui.pathChooser->isValid() && d->m_ui.nameLineEdit->isValid() && m_hasValidCodeBlocksProjectFile;
+    if (newComplete != d->m_complete) {
+        d->m_complete = newComplete;
+        emit completeChanged();
+    }
+}
+
+void ROSImportWizardPage::slotActivated()
+{
+    if (d->m_complete)
+        emit activated();
+}
+
+bool ROSImportWizardPage::validateBaseName(const QString &name, QString *errorMessage /* = 0*/)
+{
+    return Utils::FileNameValidatingLineEdit::validateFileName(name, false, errorMessage);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -132,7 +324,7 @@ Core::BaseFileWizard *ROSProjectWizard::create(QWidget *parent,
 {
     ROSProjectWizardDialog *wizard = new ROSProjectWizardDialog(this, parent);
 
-    wizard->setPath(parameters.defaultPath());
+    wizard->setWorkspaceDirectory(parameters.defaultPath());
 
     foreach (QWizardPage *p, wizard->extensionPages())
         wizard->addPage(p);
@@ -146,11 +338,10 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
     Q_UNUSED(errorMessage)
 
     const ROSProjectWizardDialog *wizard = qobject_cast<const ROSProjectWizardDialog *>(w);
-    const QString projectPath = wizard->path();
-    const QDir wsDir(projectPath);
-    const QDir srcDir(projectPath + QLatin1String("/src"));
-    const QDir bldDir(projectPath + QLatin1String("/build"));
-    const QDir devDir(projectPath + QLatin1String("/devel"));
+    const QDir wsDir(wizard->workspaceDirectory().toString());
+    const QDir srcDir(wizard->sourceDirectory().toString());
+    const QDir bldDir(wizard->buildDirectory().toString());
+
     const QString projectName = wizard->projectName();
     const QString creatorFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros_creator")).absoluteFilePath();
     const QString filesFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros_files")).absoluteFilePath();
@@ -169,22 +360,6 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
       {
         workspaceFiles.append(curDir.filePath(str));
       }
-    }
-
-    // Generate CodeBlocks Project File
-    QString cmd = QLatin1String(" cmake ") + srcDir.absolutePath() + QLatin1String(" -G \"CodeBlocks - Unix Makefiles\"");
-    QProcess runCmake;
-    runCmake.setWorkingDirectory(bldDir.absolutePath());
-    runCmake.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << cmd);
-    runCmake.waitForBytesWritten();
-    runCmake.waitForFinished();
-    if (runCmake.exitStatus() == QProcess::CrashExit)
-    {
-      qDebug() << runCmake.errorString();
-    }
-    else
-    {
-      qDebug() << runCmake.readAll();
     }
 
     // Parse CodeBlocks Project File

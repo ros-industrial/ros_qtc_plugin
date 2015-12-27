@@ -33,6 +33,7 @@
 #include "ros_make_step.h"
 #include "ros_project.h"
 #include "ros_project_constants.h"
+#include "ros_utils.h"
 #include "ui_ros_build_configuration.h"
 
 #include <coreplugin/icore.h>
@@ -56,7 +57,6 @@ namespace Internal {
 const char ROS_BC_ID[] = "ROSProjectManager.ROSBuildConfiguration";
 const char ROS_BC_INITIAL_ARGUMENTS[] = "ROSProjectManager.ROSBuildConfiguration.InitialArguments";
 const char ROS_BC_DISTRIBUTION[] = "ROSProjectManager.ROSBuildConfiguration.Distribution";
-const char ROS_BC_DEVEL_DIRECTORY[] = "ROSProjectManager.ROSBuildConfiguration.DevelDirectory";
 
 ROSBuildConfiguration::ROSBuildConfiguration(Target *parent)
     : BuildConfiguration(parent, Core::Id(ROS_BC_ID))
@@ -70,7 +70,7 @@ ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, Core::Id id)
 
 ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, ROSBuildConfiguration *source) :
     BuildConfiguration(parent, source),m_initialArguments(source->m_initialArguments),
-    m_rosDistribution(source->m_rosDistribution), m_develDirectory(source->m_develDirectory)
+    m_rosDistribution(source->m_rosDistribution)
 {
     cloneSteps(source);
 }
@@ -81,7 +81,6 @@ QVariantMap ROSBuildConfiguration::toMap() const
 
   map.insert(QLatin1String(ROS_BC_INITIAL_ARGUMENTS), m_initialArguments);
   map.insert(QLatin1String(ROS_BC_DISTRIBUTION), m_rosDistribution);
-  map.insert(QLatin1String(ROS_BC_DEVEL_DIRECTORY), m_develDirectory.toString());
 
   return map;
 }
@@ -90,7 +89,6 @@ bool ROSBuildConfiguration::fromMap(const QVariantMap &map)
 {
   m_initialArguments = map.value(QLatin1String(ROS_BC_INITIAL_ARGUMENTS)).toString();
   m_rosDistribution = map.value(QLatin1String(ROS_BC_DISTRIBUTION)).toString();
-  m_develDirectory = Utils::FileName::fromString(map.value(QLatin1String(ROS_BC_DEVEL_DIRECTORY)).toString());
   return BuildConfiguration::fromMap(map);
 }
 
@@ -104,36 +102,27 @@ QString ROSBuildConfiguration::initialArguments() const
   return m_initialArguments;
 }
 
-void ROSBuildConfiguration::setDevelDirectory(const Utils::FileName &dir)
+void ROSBuildConfiguration::setROSDistribution(const QString &distribution)
 {
-  m_develDirectory = dir;
+  m_rosDistribution = distribution;
 }
 
-Utils::FileName ROSBuildConfiguration::develDirectory() const
+QString ROSBuildConfiguration::rosDistribution() const
 {
-  return m_develDirectory;
+  return m_rosDistribution;
 }
 
 void ROSBuildConfiguration::sourceWorkspace()
 {
-  // Need to source devel directory to setup enviroment variables
-  QString cmd = QLatin1String(" source ") + develDirectory().appendPath(tr("setup.bash)")).toString();
-  QString ws_dir = target()->project()->projectDirectory().toString();
-  QProcess source_devel;
-  source_devel.setWorkingDirectory(ws_dir);
-  source_devel.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << cmd);
-  source_devel.waitForBytesWritten();
-  source_devel.waitForFinished();
+  // Need to source ros and devel directory to setup enviroment variables
+  Utils::FileName ws_dir = target()->project()->projectDirectory();
+  QProcess process;
 
-  if (source_devel.exitStatus() == QProcess::CrashExit)
-  {
-    qDebug() << source_devel.errorString();
-  }
-  else
+  if (ROSUtils::sourceWorkspace(&process, ws_dir , rosDistribution()))
   {
     QList<Utils::EnvironmentItem> current_env = userEnvironmentChanges();
-    Utils::Environment source_env = Utils::Environment(source_devel.systemEnvironment());
-    source_env.set(QLatin1String("PWD"), ws_dir);
+    Utils::Environment source_env = Utils::Environment(process.processEnvironment().toStringList());
+    source_env.set(QLatin1String("PWD"), ws_dir.toString());
 
     // Need to check if additional user changes are not overwritten
     QList<Utils::EnvironmentItem> diff = baseEnvironment().diff(source_env);
@@ -149,7 +138,6 @@ void ROSBuildConfiguration::sourceWorkspace()
       setUserEnvironmentChanges(diff);
     }
   }
-
 }
 
 NamedWidget *ROSBuildConfiguration::createConfigWidget()
@@ -227,7 +215,6 @@ BuildConfiguration *ROSBuildConfigurationFactory::create(Target *parent, const B
     bc->setDisplayName(ros_info.displayName);
     bc->setDefaultDisplayName(ros_info.displayName);
     bc->setBuildDirectory(ros_info.buildDirectory);
-    bc->setDevelDirectory(ros_info.develDirectory);
     bc->setInitialArguments(ros_info.arguments);
 
     BuildStepList *buildSteps = bc->stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
@@ -239,7 +226,6 @@ BuildConfiguration *ROSBuildConfigurationFactory::create(Target *parent, const B
     buildSteps->insertStep(0, makeStep);
 
     makeStep->setBuildTarget(QLatin1String("all"), /* on = */ true);
-
 
     ROSMakeStep *cleanMakeStep = new ROSMakeStep(cleanSteps);
     cleanSteps->insertStep(0, cleanMakeStep);
@@ -295,7 +281,6 @@ ROSBuildInfo *ROSBuildConfigurationFactory::createBuildInfo(const Kit *k,
     ROSBuildInfo *info = new ROSBuildInfo(this);
     info->kitId = k->id();
     info->buildDirectory = Project::projectDirectory(Utils::FileName::fromString(projectPath)).appendPath(tr("build"));
-    info->develDirectory = Project::projectDirectory(Utils::FileName::fromString(projectPath)).appendPath(tr("devel"));
     switch (type) {
     case BuildTypeNone:
         info->displayName = tr("Default");
@@ -363,16 +348,34 @@ ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
     m_ui = new Ui::ROSBuildConfiguration;
     m_ui->setupUi(this);
 
+    // Get list of install ros distributions
+    m_ui->ros_distribution_comboBox->addItems(ROSUtils::installedDistributions());
+    m_ui->ros_distribution_comboBox->setCurrentIndex(m_ui->ros_distribution_comboBox->findText(bc->rosDistribution()));
+
     connect(m_ui->source_pushButton, SIGNAL(clicked()),
                 this, SLOT(on_source_pushButton_clicked()));
 
+    connect(m_ui->ros_distribution_comboBox, SIGNAL(currentIndexChanged(QString)),
+            this, SLOT(on_ros_distribution_comboBox_currentIndexChanged(QString)));
+
     setDisplayName(tr("ROS Manager"));
+}
+
+ROSBuildSettingsWidget::~ROSBuildSettingsWidget()
+{
+  delete m_ui;
 }
 
 void ROSBuildSettingsWidget::on_source_pushButton_clicked()
 {
     m_buildConfiguration->sourceWorkspace();
 }
+
+void ROSBuildSettingsWidget::on_ros_distribution_comboBox_currentIndexChanged(const QString &arg1)
+{
+    m_buildConfiguration->setROSDistribution(arg1);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 // ROSBuildEnvironmentWidget

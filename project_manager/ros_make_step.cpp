@@ -103,24 +103,6 @@ ROSBuildConfiguration *ROSMakeStep::targetsActiveBuildConfiguration() const
     return static_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
 }
 
-//ROSBuildConfiguration *ROSMakeStep::targetsActiveRunConfiguration() const
-//{
-//    return qobject_cast<ROSRunConfiguration *>(target()->activeRunConfiguration());
-//}
-
-//void ROSMakeStep::activeBuildConfigurationChanged()
-//{
-//    if (m_activeConfiguration)
-//        disconnect(m_activeConfiguration, &CMakeBuildConfiguration::useNinjaChanged, this, &MakeStep::makeCommandChanged);
-
-//    m_activeConfiguration = targetsActiveBuildConfiguration();
-
-//    if (m_activeConfiguration)
-//        connect(m_activeConfiguration, &CMakeBuildConfiguration::useNinjaChanged, this, &MakeStep::makeCommandChanged);
-
-//    emit makeCommandChanged();
-//}
-
 ROSMakeStep::~ROSMakeStep()
 {
 }

@@ -41,6 +41,7 @@
 #include <utils/environment.h>
 #include <utils/qtcassert.h>
 #include <QCheckBox>
+#include <QProcess>
 
 namespace Utils {
 class FileName;
@@ -73,8 +74,8 @@ public:
     void setInitialArguments(const QString &arguments);
     QString initialArguments() const;
 
-    void setDevelDirectory(const Utils::FileName &dir);
-    Utils::FileName develDirectory() const;
+    void setROSDistribution(const QString &distribution);
+    QString rosDistribution() const;
 
     void sourceWorkspace();
 
@@ -89,7 +90,6 @@ protected:
 private:
     QString m_initialArguments;
     QString m_rosDistribution;
-    Utils::FileName m_develDirectory;
     ProjectExplorer::NamedWidget *m_buildEnvironmentWidget;
 
 };
@@ -134,13 +134,17 @@ class ROSBuildSettingsWidget : public ProjectExplorer::NamedWidget
 
 public:
     ROSBuildSettingsWidget(ROSBuildConfiguration *bc);
+    ~ROSBuildSettingsWidget();
 
 private slots:
     void on_source_pushButton_clicked();
 
+    void on_ros_distribution_comboBox_currentIndexChanged(const QString &arg1);
+
 private:
     Ui::ROSBuildConfiguration *m_ui;
     ROSBuildConfiguration *m_buildConfiguration;
+    QMap<QString, QString> m_rosDistributions;
 };
 
 class ROSBuildEnvironmentWidget : public ProjectExplorer::NamedWidget
@@ -174,12 +178,10 @@ public:
         buildDirectory = bc->buildDirectory();
         kitId = bc->target()->kit()->id();
         environment = bc->environment();
-        develDirectory = bc->develDirectory();
         arguments = bc->initialArguments();
     }
 
     Utils::Environment environment;
-    Utils::FileName develDirectory;
     QString arguments;
 };
 
