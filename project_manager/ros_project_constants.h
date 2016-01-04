@@ -46,6 +46,7 @@ const char CONFIG_MIMETYPE[]    = "application/vnd.qtcreator.ros.config";
 
 // Project
 const char ROSPROJECT_ID[]  = "ROSProjectManager.ROSProject";
+const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
 
 const char HIDE_FILE_FILTER_SETTING[] = "ROSProject/FileFilter";
 const char HIDE_FILE_FILTER_DEFAULT[] = "Makefile*; *.o; *.lo; *.la; *.obj; *~; *.files;"

@@ -19,7 +19,8 @@ HEADERS = \
     ros_make_step.h \
     ros_build_configuration.h \
     ros_project_nodes.h \
-    ros_project_files_editor.h
+    ros_project_files_editor.h \
+    ros_utils.h
 
 SOURCES = \
     ros_project_wizard.cpp \
@@ -29,7 +30,10 @@ SOURCES = \
     ros_make_step.cpp \
     ros_build_configuration.cpp \
     ros_project_nodes.cpp \
-    ros_project_files_editor.cpp
+    ros_project_files_editor.cpp \
+    ros_utils.cpp
 
 RESOURCES += ros_project.qrc
-FORMS += ros_make_step.ui
+FORMS += ros_make_step.ui \
+    ros_build_configuration.ui \
+    ros_import_wizard_page.ui
