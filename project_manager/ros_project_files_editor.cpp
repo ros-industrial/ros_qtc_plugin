@@ -49,13 +49,11 @@ namespace Internal {
 
 ProjectFilesFactory::ProjectFilesFactory()
 {
-    setId(Constants::FILES_EDITOR_ID);
+    setId(Constants::WORKSPACE_EDITOR_ID);
     setDisplayName(QCoreApplication::translate("OpenWith::Editors", ".files Editor"));
-    addMimeType(Constants::FILES_MIMETYPE);
-    addMimeType(Constants::INCLUDES_MIMETYPE);
-    addMimeType(Constants::CONFIG_MIMETYPE);
+    addMimeType(Constants::WORKSPACE_MIMETYPE);
 
-    setDocumentCreator([]() { return new TextDocument(Constants::FILES_EDITOR_ID); });
+    setDocumentCreator([]() { return new TextDocument(Constants::WORKSPACE_EDITOR_ID); });
     setEditorActionHandlers(TextEditorActionHandler::None);
 }
 

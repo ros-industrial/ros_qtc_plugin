@@ -343,10 +343,8 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
     const QDir bldDir(wizard->buildDirectory().toString());
 
     const QString projectName = wizard->projectName();
-    const QString creatorFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros_creator")).absoluteFilePath();
-    const QString filesFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros_files")).absoluteFilePath();
-    const QString includesFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros_includes")).absoluteFilePath();
-    const QString configFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros_config")).absoluteFilePath();
+    const QString creatorFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros")).absoluteFilePath();
+    const QString workspaceFileName = QFileInfo(wsDir, projectName + QLatin1String(".workspace")).absoluteFilePath();
 
     // Get all file in the workspace source directory
     QStringList workspaceFiles;
@@ -400,19 +398,14 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
     generatedCreatorFile.setContents(QLatin1String("[General]\n"));
     generatedCreatorFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
 
-    Core::GeneratedFile generatedFilesFile(filesFileName);
-    generatedFilesFile.setContents(workspaceFiles.join(QLatin1Char('\n')));
-
-    Core::GeneratedFile generatedIncludesFile(includesFileName);
-    generatedIncludesFile.setContents(includePaths.join(QLatin1Char('\n')));
-
-    Core::GeneratedFile generatedConfigFile(configFileName);
-    generatedConfigFile.setContents(QLatin1String(ConfigFileTemplate));
+    Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
+    QString content;
+    QXmlStreamWriter workspaceXml(&content);
+    ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, workspaceFiles, includePaths);
+    generatedWorkspaceFile.setContents(content);
 
     Core::GeneratedFiles files;
-    files.append(generatedFilesFile);
-    files.append(generatedIncludesFile);
-    files.append(generatedConfigFile);
+    files.append(generatedWorkspaceFile);
     files.append(generatedCreatorFile);
 
     return files;

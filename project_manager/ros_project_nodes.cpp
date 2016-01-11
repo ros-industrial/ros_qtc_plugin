@@ -90,14 +90,10 @@ void ROSProjectNode::refresh(QSet<QString> oldFileList)
     typedef FilesInPathHash::ConstIterator FilesInPathHashConstIt;
 
     // Do those separately
-    oldFileList.remove(m_project->filesFileName());
-    oldFileList.remove(m_project->includesFileName());
-    oldFileList.remove(m_project->configFileName());
+    oldFileList.remove(m_project->workspaceFileName());
 
     QSet<QString> newFileList = m_project->files().toSet();
-    newFileList.remove(m_project->filesFileName());
-    newFileList.remove(m_project->includesFileName());
-    newFileList.remove(m_project->configFileName());
+    newFileList.remove(m_project->workspaceFileName());
 
     QSet<QString> removed = oldFileList;
     removed.subtract(newFileList);

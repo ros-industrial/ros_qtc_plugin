@@ -38,11 +38,8 @@ const char PROJECTCONTEXT[]     = "ROSProject.ProjectContext";
 const char ROSMIMETYPE[]    = "text/x-ros-project"; // ### FIXME
 
 // Contexts
-const char FILES_EDITOR_ID[]    = "QT4.FilesEditor";
-
-const char FILES_MIMETYPE[]     = "application/vnd.qtcreator.ros.files";
-const char INCLUDES_MIMETYPE[]  = "application/vnd.qtcreator.ros.includes";
-const char CONFIG_MIMETYPE[]    = "application/vnd.qtcreator.ros.config";
+const char WORKSPACE_EDITOR_ID[]    = "QT4.FilesEditor";
+const char WORKSPACE_MIMETYPE[]     = "application/vnd.qtcreator.ros.workspace";
 
 // Project
 const char ROSPROJECT_ID[]  = "ROSProjectManager.ROSProject";

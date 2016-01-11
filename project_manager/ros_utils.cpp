@@ -204,5 +204,30 @@ bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
   return results;
 }
 
+bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const QStringList &files, const QStringList &includePaths)
+{
+  xmlFile.setAutoFormatting(true);
+  xmlFile.writeStartDocument();
+  xmlFile.writeStartElement(QLatin1String("Workspace"));
+
+  xmlFile.writeStartElement(QLatin1String("Files"));
+  foreach (const QString &str, files)
+  {
+    xmlFile.writeTextElement(QLatin1String("File"), str);
+  }
+  xmlFile.writeEndElement();
+
+  xmlFile.writeStartElement(QLatin1String("IncludePaths"));
+  foreach (const QString &str, includePaths)
+  {
+    xmlFile.writeTextElement(QLatin1String("Directory"), str);
+  }
+  xmlFile.writeEndElement();
+
+  xmlFile.writeEndElement();
+  xmlFile.writeEndDocument();
+  return xmlFile.hasError();
+}
+
 } //namespace Internal
 } //namespace ROSProjectManager

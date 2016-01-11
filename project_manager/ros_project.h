@@ -56,9 +56,7 @@ public:
     ROSProject(Manager *manager, const QString &filename);
     ~ROSProject();
 
-    QString filesFileName() const;
-    QString includesFileName() const;
-    QString configFileName() const;
+    QString workspaceFileName() const;
 
     QString displayName() const;
     Core::IDocument *document() const;
@@ -74,13 +72,13 @@ public:
     bool setFiles(const QStringList &filePaths);
     bool renameFile(const QString &filePath, const QString &newFilePath);
 
-    enum RefreshOptions {
-        Files         = 0x01,
-        Configuration = 0x02,
-        Everything    = Files | Configuration
+    enum UpdateOptions
+    {
+        Files        = 0x01,
+        IncludePaths = 0x02,
     };
 
-    void refresh(RefreshOptions options);
+    void refresh();
 
     QStringList projectIncludePaths() const;
     QStringList files() const;
@@ -89,9 +87,8 @@ protected:
     Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage);
 
 private:
-    bool saveRawFileList(const QStringList &rawFileList);
-    bool saveRawList(const QStringList &rawList, const QString &fileName);
-    void parseProject(RefreshOptions options);
+    bool saveRawList(const QStringList &rawList, const ROSProject::UpdateOptions &updateOption);
+    void parseProject();
     QStringList processEntries(const QStringList &paths,
                                QHash<QString, QString> *map = 0) const;
 
@@ -99,14 +96,11 @@ private:
 
     Manager *m_manager;
     QString m_fileName;
-    QString m_filesFileName;
-    QString m_includesFileName;
-    QString m_configFileName;
     QString m_projectName;
+    QString m_workspaceFileName;
+
     ROSProjectFile *m_creatorIDocument;
-    ROSProjectFile *m_filesIDocument;
-    ROSProjectFile *m_includesIDocument;
-    ROSProjectFile *m_configIDocument;
+    ROSProjectFile *m_workspaceIDocument;
     QStringList m_rawFileList;
     QStringList m_files;
     QHash<QString, QString> m_rawListEntries;
@@ -122,7 +116,7 @@ class ROSProjectFile : public Core::IDocument
     Q_OBJECT
 
 public:
-    ROSProjectFile(ROSProject *parent, QString fileName, ROSProject::RefreshOptions options);
+    ROSProjectFile(ROSProject *parent, QString fileName);
 
     bool save(QString *errorString, const QString &fileName, bool autoSave) override;
 
@@ -137,7 +131,6 @@ public:
 
 private:
     ROSProject *m_project;
-    ROSProject::RefreshOptions m_options;
 };
 
 } // namespace Internal
