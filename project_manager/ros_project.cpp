@@ -78,23 +78,14 @@ ROSProject::ROSProject(Manager *manager, const QString &fileName)
     setProjectLanguages(Context(ProjectExplorer::Constants::LANG_CXX));
 
     QFileInfo fileInfo(m_fileName);
-    QDir dir = fileInfo.dir();
-
     m_projectName       = fileInfo.completeBaseName();
-    m_workspaceFileName = QFileInfo(dir, m_projectName + QLatin1String(".workspace")).absoluteFilePath();
+    m_workspaceIDocument  = new ROSProjectFile(this, m_fileName);
 
-    m_creatorIDocument  = new ROSProjectFile(this, m_fileName);
-    m_workspaceIDocument = new ROSProjectFile(this, m_workspaceFileName);
-
-    DocumentManager::addDocument(m_creatorIDocument);
     DocumentManager::addDocument(m_workspaceIDocument);
-
-    m_rootNode = new ROSProjectNode(this, m_creatorIDocument);
-
-    FileNode *projectWorkspaceFileNode = new FileNode(Utils::FileName::fromString(m_workspaceFileName),
+    m_rootNode = new ROSProjectNode(this, m_workspaceIDocument);
+    FileNode *projectWorkspaceFileNode = new FileNode(Utils::FileName::fromString(m_fileName),
                                                       ProjectFileType,
                                                       /* generated = */ false);
-
 
     m_rootNode->addFileNodes(QList<FileNode *>()
                              << projectWorkspaceFileNode);
@@ -112,16 +103,17 @@ ROSProject::~ROSProject()
 
 QString ROSProject::workspaceFileName() const
 {
-    return m_workspaceFileName;
+  return m_fileName;
 }
 
 bool ROSProject::saveRawList(const QStringList &rawList, const ROSProject::UpdateOptions &updateOption)
 {
-    DocumentManager::expectFileChange(m_workspaceFileName);
+    DocumentManager::expectFileChange(m_fileName);
     // Make sure we can open the file for writing
 
     QStringList files, includePaths;
 
+    // TODO: Need to look into this further and see if there is a better way. Review QMakeProjectManager
     if (updateOption == UpdateOptions::Files)
     {
       files = rawList;
@@ -133,7 +125,7 @@ bool ROSProject::saveRawList(const QStringList &rawList, const ROSProject::Updat
       includePaths = rawList;
     }
 
-    Utils::FileSaver saver(m_workspaceFileName, QIODevice::Text);
+    Utils::FileSaver saver(m_fileName, QIODevice::Text);
     if (!saver.hasError())
     {
       QXmlStreamWriter workspaceXml(saver.file());
@@ -141,7 +133,7 @@ bool ROSProject::saveRawList(const QStringList &rawList, const ROSProject::Updat
       saver.setResult(&workspaceXml);
     }
     bool result = saver.finalize(ICore::mainWindow());
-    DocumentManager::unexpectFileChange(m_workspaceFileName);
+    DocumentManager::unexpectFileChange(m_fileName);
     return result;
 }
 
@@ -151,7 +143,7 @@ bool ROSProject::addFiles(const QStringList &filePaths)
 
     QDir baseDir(QFileInfo(m_fileName).dir());
     foreach (const QString &filePath, filePaths)
-        newList.append(baseDir.relativeFilePath(filePath));
+        newList.append(baseDir.absoluteFilePath(filePath));
 
 
     QSet<QString> includes = projectIncludePaths().toSet();
@@ -166,7 +158,7 @@ bool ROSProject::addFiles(const QStringList &filePaths)
 
     const QDir dir(projectDirectory().toString());
     foreach (const QString &path, toAdd) {
-        QString relative = dir.relativeFilePath(path);
+        QString relative = dir.absoluteFilePath(path);
         if (relative.isEmpty())
             relative = QLatin1Char('.');
         m_rawProjectIncludePaths.append(relative);
@@ -197,7 +189,7 @@ bool ROSProject::setFiles(const QStringList &filePaths)
     QStringList newList;
     QDir baseDir(QFileInfo(m_fileName).dir());
     foreach (const QString &filePath, filePaths)
-        newList.append(baseDir.relativeFilePath(filePath));
+        newList.append(baseDir.absoluteFilePath(filePath));
 
     return saveRawList(newList, UpdateOptions::Files);
 }
@@ -211,7 +203,7 @@ bool ROSProject::renameFile(const QString &filePath, const QString &newFilePath)
         int index = newList.indexOf(i.value());
         if (index != -1) {
             QDir baseDir(QFileInfo(m_fileName).dir());
-            newList.replace(index, baseDir.relativeFilePath(newFilePath));
+            newList.replace(index, baseDir.absoluteFilePath(newFilePath));
         }
     }
 
@@ -221,7 +213,7 @@ bool ROSProject::renameFile(const QString &filePath, const QString &newFilePath)
 void ROSProject::parseProject()
 {
     QXmlStreamReader workspaceXml;
-    QFile workspaceFile(m_workspaceFileName);
+    QFile workspaceFile(m_fileName);
     if (workspaceFile.open(QFile::ReadOnly | QFile::Text))
     {
       m_rawListEntries.clear();
@@ -343,7 +335,6 @@ void ROSProject::refreshCppCodeModel()
 
     ppBuilder.setQtVersion(activeQtVersion);
     ppBuilder.setIncludePaths(projectIncludePaths());
-    //ppBuilder.setConfigFileName(configFileName());
     ppBuilder.setCxxFlags(QStringList() << QLatin1String("-std=c++11"));
 
     const QList<Id> languages = ppBuilder.createProjectPartsForFiles(files());
@@ -371,7 +362,7 @@ QString ROSProject::displayName() const
 
 IDocument *ROSProject::document() const
 {
-    return m_creatorIDocument;
+    return m_workspaceIDocument;
 }
 
 IProjectManager *ROSProject::projectManager() const

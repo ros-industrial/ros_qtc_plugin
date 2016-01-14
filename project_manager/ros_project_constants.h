@@ -34,15 +34,10 @@
 namespace ROSProjectManager {
 namespace Constants {
 
-const char PROJECTCONTEXT[]     = "ROSProject.ProjectContext";
-const char ROSMIMETYPE[]    = "text/x-ros-project"; // ### FIXME
-
-// Contexts
-const char WORKSPACE_EDITOR_ID[]    = "QT4.FilesEditor";
-const char WORKSPACE_MIMETYPE[]     = "application/vnd.qtcreator.ros.workspace";
-
 // Project
 const char ROSPROJECT_ID[]  = "ROSProjectManager.ROSProject";
+const char PROJECTCONTEXT[]     = "ROSProject.ProjectContext";
+const char ROSMIMETYPE[]    = "text/x-ros-project"; // ### FIXME
 const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
 
 const char HIDE_FILE_FILTER_SETTING[] = "ROSProject/FileFilter";

@@ -34,7 +34,6 @@
 #include "ros_project_manager.h"
 #include "ros_project_wizard.h"
 #include "ros_project_constants.h"
-#include "ros_project_files_editor.h"
 #include "ros_make_step.h"
 #include "ros_project.h"
 
@@ -66,7 +65,6 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     Utils::MimeDatabase::addMimeTypes(QLatin1String(":rosproject/ROSProjectManager.mimetypes.xml"));
 
     addAutoReleasedObject(new Manager);
-    addAutoReleasedObject(new ProjectFilesFactory);
     addAutoReleasedObject(new ROSMakeStepFactory);
     addAutoReleasedObject(new ROSBuildConfigurationFactory);
 

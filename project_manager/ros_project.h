@@ -97,9 +97,7 @@ private:
     Manager *m_manager;
     QString m_fileName;
     QString m_projectName;
-    QString m_workspaceFileName;
 
-    ROSProjectFile *m_creatorIDocument;
     ROSProjectFile *m_workspaceIDocument;
     QStringList m_rawFileList;
     QStringList m_files;

@@ -343,7 +343,7 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
     const QDir bldDir(wizard->buildDirectory().toString());
 
     const QString projectName = wizard->projectName();
-    const QString creatorFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros")).absoluteFilePath();
+    //const QString creatorFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros")).absoluteFilePath();
     const QString workspaceFileName = QFileInfo(wsDir, projectName + QLatin1String(".workspace")).absoluteFilePath();
 
     // Get all file in the workspace source directory
@@ -394,19 +394,20 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
       cbpXml.readNext();
     }
 
-    Core::GeneratedFile generatedCreatorFile(creatorFileName);
-    generatedCreatorFile.setContents(QLatin1String("[General]\n"));
-    generatedCreatorFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
+//    Core::GeneratedFile generatedCreatorFile(creatorFileName);
+//    generatedCreatorFile.setContents(QLatin1String("[General]\n"));
+//    generatedCreatorFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
 
     Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
     QString content;
     QXmlStreamWriter workspaceXml(&content);
     ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, workspaceFiles, includePaths);
     generatedWorkspaceFile.setContents(content);
+    generatedWorkspaceFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
 
     Core::GeneratedFiles files;
     files.append(generatedWorkspaceFile);
-    files.append(generatedCreatorFile);
+    //files.append(generatedCreatorFile);
 
     return files;
 }
