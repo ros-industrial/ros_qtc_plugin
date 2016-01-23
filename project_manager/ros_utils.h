@@ -2,6 +2,8 @@
 #define ROSUTILS_H
 
 #include <QProcess>
+#include <QXmlStreamWriter>
+
 namespace Utils {
 class FileName;
 } // namespace Utils
@@ -22,6 +24,7 @@ public:
   static bool initializeWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution);
   static bool buildWorkspace(QProcess *process, const Utils::FileName &workspaceDir);
   static QStringList installedDistributions();
+  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QStringList &files, const QStringList &includePaths);
 
 private:
   static bool sourceWorkspaceHelper(QProcess *process, const QString &path);

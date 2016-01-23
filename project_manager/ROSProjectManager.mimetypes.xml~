@@ -2,7 +2,7 @@
 
 <mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
   <mime-type type="text/x-ros-project">
-    <sub-class-of type="application/xml"/>
+    <sub-class-of type="text/plain"/>
     <comment>ROS Qt Creator Project file</comment>
     <glob pattern="*.workspace"/>
   </mime-type>
