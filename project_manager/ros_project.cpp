@@ -40,6 +40,7 @@
 #include <coreplugin/icore.h>
 #include <cpptools/cpptoolsconstants.h>
 #include <cpptools/cppmodelmanager.h>
+#include <cpptools/projectpartbuilder.h>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/abi.h>
 #include <projectexplorer/buildsteplist.h>
@@ -435,16 +436,6 @@ ROSProjectFile::ROSProjectFile(ROSProject *parent, QString fileName)
 bool ROSProjectFile::save(QString *, const QString &, bool)
 {
     return false;
-}
-
-QString ROSProjectFile::defaultPath() const
-{
-    return QString();
-}
-
-QString ROSProjectFile::suggestedFileName() const
-{
-    return QString();
 }
 
 bool ROSProjectFile::isModified() const

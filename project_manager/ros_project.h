@@ -118,9 +118,6 @@ public:
 
     bool save(QString *errorString, const QString &fileName, bool autoSave) override;
 
-    QString defaultPath() const override;
-    QString suggestedFileName() const override;
-
     bool isModified() const override;
     bool isSaveAsAllowed() const override;
 

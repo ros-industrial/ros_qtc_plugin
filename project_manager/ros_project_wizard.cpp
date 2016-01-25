@@ -31,6 +31,7 @@
 #include "ros_project_wizard.h"
 #include "ros_utils.h"
 #include "ui_ros_import_wizard_page.h"
+#include "ros_project_constants.h"
 
 #include <coreplugin/icore.h>
 #include <projectexplorer/projectexplorerconstants.h>
@@ -302,7 +303,7 @@ bool ROSImportWizardPage::validateBaseName(const QString &name, QString *errorMe
 
 ROSProjectWizard::ROSProjectWizard()
 {
-    setWizardKind(ProjectWizard);
+    setSupportedProjectTypes({ Constants::ROSPROJECT_ID });
     // TODO do something about the ugliness of standard icons in sizes different than 16, 32, 64, 128
     {
         QPixmap icon(22, 22);
