@@ -47,24 +47,15 @@ class ROSProject;
 class ROSProjectNode : public ProjectExplorer::ProjectNode
 {
 public:
-    ROSProjectNode(ROSProject *project, Core::IDocument *projectFile);
+    ROSProjectNode(ROSProject *project);
 
-    Core::IDocument *projectFile() const;
-    QString projectFilePath() const;
+    bool showInSimpleTree() const override;
 
-    bool showInSimpleTree() const;
+    QList<ProjectExplorer::ProjectAction> supportedActions(Node *node) const override;
 
-    QList<ProjectExplorer::ProjectAction> supportedActions(Node *node) const;
-
-    bool canAddSubProject(const QString &proFilePath) const;
-
-    bool addSubProjects(const QStringList &proFilePaths);
-    bool removeSubProjects(const QStringList &proFilePaths);
-
-    bool addFiles(const QStringList &filePaths, QStringList *notAdded = 0);
-    bool removeFiles(const QStringList &filePaths, QStringList *notRemoved = 0);
-    bool deleteFiles(const QStringList &filePaths);
-    bool renameFile(const QString &filePath, const QString &newFilePath);
+    bool addFiles(const QStringList &filePaths, QStringList *notAdded = 0) override;
+    bool removeFiles(const QStringList &filePaths, QStringList *notRemoved = 0) override;
+    bool renameFile(const QString &filePath, const QString &newFilePath) override;
 
     void refresh(QSet<QString> oldFileList = QSet<QString>());
 
@@ -76,7 +67,6 @@ private:
 
 private:
     ROSProject *m_project;
-    Core::IDocument *m_projectFile;
 };
 
 } // namespace Internal

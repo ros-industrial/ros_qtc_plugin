@@ -42,22 +42,10 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
-ROSProjectNode::ROSProjectNode(ROSProject *project, Core::IDocument *projectFile)
-    : ProjectNode(projectFile->filePath())
-    , m_project(project)
-    , m_projectFile(projectFile)
+ROSProjectNode::ROSProjectNode(ROSProject *project)
+    : ProjectNode(project->projectFilePath()), m_project(project)
 {
-    setDisplayName(projectFile->filePath().toFileInfo().completeBaseName());
-}
-
-Core::IDocument *ROSProjectNode::projectFile() const
-{
-    return m_projectFile;
-}
-
-QString ROSProjectNode::projectFilePath() const
-{
-    return m_projectFile->filePath().toString();
+    setDisplayName(project->projectFilePath().toFileInfo().completeBaseName());
 }
 
 QHash<QString, QStringList> sortFilesIntoPaths(const QString &base, const QSet<QString> &files)
@@ -90,10 +78,10 @@ void ROSProjectNode::refresh(QSet<QString> oldFileList)
     typedef FilesInPathHash::ConstIterator FilesInPathHashConstIt;
 
     // Do those separately
-    oldFileList.remove(m_project->workspaceFileName());
+    oldFileList.remove(m_project->projectFilePath().toString());
 
     QSet<QString> newFileList = m_project->files().toSet();
-    newFileList.remove(m_project->workspaceFileName());
+    newFileList.remove(m_project->projectFilePath().toString());
 
     QSet<QString> removed = oldFileList;
     removed.subtract(newFileList);
@@ -225,24 +213,6 @@ QList<ProjectAction> ROSProjectNode::supportedActions(Node *node) const
         << Rename;
 }
 
-bool ROSProjectNode::canAddSubProject(const QString &proFilePath) const
-{
-    Q_UNUSED(proFilePath)
-    return false;
-}
-
-bool ROSProjectNode::addSubProjects(const QStringList &proFilePaths)
-{
-    Q_UNUSED(proFilePaths)
-    return false;
-}
-
-bool ROSProjectNode::removeSubProjects(const QStringList &proFilePaths)
-{
-    Q_UNUSED(proFilePaths)
-    return false;
-}
-
 bool ROSProjectNode::addFiles(const QStringList &filePaths, QStringList *notAdded)
 {
     Q_UNUSED(notAdded)
@@ -255,12 +225,6 @@ bool ROSProjectNode::removeFiles(const QStringList &filePaths, QStringList *notR
     Q_UNUSED(notRemoved)
 
     return m_project->removeFiles(filePaths);
-}
-
-bool ROSProjectNode::deleteFiles(const QStringList &filePaths)
-{
-    Q_UNUSED(filePaths)
-    return false;
 }
 
 bool ROSProjectNode::renameFile(const QString &filePath, const QString &newFilePath)

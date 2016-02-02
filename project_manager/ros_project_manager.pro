@@ -20,6 +20,9 @@ HEADERS = \
     ros_build_configuration.h \
     ros_project_nodes.h \
     ros_utils.h
+#    ros_run_configuration.h \
+#    ros_run_configuration_widget.h \
+#    ros_run_configuration_factory.h \
 
 SOURCES = \
     ros_project_wizard.cpp \
@@ -30,6 +33,9 @@ SOURCES = \
     ros_build_configuration.cpp \
     ros_project_nodes.cpp \
     ros_utils.cpp
+#    ros_run_configuration.cpp \
+#    ros_run_configuration_widget.cpp \
+#    ros_run_configuration_factory.cpp \
 
 RESOURCES += ros_project.qrc
 FORMS += ros_make_step.ui \

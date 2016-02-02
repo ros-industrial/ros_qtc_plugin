@@ -54,16 +54,12 @@ class ROSProject : public ProjectExplorer::Project
 
 public:
     ROSProject(Manager *manager, const QString &filename);
-    ~ROSProject();
+    ~ROSProject() override;
 
-    QString workspaceFileName() const;
+    QString displayName() const override;
+    Manager *projectManager() const override;
 
-    QString displayName() const;
-    Core::IDocument *document() const;
-    ProjectExplorer::IProjectManager *projectManager() const;
-
-    ROSProjectNode *rootProjectNode() const;
-    QStringList files(FilesMode fileMode) const;
+    QStringList files(FilesMode fileMode) const override;
 
     QStringList buildTargets() const;
 
@@ -94,18 +90,12 @@ private:
 
     void refreshCppCodeModel();
 
-    Manager *m_manager;
-    QString m_fileName;
     QString m_projectName;
-
-    ROSProjectFile *m_workspaceIDocument;
     QStringList m_rawFileList;
     QStringList m_files;
     QHash<QString, QString> m_rawListEntries;
     QStringList m_rawProjectIncludePaths;
     QStringList m_projectIncludePaths;
-
-    ROSProjectNode *m_rootNode;
     QFuture<void> m_codeModelFuture;
 };
 
