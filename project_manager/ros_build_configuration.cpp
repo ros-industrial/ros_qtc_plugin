@@ -232,6 +232,9 @@ BuildConfiguration *ROSBuildConfigurationFactory::create(Target *parent, const B
     cleanMakeStep->setBuildTarget(QLatin1String("clean"), /* on = */ true);
     cleanMakeStep->setClean(true);
 
+    //Source the workspace to setup initial environment variables for build configuration.
+    bc->sourceWorkspace();
+
     return bc;
 }
 
