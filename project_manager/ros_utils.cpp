@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
+#include <QDirIterator>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -19,15 +20,18 @@ ROSUtils::ROSUtils()
 bool ROSUtils::generateCodeBlocksProjectFile(QProcess *process, const Utils::FileName &sourceDir, const Utils::FileName &buildDir)
 {
     QString cmd = QLatin1String("cmake ") + sourceDir.toString() + QLatin1String(" -G \"CodeBlocks - Unix Makefiles\"");
-    bool results = false;
     process->setWorkingDirectory(buildDir.toString());
     process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << cmd);
     process->waitForFinished();
     if (process->exitStatus() != QProcess::CrashExit)
     {
-      results  = true;
+      return true;
     }
-    return results;
+    else
+    {
+      qDebug() << "Faild to generate Code Blocks Project File.";
+      return false;
+    }
 }
 
 bool ROSUtils::sourceROS(QProcess *process, const QString &rosDistribution)
@@ -227,6 +231,62 @@ bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const Q
   xmlFile.writeEndElement();
   xmlFile.writeEndDocument();
   return xmlFile.hasError();
+}
+
+QStringList ROSUtils::getWorkspaceFiles(const Utils::FileName &workspaceDir)
+{
+  QStringList workspaceFiles;
+  Utils::FileName srcPath = workspaceDir;
+  srcPath.appendPath(QLatin1String("src"));
+
+  const QDir srcDir(srcPath.toString());
+  QDirIterator it(srcDir.absolutePath(), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+  while (it.hasNext())
+  {
+      workspaceFiles.append(it.next());
+  }
+  return workspaceFiles;
+}
+
+QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir)
+{
+  // Parse CodeBlocks Project File
+  // Need to search for all of the tags <Add directory="include path" />
+  QStringList includePaths;
+  QXmlStreamReader cbpXml;
+  Utils::FileName cbpPath = workspaceDir;
+  cbpPath.appendPath(QLatin1String("build")).appendPath(QLatin1String("Project.cbp"));
+  QFile cbpFile(cbpPath.toString());
+  if (!cbpFile.open(QFile::ReadOnly | QFile::Text))
+  {
+    qDebug() << "Error opening CodeBlocks Project File";
+    return includePaths;
+  }
+
+  cbpXml.setDevice(&cbpFile);
+  cbpXml.readNext();
+  while(!cbpXml.atEnd())
+  {
+    if(cbpXml.isStartElement())
+    {
+      if(cbpXml.name() == QLatin1String("Add"))
+      {
+        foreach(const QXmlStreamAttribute &attr, cbpXml.attributes())
+        {
+          if(attr.name().toString() == QLatin1String("directory"))
+          {
+            QString attribute_value = attr.value().toString();
+            if(!includePaths.contains(attribute_value))
+            {
+              includePaths.append(attribute_value);
+            }
+          }
+        }
+      }
+    }
+    cbpXml.readNext();
+  }
+  return includePaths;
 }
 
 } //namespace Internal

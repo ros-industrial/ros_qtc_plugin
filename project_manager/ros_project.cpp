@@ -98,6 +98,16 @@ ROSProject::~ROSProject()
     projectManager()->unregisterProject(this);
 }
 
+Utils::FileName ROSProject::buildDirectory() const
+{
+  return projectDirectory().appendPath(tr("build"));
+}
+
+Utils::FileName ROSProject::sourceDirectory() const
+{
+  return projectDirectory().appendPath(tr("src"));
+}
+
 bool ROSProject::saveRawList(const QStringList &rawList, const ROSProject::UpdateOptions &updateOption)
 {
     DocumentManager::expectFileChange(projectFilePath().toString());
@@ -108,13 +118,13 @@ bool ROSProject::saveRawList(const QStringList &rawList, const ROSProject::Updat
     // TODO: Need to look into this further and see if there is a better way. Review QMakeProjectManager
     if (updateOption == UpdateOptions::Files)
     {
-      files = rawList;
+      files = processEntries(rawList);
       includePaths = m_projectIncludePaths;
     }
     else if (updateOption == UpdateOptions::IncludePaths)
     {
-      files = m_rawFileList;
-      includePaths = rawList;
+      files = m_files;
+      includePaths = processEntries(rawList);
     }
 
     Utils::FileSaver saver(projectFilePath().toString(), QIODevice::Text);
@@ -137,27 +147,7 @@ bool ROSProject::addFiles(const QStringList &filePaths)
     foreach (const QString &filePath, filePaths)
         newList.append(baseDir.absoluteFilePath(filePath));
 
-
-    QSet<QString> includes = projectIncludePaths().toSet();
-    QSet<QString> toAdd;
-
-    foreach (const QString &filePath, filePaths) {
-        QString directory = QFileInfo(filePath).absolutePath();
-        if (!includes.contains(directory)
-                && !toAdd.contains(directory))
-            toAdd << directory;
-    }
-
-    const QDir dir(projectDirectory().toString());
-    foreach (const QString &path, toAdd) {
-        QString relative = dir.absoluteFilePath(path);
-        if (relative.isEmpty())
-            relative = QLatin1Char('.');
-        m_rawProjectIncludePaths.append(relative);
-    }
-
     bool result = saveRawList(newList, UpdateOptions::Files);
-    result &= saveRawList(m_rawProjectIncludePaths, UpdateOptions::IncludePaths);
     refresh();
 
     return result;
@@ -173,7 +163,10 @@ bool ROSProject::removeFiles(const QStringList &filePaths)
             newList.removeOne(i.value());
     }
 
-    return saveRawList(newList, UpdateOptions::Files);
+    bool result = saveRawList(newList, UpdateOptions::Files);
+    refresh();
+
+    return result;
 }
 
 bool ROSProject::setFiles(const QStringList &filePaths)
@@ -183,7 +176,10 @@ bool ROSProject::setFiles(const QStringList &filePaths)
     foreach (const QString &filePath, filePaths)
         newList.append(baseDir.absoluteFilePath(filePath));
 
-    return saveRawList(newList, UpdateOptions::Files);
+    bool result = saveRawList(newList, UpdateOptions::Files);
+    refresh();
+
+    return result;
 }
 
 bool ROSProject::renameFile(const QString &filePath, const QString &newFilePath)
@@ -199,8 +195,38 @@ bool ROSProject::renameFile(const QString &filePath, const QString &newFilePath)
         }
     }
 
-    return saveRawList(newList, UpdateOptions::Files);
+    bool result = saveRawList(newList, UpdateOptions::Files);
+    refresh();
+
+    return result;
 }
+
+bool ROSProject::addIncludes(const QStringList &includePaths)
+{
+    QStringList newList = m_projectIncludePaths;
+
+    foreach (const QString &includePath, includePaths)
+        newList.append(includePath);
+
+    bool result = saveRawList(newList, UpdateOptions::IncludePaths);
+    refresh();
+
+    return result;
+}
+
+bool ROSProject::setIncludes(const QStringList &includePaths)
+{
+    QStringList newList;
+
+    foreach (const QString &includePath, includePaths)
+        newList.append(includePath);
+
+    bool result = saveRawList(newList, UpdateOptions::IncludePaths);
+    refresh();
+
+    return result;
+}
+
 
 void ROSProject::parseProject()
 {

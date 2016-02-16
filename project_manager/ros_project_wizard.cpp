@@ -340,64 +340,16 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
 
     const ROSProjectWizardDialog *wizard = qobject_cast<const ROSProjectWizardDialog *>(w);
     const QDir wsDir(wizard->workspaceDirectory().toString());
-    const QDir srcDir(wizard->sourceDirectory().toString());
-    const QDir bldDir(wizard->buildDirectory().toString());
 
     const QString projectName = wizard->projectName();
     //const QString creatorFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros")).absoluteFilePath();
     const QString workspaceFileName = QFileInfo(wsDir, projectName + QLatin1String(".workspace")).absoluteFilePath();
 
     // Get all file in the workspace source directory
-    QStringList workspaceFiles;
-    QDirIterator it(srcDir, QDirIterator::Subdirectories);
-    while (it.hasNext())
-    {
-      QDir curDir(it.next());
-      QStringList dirFiles = curDir.entryList(QDir::NoDotAndDotDot | QDir::Files);
-      curDir.makeAbsolute();
-      foreach (const QString &str, dirFiles)
-      {
-        workspaceFiles.append(curDir.filePath(str));
-      }
-    }
+    QStringList workspaceFiles = ROSUtils::getWorkspaceFiles(wizard->workspaceDirectory());
 
     // Parse CodeBlocks Project File
-    // Need to search for all of the tags <Add directory="include path" />
-    QStringList includePaths;
-    QXmlStreamReader cbpXml;
-    QFile cbpFile(bldDir.filePath(QLatin1String("Project.cbp")));
-    if (!cbpFile.open(QFile::ReadOnly | QFile::Text))
-    {
-      qDebug() << "Error opening CodeBlocks Project File";
-    }
-
-    cbpXml.setDevice(&cbpFile);
-    cbpXml.readNext();
-    while(!cbpXml.atEnd())
-    {
-      if(cbpXml.isStartElement())
-      {
-        if(cbpXml.name() == QLatin1String("Add"))
-        {
-          foreach(const QXmlStreamAttribute &attr, cbpXml.attributes())
-          {
-            if(attr.name().toString() == QLatin1String("directory"))
-            {
-              QString attribute_value = attr.value().toString();
-              if(!includePaths.contains(attribute_value))
-              {
-                includePaths.append(attribute_value);
-              }
-            }
-          }
-        }
-      }
-      cbpXml.readNext();
-    }
-
-//    Core::GeneratedFile generatedCreatorFile(creatorFileName);
-//    generatedCreatorFile.setContents(QLatin1String("[General]\n"));
-//    generatedCreatorFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
+    QStringList includePaths = ROSUtils::getWorkspaceIncludes(wizard->workspaceDirectory());
 
     Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
     QString content;
@@ -408,7 +360,6 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
 
     Core::GeneratedFiles files;
     files.append(generatedWorkspaceFile);
-    //files.append(generatedCreatorFile);
 
     return files;
 }

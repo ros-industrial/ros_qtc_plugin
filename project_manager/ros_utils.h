@@ -25,6 +25,8 @@ public:
   static bool buildWorkspace(QProcess *process, const Utils::FileName &workspaceDir);
   static QStringList installedDistributions();
   static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QStringList &files, const QStringList &includePaths);
+  static QStringList getWorkspaceFiles(const Utils::FileName &workspaceDir);
+  static QStringList getWorkspaceIncludes(const Utils::FileName &workspaceDir);
 
 private:
   static bool sourceWorkspaceHelper(QProcess *process, const QString &path);

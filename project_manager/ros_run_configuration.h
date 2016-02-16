@@ -26,36 +26,33 @@
 #ifndef ROS_RUN_CONFIGURATION_H
 #define ROS_RUN_CONFIGURATION_H
 
-#include <projectexplorer/localapplicationrunconfiguration.h>
+#include "ros_run_step.h"
+#include <projectexplorer/runconfiguration.h>
+#include <projectexplorer/buildstep.h>
+#include <projectexplorer/devicesupport/deviceapplicationrunner.h>
 
 #include <QPointer>
+#include <QMenu>
 
 QT_FORWARD_DECLARE_CLASS(QStringListModel)
 
 
 namespace ROSProjectManager {
-class ROSProject;
-
 namespace Internal {
 
 class ROSRunConfigurationFactory;
-class ROSRunConfigurationWidget;
+class ROSRunControlFactory;
 
-class ROSRunConfiguration : public ProjectExplorer::LocalApplicationRunConfiguration
+namespace Ui { class ROSRunConfiguration; class ROSLaunchConfiguration;}
+
+class ROSRunConfiguration : public ProjectExplorer::RunConfiguration
 {
     Q_OBJECT
     friend class ROSRunConfigurationFactory;
     friend class ROSRunConfigurationWidget;
-    friend class ROSProject; // to call updateEnabled()
 
 public:
-    ROSRunConfiguration(ProjectExplorer::Target *parent, Core::Id id);
-
-    QString executable() const override;
-    ProjectExplorer::ApplicationLauncher::Mode runMode() const override;
-    QString commandLineArguments() const override;
-
-    QString workingDirectory() const override;
+    explicit ROSRunConfiguration(ProjectExplorer::Target *parent);
 
     // RunConfiguration
     bool isEnabled() const override;
@@ -66,17 +63,19 @@ public:
 
     ProjectExplorer::Abi abi() const override;
 
+    RunStepList *stepList() const;
+    QString executable() const;
+
 protected:
+    ROSRunConfiguration(ProjectExplorer::Target *parent, Core::Id id);
     ROSRunConfiguration(ProjectExplorer::Target *parent,
-                               QmlProjectRunConfiguration *source);
+                               ROSRunConfiguration *source);
     virtual bool fromMap(const QVariantMap &map) override;
-//    void setEnabled(bool value);
 
 private:
     void ctor();
-    static bool isValidVersion(QtSupport::BaseQtVersion *version);
 
-    static QString canonicalCapsPath(const QString &filePath);
+    RunStepList *m_stepList;
 
     // absolute path to current file (if being used)
     QString m_currentFileFilename;
@@ -88,7 +87,107 @@ private:
 
     bool m_isEnabled;
 };
-}
+
+class ROSRunConfigurationFactory : public ProjectExplorer::IRunConfigurationFactory
+{
+    Q_OBJECT
+
+public:
+    explicit ROSRunConfigurationFactory(QObject *parent = 0);
+    ~ROSRunConfigurationFactory();
+
+    QList<Core::Id> availableCreationIds(ProjectExplorer::Target *parent, CreationMode mode) const override;
+    QString displayNameForId(Core::Id id) const override;
+
+    bool canCreate(ProjectExplorer::Target *parent, Core::Id id) const override;
+    bool canRestore(ProjectExplorer::Target *parent, const QVariantMap &map) const override;
+    bool canClone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *source) const override;
+    ProjectExplorer::RunConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *source) override;
+
+private:
+    bool canHandle(ProjectExplorer::Target *parent) const;
+
+    ProjectExplorer::RunConfiguration *doCreate(ProjectExplorer::Target *parent, Core::Id id) override;
+    ProjectExplorer::RunConfiguration *doRestore(ProjectExplorer::Target *parent,
+                                                 const QVariantMap &map) override;
+};
+
+//class ROSLaunchConfigurationWidget : public ProjectExplorer::BuildStepConfigWidget
+//{
+//  Q_OBJECT
+//public:
+//  ROSLaunchConfigurationWidget();
+//  QString displayName() const override;
+//  QString summaryText() const override;
+
+//private:
+////  void commandLineEditTextEdited();
+////  void workingDirectoryLineEditTextEdited();
+////  void commandArgumentsLineEditTextEdited();
+////  void updateDetails();
+////  ProcessStep *m_step;
+//  Ui::ROSLaunchConfiguration *m_ui;
+////  QString m_summaryText;
+//};
+
+//class ROSRunConfigurationWidget : public QWidget
+//{
+//    Q_OBJECT
+//public:
+//    explicit ROSRunConfigurationWidget(ROSRunConfiguration *rc);
+
+////private slots:
+////    void updateFileComboBox();
+////    void setMainScript(int index);
+////    void onViewerArgsChanged();
+
+//private slots:
+//  void on_actionROS_Launch_triggered();
+
+//private:
+//  Ui::ROSRunConfiguration *m_ui;
+//  ROSRunConfiguration *m_runConfiguration;
+
+//  QMenu *m_addButtonMenu;
+//};
+
+class ROSRunControl : public ProjectExplorer::RunControl
+{
+  Q_OBJECT
+public:
+  explicit ROSRunControl(ProjectExplorer::RunConfiguration *rc);
+
+  void start() override;
+  StopResult stop() override;
+  bool isRunning() const override;
+
+protected:
+  ROSRunControl(ProjectExplorer::RunConfiguration *rc, Core::Id id);
+
+private slots:
+  void handleErrorMessage(const QString &error);
+  void handleRunnerFinished();
+  void handleRemoteOutput(const QByteArray &output);
+  void handleRemoteErrorOutput(const QByteArray &output);
+  void handleProgressReport(const QString &progressString);
+
+private:
+
+  class ROSRunControlPrivate;
+  ROSRunControlPrivate * const d;
+};
+
+class ROSRunControlFactory : public ProjectExplorer::IRunControlFactory
+{
+  Q_OBJECT
+public:
+  explicit ROSRunControlFactory(QObject * parent = 0);
+
+  bool canRun(ProjectExplorer::RunConfiguration *rc, Core::Id mode) const override;
+  ProjectExplorer::RunControl *create(ProjectExplorer::RunConfiguration *rc, Core::Id mode, QString *errorMessage) override;
+};
+
+} // namespace Internal
 
 } // namespace ROSProjectManager
 

@@ -68,6 +68,9 @@ public:
     bool setFiles(const QStringList &filePaths);
     bool renameFile(const QString &filePath, const QString &newFilePath);
 
+    bool addIncludes(const QStringList &includePaths);
+    bool setIncludes(const QStringList &includePaths);
+
     enum UpdateOptions
     {
         Files        = 0x01,
@@ -78,6 +81,9 @@ public:
 
     QStringList projectIncludePaths() const;
     QStringList files() const;
+
+    Utils::FileName buildDirectory() const;
+    Utils::FileName sourceDirectory() const;
 
 protected:
     Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage);

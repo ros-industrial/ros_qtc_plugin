@@ -19,10 +19,11 @@ HEADERS = \
     ros_make_step.h \
     ros_build_configuration.h \
     ros_project_nodes.h \
-    ros_utils.h
-#    ros_run_configuration.h \
-#    ros_run_configuration_widget.h \
-#    ros_run_configuration_factory.h \
+    ros_utils.h \
+    ros_run_configuration.h \
+    ros_run_steps_page.h \
+    ros_run_step.h \
+    ros_run_steps.h
 
 SOURCES = \
     ros_project_wizard.cpp \
@@ -32,12 +33,15 @@ SOURCES = \
     ros_make_step.cpp \
     ros_build_configuration.cpp \
     ros_project_nodes.cpp \
-    ros_utils.cpp
-#    ros_run_configuration.cpp \
-#    ros_run_configuration_widget.cpp \
-#    ros_run_configuration_factory.cpp \
+    ros_utils.cpp \
+    ros_run_configuration.cpp \
+    ros_run_steps_page.cpp \
+    ros_run_step.cpp \
+    ros_run_steps.cpp
 
 RESOURCES += ros_project.qrc
 FORMS += ros_make_step.ui \
     ros_build_configuration.ui \
-    ros_import_wizard_page.ui
+    ros_import_wizard_page.ui \
+    ros_run_configuration.ui \
+    ros_launch_configuration.ui

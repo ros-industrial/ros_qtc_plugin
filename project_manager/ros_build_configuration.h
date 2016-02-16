@@ -114,7 +114,6 @@ public:
     ProjectExplorer::BuildConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *source);
     bool canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const;
     ProjectExplorer::BuildConfiguration *restore(ProjectExplorer::Target *parent, const QVariantMap &map);
-
 private:
     bool canHandle(const ProjectExplorer::Target *t) const;
 
