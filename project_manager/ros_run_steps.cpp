@@ -138,7 +138,10 @@ QString ROSLaunchStepConfigWidget::displayName() const
 
 QString ROSLaunchStepConfigWidget::summaryText() const
 {
-    return QString();
+  return QString::fromLatin1("<b>%1:</b> %2 %3")
+          .arg(displayName(),
+               m_ui->packageNameComboBox->currentText(),
+               m_ui->argumentsLineEdit->text());
 }
 
 //

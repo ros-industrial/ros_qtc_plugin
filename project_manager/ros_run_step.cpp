@@ -298,11 +298,7 @@ ProjectExplorer::Target *RunStepList::target() const
     ProjectExplorer::RunConfiguration *rc = qobject_cast<ProjectExplorer::RunConfiguration *>(parent());
     if (rc)
       return rc->target();
-//    if (bc)
-//        return bc->target();
-//    DeployConfiguration *dc = qobject_cast<DeployConfiguration *>(parent());
-//    if (dc)
-//        return dc->target();
+
     return 0;
 }
 

@@ -23,7 +23,8 @@ HEADERS = \
     ros_run_configuration.h \
     ros_run_steps_page.h \
     ros_run_step.h \
-    ros_run_steps.h
+    ros_run_steps.h \
+    ros_output_window.h
 
 SOURCES = \
     ros_project_wizard.cpp \
@@ -37,7 +38,8 @@ SOURCES = \
     ros_run_configuration.cpp \
     ros_run_steps_page.cpp \
     ros_run_step.cpp \
-    ros_run_steps.cpp
+    ros_run_steps.cpp \
+    ros_output_window.cpp
 
 RESOURCES += ros_project.qrc
 FORMS += ros_make_step.ui \

@@ -65,6 +65,7 @@ namespace Internal {
 
 const char M_CURRENT_FILE[] = "CurrentFile";
 const char ROS_RC_ID[] = "ROSProjectManager.ROSRunConfiguration";
+const char ROS_RUN_STEP_LIST_ID[] = "ROSProjectManager.ROSRunConfiguration.RunStepList";
 //const char ROS_RUN_CONTROL_ID[] = "ROSProjectManager.ROSRunControl";
 
 ROSRunConfiguration::ROSRunConfiguration(Target *parent):
@@ -76,14 +77,14 @@ ROSRunConfiguration::ROSRunConfiguration(Target *parent, Id id) :
     RunConfiguration(parent, id),
     m_scriptFile(QLatin1String(M_CURRENT_FILE)),
     m_isEnabled(false),
-    m_stepList(new RunStepList(this, Core::Id(ROS_RC_ID)))
+    m_stepList(new RunStepList(this, Core::Id(ROS_RUN_STEP_LIST_ID)))
 {
+    m_stepList->setDefaultDisplayName(tr("Run"));
     m_isEnabled = true; //Added for testing
     ctor();
 }
 
-ROSRunConfiguration::ROSRunConfiguration(Target *parent,
-                                                       ROSRunConfiguration *source) :
+ROSRunConfiguration::ROSRunConfiguration(Target *parent, ROSRunConfiguration *source) :
     RunConfiguration(parent, source),
     m_currentFileFilename(source->m_currentFileFilename),
     m_mainScriptFilename(source->m_mainScriptFilename),
@@ -117,7 +118,7 @@ void ROSRunConfiguration::ctor()
 
 //    connect(target(), SIGNAL(kitChanged()),
 //            this, SLOT(updateEnabled()));
-//    setDisplayName(tr("Attach to process", "ROSRunConfiguration display name."));
+setDisplayName(tr("ROS Run Configuration", "ROS run configuration display name."));
 
 //    if (id() == Constants::QML_SCENE_RC_ID)
 //        setDisplayName(tr("QML Scene", "QMLRunConfiguration display name."));
@@ -159,24 +160,26 @@ Abi ROSRunConfiguration::abi() const
 QVariantMap ROSRunConfiguration::toMap() const
 {
     QVariantMap map(RunConfiguration::toMap());
+    map.insert(QLatin1String(ROS_RUN_STEP_LIST_ID), m_stepList->toMap());
 
-//    map.insert(QLatin1String(Constants::QML_VIEWER_ARGUMENTS_KEY), m_qmlViewerArgs);
-//    map.insert(QLatin1String(Constants::QML_MAINSCRIPT_KEY),  m_scriptFile);
     return map;
 }
 
 bool ROSRunConfiguration::fromMap(const QVariantMap &map)
 {
-//    m_qmlViewerArgs = map.value(QLatin1String(Constants::QML_VIEWER_ARGUMENTS_KEY)).toString();
-//    m_scriptFile = map.value(QLatin1String(Constants::QML_MAINSCRIPT_KEY), QLatin1String(M_CURRENT_FILE)).toString();
-
-//    if (m_scriptFile == QLatin1String(M_CURRENT_FILE))
-//        setScriptSource(FileInEditor);
-//    else if (m_scriptFile.isEmpty())
-//        setScriptSource(FileInProjectFile);
-//    else
-//        setScriptSource(FileInSettings, m_scriptFile);
-
+  QVariantMap data = map.value(QLatin1String(ROS_RUN_STEP_LIST_ID)).toMap();
+          if (data.isEmpty()) {
+              qWarning() << "No data for ROS run step list found!";
+              return false;
+          }
+          RunStepList *list = new RunStepList(this, data);
+          if (list->isNull()) {
+              qWarning() << "Failed to restore ROS run step list!";
+              delete list;
+              return false;
+          }
+          list->setDefaultDisplayName(tr("Run"));
+          m_stepList = list;
     return RunConfiguration::fromMap(map);
 }
 
@@ -294,7 +297,7 @@ QList<Core::Id> ROSRunConfigurationFactory::availableCreationIds(ProjectExplorer
 QString ROSRunConfigurationFactory::displayNameForId(Core::Id id) const
 {
     if (id == ROS_RC_ID)
-        return tr("ROS Run Config");
+        return tr("ROS Run Configuration");
 
     return QString();
 }
@@ -302,20 +305,13 @@ QString ROSRunConfigurationFactory::displayNameForId(Core::Id id) const
 bool ROSRunConfigurationFactory::canCreate(ProjectExplorer::Target *parent,
                                                   const Core::Id id) const
 {
-//    if (!canHandle(parent))
-//        return false;
+    if (!canHandle(parent))
+        return false;
 
-//    if (id == Constants::QML_VIEWER_RC_ID)
-//        return true;
+    if (id == ROS_RC_ID)
+        return true;
 
-//    if (id == Constants::QML_SCENE_RC_ID) {
-//        // only support qmlscene if it's Qt5
-//        QtSupport::BaseQtVersion *version
-//                = QtSupport::QtKitInformation::qtVersion(parent->kit());
-//        return version && version->qtVersion() >= QtSupport::QtVersionNumber(5, 0, 0);
-//    }
-//    return false;
-    return true;
+    return false;
 }
 
 ProjectExplorer::RunConfiguration *ROSRunConfigurationFactory::doCreate(ProjectExplorer::Target *parent, Core::Id id)
@@ -325,7 +321,7 @@ ProjectExplorer::RunConfiguration *ROSRunConfigurationFactory::doCreate(ProjectE
   RunStepList *runSteps = rc->stepList();
   Q_ASSERT(runSteps);
 
-  ROSLaunchStep *rosLaunchStep = new ROSLaunchStep(runSteps, id);
+  ROSLaunchStep *rosLaunchStep = new ROSLaunchStep(runSteps);
   runSteps->insertStep(0, rosLaunchStep);
 
   return rc;
@@ -600,6 +596,7 @@ ROSRunControl::ROSRunControl(RunConfiguration *rc, Id id):
   //d->arguments = lrc->arguments();
   d->environment = lrc->target()->activeBuildConfiguration()->environment();
   d->workingDir = lrc->target()->activeBuildConfiguration()->buildDirectory().toString();
+
 }
 
 
