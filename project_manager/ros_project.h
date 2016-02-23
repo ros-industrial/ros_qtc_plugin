@@ -53,11 +53,11 @@ class ROSProject : public ProjectExplorer::Project
     Q_OBJECT
 
 public:
-    ROSProject(Manager *manager, const QString &filename);
+    ROSProject(ROSManager *manager, const QString &filename);
     ~ROSProject() override;
 
     QString displayName() const override;
-    Manager *projectManager() const override;
+    ROSManager *projectManager() const override;
 
     QStringList files(FilesMode fileMode) const override;
 

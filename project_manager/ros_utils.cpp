@@ -9,6 +9,8 @@
 #include <QTextStream>
 #include <QDirIterator>
 
+#include <ros/package.h>
+
 namespace ROSProjectManager {
 namespace Internal {
 
@@ -287,6 +289,46 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir)
     cbpXml.readNext();
   }
   return includePaths;
+}
+
+QStringList ROSUtils::getROSPackages()
+{
+  QStringList output;
+  ros::package::V_string packages;
+  ros::package::getAll(packages);
+
+  foreach(std::string str, packages)
+  {
+    output.append(QString::fromStdString(str));
+  }
+
+  return output;
+}
+
+QStringList ROSUtils::getROSPackageLaunchFiles(const QString &packageName, bool OnlyNames)
+{
+  QStringList launchFiles;
+  if(!packageName.isEmpty())
+  {
+    QString path = QString::fromStdString(ros::package::getPath(packageName.toStdString()));
+    const QDir srcDir(path);
+    QDirIterator it(srcDir.absolutePath(),QStringList() << QLatin1String("*.launch"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+    while (it.hasNext())
+    {
+      QFileInfo launchFile(it.next());
+      if(OnlyNames)
+      {
+        launchFiles.append(launchFile.baseName());
+      }
+      else
+      {
+        launchFiles.append(launchFile.absoluteFilePath());
+      }
+    }
+  }
+
+  return launchFiles;
 }
 
 } //namespace Internal

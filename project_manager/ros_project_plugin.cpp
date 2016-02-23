@@ -78,7 +78,7 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     Q_UNUSED(errorMessage)
     Utils::MimeDatabase::addMimeTypes(QLatin1String(":rosproject/ROSProjectManager.mimetypes.xml"));
 
-    addAutoReleasedObject(new Manager);
+    addAutoReleasedObject(new ROSManager);
     addAutoReleasedObject(new ROSMakeStepFactory);
     addAutoReleasedObject(new ROSBuildConfigurationFactory);
     addAutoReleasedObject(new ROSRunConfigurationFactory);

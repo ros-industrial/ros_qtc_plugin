@@ -70,7 +70,7 @@ namespace Internal {
 //
 ////////////////////////////////////////////////////////////////////////////////////
 
-ROSProject::ROSProject(Manager *manager, const QString &fileName)
+ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
 {
     setId(Constants::ROSPROJECT_ID);
     setProjectManager(manager);
@@ -78,7 +78,7 @@ ROSProject::ROSProject(Manager *manager, const QString &fileName)
     DocumentManager::addDocument(document(), true);
     setRootProjectNode(new ROSProjectNode(this));
 
-    setProjectContext(Context(ROSProjectManager::Constants::PROJECTCONTEXT));
+    setProjectContext(Context(Constants::PROJECTCONTEXT));
     setProjectLanguages(Context(ProjectExplorer::Constants::LANG_CXX));
 
     m_projectName = projectFilePath().toFileInfo().completeBaseName();
@@ -386,9 +386,9 @@ QStringList ROSProject::files(FilesMode fileMode) const
     return m_files;
 }
 
-Manager *ROSProject::projectManager() const
+ROSManager *ROSProject::projectManager() const
 {
-  return static_cast<Manager *>(Project::projectManager());
+  return static_cast<ROSManager *>(Project::projectManager());
 }
 
 QStringList ROSProject::buildTargets() const

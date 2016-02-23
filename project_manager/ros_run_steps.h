@@ -31,6 +31,14 @@ public:
   ROSRunConfiguration *rosRunConfiguration() const;
   ROSRunConfiguration *targetsActiveRunConfiguration() const;
 
+  QString packageName() const;
+  QString launchFileName() const;
+  QString launchFileArguments() const;
+
+  void setPackageName(const QString &packageName);
+  void setLaunchFileName(const QString &launchFileName);
+  void setLaunchFileArguments(const QString &launchFileArguments);
+
 protected:
   ROSLaunchStep(RunStepList *rsl, Core::Id id);
   ROSLaunchStep(RunStepList *rsl, RunStep *rs);
@@ -51,6 +59,13 @@ public:
   ~ROSLaunchStepConfigWidget();
   QString summaryText() const override;
   QString displayName() const override;
+
+private slots:
+  void packageNameComboBox_currentIndexChanged(const QString &arg1);
+
+  void launchFileComboBox_currentIndexChanged(const QString &arg1);
+
+  void argumentsLineEdit_textChanged(const QString &arg1);
 
 private:
     Ui::ROSLaunchStep *m_ui;

@@ -32,18 +32,21 @@
 #define ROSPROJECTMANAGER_H
 
 #include <projectexplorer/iprojectmanager.h>
+#include <projectexplorer/processparameters.h>
+#include "ros_output_pane.h"
 
 namespace ROSProjectManager {
 namespace Internal {
 
 class ROSProject;
 
-class Manager : public ProjectExplorer::IProjectManager
+class ROSManager : public ProjectExplorer::IProjectManager
 {
     Q_OBJECT
 
 public:
-    Manager();
+    ROSManager();
+    ~ROSManager();
 
     virtual QString mimeType() const;
     virtual ProjectExplorer::Project *openProject(const QString &fileName, QString *errorString);
@@ -51,8 +54,14 @@ public:
     void registerProject(ROSProject *project);
     void unregisterProject(ROSProject *project);
 
+    static ROSManager *instance();
+
+    void startProcess(const ProjectExplorer::ProcessParameters &param);
+
 private:
     QList<ROSProject *> m_projects;
+    ROSOutputPane *m_outputPane;
+
 };
 
 } // namespace Internal

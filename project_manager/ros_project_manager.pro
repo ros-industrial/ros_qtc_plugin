@@ -7,6 +7,10 @@ QTCREATOR_SOURCES = $$QTC_SOURCE
 ## set the QTC_BUILD environment variable to override the setting here
 IDE_BUILD_TREE = $$QTC_BUILD
 
+INCLUDEPATH += /opt/ros/indigo/lib
+
+LIBS += -L/opt/ros/indigo/lib -lroslib
+
 include(ros_project_manager_dependencies.pri)
 include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
 
@@ -24,7 +28,7 @@ HEADERS = \
     ros_run_steps_page.h \
     ros_run_step.h \
     ros_run_steps.h \
-    ros_output_window.h
+    ros_output_pane.h
 
 SOURCES = \
     ros_project_wizard.cpp \
@@ -39,7 +43,7 @@ SOURCES = \
     ros_run_steps_page.cpp \
     ros_run_step.cpp \
     ros_run_steps.cpp \
-    ros_output_window.cpp
+    ros_output_pane.cpp
 
 RESOURCES += ros_project.qrc
 FORMS += ros_make_step.ui \

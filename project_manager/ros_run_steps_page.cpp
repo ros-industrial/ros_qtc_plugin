@@ -175,7 +175,7 @@ RunStepsWidgetData::RunStepsWidgetData(RunStep *s) :
     widget = s->createConfigWidget();
     Q_ASSERT(widget);
 
-    detailsWidget = new Utils::DetailsWidget;
+    detailsWidget = new Utils::DetailsWidget();
     detailsWidget->setWidget(widget);
 
     toolWidget = new ToolWidget(detailsWidget);

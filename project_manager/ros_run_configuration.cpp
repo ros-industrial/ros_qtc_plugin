@@ -63,7 +63,6 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
-const char M_CURRENT_FILE[] = "CurrentFile";
 const char ROS_RC_ID[] = "ROSProjectManager.ROSRunConfiguration";
 const char ROS_RUN_STEP_LIST_ID[] = "ROSProjectManager.ROSRunConfiguration.RunStepList";
 //const char ROS_RUN_CONTROL_ID[] = "ROSProjectManager.ROSRunControl";
@@ -75,9 +74,8 @@ ROSRunConfiguration::ROSRunConfiguration(Target *parent):
 
 ROSRunConfiguration::ROSRunConfiguration(Target *parent, Id id) :
     RunConfiguration(parent, id),
-    m_scriptFile(QLatin1String(M_CURRENT_FILE)),
-    m_isEnabled(false),
-    m_stepList(new RunStepList(this, Core::Id(ROS_RUN_STEP_LIST_ID)))
+    m_stepList(new RunStepList(this, Core::Id(ROS_RUN_STEP_LIST_ID))),
+    m_isEnabled(false)
 {
     m_stepList->setDefaultDisplayName(tr("Run"));
     m_isEnabled = true; //Added for testing
@@ -86,12 +84,8 @@ ROSRunConfiguration::ROSRunConfiguration(Target *parent, Id id) :
 
 ROSRunConfiguration::ROSRunConfiguration(Target *parent, ROSRunConfiguration *source) :
     RunConfiguration(parent, source),
-    m_currentFileFilename(source->m_currentFileFilename),
-    m_mainScriptFilename(source->m_mainScriptFilename),
-    m_scriptFile(source->m_scriptFile),
-    m_qmlViewerArgs(source->m_qmlViewerArgs),
-    m_isEnabled(source->m_isEnabled),
-    m_stepList(source->m_stepList)
+    m_stepList(source->m_stepList),
+    m_isEnabled(source->m_isEnabled)
 {
     ctor();
 }
@@ -272,24 +266,6 @@ QList<Core::Id> ROSRunConfigurationFactory::availableCreationIds(ProjectExplorer
     // First id will be the default run configuration
     QList<Core::Id> list;
     list << Core::Id(ROS_RC_ID);
-//    if (version && version->qtVersion() >= QtSupport::QtVersionNumber(5, 0, 0)) {
-//        QmlProject *project = static_cast<QmlProject*>(parent->project());
-//        switch (project->defaultImport()) {
-//        case QmlProject::QtQuick1Import:
-//            list << Core::Id(Constants::QML_VIEWER_RC_ID);
-//            break;
-//        case QmlProject::QtQuick2Import:
-//            list << Core::Id(Constants::QML_SCENE_RC_ID);
-//            break;
-//        case QmlProject::UnknownImport:
-//        default:
-//            list << Core::Id(Constants::QML_SCENE_RC_ID);
-//            list << Core::Id(Constants::QML_VIEWER_RC_ID);
-//            break;
-//        }
-//    } else {
-//        list << Core::Id(Constants::QML_VIEWER_RC_ID);
-//    }
 
     return list;
 }
@@ -507,14 +483,13 @@ bool ROSRunControlFactory::canRun(RunConfiguration *rc, Core::Id mode) const
 RunControl *ROSRunControlFactory::create(RunConfiguration *rc, Core::Id mode,
                                                  QString *errorMessage)
 {
-    qDebug() << "Factory Create";
     QTC_ASSERT(canRun(rc, mode), return 0);
 
     if (mode == ProjectExplorer::Constants::NORMAL_RUN_MODE)
         return new ROSRunControl(rc);
 
     // Added temporary for testing
-    return new ROSRunControl(rc);
+//    return new ROSRunControl(rc);
 //    if (mode == ProjectExplorer::Constants::DEBUG_RUN_MODE
 //            || mode == ProjectExplorer::Constants::DEBUG_RUN_MODE_WITH_BREAK_ON_MAIN) {
 //        IDevice::ConstPtr dev = DeviceKitInformation::device(runConfig->target()->kit());
@@ -585,23 +560,29 @@ ROSRunControl::ROSRunControl(ProjectExplorer::RunConfiguration *rc) :
 }
 
 ROSRunControl::ROSRunControl(RunConfiguration *rc, Id id):
-    RunControl(rc, id), d(new ROSRunControlPrivate)
+    RunControl(rc, id),
+    d(new ROSRunControlPrivate)
 {
-  qDebug() << "ROS Control Created";
   setIcon(ProjectExplorer::Icons::RUN_SMALL);
 
+  m_rc = qobject_cast<ROSRunConfiguration *>(rc);
   d->running = false;
-  d->device = DeviceKitInformation::device(rc->target()->kit());
-  const ROSRunConfiguration * const lrc = qobject_cast<ROSRunConfiguration *>(rc);
+  d->device = DeviceKitInformation::device(m_rc->target()->kit());
+
   //d->arguments = lrc->arguments();
-  d->environment = lrc->target()->activeBuildConfiguration()->environment();
-  d->workingDir = lrc->target()->activeBuildConfiguration()->buildDirectory().toString();
+  d->environment = m_rc->target()->activeBuildConfiguration()->environment();
+  d->workingDir = m_rc->target()->activeBuildConfiguration()->buildDirectory().toString();
 
 }
 
 
 void ROSRunControl::start()
 {
+  foreach(RunStep *rs, m_rc->stepList()->steps())
+  {
+    rs->run(m_futureInterfaceForAysnc);
+  }
+
   d->running = true;
   emit started();
   d->runner.disconnect(this);
@@ -618,10 +599,14 @@ void ROSRunControl::start()
 
   d->runner.setEnvironment(d->environment);
   d->runner.setWorkingDirectory(d->workingDir);
+
+
+
 //  d->runner.start(d->device, d->remoteExecutable,
 //                  Utils::QtcProcess::splitArgs(d->arguments, Utils::OsTypeLinux));
 
 }
+
 
 RunControl::StopResult ROSRunControl::stop()
 {

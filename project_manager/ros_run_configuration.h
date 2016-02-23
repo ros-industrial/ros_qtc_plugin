@@ -33,6 +33,8 @@
 
 #include <QPointer>
 #include <QMenu>
+#include <QFutureInterface>
+#include <QFutureWatcher>
 
 QT_FORWARD_DECLARE_CLASS(QStringListModel)
 
@@ -76,15 +78,6 @@ private:
     void ctor();
 
     RunStepList *m_stepList;
-
-    // absolute path to current file (if being used)
-    QString m_currentFileFilename;
-    // absolute path to selected main script (if being used)
-    QString m_mainScriptFilename;
-
-    QString m_scriptFile;
-    QString m_qmlViewerArgs;
-
     bool m_isEnabled;
 };
 
@@ -112,45 +105,6 @@ private:
                                                  const QVariantMap &map) override;
 };
 
-//class ROSLaunchConfigurationWidget : public ProjectExplorer::BuildStepConfigWidget
-//{
-//  Q_OBJECT
-//public:
-//  ROSLaunchConfigurationWidget();
-//  QString displayName() const override;
-//  QString summaryText() const override;
-
-//private:
-////  void commandLineEditTextEdited();
-////  void workingDirectoryLineEditTextEdited();
-////  void commandArgumentsLineEditTextEdited();
-////  void updateDetails();
-////  ProcessStep *m_step;
-//  Ui::ROSLaunchConfiguration *m_ui;
-////  QString m_summaryText;
-//};
-
-//class ROSRunConfigurationWidget : public QWidget
-//{
-//    Q_OBJECT
-//public:
-//    explicit ROSRunConfigurationWidget(ROSRunConfiguration *rc);
-
-////private slots:
-////    void updateFileComboBox();
-////    void setMainScript(int index);
-////    void onViewerArgsChanged();
-
-//private slots:
-//  void on_actionROS_Launch_triggered();
-
-//private:
-//  Ui::ROSRunConfiguration *m_ui;
-//  ROSRunConfiguration *m_runConfiguration;
-
-//  QMenu *m_addButtonMenu;
-//};
-
 class ROSRunControl : public ProjectExplorer::RunControl
 {
   Q_OBJECT
@@ -175,6 +129,9 @@ private:
 
   class ROSRunControlPrivate;
   ROSRunControlPrivate * const d;
+  ROSRunConfiguration *m_rc;
+  QFutureWatcher<bool> m_watcher;
+  QFutureInterface<bool> m_futureInterfaceForAysnc;
 };
 
 class ROSRunControlFactory : public ProjectExplorer::IRunControlFactory
