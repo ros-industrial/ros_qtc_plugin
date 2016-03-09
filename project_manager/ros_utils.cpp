@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
+#include <QDirIterator>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -19,15 +20,18 @@ ROSUtils::ROSUtils()
 bool ROSUtils::generateCodeBlocksProjectFile(QProcess *process, const Utils::FileName &sourceDir, const Utils::FileName &buildDir)
 {
     QString cmd = QLatin1String("cmake ") + sourceDir.toString() + QLatin1String(" -G \"CodeBlocks - Unix Makefiles\"");
-    bool results = false;
     process->setWorkingDirectory(buildDir.toString());
     process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << cmd);
     process->waitForFinished();
     if (process->exitStatus() != QProcess::CrashExit)
     {
-      results  = true;
+      return true;
     }
-    return results;
+    else
+    {
+      qDebug() << "Faild to generate Code Blocks Project File.";
+      return false;
+    }
 }
 
 bool ROSUtils::sourceROS(QProcess *process, const QString &rosDistribution)
@@ -228,6 +232,176 @@ bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const Q
   xmlFile.writeEndDocument();
   return xmlFile.hasError();
 }
+
+QStringList ROSUtils::getWorkspaceFiles(const Utils::FileName &workspaceDir)
+{
+  QStringList workspaceFiles;
+  Utils::FileName srcPath = workspaceDir;
+  srcPath.appendPath(QLatin1String("src"));
+
+  const QDir srcDir(srcPath.toString());
+  QDirIterator it(srcDir.absolutePath(), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+  while (it.hasNext())
+  {
+      workspaceFiles.append(it.next());
+  }
+  return workspaceFiles;
+}
+
+QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir)
+{
+  // Parse CodeBlocks Project File
+  // Need to search for all of the tags <Add directory="include path" />
+  QStringList includePaths;
+  QXmlStreamReader cbpXml;
+  Utils::FileName cbpPath = workspaceDir;
+  cbpPath.appendPath(QLatin1String("build")).appendPath(QLatin1String("Project.cbp"));
+  QFile cbpFile(cbpPath.toString());
+  if (!cbpFile.open(QFile::ReadOnly | QFile::Text))
+  {
+    qDebug() << "Error opening CodeBlocks Project File";
+    return includePaths;
+  }
+
+  cbpXml.setDevice(&cbpFile);
+  cbpXml.readNext();
+  while(!cbpXml.atEnd())
+  {
+    if(cbpXml.isStartElement())
+    {
+      if(cbpXml.name() == QLatin1String("Add"))
+      {
+        foreach(const QXmlStreamAttribute &attr, cbpXml.attributes())
+        {
+          if(attr.name().toString() == QLatin1String("directory"))
+          {
+            QString attribute_value = attr.value().toString();
+            if(!includePaths.contains(attribute_value))
+            {
+              includePaths.append(attribute_value);
+            }
+          }
+        }
+      }
+    }
+    cbpXml.readNext();
+  }
+  return includePaths;
+}
+
+QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
+{
+//  QStringList output;
+//  ros::package::V_string packages;
+//  ros::package::getAll(packages);
+
+//  foreach(std::string str, packages)
+//  {
+//    output.append(QString::fromStdString(str));
+//  }
+
+//  return output;
+  QProcess process;
+  QMap<QString, QString> package_map;
+  QStringList tmp;
+
+  process.setEnvironment(env);
+  process.start(QLatin1String("bash"));
+  process.waitForStarted();
+  QString cmd = QLatin1String("rospack list > /tmp/rosqtpackages.txt");
+  process.write(cmd.toLatin1());
+  process.closeWriteChannel();
+  process.waitForFinished();
+
+  if (process.exitStatus() != QProcess::CrashExit)
+  {
+    QFile package_file(QLatin1String("/tmp/rosqtpackages.txt"));
+    if (package_file.open(QIODevice::ReadOnly))
+    {
+      QTextStream package_stream(&package_file);
+      while (!package_stream.atEnd())
+      {
+        tmp = package_stream.readLine().split(QLatin1String(" "));
+        package_map.insert(tmp[0],tmp[1]);
+      }
+      package_file.close();
+      return package_map;
+    }
+  }
+  return QMap<QString, QString>();
+}
+
+QStringList ROSUtils::getROSPackageLaunchFiles(const QString &packagePath, bool OnlyNames)
+{
+  QStringList launchFiles;
+  if(!packagePath.isEmpty())
+  {
+    const QDir srcDir(packagePath);
+    QDirIterator it(srcDir.absolutePath(),QStringList() << QLatin1String("*.launch"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+    while (it.hasNext())
+    {
+      QFileInfo launchFile(it.next());
+      if(OnlyNames)
+      {
+        launchFiles.append(launchFile.fileName());
+      }
+      else
+      {
+        launchFiles.append(launchFile.absoluteFilePath());
+      }
+    }
+  }
+
+  return launchFiles;
+}
+
+QStringList ROSUtils::getROSPackageExecutables(const QString &packageName, const QStringList &env)
+{
+
+  QProcess process;
+  QStringList package_executables;
+  QString package_executables_location;
+
+  process.setEnvironment(env);
+  process.start(QLatin1String("bash"));
+  process.waitForStarted();
+  QString cmd = QLatin1String("catkin_find --without-underlays --libexec ") + packageName + QLatin1String(" > /tmp/rosqtexecutables.txt");
+  process.write(cmd.toLatin1());
+  process.closeWriteChannel();
+  process.waitForFinished();
+
+  if (process.exitStatus() != QProcess::CrashExit)
+  {
+    QFile executable_file(QLatin1String("/tmp/rosqtexecutables.txt"));
+    if (executable_file.open(QIODevice::ReadOnly))
+    {
+      QTextStream executable_stream(&executable_file);
+      if (!executable_stream.atEnd())
+      {
+        package_executables_location = executable_stream.readLine();
+      }
+      executable_file.close();
+
+      if(!package_executables_location.isEmpty())
+      {
+        const QDir srcDir(package_executables_location);
+        QDirIterator it(srcDir.absolutePath(), QDir::Files | QDir::Executable | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+        while (it.hasNext())
+        {
+          QFileInfo executableFile(it.next());
+          package_executables.append(executableFile.fileName());
+        }
+
+        return package_executables;
+      }
+    }
+  }
+
+  return QStringList();
+}
+
 
 } //namespace Internal
 } //namespace ROSProjectManager

@@ -32,18 +32,22 @@
 #define ROSPROJECTMANAGER_H
 
 #include <projectexplorer/iprojectmanager.h>
+#include <projectexplorer/processparameters.h>
+#include <qtermwidget5/qtermwidget.h>
+#include "ros_terminal_pane.h"
 
 namespace ROSProjectManager {
 namespace Internal {
 
 class ROSProject;
 
-class Manager : public ProjectExplorer::IProjectManager
+class ROSManager : public ProjectExplorer::IProjectManager
 {
     Q_OBJECT
 
 public:
-    Manager();
+    ROSManager();
+    ~ROSManager();
 
     virtual QString mimeType() const;
     virtual ProjectExplorer::Project *openProject(const QString &fileName, QString *errorString);
@@ -51,8 +55,14 @@ public:
     void registerProject(ROSProject *project);
     void unregisterProject(ROSProject *project);
 
+    static ROSManager *instance();
+
+    QTermWidget &startTerminal(int startnow = 1, const QString name = QString());
+
 private:
     QList<ROSProject *> m_projects;
+    ROSTerminalPane *m_terminalPane;
+
 };
 
 } // namespace Internal

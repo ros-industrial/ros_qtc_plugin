@@ -53,17 +53,13 @@ class ROSProject : public ProjectExplorer::Project
     Q_OBJECT
 
 public:
-    ROSProject(Manager *manager, const QString &filename);
-    ~ROSProject();
+    ROSProject(ROSManager *manager, const QString &filename);
+    ~ROSProject() override;
 
-    QString workspaceFileName() const;
+    QString displayName() const override;
+    ROSManager *projectManager() const override;
 
-    QString displayName() const;
-    Core::IDocument *document() const;
-    ProjectExplorer::IProjectManager *projectManager() const;
-
-    ROSProjectNode *rootProjectNode() const;
-    QStringList files(FilesMode fileMode) const;
+    QStringList files(FilesMode fileMode) const override;
 
     QStringList buildTargets() const;
 
@@ -71,6 +67,9 @@ public:
     bool removeFiles(const QStringList &filePaths);
     bool setFiles(const QStringList &filePaths);
     bool renameFile(const QString &filePath, const QString &newFilePath);
+
+    bool addIncludes(const QStringList &includePaths);
+    bool setIncludes(const QStringList &includePaths);
 
     enum UpdateOptions
     {
@@ -83,6 +82,9 @@ public:
     QStringList projectIncludePaths() const;
     QStringList files() const;
 
+    Utils::FileName buildDirectory() const;
+    Utils::FileName sourceDirectory() const;
+
 protected:
     Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage);
 
@@ -94,18 +96,12 @@ private:
 
     void refreshCppCodeModel();
 
-    Manager *m_manager;
-    QString m_fileName;
     QString m_projectName;
-
-    ROSProjectFile *m_workspaceIDocument;
     QStringList m_rawFileList;
     QStringList m_files;
     QHash<QString, QString> m_rawListEntries;
     QStringList m_rawProjectIncludePaths;
     QStringList m_projectIncludePaths;
-
-    ROSProjectNode *m_rootNode;
     QFuture<void> m_codeModelFuture;
 };
 

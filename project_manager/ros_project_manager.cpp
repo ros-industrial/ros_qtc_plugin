@@ -33,24 +33,45 @@
 #include "ros_project.h"
 
 #include <coreplugin/icore.h>
+
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/session.h>
+
+#include <extensionsystem/pluginmanager.h>
 
 #include <QDebug>
 
 namespace ROSProjectManager {
 namespace Internal {
 
-Manager::Manager()
-{ }
+static ROSManager *m_instance = 0;
 
-QString Manager::mimeType() const
+ROSManager::ROSManager()
+{
+  m_instance = this;
+  m_terminalPane = new ROSTerminalPane();
+  ExtensionSystem::PluginManager::addObject(m_terminalPane);
+}
+
+ROSManager::~ROSManager()
+{
+  m_instance = 0;
+  ExtensionSystem::PluginManager::removeObject(m_terminalPane);
+  delete m_terminalPane;
+}
+
+ROSManager *ROSManager::instance()
+{
+  return m_instance;
+}
+
+QString ROSManager::mimeType() const
 {
     return QLatin1String(Constants::ROSMIMETYPE);
 }
 
-ProjectExplorer::Project *Manager::openProject(const QString &fileName, QString *errorString)
+ProjectExplorer::Project *ROSManager::openProject(const QString &fileName, QString *errorString)
 {
     if (!QFileInfo(fileName).isFile()) {
         if (errorString)
@@ -62,14 +83,19 @@ ProjectExplorer::Project *Manager::openProject(const QString &fileName, QString 
     return new ROSProject(this, fileName);
 }
 
-void Manager::registerProject(ROSProject *project)
+void ROSManager::registerProject(ROSProject *project)
 {
     m_projects.append(project);
 }
 
-void Manager::unregisterProject(ROSProject *project)
+void ROSManager::unregisterProject(ROSProject *project)
 {
     m_projects.removeAll(project);
+}
+
+QTermWidget &ROSManager::startTerminal(int startnow, const QString name)
+{
+  return m_terminalPane->startTerminal(startnow, name);
 }
 
 } // namespace Internal

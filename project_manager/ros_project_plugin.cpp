@@ -31,11 +31,15 @@
 #include "ros_project_plugin.h"
 
 #include "ros_build_configuration.h"
+#include "ros_run_configuration.h"
+#include "ros_run_steps.h"
 #include "ros_project_manager.h"
 #include "ros_project_wizard.h"
 #include "ros_project_constants.h"
 #include "ros_make_step.h"
 #include "ros_project.h"
+#include "ros_utils.h"
+#include "ros_project_constants.h"
 
 #include <coreplugin/icore.h>
 #include <coreplugin/actionmanager/actionmanager.h>
@@ -45,6 +49,16 @@
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/projecttree.h>
 #include <projectexplorer/selectablefilesmodel.h>
+#include <projectexplorer/gnumakeparser.h>
+#include <projectexplorer/buildsteplist.h>
+#include <projectexplorer/projectexplorer.h>
+#include <projectexplorer/buildmanager.h>
+#include <projectexplorer/buildstep.h>
+#include <projectexplorer/compileoutputwindow.h>
+#include <projectexplorer/appoutputpane.h>
+
+#include <extensionsystem/pluginmanager.h>
+#include <extensionsystem/invoker.h>
 
 #include <utils/algorithm.h>
 #include <utils/fileutils.h>
@@ -64,36 +78,60 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     Q_UNUSED(errorMessage)
     Utils::MimeDatabase::addMimeTypes(QLatin1String(":rosproject/ROSProjectManager.mimetypes.xml"));
 
-    addAutoReleasedObject(new Manager);
+    addAutoReleasedObject(new ROSManager);
     addAutoReleasedObject(new ROSMakeStepFactory);
     addAutoReleasedObject(new ROSBuildConfigurationFactory);
+    addAutoReleasedObject(new ROSRunConfigurationFactory);
+    addAutoReleasedObject(new ROSRunControlFactory);
+    addAutoReleasedObject(new ROSRunStepFactory);
 
     IWizardFactory::registerFactoryCreator([]() { return QList<IWizardFactory *>() << new ROSProjectWizard; });
 
     ActionContainer *mproject =
             ActionManager::actionContainer(ProjectExplorer::Constants::M_PROJECTCONTEXT);
 
-    auto editFilesAction = new QAction(tr("Edit Files..."), this);
-    Command *command = ActionManager::registerAction(editFilesAction,
-        "ROSProjectManager.EditFiles", Context(Constants::PROJECTCONTEXT));
+    auto reloadWorkspaceAction = new QAction(tr("Reload Workspace..."), this);
+    Command *command = ActionManager::registerAction(reloadWorkspaceAction,
+        "ROSProjectManager.ReloadWorkspace", Context(Constants::PROJECTCONTEXT));
     command->setAttribute(Command::CA_Hide);
     mproject->addAction(command, ProjectExplorer::Constants::G_PROJECT_FILES);
 
-    connect(editFilesAction, &QAction::triggered, this, &ROSProjectPlugin::editFiles);
+    connect(reloadWorkspaceAction, &QAction::triggered, this, &ROSProjectPlugin::reloadWorkspace);
 
     return true;
 }
 
-void ROSProjectPlugin::editFiles()
+void ROSProjectPlugin::reloadWorkspace()
 {
     ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectTree::currentProject());
     if (!rosProject)
         return;
-    SelectableFilesDialogEditFiles sfd(rosProject->projectFilePath(),
-                                       Utils::transform(rosProject->files(), [](const QString &f) { return Utils::FileName::fromString(f); }),
-                                       ICore::mainWindow());
-    if (sfd.exec() == QDialog::Accepted)
-        rosProject->setFiles(Utils::transform(sfd.selectedFiles(), &Utils::FileName::toString));
+
+    QProcess *runCmake = new QProcess();
+    ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(rosProject->activeTarget()->activeBuildConfiguration());
+
+//    connect(runCmake, SIGNAL(readyReadStandardOutput()),this, SLOT(parser->stdOutput()));
+//    connect(runCmake, SIGNAL(readyReadStandardError()),this, SLOT(slotUpdateStdError()));
+
+//    Need to figure out how to output to the Compile Output Window
+//    QObject *app = ExtensionSystem::PluginManager::getObjectByClassName(QLatin1String("ProjectExplorer::Internal::CompileOutputWindow"));
+//    ProjectExplorer::Internal::CompileOutputWindow *capp = qobject_cast<ProjectExplorer::Internal::CompileOutputWindow *>(app);
+
+    // Get Workspace Files
+    QStringList projectFiles = ROSUtils::getWorkspaceFiles(rosProject->projectDirectory());
+    rosProject->setFiles(projectFiles);
+
+    // Generate CodeBlocks Project File
+    if (ROSUtils::sourceWorkspace(runCmake, rosProject->projectDirectory(), bc->rosDistribution()))
+    {
+      if (ROSUtils::generateCodeBlocksProjectFile(runCmake, rosProject->sourceDirectory(), rosProject->buildDirectory()))
+      {
+        QStringList projectIncludes = ROSUtils::getWorkspaceIncludes(rosProject->projectDirectory());
+        rosProject->addIncludes(projectIncludes);
+      }
+    }
+
+    delete runCmake;
 }
 
 } // namespace Internal

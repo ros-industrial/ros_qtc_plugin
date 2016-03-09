@@ -1,5 +1,6 @@
 <RCC>
-    <qresource prefix="/rosproject" >
+    <qresource prefix="/rosproject">
         <file>ROSProjectManager.mimetypes.xml</file>
+        <file>50x50pix.png</file>
     </qresource>
 </RCC>
