@@ -2,7 +2,6 @@
 #define ROSOUTPUTPANE_H
 
 #include <coreplugin/ioutputpane.h>
-#include <coreplugin/outputwindow.h>
 
 #include <projectexplorer/processparameters.h>
 #include <utils/qtcprocess.h>
@@ -11,42 +10,19 @@
 #include <QToolButton>
 #include <QProcess>
 
+#include <qtermwidget5/qtermwidget.h>
+
 namespace ROSProjectManager {
 namespace Internal {
 
-class ROSOutputWindow :public Core::OutputWindow
+
+class ROSTerminalPane : public Core::IOutputPane
 {
   Q_OBJECT
 
 public:
-  ROSOutputWindow(Core::Context context, const ProjectExplorer::ProcessParameters &param);
-  ~ROSOutputWindow();
-
-  void startProcess();
-  void stopProcess();
-
-protected:
-  void processFinished(int exitCode, QProcess::ExitStatus status);
-  void stdOutput(const QString &line);
-  void stdError(const QString &line);
-
-private:
-  void cleanUp();
-  void processReadyReadStdError();
-  void processReadyReadStdOutput();
-  void slotProcessFinished(int, QProcess::ExitStatus);
-
-  ProjectExplorer::ProcessParameters m_processParameters;
-  Utils::QtcProcess *m_rosProcess;
-};
-
-class ROSOutputPane : public Core::IOutputPane
-{
-  Q_OBJECT
-
-public:
-  ROSOutputPane();
-  ~ROSOutputPane();
+  ROSTerminalPane();
+  ~ROSTerminalPane();
 
   QWidget *outputWidget(QWidget *parent) override;
   QList<QWidget *> toolBarWidgets() const override;
@@ -67,25 +43,27 @@ public:
   void goToNext() override;
   void goToPrev() override;
 
-  void startProcess(const ProjectExplorer::ProcessParameters &param);
-  void saveSettings();
+  QTermWidget &startTerminal(int startnow = 1, const QString name = QLatin1String("Terminal"));
 
-  //void appendText(const QString &text, BuildStep::OutputFormat format);
+  void sendText(const QString &text);
+
 private slots:
-  void fontSettingsChanged();
   void updateZoomEnabled();
-  void updateWordWrapMode();
   void zoomIn();
   void zoomOut();
+  void startTerminalButton();
   void stopProcess();
+  void closeTerminal(int index);
 
 private:
-  QList<ROSOutputWindow *> m_windows;
+  QList<QTermWidget *> m_terminals;
   QTabWidget * m_tabWidget;
+  QStringList m_tabNames;
 
   QToolButton *m_stopButton;
   QToolButton *m_zoomInButton;
   QToolButton *m_zoomOutButton;
+  QToolButton *m_newTerminalButton;
 };
 
 } // namespace Internal

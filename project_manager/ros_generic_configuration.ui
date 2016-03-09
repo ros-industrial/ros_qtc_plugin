@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ROSProjectManager::Internal::ROSLaunchStep</class>
- <widget class="QWidget" name="ROSProjectManager::Internal::ROSLaunchStep">
+ <class>ROSProjectManager::Internal::ROSGenericStep</class>
+ <widget class="QWidget" name="ROSProjectManager::Internal::ROSGenericStep">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -15,23 +15,23 @@
   </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="0" column="0">
-    <widget class="QLabel" name="packageNameLabel">
+    <widget class="QLabel" name="packageLabel">
      <property name="text">
-      <string>Package Name:</string>
+      <string>Package:</string>
      </property>
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QComboBox" name="packageNameComboBox">
+    <widget class="QComboBox" name="packageComboBox">
      <property name="editable">
       <bool>false</bool>
      </property>
     </widget>
    </item>
    <item row="1" column="0">
-    <widget class="QLabel" name="launchFileLabel">
+    <widget class="QLabel" name="targetLabel">
      <property name="text">
-      <string>Launch FIle:</string>
+      <string>Target:</string>
      </property>
     </widget>
    </item>
@@ -46,7 +46,7 @@
     <widget class="QLineEdit" name="argumentsLineEdit"/>
    </item>
    <item row="1" column="1">
-    <widget class="QComboBox" name="launchFileComboBox"/>
+    <widget class="QComboBox" name="targetComboBox"/>
    </item>
   </layout>
  </widget>

@@ -33,7 +33,8 @@
 
 #include <projectexplorer/iprojectmanager.h>
 #include <projectexplorer/processparameters.h>
-#include "ros_output_pane.h"
+#include <qtermwidget5/qtermwidget.h>
+#include "ros_terminal_pane.h"
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -56,11 +57,11 @@ public:
 
     static ROSManager *instance();
 
-    void startProcess(const ProjectExplorer::ProcessParameters &param);
+    QTermWidget &startTerminal(int startnow = 1, const QString name = QString());
 
 private:
     QList<ROSProject *> m_projects;
-    ROSOutputPane *m_outputPane;
+    ROSTerminalPane *m_terminalPane;
 
 };
 

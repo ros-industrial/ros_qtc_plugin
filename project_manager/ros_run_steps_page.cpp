@@ -488,10 +488,6 @@ RunStepsPage::RunStepsPage(ROSRunConfiguration *rc) :
 
     m_widget->init(rc->stepList());
     setDisplayName(tr("ROS Run Steps"));
-//    if (m_id == Constants::BUILDSTEPS_BUILD)
-//        setDisplayName(tr("Build Steps"));
-//    if (m_id == Constants::BUILDSTEPS_CLEAN)
-//        setDisplayName(tr("Clean Steps"));
 }
 
 RunStepsPage::~RunStepsPage()

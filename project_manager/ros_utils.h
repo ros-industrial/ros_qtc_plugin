@@ -27,8 +27,9 @@ public:
   static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QStringList &files, const QStringList &includePaths);
   static QStringList getWorkspaceFiles(const Utils::FileName &workspaceDir);
   static QStringList getWorkspaceIncludes(const Utils::FileName &workspaceDir);
-  static QStringList getROSPackages();
-  static QStringList getROSPackageLaunchFiles(const QString &packageName, bool OnlyNames = true);
+  static QMap<QString, QString> getROSPackages(const QStringList &env);
+  static QStringList getROSPackageLaunchFiles(const QString &packagePath, bool OnlyNames = true);
+  static QStringList getROSPackageExecutables(const QString &packageName, const QStringList &env);
 
 private:
   static bool sourceWorkspaceHelper(QProcess *process, const QString &path);

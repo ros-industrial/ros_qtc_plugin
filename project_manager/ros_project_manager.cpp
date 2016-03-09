@@ -50,15 +50,15 @@ static ROSManager *m_instance = 0;
 ROSManager::ROSManager()
 {
   m_instance = this;
-  m_outputPane = new ROSOutputPane();
-  ExtensionSystem::PluginManager::addObject(m_outputPane);
+  m_terminalPane = new ROSTerminalPane();
+  ExtensionSystem::PluginManager::addObject(m_terminalPane);
 }
 
 ROSManager::~ROSManager()
 {
   m_instance = 0;
-  ExtensionSystem::PluginManager::removeObject(m_outputPane);
-  delete m_outputPane;
+  ExtensionSystem::PluginManager::removeObject(m_terminalPane);
+  delete m_terminalPane;
 }
 
 ROSManager *ROSManager::instance()
@@ -93,9 +93,9 @@ void ROSManager::unregisterProject(ROSProject *project)
     m_projects.removeAll(project);
 }
 
-void ROSManager::startProcess(const ProjectExplorer::ProcessParameters &param)
+QTermWidget &ROSManager::startTerminal(int startnow, const QString name)
 {
-  m_outputPane->startProcess(param);
+  return m_terminalPane->startTerminal(startnow, name);
 }
 
 } // namespace Internal

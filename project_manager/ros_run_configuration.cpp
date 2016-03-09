@@ -292,15 +292,7 @@ bool ROSRunConfigurationFactory::canCreate(ProjectExplorer::Target *parent,
 
 ProjectExplorer::RunConfiguration *ROSRunConfigurationFactory::doCreate(ProjectExplorer::Target *parent, Core::Id id)
 {
-  ROSRunConfiguration *rc = new ROSRunConfiguration(parent, id);
-
-  RunStepList *runSteps = rc->stepList();
-  Q_ASSERT(runSteps);
-
-  ROSLaunchStep *rosLaunchStep = new ROSLaunchStep(runSteps);
-  runSteps->insertStep(0, rosLaunchStep);
-
-  return rc;
+  return new ROSRunConfiguration(parent, id);
 }
 
 bool ROSRunConfigurationFactory::canRestore(ProjectExplorer::Target *parent, const QVariantMap &map) const
@@ -583,22 +575,22 @@ void ROSRunControl::start()
     rs->run(m_futureInterfaceForAysnc);
   }
 
-  d->running = true;
-  emit started();
-  d->runner.disconnect(this);
-  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::reportError,
-          this, &ROSRunControl::handleErrorMessage);
-  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::remoteStderr,
-          this, &ROSRunControl::handleRemoteErrorOutput);
-  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::remoteStdout,
-          this, &ROSRunControl::handleRemoteOutput);
-  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::finished,
-          this, &ROSRunControl::handleRunnerFinished);
-  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::reportProgress,
-          this, &ROSRunControl::handleProgressReport);
+//  d->running = true;
+//  emit started();
+//  d->runner.disconnect(this);
+//  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::reportError,
+//          this, &ROSRunControl::handleErrorMessage);
+//  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::remoteStderr,
+//          this, &ROSRunControl::handleRemoteErrorOutput);
+//  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::remoteStdout,
+//          this, &ROSRunControl::handleRemoteOutput);
+//  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::finished,
+//          this, &ROSRunControl::handleRunnerFinished);
+//  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::reportProgress,
+//          this, &ROSRunControl::handleProgressReport);
 
-  d->runner.setEnvironment(d->environment);
-  d->runner.setWorkingDirectory(d->workingDir);
+//  d->runner.setEnvironment(d->environment);
+//  d->runner.setWorkingDirectory(d->workingDir);
 
 
 

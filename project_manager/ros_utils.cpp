@@ -9,8 +9,6 @@
 #include <QTextStream>
 #include <QDirIterator>
 
-#include <ros/package.h>
-
 namespace ROSProjectManager {
 namespace Internal {
 
@@ -291,27 +289,54 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir)
   return includePaths;
 }
 
-QStringList ROSUtils::getROSPackages()
+QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
 {
-  QStringList output;
-  ros::package::V_string packages;
-  ros::package::getAll(packages);
+//  QStringList output;
+//  ros::package::V_string packages;
+//  ros::package::getAll(packages);
 
-  foreach(std::string str, packages)
+//  foreach(std::string str, packages)
+//  {
+//    output.append(QString::fromStdString(str));
+//  }
+
+//  return output;
+  QProcess process;
+  QMap<QString, QString> package_map;
+  QStringList tmp;
+
+  process.setEnvironment(env);
+  process.start(QLatin1String("bash"));
+  process.waitForStarted();
+  QString cmd = QLatin1String("rospack list > /tmp/rosqtpackages.txt");
+  process.write(cmd.toLatin1());
+  process.closeWriteChannel();
+  process.waitForFinished();
+
+  if (process.exitStatus() != QProcess::CrashExit)
   {
-    output.append(QString::fromStdString(str));
+    QFile package_file(QLatin1String("/tmp/rosqtpackages.txt"));
+    if (package_file.open(QIODevice::ReadOnly))
+    {
+      QTextStream package_stream(&package_file);
+      while (!package_stream.atEnd())
+      {
+        tmp = package_stream.readLine().split(QLatin1String(" "));
+        package_map.insert(tmp[0],tmp[1]);
+      }
+      package_file.close();
+      return package_map;
+    }
   }
-
-  return output;
+  return QMap<QString, QString>();
 }
 
-QStringList ROSUtils::getROSPackageLaunchFiles(const QString &packageName, bool OnlyNames)
+QStringList ROSUtils::getROSPackageLaunchFiles(const QString &packagePath, bool OnlyNames)
 {
   QStringList launchFiles;
-  if(!packageName.isEmpty())
+  if(!packagePath.isEmpty())
   {
-    QString path = QString::fromStdString(ros::package::getPath(packageName.toStdString()));
-    const QDir srcDir(path);
+    const QDir srcDir(packagePath);
     QDirIterator it(srcDir.absolutePath(),QStringList() << QLatin1String("*.launch"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
     while (it.hasNext())
@@ -319,7 +344,7 @@ QStringList ROSUtils::getROSPackageLaunchFiles(const QString &packageName, bool 
       QFileInfo launchFile(it.next());
       if(OnlyNames)
       {
-        launchFiles.append(launchFile.baseName());
+        launchFiles.append(launchFile.fileName());
       }
       else
       {
@@ -330,6 +355,53 @@ QStringList ROSUtils::getROSPackageLaunchFiles(const QString &packageName, bool 
 
   return launchFiles;
 }
+
+QStringList ROSUtils::getROSPackageExecutables(const QString &packageName, const QStringList &env)
+{
+
+  QProcess process;
+  QStringList package_executables;
+  QString package_executables_location;
+
+  process.setEnvironment(env);
+  process.start(QLatin1String("bash"));
+  process.waitForStarted();
+  QString cmd = QLatin1String("catkin_find --without-underlays --libexec ") + packageName + QLatin1String(" > /tmp/rosqtexecutables.txt");
+  process.write(cmd.toLatin1());
+  process.closeWriteChannel();
+  process.waitForFinished();
+
+  if (process.exitStatus() != QProcess::CrashExit)
+  {
+    QFile executable_file(QLatin1String("/tmp/rosqtexecutables.txt"));
+    if (executable_file.open(QIODevice::ReadOnly))
+    {
+      QTextStream executable_stream(&executable_file);
+      if (!executable_stream.atEnd())
+      {
+        package_executables_location = executable_stream.readLine();
+      }
+      executable_file.close();
+
+      if(!package_executables_location.isEmpty())
+      {
+        const QDir srcDir(package_executables_location);
+        QDirIterator it(srcDir.absolutePath(), QDir::Files | QDir::Executable | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+        while (it.hasNext())
+        {
+          QFileInfo executableFile(it.next());
+          package_executables.append(executableFile.fileName());
+        }
+
+        return package_executables;
+      }
+    }
+  }
+
+  return QStringList();
+}
+
 
 } //namespace Internal
 } //namespace ROSProjectManager

@@ -271,8 +271,6 @@ void RunStepList::insertStep(int position, RunStep *step)
 bool RunStepList::removeStep(int position)
 {
     RunStep *bs = at(position);
-//    if (BuildManager::isBuilding(bs))
-//        return false;
 
     emit aboutToRemoveStep(position);
     m_steps.removeAt(position);
