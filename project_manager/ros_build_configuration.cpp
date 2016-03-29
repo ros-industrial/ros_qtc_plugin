@@ -131,6 +131,7 @@ void ROSBuildConfiguration::sourceWorkspace()
     {
       foreach(Utils::EnvironmentItem it, current_env)
       {
+		//TODO: The append does not work correctly on every environment variable
         source_env.appendOrSet(it.name, it.value);
       }
 
