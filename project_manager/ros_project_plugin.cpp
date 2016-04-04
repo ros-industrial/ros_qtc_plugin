@@ -126,7 +126,7 @@ void ROSProjectPlugin::reloadWorkspace()
     {
       if (ROSUtils::generateCodeBlocksProjectFile(runCmake, rosProject->sourceDirectory(), rosProject->buildDirectory()))
       {
-        QStringList projectIncludes = ROSUtils::getWorkspaceIncludes(rosProject->projectDirectory());
+        QStringList projectIncludes = ROSUtils::getWorkspaceIncludes(rosProject->projectDirectory(), bc->rosDistribution());
         rosProject->addIncludes(projectIncludes);
       }
     }

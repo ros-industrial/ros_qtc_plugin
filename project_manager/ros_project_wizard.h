@@ -28,6 +28,7 @@ public:
     void setWorkspaceDirectory(const QString &path);
 
     QString projectName() const;
+    QString distribution() const;
     Utils::FileName workspaceDirectory() const;
     Utils::FileName develDirectory() const;
     Utils::FileName sourceDirectory() const;
@@ -52,6 +53,7 @@ public:
     void setWorkspaceDirectory(const QString &path);
 
     QString projectName() const;
+    QString distribution() const;
     Utils::FileName workspaceDirectory() const;
     Utils::FileName develDirectory() const;
     Utils::FileName sourceDirectory() const;

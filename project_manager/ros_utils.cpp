@@ -248,7 +248,7 @@ QStringList ROSUtils::getWorkspaceFiles(const Utils::FileName &workspaceDir)
   return workspaceFiles;
 }
 
-QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir)
+QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir, const QString &rosDistribution)
 {
   // Parse CodeBlocks Project File
   // Need to search for all of the tags <Add directory="include path" />
@@ -291,10 +291,11 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir)
   Utils::FileName srcPath = workspaceDir;
   const QDir srcDir(srcPath.toString());
   srcPath.appendPath(QLatin1String("src"));
+  QString includePath;
   QDirIterator itSrc(srcDir.absolutePath(),QStringList() << QLatin1String("include"), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
   while (itSrc.hasNext())
   {
-    QString includePath = itSrc.next();
+    includePath = itSrc.next();
     if(!includePaths.contains(includePath))
     {
       includePaths.append(includePath);
@@ -308,11 +309,18 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir)
   QDirIterator itDevel(develDir.absolutePath(),QStringList() << QLatin1String("include"), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
   while (itDevel.hasNext())
   {
-    QString includePath = itDevel.next();
+    includePath = itDevel.next();
     if(!includePaths.contains(includePath))
     {
       includePaths.append(includePath);
     }
+  }
+
+  // Next make sure /opt/ros/distribution/includes was added
+  includePath = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY)).appendPath(rosDistribution).appendPath(QLatin1String("include")).toString();
+  if(!includePaths.contains(includePath))
+  {
+    includePaths.append(includePath);
   }
 
   return includePaths;

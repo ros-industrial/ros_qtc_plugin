@@ -87,6 +87,11 @@ QString ROSProjectWizardDialog::projectName() const
     return m_firstPage->projectName();
 }
 
+QString ROSProjectWizardDialog::distribution() const
+{
+    return m_firstPage->distribution();
+}
+
 Utils::FileName ROSProjectWizardDialog::workspaceDirectory() const
 {
     return m_firstPage->workspaceDirectory();
@@ -169,6 +174,11 @@ QString ROSImportWizardPage::projectName() const
     return d->m_ui.nameLineEdit->text();
 }
 
+QString ROSImportWizardPage::distribution() const
+{
+    return d->m_ui.distributionComboBox->currentText();
+}
+
 void ROSImportWizardPage::setWorkspaceDirectory(const QString &path)
 {
     d->m_ui.pathChooser->setPath(path);
@@ -216,7 +226,7 @@ void ROSImportWizardPage::slotGenerateCodeBlocksProjectFile()
   connect(m_runCmake, SIGNAL(readyReadStandardOutput()),this, SLOT(slotUpdateStdText()));
   connect(m_runCmake, SIGNAL(readyReadStandardError()),this, SLOT(slotUpdateStdError()));
   m_hasValidCodeBlocksProjectFile = false;
-  if (ROSUtils::sourceWorkspace(m_runCmake, m_wsDir, d->m_ui.distributionComboBox->currentText()))
+  if (ROSUtils::sourceWorkspace(m_runCmake, m_wsDir, distribution()))
   {
     if (ROSUtils::generateCodeBlocksProjectFile(m_runCmake, m_srcDir, m_bldDir))
     {
@@ -335,14 +345,13 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
     const QDir wsDir(wizard->workspaceDirectory().toString());
 
     const QString projectName = wizard->projectName();
-    //const QString creatorFileName = QFileInfo(wsDir, projectName + QLatin1String(".ros")).absoluteFilePath();
     const QString workspaceFileName = QFileInfo(wsDir, projectName + QLatin1String(".workspace")).absoluteFilePath();
 
     // Get all file in the workspace source directory
     QStringList workspaceFiles = ROSUtils::getWorkspaceFiles(wizard->workspaceDirectory());
 
     // Parse CodeBlocks Project File
-    QStringList includePaths = ROSUtils::getWorkspaceIncludes(wizard->workspaceDirectory());
+    QStringList includePaths = ROSUtils::getWorkspaceIncludes(wizard->workspaceDirectory(), wizard->distribution());
 
     Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
     QString content;
