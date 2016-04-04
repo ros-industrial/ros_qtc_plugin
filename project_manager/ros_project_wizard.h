@@ -25,8 +25,6 @@ class ROSProjectWizardDialog : public Core::BaseFileWizard
 public:
     explicit ROSProjectWizardDialog(const Core::BaseFileWizardFactory *factory, QWidget *parent = 0);
 
-    void setWorkspaceDirectory(const QString &path);
-
     QString projectName() const;
     QString distribution() const;
     Utils::FileName workspaceDirectory() const;
@@ -49,8 +47,6 @@ public:
 
     bool forceFirstCapitalLetterForFileName() const;
     void setForceFirstCapitalLetterForFileName(bool b);
-
-    void setWorkspaceDirectory(const QString &path);
 
     QString projectName() const;
     QString distribution() const;
