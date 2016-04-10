@@ -278,6 +278,7 @@ void ROSImportWizardPage::slotProjectPathChanged(const QString &path)
   }
   else
   {
+      d->m_ui.pathChooser->setPath(QLatin1String(""));
       d->m_ui.generateProjectFileButton->setEnabled(false);
   }
 

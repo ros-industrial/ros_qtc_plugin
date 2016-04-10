@@ -245,6 +245,19 @@ QStringList ROSUtils::getWorkspaceFiles(const Utils::FileName &workspaceDir)
   {
       workspaceFiles.append(it.next());
   }
+
+  // Next search for empty directories
+  QString ws_dir;
+  QDirIterator itSrc(srcDir.absolutePath(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+  while (itSrc.hasNext())
+  {
+    ws_dir = itSrc.next();
+    if(QDir(ws_dir).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0)
+    {
+      workspaceFiles.append(ws_dir);
+    }
+  }
+
   return workspaceFiles;
 }
 
