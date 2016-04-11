@@ -245,10 +245,23 @@ QStringList ROSUtils::getWorkspaceFiles(const Utils::FileName &workspaceDir)
   {
       workspaceFiles.append(it.next());
   }
+
+  // Next search for empty directories
+  QString ws_dir;
+  QDirIterator itSrc(srcDir.absolutePath(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+  while (itSrc.hasNext())
+  {
+    ws_dir = itSrc.next();
+    if(QDir(ws_dir).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0)
+    {
+      workspaceFiles.append(ws_dir);
+    }
+  }
+
   return workspaceFiles;
 }
 
-QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir)
+QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir, const QString &rosDistribution)
 {
   // Parse CodeBlocks Project File
   // Need to search for all of the tags <Add directory="include path" />
@@ -286,21 +299,48 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir)
     }
     cbpXml.readNext();
   }
+
+  // Next search the source directory for any missed include folders
+  Utils::FileName srcPath = workspaceDir;
+  const QDir srcDir(srcPath.toString());
+  srcPath.appendPath(QLatin1String("src"));
+  QString includePath;
+  QDirIterator itSrc(srcDir.absolutePath(),QStringList() << QLatin1String("include"), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+  while (itSrc.hasNext())
+  {
+    includePath = itSrc.next();
+    if(!includePaths.contains(includePath))
+    {
+      includePaths.append(includePath);
+    }
+  }
+
+  // Next search the devel directory for any missed include folders
+  Utils::FileName develPath = workspaceDir;
+  const QDir develDir(develPath.toString());
+  develPath.appendPath(QLatin1String("devel"));
+  QDirIterator itDevel(develDir.absolutePath(),QStringList() << QLatin1String("include"), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+  while (itDevel.hasNext())
+  {
+    includePath = itDevel.next();
+    if(!includePaths.contains(includePath))
+    {
+      includePaths.append(includePath);
+    }
+  }
+
+  // Next make sure /opt/ros/distribution/includes was added
+  includePath = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY)).appendPath(rosDistribution).appendPath(QLatin1String("include")).toString();
+  if(!includePaths.contains(includePath))
+  {
+    includePaths.append(includePath);
+  }
+
   return includePaths;
 }
 
 QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
 {
-//  QStringList output;
-//  ros::package::V_string packages;
-//  ros::package::getAll(packages);
-
-//  foreach(std::string str, packages)
-//  {
-//    output.append(QString::fromStdString(str));
-//  }
-
-//  return output;
   QProcess process;
   QMap<QString, QString> package_map;
   QStringList tmp;

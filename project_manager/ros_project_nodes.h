@@ -63,7 +63,6 @@ private:
     typedef QHash<QString, FolderNode *> FolderByName;
     FolderNode *createFolderByName(const QStringList &components, int end);
     FolderNode *findFolderByName(const QStringList &components, int end);
-    void removeEmptySubFolders(FolderNode *gparent, FolderNode *parent);
 
 private:
     ROSProject *m_project;

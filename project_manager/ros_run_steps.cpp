@@ -327,7 +327,6 @@ void ROSGenericRunStep::run(QFutureInterface<bool> &fi)
   QTermWidget &terminal = ROSManager::instance()->startTerminal(0, QString::fromLatin1("%1 %2 %3").arg(m_command, m_package, m_target));
 
   terminal.setWorkingDirectory(rp->projectDirectory().toString());
-  terminal.setEnvironment(bc->environment().toStringList());
 
   //start bash now that everything is setup
   terminal.startShellProgram();

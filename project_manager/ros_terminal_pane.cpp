@@ -105,13 +105,15 @@ void ROSTerminalPane::zoomOut()
 
 void ROSTerminalPane::startTerminalButton()
 {
-
   startTerminal();
 }
 
 void ROSTerminalPane::closeTerminal(int index)
 {
+  m_tabNames.removeAll(m_tabWidget->tabText(index));
+  m_terminals.removeAll(qobject_cast<QTermWidget*>(m_tabWidget->currentWidget()));
   m_tabWidget->removeTab(index);
+  emit navigateStateUpdate();
 }
 
 void ROSTerminalPane::stopProcess()
@@ -168,8 +170,10 @@ QTermWidget &ROSTerminalPane::startTerminal(int startnow, const QString name)
   };
 
   m_tabNames.append(tabName);
-  m_tabWidget->addTab(widget, tabName);
+  int idx = m_tabWidget->addTab(widget, tabName);
+  m_tabWidget->setCurrentIndex(idx);
 
+  emit navigateStateUpdate();
   return *widget;
 }
 
@@ -228,7 +232,7 @@ int ROSTerminalPane::priorityInStatusBar() const
 
 bool ROSTerminalPane::canNext() const
 {
-  if(m_terminals.count() > 1 && m_tabWidget->currentIndex() < m_terminals.count())
+  if(m_terminals.count() > 1 && m_tabWidget->currentIndex() < (m_terminals.count()-1))
   {
     return true;
   }
@@ -249,16 +253,18 @@ bool ROSTerminalPane::canPrevious() const
 void ROSTerminalPane::goToNext()
 {
   m_tabWidget->setCurrentIndex(m_tabWidget->currentIndex()+1);
+  emit navigateStateChanged();
 }
 
 void ROSTerminalPane::goToPrev()
 {
   m_tabWidget->setCurrentIndex(m_tabWidget->currentIndex()-1);
+  emit navigateStateChanged();
 }
 
 bool ROSTerminalPane::canNavigate() const
 {
-    return false;
+    return true;
 }
 
 } // namespace Internal

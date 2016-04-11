@@ -324,7 +324,8 @@ QStringList ROSProject::processEntries(const QStringList &paths,
         trimmedPath = Utils::FileName::fromUserInput(trimmedPath).toString();
 
         fileInfo.setFile(projectDir, trimmedPath);
-        if (fileInfo.exists()) {
+        if (fileInfo.isDir() || fileInfo.exists())
+        {
             const QString absPath = fileInfo.absoluteFilePath();
             absolutePaths.append(absPath);
             if (map)

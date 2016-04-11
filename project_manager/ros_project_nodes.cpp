@@ -52,22 +52,30 @@ QHash<QString, QStringList> sortFilesIntoPaths(const QString &base, const QSet<Q
 {
     QHash<QString, QStringList> filesInPath;
     const QDir baseDir(base);
+    QString relativeFilePath;
+    Utils::FileName absoluteFilePath;
 
     foreach (const QString &absoluteFileName, files) {
         QFileInfo fileInfo(absoluteFileName);
-        Utils::FileName absoluteFilePath = Utils::FileName::fromString(fileInfo.path());
-        QString relativeFilePath;
-
-        if (absoluteFilePath.isChildOf(baseDir)) {
-            relativeFilePath = absoluteFilePath.relativeChildPath(Utils::FileName::fromString(base)).toString();
-        } else {
-            // `file' is not part of the project.
-            relativeFilePath = baseDir.relativeFilePath(absoluteFilePath.toString());
-            if (relativeFilePath.endsWith(QLatin1Char('/')))
-                relativeFilePath.chop(1);
+        if (!fileInfo.isDir())
+        {
+          absoluteFilePath = Utils::FileName::fromString(fileInfo.path());
+          if (absoluteFilePath.isChildOf(baseDir))
+          {
+              relativeFilePath = absoluteFilePath.relativeChildPath(Utils::FileName::fromString(base)).toString();
+              filesInPath[relativeFilePath].append(absoluteFileName);
+          }
         }
-
-        filesInPath[relativeFilePath].append(absoluteFileName);
+        else
+        {
+          //This handles empty folders
+          absoluteFilePath = Utils::FileName::fromString(absoluteFileName);
+          if (absoluteFilePath.isChildOf(baseDir))
+          {
+            relativeFilePath = baseDir.relativeFilePath(absoluteFileName);
+            filesInPath[relativeFilePath].append(QLatin1String("EMPTY_FOLDER"));
+          }
+        }
     }
     return filesInPath;
 }
@@ -88,6 +96,20 @@ void ROSProjectNode::refresh(QSet<QString> oldFileList)
     QSet<QString> added = newFileList;
     added.subtract(oldFileList);
 
+    QStringList sourceExtension, headerExtension;
+    sourceExtension << QLatin1Literal("c")
+                    << QLatin1Literal("cc")
+                    << QLatin1Literal("cpp")
+                    << QLatin1Literal("c++")
+                    << QLatin1Literal("cp")
+                    << QLatin1Literal("cxx");
+    headerExtension << QLatin1Literal("h")
+                    << QLatin1Literal("hh")
+                    << QLatin1Literal("hpp")
+                    << QLatin1Literal("h++")
+                    << QLatin1Literal("hp")
+                    << QLatin1Literal("hxx");
+
     QString baseDir = filePath().toFileInfo().absolutePath();
     FilesInPathHash filesInPaths = sortFilesIntoPaths(baseDir, added);
 
@@ -102,13 +124,21 @@ void ROSProjectNode::refresh(QSet<QString> oldFileList)
             folder = createFolderByName(components, components.size());
 
         QList<FileNode *> fileNodes;
-        foreach (const QString &file, it.value()) {
-            FileType fileType = SourceType; // ### FIXME
-            if (file.endsWith(QLatin1String(".qrc")))
-                fileType = ResourceType;
-            FileNode *fileNode = new FileNode(Utils::FileName::fromString(file),
-                                              fileType, /*generated = */ false);
-            fileNodes.append(fileNode);
+        foreach (const QString &file, it.value())
+        {
+            if (file != QLatin1Literal("EMPTY_FOLDER"))
+            {
+              QFileInfo fileInfo(file);
+              FileType fileType = ResourceType;
+              if (headerExtension.contains(fileInfo.suffix()))
+                fileType = HeaderType;
+              else if(sourceExtension.contains(fileInfo.suffix()))
+                fileType = SourceType;
+
+              FileNode *fileNode = new FileNode(Utils::FileName::fromString(file),
+                                                fileType, /*generated = */ false);
+              fileNodes.append(fileNode);
+            }
         }
 
         folder->addFileNodes(fileNodes);
@@ -123,29 +153,36 @@ void ROSProjectNode::refresh(QSet<QString> oldFileList)
             components = filePath.split(QLatin1Char('/'));
         FolderNode *folder = findFolderByName(components, components.size());
 
+        //Need to get parent folder also for empty folder removal
+        FolderNode *parentFolder = NULL;
+        if (components.size() >= 2)
+        {
+          components.removeLast();
+          parentFolder = findFolderByName(components, components.size());
+        }
+        else
+        {
+          parentFolder = projectNode()->asFolderNode();
+        }
+
         QList<FileNode *> fileNodes;
-        foreach (const QString &file, it.value()) {
+        foreach (const QString &file, it.value())
+        {
+          if (file != QLatin1Literal("EMPTY_FOLDER"))
+          {
             foreach (FileNode *fn, folder->fileNodes()) {
                 if (fn->filePath().toString() == file)
                     fileNodes.append(fn);
             }
-        }
-
-        folder->removeFileNodes(fileNodes);
+            folder->removeFileNodes(fileNodes);
+          }
+          else
+          {
+            //Remove empty folders that are no longer in .workspace file.
+            parentFolder->removeFolderNodes(QList<FolderNode *>() << folder);
+          }
+        } 
     }
-
-    foreach (FolderNode *fn, subFolderNodes())
-        removeEmptySubFolders(this, fn);
-
-}
-
-void ROSProjectNode::removeEmptySubFolders(FolderNode *gparent, FolderNode *parent)
-{
-    foreach (FolderNode *fn, parent->subFolderNodes())
-        removeEmptySubFolders(parent, fn);
-
-    if (parent->subFolderNodes().isEmpty() && parent->fileNodes().isEmpty())
-        gparent->removeFolderNodes(QList<FolderNode*>() << parent);
 }
 
 FolderNode *ROSProjectNode::createFolderByName(const QStringList &components, int end)
