@@ -353,7 +353,7 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
     const QString workspaceFileName = QFileInfo(wsDir, projectName + QLatin1String(".workspace")).absoluteFilePath();
 
     // Get all file in the workspace source directory
-    QStringList workspaceFiles = ROSUtils::getWorkspaceFiles(wizard->workspaceDirectory());
+    QHash<QString, QStringList> workspaceDirectory = ROSUtils::getWorkspaceFiles(wizard->workspaceDirectory());
 
     // Parse CodeBlocks Project File
     QStringList includePaths = ROSUtils::getWorkspaceIncludes(wizard->workspaceDirectory(), wizard->distribution());
@@ -361,7 +361,7 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
     Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
     QString content;
     QXmlStreamWriter workspaceXml(&content);
-    ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, workspaceFiles, includePaths);
+    ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, workspaceDirectory, includePaths);
     generatedWorkspaceFile.setContents(content);
     generatedWorkspaceFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
 

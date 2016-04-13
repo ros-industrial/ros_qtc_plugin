@@ -93,14 +93,14 @@ public:
    * @param includePaths - List of required include directories
    * @return A bool whether the Qt ROS Project file was succesfully updated
    */
-  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QStringList &files, const QStringList &includePaths);
+  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QHash<QString, QStringList> &workspaceFiles, const QStringList &includePaths);
 
   /**
    * @brief getWorkspaceFiles - Gets all fo the files in a ROS Workspace
    * @param workspaceDir - Path to the ROS Workspace
    * @return QStringList of file paths
    */
-  static QStringList getWorkspaceFiles(const Utils::FileName &workspaceDir);
+  static QHash<QString, QStringList> getWorkspaceFiles(const Utils::FileName &workspaceDir);
 
   /**
    * @brief getWorkspaceIncludes - Gets all of the include directories

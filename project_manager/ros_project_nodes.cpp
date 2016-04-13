@@ -48,53 +48,70 @@ ROSProjectNode::ROSProjectNode(ROSProject *project)
     setDisplayName(project->projectFilePath().toFileInfo().completeBaseName());
 }
 
-QHash<QString, QStringList> sortFilesIntoPaths(const QString &base, const QSet<QString> &files)
+void ROSProjectNode::diffWorkspaceFiles(const QHash<QString, QStringList> oldWorkspaceFiles,
+                                        const QHash<QString, QStringList> newWorkspaceFiles,
+                                        QHash<QString, QStringList> &addedFiles,
+                                        QHash<QString, QStringList> &removedFiles)
 {
-    QHash<QString, QStringList> filesInPath;
-    const QDir baseDir(base);
-    QString relativeFilePath;
-    Utils::FileName absoluteFilePath;
+  QSet<QString> oldDirs = oldWorkspaceFiles.keys().toSet();
+  QSet<QString> newDirs = newWorkspaceFiles.keys().toSet();
+  QSet<QString> oldFiles;
+  QSet<QString> newFiles;
 
-    foreach (const QString &absoluteFileName, files) {
-        QFileInfo fileInfo(absoluteFileName);
-        if (!fileInfo.isDir())
-        {
-          absoluteFilePath = Utils::FileName::fromString(fileInfo.path());
-          if (absoluteFilePath.isChildOf(baseDir))
-          {
-              relativeFilePath = absoluteFilePath.relativeChildPath(Utils::FileName::fromString(base)).toString();
-              filesInPath[relativeFilePath].append(absoluteFileName);
-          }
-        }
-        else
-        {
-          //This handles empty folders
-          absoluteFilePath = Utils::FileName::fromString(absoluteFileName);
-          if (absoluteFilePath.isChildOf(baseDir))
-          {
-            relativeFilePath = baseDir.relativeFilePath(absoluteFileName);
-            filesInPath[relativeFilePath].append(QLatin1String("EMPTY_FOLDER"));
-          }
-        }
+  QHashIterator<QString, QStringList> item(newWorkspaceFiles);
+  while (item.hasNext())
+  {
+    item.next();
+    // if they both contain the same directory check if files have been added or removed.
+    if (oldWorkspaceFiles.contains(item.key()))
+    {
+      oldFiles = oldWorkspaceFiles[item.key()].toSet();
+      newFiles = item.value().toSet();
+
+      QSet<QString> removed = oldFiles;
+      removed.subtract(newFiles);
+
+      QSet<QString> added = newFiles;
+      added.subtract(oldFiles);
+
+      foreach (QString path, added)
+      {
+        addedFiles[item.key()].append(path);
+      }
+
+      foreach (QString path, removed)
+      {
+        removedFiles[item.key()].append(path);
+      }
     }
-    return filesInPath;
+    else
+    {
+      foreach (QString path, item.value())
+      {
+        addedFiles[item.key()].append(path);
+      }
+    }
+  }
+
+  //Now check is directory was removed
+  QSet<QString> removedDirs = oldDirs;
+  removedDirs.subtract(newDirs);
+  foreach (QString dirPath, removedDirs)
+  {
+    removedFiles[dirPath].append(QLatin1String("REMOVE_FOLDER"));
+  }
 }
 
-void ROSProjectNode::refresh(QSet<QString> oldFileList)
+void ROSProjectNode::refresh(QHash<QString, QStringList> oldWorkspaceFiles)
 {
     typedef QHash<QString, QStringList> FilesInPathHash;
     typedef FilesInPathHash::ConstIterator FilesInPathHashConstIt;
 
-    // Do those separately
-    oldFileList.remove(m_project->projectFilePath().toString());
+    FilesInPathHash newWorkspaceFiles = m_project->workspaceFiles();
+    FilesInPathHash addedFiles, removedFiles;
 
-    QSet<QString> newFileList = m_project->files().toSet();
-    newFileList.remove(m_project->projectFilePath().toString());
+    diffWorkspaceFiles(oldWorkspaceFiles, newWorkspaceFiles, addedFiles, removedFiles);
 
-    QSet<QString> removed = oldFileList;
-    removed.subtract(newFileList);
-    QSet<QString> added = newFileList;
-    added.subtract(oldFileList);
 
     QStringList sourceExtension, headerExtension;
     sourceExtension << QLatin1Literal("c")
@@ -110,12 +127,10 @@ void ROSProjectNode::refresh(QSet<QString> oldFileList)
                     << QLatin1Literal("hp")
                     << QLatin1Literal("hxx");
 
-    QString baseDir = filePath().toFileInfo().absolutePath();
-    FilesInPathHash filesInPaths = sortFilesIntoPaths(baseDir, added);
-
-    FilesInPathHashConstIt cend = filesInPaths.constEnd();
-    for (FilesInPathHashConstIt it = filesInPaths.constBegin(); it != cend; ++it) {
-        const QString &filePath = it.key();
+    QDir baseDir(m_project->projectDirectory().toString());
+    FilesInPathHashConstIt cend = addedFiles.constEnd();
+    for (FilesInPathHashConstIt it = addedFiles.constBegin(); it != cend; ++it) {
+        const QString &filePath = baseDir.relativeFilePath(it.key());
         QStringList components;
         if (!filePath.isEmpty())
             components = filePath.split(QLatin1Char('/'));
@@ -144,10 +159,9 @@ void ROSProjectNode::refresh(QSet<QString> oldFileList)
         folder->addFileNodes(fileNodes);
     }
 
-    filesInPaths = sortFilesIntoPaths(baseDir, removed);
-    cend = filesInPaths.constEnd();
-    for (FilesInPathHashConstIt it = filesInPaths.constBegin(); it != cend; ++it) {
-        const QString &filePath = it.key();
+    cend = removedFiles.constEnd();
+    for (FilesInPathHashConstIt it = removedFiles.constBegin(); it != cend; ++it) {
+        const QString &filePath = baseDir.relativeFilePath(it.key());
         QStringList components;
         if (!filePath.isEmpty())
             components = filePath.split(QLatin1Char('/'));
@@ -168,7 +182,7 @@ void ROSProjectNode::refresh(QSet<QString> oldFileList)
         QList<FileNode *> fileNodes;
         foreach (const QString &file, it.value())
         {
-          if (file != QLatin1Literal("EMPTY_FOLDER"))
+          if (file != QLatin1Literal("REMOVE_FOLDER") && file != QLatin1Literal("EMPTY_FOLDER"))
           {
             foreach (FileNode *fn, folder->fileNodes()) {
                 if (fn->filePath().toString() == file)
@@ -176,9 +190,8 @@ void ROSProjectNode::refresh(QSet<QString> oldFileList)
             }
             folder->removeFileNodes(fileNodes);
           }
-          else
+          else if (file == QLatin1Literal("REMOVE_FOLDER"))
           {
-            //Remove empty folders that are no longer in .workspace file.
             parentFolder->removeFolderNodes(QList<FolderNode *>() << folder);
           }
         } 

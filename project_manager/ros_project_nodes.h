@@ -57,10 +57,11 @@ public:
     bool removeFiles(const QStringList &filePaths, QStringList *notRemoved = 0) override;
     bool renameFile(const QString &filePath, const QString &newFilePath) override;
 
-    void refresh(QSet<QString> oldFileList = QSet<QString>());
+    void refresh(QHash<QString, QStringList> oldWorkspaceFiles = QHash<QString, QStringList>());
 
 private:
     typedef QHash<QString, FolderNode *> FolderByName;
+    void diffWorkspaceFiles(const QHash<QString, QStringList> oldWorkspaceFiles, const QHash<QString, QStringList> newWorkspaceFiles, QHash<QString, QStringList> &addedFiles, QHash<QString, QStringList> &removedFiles);
     FolderNode *createFolderByName(const QStringList &components, int end);
     FolderNode *findFolderByName(const QStringList &components, int end);
 

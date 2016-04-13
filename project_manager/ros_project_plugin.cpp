@@ -118,8 +118,8 @@ void ROSProjectPlugin::reloadWorkspace()
 //    ProjectExplorer::Internal::CompileOutputWindow *capp = qobject_cast<ProjectExplorer::Internal::CompileOutputWindow *>(app);
 
     // Get Workspace Files
-    QStringList projectFiles = ROSUtils::getWorkspaceFiles(rosProject->projectDirectory());
-    rosProject->setFiles(projectFiles);
+    QHash<QString, QStringList> projectDirectory = ROSUtils::getWorkspaceFiles(rosProject->projectDirectory());
+    rosProject->setWorkspaceFiles(projectDirectory);
 
     // Generate CodeBlocks Project File
     if (ROSUtils::sourceWorkspace(runCmake, rosProject->projectDirectory(), bc->rosDistribution()))

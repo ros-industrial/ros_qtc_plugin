@@ -208,16 +208,35 @@ bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
   return results;
 }
 
-bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const QStringList &files, const QStringList &includePaths)
+bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const QHash<QString, QStringList> &workspaceFiles, const QStringList &includePaths)
 {
   xmlFile.setAutoFormatting(true);
   xmlFile.writeStartDocument();
   xmlFile.writeStartElement(QLatin1String("Workspace"));
 
   xmlFile.writeStartElement(QLatin1String("Files"));
-  foreach (const QString &str, files)
+  QHashIterator<QString, QStringList> item(workspaceFiles);
+  while (item.hasNext())
   {
-    xmlFile.writeTextElement(QLatin1String("File"), str);
+    item.next();
+    xmlFile.writeStartElement(QLatin1String("Directory"));
+    QString curPath = item.key();
+    xmlFile.writeAttribute(QLatin1String("path"), curPath);
+
+    if (item.value().count() == 1 && item.value().at(0) == QLatin1String("EMPTY_FOLDER"))
+    {
+      xmlFile.writeAttribute(QLatin1String("empty"), QLatin1String("true"));
+    }
+    else if (item.value().count() > 0 )
+    {
+      xmlFile.writeAttribute(QLatin1String("empty"), QLatin1String("false"));
+      QDir baseDir(curPath);
+      foreach (QString var, item.value())
+      {
+        xmlFile.writeTextElement(QLatin1String("File"), baseDir.relativeFilePath(var));
+      }
+    }
+    xmlFile.writeEndElement();
   }
   xmlFile.writeEndElement();
 
@@ -233,30 +252,50 @@ bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const Q
   return xmlFile.hasError();
 }
 
-QStringList ROSUtils::getWorkspaceFiles(const Utils::FileName &workspaceDir)
+QHash<QString, QStringList> ROSUtils::getWorkspaceFiles(const Utils::FileName &workspaceDir)
 {
-  QStringList workspaceFiles;
+  QHash<QString, QStringList> workspaceFiles;
   Utils::FileName srcPath = workspaceDir;
   srcPath.appendPath(QLatin1String("src"));
 
   const QDir srcDir(srcPath.toString());
-  QDirIterator it(srcDir.absolutePath(), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-  while (it.hasNext())
-  {
-      workspaceFiles.append(it.next());
-  }
-
-  // Next search for empty directories
-  QString ws_dir;
+  QString wsDir;
   QDirIterator itSrc(srcDir.absolutePath(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
   while (itSrc.hasNext())
   {
-    ws_dir = itSrc.next();
-    if(QDir(ws_dir).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0)
+    wsDir = itSrc.next();
+    QFileInfoList dirFiles = QDir(wsDir).entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
+    if(dirFiles.count() == 0)
     {
-      workspaceFiles.append(ws_dir);
+      workspaceFiles[wsDir].append(QLatin1Literal("EMPTY_FOLDER"));
+    }
+    else
+    {
+      foreach (QFileInfo file, dirFiles)
+      {
+        workspaceFiles[wsDir].append(file.absoluteFilePath());
+      }
     }
   }
+
+//  const QDir srcDir(srcPath.toString());
+//  QDirIterator it(srcDir.absolutePath(), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+//  while (it.hasNext())
+//  {
+//      workspaceFiles.append(it.next());
+//  }
+
+//  // Next search for empty directories
+//  QString ws_dir;
+//  QDirIterator itSrc(srcDir.absolutePath(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+//  while (itSrc.hasNext())
+//  {
+//    ws_dir = itSrc.next();
+//    if(QDir(ws_dir).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0)
+//    {
+//      workspaceFiles.append(ws_dir);
+//    }
+//  }
 
   return workspaceFiles;
 }
