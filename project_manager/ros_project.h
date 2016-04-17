@@ -3,6 +3,7 @@
 
 #include "ros_project_manager.h"
 #include "ros_project_nodes.h"
+#include "ros_utils.h"
 
 #include <projectexplorer/project.h>
 #include <projectexplorer/projectnodes.h>
@@ -29,15 +30,9 @@ public:
 
     QString displayName() const override;
     ROSManager *projectManager() const override;
-
     QStringList files(FilesMode fileMode) const override;
 
     QStringList buildTargets() const;
-
-    bool addFiles(const QStringList &filePaths);
-    bool removeFiles(const QStringList &filePaths);
-    bool setWorkspaceFiles(const QHash<QString, QStringList> &workspaceFiles);
-    bool renameFile(const QString &filePath, const QString &newFilePath);
 
     bool addIncludes(const QStringList &includePaths);
     bool setIncludes(const QStringList &includePaths);
@@ -45,25 +40,32 @@ public:
     void refresh();
 
     QStringList projectIncludePaths() const;
-    QHash<QString, QStringList> workspaceFiles() const;
+    QStringList workspaceFiles() const;
 
     Utils::FileName buildDirectory() const;
     Utils::FileName sourceDirectory() const;
+
+public slots:
+    void onDirectoryChanged(const QString &path);
 
 protected:
     Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage);
 
 private:
-    bool saveWorkspaceFiles(const QHash<QString, QStringList> &workspaceFiles);
-    bool saveProjectIncludePaths();
-    void parseProject();
+    void addDirectory(const QString &parentPath, const QString &dirName);
+    void removeDirectory(const QString &parentPath, const QString &dirName);
+    void renameDirectory(const QString &parentPath, const QString &oldDirName, const QString &newDirName);
+    bool saveProjectFile();
+    void parseProjectFile();
     void refreshCppCodeModel();
+    void print();
 
     QString m_projectName;
-    QHash<QString, QStringList> m_workspaceFiles;
-    QStringList m_workspaceFileList;
+    QHash<QString, ROSUtils::FolderContent> m_workspaceContent;
+    QStringList m_watchDirectories;
+    QStringList m_workspaceFiles;
     QStringList m_projectIncludePaths;
-    QFileSystemWatcher watcher;
+    QFileSystemWatcher m_watcher;
     QFuture<void> m_codeModelFuture;
 };
 

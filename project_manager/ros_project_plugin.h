@@ -23,7 +23,7 @@ public:
     void extensionsInitialized() {}
 
 private slots:
-    void reloadWorkspace();
+    void reloadProjectIncludeDirectories();
 
 };
 

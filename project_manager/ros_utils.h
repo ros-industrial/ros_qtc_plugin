@@ -17,6 +17,15 @@ public:
   ROSUtils();
 
   /**
+   * @brief The FolderContent struct used to store file and folder information
+   */
+  struct FolderContent
+  {
+    QStringList files;
+    QStringList directories;
+  };
+
+  /**
    * @brief generateCodeBlocksProjectFile - Generates a CodeBlocks project file from which include directories are extracted.
    * @param process - QProcess to execute the CMAKE command
    * @param sourceDir - Source directory of the workspace
@@ -93,14 +102,21 @@ public:
    * @param includePaths - List of required include directories
    * @return A bool whether the Qt ROS Project file was succesfully updated
    */
-  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QHash<QString, QStringList> &workspaceFiles, const QStringList &includePaths);
+  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QStringList &watchDirectories, const QStringList &includePaths);
 
   /**
    * @brief getWorkspaceFiles - Gets all fo the files in a ROS Workspace
    * @param workspaceDir - Path to the ROS Workspace
-   * @return QStringList of file paths
+   * @return QHash<QString, QStringList> Directory, List of file paths
    */
   static QHash<QString, QStringList> getWorkspaceFiles(const Utils::FileName &workspaceDir);
+
+  /**
+   * @brief getFolderContent - Gets all fo the files in a given folder
+   * @param folderPath - Path to the foder
+   * @return QHash<QString, QStringList> Directory, List of file paths
+   */
+  static QHash<QString, FolderContent> getFolderContent(const Utils::FileName &folderPath, QStringList &fileList);
 
   /**
    * @brief getWorkspaceIncludes - Gets all of the include directories
