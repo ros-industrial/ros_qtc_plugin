@@ -30,6 +30,7 @@
 
 #ifndef ROSPROJECTCONSTANTS_H
 #define ROSPROJECTCONSTANTS_H
+#include <QStringList>
 
 namespace ROSProjectManager {
 namespace Constants {
@@ -40,12 +41,21 @@ const char PROJECTCONTEXT[]     = "ROSProject.ProjectContext";
 const char ROSMIMETYPE[]    = "text/x-ros-project"; // ### FIXME
 const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
 
-const char HIDE_FILE_FILTER_SETTING[] = "ROSProject/FileFilter";
-const char HIDE_FILE_FILTER_DEFAULT[] = "Makefile*; *.o; *.lo; *.la; *.obj; *~; *.files;"
-    " *.config; *.creator; *.user; *.includes; *.autosave";
+const char SOURCE_HEADER_FILE_FILTER[] = "*.c; *.cc; *.cpp; *.c++; *.cp; *.cxx; *.h; *.hh; *.hpp; *.h++; *.hp; *.hxx;";
 
-const char SHOW_FILE_FILTER_SETTING[] = "ROSProject/ShowFileFilter";
-const char SHOW_FILE_FILTER_DEFAULT[] = "*.c; *.cc; *.cpp; *.cp; *.cxx; *.c++; *.h; *.hh; *.hpp; *.hxx;";
+const QStringList SOURCE_FILE_EXTENSIONS = QStringList() << QLatin1Literal("c")
+                                                         << QLatin1Literal("cc")
+                                                         << QLatin1Literal("cpp")
+                                                         << QLatin1Literal("c++")
+                                                         << QLatin1Literal("cp")
+                                                         << QLatin1Literal("cxx");
+
+const QStringList HEADER_FILE_EXTENSIONS = QStringList() << QLatin1Literal("h")
+                                                         << QLatin1Literal("hh")
+                                                         << QLatin1Literal("hpp")
+                                                         << QLatin1Literal("h++")
+                                                         << QLatin1Literal("hp")
+                                                         << QLatin1Literal("hxx");
 
 } // namespace Constants
 } // namespace ROSProjectManager

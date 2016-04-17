@@ -1,38 +1,9 @@
-/****************************************************************************
-**
-** Copyright (C) 2015 The Qt Company Ltd.
-** Contact: http://www.qt.io/licensing
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company.  For licensing terms and
-** conditions see http://www.qt.io/terms-conditions.  For further information
-** use the contact form at http://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 or version 3 as published by the Free
-** Software Foundation and appearing in the file LICENSE.LGPLv21 and
-** LICENSE.LGPLv3 included in the packaging of this file.  Please review the
-** following information to ensure the GNU Lesser General Public License
-** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
-** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
-**
-** In addition, as a special exception, The Qt Company gives you certain additional
-** rights.  These rights are described in The Qt Company LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
-**
-****************************************************************************/
-
 #ifndef ROSPROJECT_H
 #define ROSPROJECT_H
 
 #include "ros_project_manager.h"
 #include "ros_project_nodes.h"
+#include "ros_utils.h"
 
 #include <projectexplorer/project.h>
 #include <projectexplorer/projectnodes.h>
@@ -42,6 +13,7 @@
 #include <coreplugin/idocument.h>
 
 #include <QFuture>
+#include <QFileSystemWatcher>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -58,50 +30,42 @@ public:
 
     QString displayName() const override;
     ROSManager *projectManager() const override;
-
     QStringList files(FilesMode fileMode) const override;
 
     QStringList buildTargets() const;
 
-    bool addFiles(const QStringList &filePaths);
-    bool removeFiles(const QStringList &filePaths);
-    bool setFiles(const QStringList &filePaths);
-    bool renameFile(const QString &filePath, const QString &newFilePath);
-
     bool addIncludes(const QStringList &includePaths);
     bool setIncludes(const QStringList &includePaths);
-
-    enum UpdateOptions
-    {
-        Files        = 0x01,
-        IncludePaths = 0x02,
-    };
 
     void refresh();
 
     QStringList projectIncludePaths() const;
-    QStringList files() const;
+    QStringList workspaceFiles() const;
 
     Utils::FileName buildDirectory() const;
     Utils::FileName sourceDirectory() const;
+
+public slots:
+    void onDirectoryChanged(const QString &path);
 
 protected:
     Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage);
 
 private:
-    bool saveRawList(const QStringList &rawList, const ROSProject::UpdateOptions &updateOption);
-    void parseProject();
-    QStringList processEntries(const QStringList &paths,
-                               QHash<QString, QString> *map = 0) const;
-
+    void addDirectory(const QString &parentPath, const QString &dirName);
+    void removeDirectory(const QString &parentPath, const QString &dirName);
+    void renameDirectory(const QString &parentPath, const QString &oldDirName, const QString &newDirName);
+    bool saveProjectFile();
+    void parseProjectFile();
     void refreshCppCodeModel();
+    void print();
 
     QString m_projectName;
-    QStringList m_rawFileList;
-    QStringList m_files;
-    QHash<QString, QString> m_rawListEntries;
-    QStringList m_rawProjectIncludePaths;
+    QHash<QString, ROSUtils::FolderContent> m_workspaceContent;
+    QStringList m_watchDirectories;
+    QStringList m_workspaceFiles;
     QStringList m_projectIncludePaths;
+    QFileSystemWatcher m_watcher;
     QFuture<void> m_codeModelFuture;
 };
 

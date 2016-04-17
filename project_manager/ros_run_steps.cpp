@@ -298,6 +298,8 @@ ROSGenericRunStep::~ROSGenericRunStep()
 
 bool ROSGenericRunStep::init(QList<const RunStep *> &earlierSteps)
 {
+    Q_UNUSED(earlierSteps);
+
     ROSRunConfiguration *rc = rosRunConfiguration();
     if (!rc)
     {
@@ -313,6 +315,8 @@ bool ROSGenericRunStep::init(QList<const RunStep *> &earlierSteps)
 }
 void ROSGenericRunStep::run(QFutureInterface<bool> &fi)
 {
+  Q_UNUSED(fi);
+
   ROSProject *rp = qobject_cast<ROSProject *>(target()->project());
   ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
 

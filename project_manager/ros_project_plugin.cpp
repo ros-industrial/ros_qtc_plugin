@@ -90,18 +90,18 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     ActionContainer *mproject =
             ActionManager::actionContainer(ProjectExplorer::Constants::M_PROJECTCONTEXT);
 
-    auto reloadWorkspaceAction = new QAction(tr("Reload Workspace..."), this);
-    Command *command = ActionManager::registerAction(reloadWorkspaceAction,
-        "ROSProjectManager.ReloadWorkspace", Context(Constants::PROJECTCONTEXT));
+    auto reloadProjectIncludeDirectoriesAction = new QAction(tr("Reload Project Include Directories..."), this);
+    Command *command = ActionManager::registerAction(reloadProjectIncludeDirectoriesAction,
+        "ROSProjectManager.reloadProjectIncludeDirectories", Context(Constants::PROJECTCONTEXT));
     command->setAttribute(Command::CA_Hide);
     mproject->addAction(command, ProjectExplorer::Constants::G_PROJECT_FILES);
 
-    connect(reloadWorkspaceAction, &QAction::triggered, this, &ROSProjectPlugin::reloadWorkspace);
+    connect(reloadProjectIncludeDirectoriesAction, &QAction::triggered, this, &ROSProjectPlugin::reloadProjectIncludeDirectories);
 
     return true;
 }
 
-void ROSProjectPlugin::reloadWorkspace()
+void ROSProjectPlugin::reloadProjectIncludeDirectories()
 {
     ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectTree::currentProject());
     if (!rosProject)
@@ -109,17 +109,6 @@ void ROSProjectPlugin::reloadWorkspace()
 
     QProcess *runCmake = new QProcess();
     ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(rosProject->activeTarget()->activeBuildConfiguration());
-
-//    connect(runCmake, SIGNAL(readyReadStandardOutput()),this, SLOT(parser->stdOutput()));
-//    connect(runCmake, SIGNAL(readyReadStandardError()),this, SLOT(slotUpdateStdError()));
-
-//    Need to figure out how to output to the Compile Output Window
-//    QObject *app = ExtensionSystem::PluginManager::getObjectByClassName(QLatin1String("ProjectExplorer::Internal::CompileOutputWindow"));
-//    ProjectExplorer::Internal::CompileOutputWindow *capp = qobject_cast<ProjectExplorer::Internal::CompileOutputWindow *>(app);
-
-    // Get Workspace Files
-    QStringList projectFiles = ROSUtils::getWorkspaceFiles(rosProject->projectDirectory());
-    rosProject->setFiles(projectFiles);
 
     // Generate CodeBlocks Project File
     if (ROSUtils::sourceWorkspace(runCmake, rosProject->projectDirectory(), bc->rosDistribution()))

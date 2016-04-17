@@ -1,33 +1,3 @@
-/****************************************************************************
-**
-** Copyright (C) 2015 The Qt Company Ltd.
-** Contact: http://www.qt.io/licensing
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company.  For licensing terms and
-** conditions see http://www.qt.io/terms-conditions.  For further information
-** use the contact form at http://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 or version 3 as published by the Free
-** Software Foundation and appearing in the file LICENSE.LGPLv21 and
-** LICENSE.LGPLv3 included in the packaging of this file.  Please review the
-** following information to ensure the GNU Lesser General Public License
-** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
-** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
-**
-** In addition, as a special exception, The Qt Company gives you certain additional
-** rights.  These rights are described in The Qt Company LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
-**
-****************************************************************************/
-
 #include "ros_project.h"
 
 #include "ros_build_configuration.h"
@@ -76,7 +46,7 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
     setProjectManager(manager);
     setDocument(new ROSProjectFile(this, fileName));
     DocumentManager::addDocument(document(), true);
-    setRootProjectNode(new ROSProjectNode(this));
+    setRootProjectNode(new ROSProjectNode(this->projectFilePath()));
 
     setProjectContext(Context(Constants::PROJECTCONTEXT));
     setProjectLanguages(Context(ProjectExplorer::Constants::LANG_CXX));
@@ -90,12 +60,189 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
     rootProjectNode()->addFileNodes(QList<FileNode *>() << projectWorkspaceNode);
 
     projectManager()->registerProject(this);
+
+    QObject::connect(&m_watcher, SIGNAL(directoryChanged(QString)),
+                    this, SLOT(onDirectoryChanged(QString)));
+
+    QObject::connect(this, &ROSProject::fileListChanged,
+                     this, &ROSProject::refreshCppCodeModel);
+
 }
 
 ROSProject::~ROSProject()
 {
     m_codeModelFuture.cancel();
     projectManager()->unregisterProject(this);
+}
+
+void ROSProject::addDirectory(const QString &parentPath, const QString &dirName)
+{
+
+  Utils::FileName directory = Utils::FileName::fromString(QString::fromLatin1("%1/%2").arg(parentPath, dirName));
+  QStringList files;
+  QStringList subDirectories;
+  QHash<QString, ROSUtils::FolderContent> newDirContent = ROSUtils::getFolderContent(directory, files);
+  QHashIterator<QString, ROSUtils::FolderContent> item(newDirContent);
+  while (item.hasNext())
+  {
+    item.next();
+    subDirectories.append(item.key());
+
+    static_cast<ROSProjectNode *>(rootProjectNode())->addDirectory(item.key());
+    foreach (QString file, item.value().files)
+    {
+      static_cast<ROSProjectNode *>(rootProjectNode())->addFile(item.key(), file);
+    }
+  }
+  m_watcher.addPaths(subDirectories);
+  m_workspaceContent.unite(newDirContent);
+  m_workspaceFiles.append(files);
+  emit fileListChanged();
+}
+
+void ROSProject::removeDirectory(const QString &parentPath, const QString &dirName)
+{
+  static_cast<ROSProjectNode *>(rootProjectNode())->removeDirectory(parentPath, dirName);
+
+  Utils::FileName directory = Utils::FileName::fromString(QString::fromLatin1("%1/%2").arg(parentPath, dirName));
+  QHashIterator<QString, ROSUtils::FolderContent> item(m_workspaceContent);
+  while (item.hasNext())
+  {
+    item.next();
+    if(item.key() == directory.toString() || item.key().startsWith(QString::fromLatin1("%1/").arg(directory.toString())))
+    {
+      foreach (QString file, item.value().files)
+        m_workspaceFiles.removeAll(QString::fromLatin1("%1/%2").arg(item.key(), file));
+
+      m_watcher.removePath(item.key());
+      m_workspaceContent.remove(item.key());
+    }
+  }
+  emit fileListChanged();
+}
+
+void ROSProject::renameDirectory(const QString &parentPath, const QString &oldDirName, const QString &newDirName)
+{
+  static_cast<ROSProjectNode *>(rootProjectNode())->renameDirectory(parentPath, oldDirName, newDirName);
+
+  QString oldDirectory = QString::fromLatin1("%1/%2").arg(parentPath, oldDirName);
+  QString newDirectory = QString::fromLatin1("%1/%2").arg(parentPath, newDirName);
+
+  QHash<QString, ROSUtils::FolderContent> renamedContent;
+  QHashIterator<QString, ROSUtils::FolderContent> item(m_workspaceContent);
+  while (item.hasNext())
+  {
+    item.next();
+    QString key = item.key();
+    if(key == oldDirectory || key.startsWith(QString::fromLatin1("%1/").arg(oldDirectory)))
+    {
+      ROSUtils::FolderContent swapValues = item.value();
+      QString newKey = key;
+
+      m_watcher.removePath(key);
+      m_workspaceContent.remove(key);
+
+      newKey.replace(oldDirectory, newDirectory);
+      renamedContent[newKey] = swapValues;
+
+      m_watcher.addPath(newKey);
+    }
+    m_workspaceFiles.replaceInStrings(QString::fromLatin1("%1/").arg(oldDirectory), QString::fromLatin1("%1/").arg(newDirectory));
+  }
+  m_workspaceContent.unite(renamedContent);
+  emit fileListChanged();
+}
+
+void ROSProject::onDirectoryChanged(const QString &path)
+{
+  // Compare the latest contents to saved contents for the dir updated to find out the difference(change)
+  const QDir dir(path);
+  QStringList curFiles = m_workspaceContent[path].files;
+  QStringList curDirectories = m_workspaceContent[path].directories;
+
+  QStringList newFiles = dir.entryList(QDir::NoDotAndDotDot  | QDir::Files);
+  QStringList newDirectories = dir.entryList(QDir::NoDotAndDotDot  | QDir::Dirs);
+
+  QSet<QString> curFileSet = curFiles.toSet();
+  QSet<QString> newFileSet = newFiles.toSet();
+  QSet<QString> curDirectorySet = curDirectories.toSet();
+  QSet<QString> newDirectorySet = newDirectories.toSet();
+
+  // Content that has been added
+  QStringList addedFiles = (newFileSet - curFileSet).toList();
+  QStringList addedDirectories = (newDirectorySet - curDirectorySet).toList();
+
+  // Content that has been removed
+  QStringList deletedFiles = (curFileSet - newFileSet).toList();
+  QStringList deletedDirectories = (curDirectorySet - newDirectorySet).toList();
+
+  //Handle Files
+  if(!addedFiles.isEmpty() || !deletedFiles.isEmpty())
+  {
+    // File is renamed
+    if(addedFiles.count() == 1 && deletedFiles.count() == 1)
+    {
+      //File Renamed
+      static_cast<ROSProjectNode *>(rootProjectNode())->renameFile(path, deletedFiles.first(), addedFiles.first());
+      QString temp = QString::fromLatin1("%1/%2").arg(path, deletedFiles.first());
+      m_workspaceFiles.removeAll(QString::fromLatin1("%1/%2").arg(path, deletedFiles.first()));
+      m_workspaceFiles.append(QString::fromLatin1("%1/%2").arg(path, addedFiles.first()));
+    }
+    else
+    {
+      // New File Added to Dir
+      if(!addedFiles.isEmpty())
+      {
+        foreach(QString file, addedFiles)
+        {
+          static_cast<ROSProjectNode *>(rootProjectNode())->addFile(path, file);
+          m_workspaceFiles.append(dir.absoluteFilePath(file));
+        }
+      }
+
+      // File is deleted from Dir
+      if(!deletedFiles.isEmpty())
+      {
+        foreach(QString file, deletedFiles)
+        {
+          static_cast<ROSProjectNode *>(rootProjectNode())->removeFile(path, file);
+          m_workspaceFiles.removeAll(QString::fromLatin1("%1/%2").arg(path, file));
+        }
+      }
+    }
+    emit fileListChanged();
+  }
+
+  //Handle Directories
+  if(!addedDirectories.isEmpty() || !deletedDirectories.isEmpty())
+  {
+    if(addedDirectories.count() == 1 && deletedDirectories.count() == 1)
+    {
+      // Directory is renamed
+      renameDirectory(path, deletedDirectories.first(), addedDirectories.first());
+    }
+    else
+    {
+      // New Directory Added to Dir
+      foreach(QString directory, addedDirectories)
+      {
+        addDirectory(path, directory);
+      }
+
+      // Directory is deleted from Dir
+      foreach(QString directory, deletedDirectories)
+      {
+        //Directory deleted
+        removeDirectory(path, directory);
+      }
+    }
+  }
+
+  // Update the current set
+  m_workspaceContent[path].files = newFiles;
+  m_workspaceContent[path].directories = newDirectories;
+
+  //print();
 }
 
 Utils::FileName ROSProject::buildDirectory() const
@@ -108,30 +255,16 @@ Utils::FileName ROSProject::sourceDirectory() const
   return projectDirectory().appendPath(tr("src"));
 }
 
-bool ROSProject::saveRawList(const QStringList &rawList, const ROSProject::UpdateOptions &updateOption)
+bool ROSProject::saveProjectFile()
 {
     DocumentManager::expectFileChange(projectFilePath().toString());
     // Make sure we can open the file for writing
-
-    QStringList files, includePaths;
-
-    // TODO: Need to look into this further and see if there is a better way. Review QMakeProjectManager
-    if (updateOption == UpdateOptions::Files)
-    {
-      files = processEntries(rawList);
-      includePaths = m_projectIncludePaths;
-    }
-    else if (updateOption == UpdateOptions::IncludePaths)
-    {
-      files = m_files;
-      includePaths = processEntries(rawList);
-    }
 
     Utils::FileSaver saver(projectFilePath().toString(), QIODevice::Text);
     if (!saver.hasError())
     {
       QXmlStreamWriter workspaceXml(saver.file());
-      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, files, includePaths);
+      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_watchDirectories, m_projectIncludePaths);
       saver.setResult(&workspaceXml);
     }
     bool result = saver.finalize(ICore::mainWindow());
@@ -139,76 +272,16 @@ bool ROSProject::saveRawList(const QStringList &rawList, const ROSProject::Updat
     return result;
 }
 
-bool ROSProject::addFiles(const QStringList &filePaths)
-{
-    QStringList newList = m_rawFileList;
-
-    QDir baseDir(projectDirectory().toString());
-    foreach (const QString &filePath, filePaths)
-        newList.append(baseDir.absoluteFilePath(filePath));
-
-    bool result = saveRawList(newList, UpdateOptions::Files);
-    refresh();
-
-    return result;
-}
-
-bool ROSProject::removeFiles(const QStringList &filePaths)
-{
-    QStringList newList = m_rawFileList;
-
-    foreach (const QString &filePath, filePaths) {
-        QHash<QString, QString>::iterator i = m_rawListEntries.find(filePath);
-        if (i != m_rawListEntries.end())
-            newList.removeOne(i.value());
-    }
-
-    bool result = saveRawList(newList, UpdateOptions::Files);
-    refresh();
-
-    return result;
-}
-
-bool ROSProject::setFiles(const QStringList &filePaths)
-{
-    QStringList newList;
-    QDir baseDir(projectDirectory().toString());
-    foreach (const QString &filePath, filePaths)
-        newList.append(baseDir.absoluteFilePath(filePath));
-
-    bool result = saveRawList(newList, UpdateOptions::Files);
-    refresh();
-
-    return result;
-}
-
-bool ROSProject::renameFile(const QString &filePath, const QString &newFilePath)
-{
-    QStringList newList = m_rawFileList;
-
-    QHash<QString, QString>::iterator i = m_rawListEntries.find(filePath);
-    if (i != m_rawListEntries.end()) {
-        int index = newList.indexOf(i.value());
-        if (index != -1) {
-            QDir baseDir(projectFilePath().toString());
-            newList.replace(index, baseDir.absoluteFilePath(newFilePath));
-        }
-    }
-
-    bool result = saveRawList(newList, UpdateOptions::Files);
-    refresh();
-
-    return result;
-}
-
 bool ROSProject::addIncludes(const QStringList &includePaths)
 {
-    QStringList newList = m_projectIncludePaths;
-
     foreach (const QString &includePath, includePaths)
-        newList.append(includePath);
+    {
+      if (QDir(includePath).exists())
+        m_projectIncludePaths.append(includePath);
+    }
 
-    bool result = saveRawList(newList, UpdateOptions::IncludePaths);
+    m_projectIncludePaths.removeDuplicates();
+    bool result = saveProjectFile();
     refresh();
 
     return result;
@@ -216,124 +289,78 @@ bool ROSProject::addIncludes(const QStringList &includePaths)
 
 bool ROSProject::setIncludes(const QStringList &includePaths)
 {
-    QStringList newList;
-
-    foreach (const QString &includePath, includePaths)
-        newList.append(includePath);
-
-    bool result = saveRawList(newList, UpdateOptions::IncludePaths);
-    refresh();
-
+    m_projectIncludePaths.clear();
+    bool result = addIncludes(includePaths);
     return result;
 }
 
-
-void ROSProject::parseProject()
+void ROSProject::parseProjectFile()
 {
     QXmlStreamReader workspaceXml;
     QFile workspaceFile(projectFilePath().toString());
+    QDir baseDir(projectDirectory().toString());
     if (workspaceFile.open(QFile::ReadOnly | QFile::Text))
     {
-      m_rawListEntries.clear();
-      m_rawFileList.clear();
-      m_rawProjectIncludePaths.clear();
+      m_watchDirectories.clear();
+      m_projectIncludePaths.clear();
 
       workspaceXml.setDevice(&workspaceFile);
-      workspaceXml.readNext();
-      while(!workspaceXml.atEnd())
+      while(workspaceXml.readNextStartElement())
       {
-        if(workspaceXml.isStartElement())
+        if(workspaceXml.name() == QLatin1String("WatchDirectories"))
         {
-          if(workspaceXml.name() == QLatin1String("File"))
+          while(workspaceXml.readNextStartElement())
           {
-            m_rawFileList.append(workspaceXml.readElementText());
-
-          }
-          else if(workspaceXml.name() == QLatin1String("Directory"))
-          {
-            m_rawProjectIncludePaths.append(workspaceXml.readElementText());
-
+            if(workspaceXml.name() == QLatin1String("Directory"))
+            {
+              m_watchDirectories.append(workspaceXml.readElementText());
+            }
           }
         }
-        workspaceXml.readNext();
+        else if(workspaceXml.name() == QLatin1String("IncludePaths"))
+        {
+          while(workspaceXml.readNextStartElement())
+          {
+            if(workspaceXml.name() == QLatin1String("Directory"))
+            {
+              m_projectIncludePaths.append(workspaceXml.readElementText());
+            }
+          }
+        }
       }
-      m_files = processEntries(m_rawFileList, &m_rawListEntries);
-      m_projectIncludePaths = processEntries(m_rawProjectIncludePaths);
     }
     else
     {
       qDebug() << "Error opening Workspace Project File";
     }
-    emit fileListChanged();
-
 }
 
 void ROSProject::refresh()
 {
-    QSet<QString> oldFileList;
-    oldFileList = m_files.toSet();
+    QSet<QString> oldWatchDirectories = m_watchDirectories.toSet();
+    parseProjectFile();
+    QSet<QString> newWatchDirectories = m_watchDirectories.toSet();
 
-    parseProject();
+    QStringList addedDirectories = (newWatchDirectories - oldWatchDirectories).toList();
+    QStringList removedDirectories = (oldWatchDirectories - newWatchDirectories).toList();
 
-    static_cast<ROSProjectNode *>(rootProjectNode())->refresh(oldFileList);
+    foreach (QString dir, removedDirectories) {
+      Utils::FileName removedDir = projectDirectory().appendPath(dir);
 
-    refreshCppCodeModel();
-}
-
-/**
- * Expands environment variables in the given \a string when they are written
- * like $$(VARIABLE).
- */
-static void expandEnvironmentVariables(const QProcessEnvironment &env, QString &string)
-{
-    static QRegExp candidate(QLatin1String("\\$\\$\\((.+)\\)"));
-
-    int index = candidate.indexIn(string);
-    while (index != -1) {
-        const QString value = env.value(candidate.cap(1));
-
-        string.replace(index, candidate.matchedLength(), value);
-        index += value.length();
-
-        index = candidate.indexIn(string, index);
+      if (removedDir.isChildOf(projectDirectory()))
+        removeDirectory(removedDir.parentDir().toString(), dir);
     }
-}
 
-/**
- * Expands environment variables and converts the path from relative to the
- * project to an absolute path.
- *
- * The \a map variable is an optional argument that will map the returned
- * absolute paths back to their original \a entries.
- */
-QStringList ROSProject::processEntries(const QStringList &paths,
-                                           QHash<QString, QString> *map) const
-{
-    const QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    const QDir projectDir(projectDirectory().toString());
-
-    QFileInfo fileInfo;
-    QStringList absolutePaths;
-    foreach (const QString &path, paths) {
-        QString trimmedPath = path.trimmed();
-        if (trimmedPath.isEmpty())
-            continue;
-
-        expandEnvironmentVariables(env, trimmedPath);
-
-        trimmedPath = Utils::FileName::fromUserInput(trimmedPath).toString();
-
-        fileInfo.setFile(projectDir, trimmedPath);
-        if (fileInfo.isDir() || fileInfo.exists())
-        {
-            const QString absPath = fileInfo.absoluteFilePath();
-            absolutePaths.append(absPath);
-            if (map)
-                map->insert(absPath, trimmedPath);
-        }
+    foreach (QString dir, addedDirectories) {
+      Utils::FileName addedDir = projectDirectory().appendPath(dir);
+      if (addedDir.isChildOf(projectDirectory()) && addedDir.exists())
+        addDirectory(addedDir.parentDir().toString(), dir);
     }
-    absolutePaths.removeDuplicates();
-    return absolutePaths;
+
+    if (addedDirectories.empty() && removedDirectories.empty())
+      refreshCppCodeModel();
+
+    //print();
 }
 
 void ROSProject::refreshCppCodeModel()
@@ -358,7 +385,7 @@ void ROSProject::refreshCppCodeModel()
     ppBuilder.setIncludePaths(projectIncludePaths());
     ppBuilder.setCxxFlags(QStringList() << QLatin1String("-std=c++11"));
 
-    const QList<Id> languages = ppBuilder.createProjectPartsForFiles(files());
+    const QList<Id> languages = ppBuilder.createProjectPartsForFiles(m_workspaceFiles);
     foreach (Id language, languages)
         setProjectLanguage(language, true);
 
@@ -371,9 +398,9 @@ QStringList ROSProject::projectIncludePaths() const
     return m_projectIncludePaths;
 }
 
-QStringList ROSProject::files() const
+QStringList ROSProject::workspaceFiles() const
 {
-    return m_files;
+    return m_workspaceFiles;
 }
 
 QString ROSProject::displayName() const
@@ -384,7 +411,7 @@ QString ROSProject::displayName() const
 QStringList ROSProject::files(FilesMode fileMode) const
 {
     Q_UNUSED(fileMode)
-    return m_files;
+    return m_workspaceFiles;
 }
 
 ROSManager *ROSProject::projectManager() const
@@ -426,6 +453,29 @@ Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *erro
 
       refresh();
       return RestoreResult::Ok;
+}
+
+void ROSProject::print()
+{
+  QHashIterator<QString, ROSUtils::FolderContent> item(m_workspaceContent);
+  qDebug() << "Workspace Content:";
+  while (item.hasNext())
+  {
+    item.next();
+    qDebug() << "Parent:" << item.key();
+    qDebug() << "  Files: ";
+    foreach (QString str, item.value().files)
+      qDebug() << "    " << str;
+
+    qDebug() << "  SubDirectories: ";
+    foreach (QString str, item.value().directories)
+      qDebug() << "    " << str;
+  }
+
+  qDebug() << "File List:";
+  foreach (QString str, m_workspaceFiles)
+    qDebug() << "  " << str;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
