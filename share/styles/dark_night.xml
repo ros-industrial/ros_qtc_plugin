@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<style-scheme version="1.0" name="Dark Knight">
+  <style name="AddedLine" foreground="#55ffff"/>
+  <style name="Comment" foreground="#3e9d3e" italic="true"/>
+  <style name="CurrentLine" background="#232323"/>
+  <style name="CurrentLineNumber" foreground="#6b6b6b" bold="true"/>
+  <style name="DiffFile" foreground="#55ff55"/>
+  <style name="DiffLocation" foreground="#ffff55"/>
+  <style name="DisabledCode" foreground="#777777" background="#4a4a4a"/>
+  <style name="Doxygen.Comment" foreground="#356ca2" italic="true"/>
+  <style name="Doxygen.Tag" foreground="#00a0a0"/>
+  <style name="Keyword" foreground="#138dff"/>
+  <style name="Label" foreground="#ffff55"/>
+  <style name="LineNumber" foreground="#888888"/>
+  <style name="Link" foreground="#b83eff" background="#000000"/>
+  <style name="Number" foreground="#4ed0ff"/>
+  <style name="Occurrences" background="#6e9d4a"/>
+  <style name="Occurrences.Rename" foreground="#ffaaaa" background="#553636"/>
+  <style name="Occurrences.Unused" foreground="#c0c0c0"/>
+  <style name="Operator" foreground="#e7b48b"/>
+  <style name="Parentheses" foreground="#ff133e" background="#333333"/>
+  <style name="Preprocessor" foreground="#ffff55"/>
+  <style name="RemovedLine" foreground="#ff5555"/>
+  <style name="SearchResult" foreground="#8d0c78" background="#9c6084"/>
+  <style name="SearchScope"/>
+  <style name="Selection" foreground="#000000" background="#4a85aa"/>
+  <style name="String" foreground="#4ed0ff"/>
+  <style name="Text" foreground="#dcdcdc" background="#000000"/>
+  <style name="Type" foreground="#067eff"/>
+  <style name="VisualWhitespace" foreground="#c0c0c0"/>
+</style-scheme>

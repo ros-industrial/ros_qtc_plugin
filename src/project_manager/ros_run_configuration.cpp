@@ -28,10 +28,10 @@
 #include "ros_run_steps_page.h"
 #include "ros_run_steps.h"
 #include "ui_ros_run_configuration.h"
-#include "ui_ros_launch_configuration.h"
 
 #include <coreplugin/editormanager/editormanager.h>
 #include <coreplugin/editormanager/ieditor.h>
+#include <coreplugin/coreicons.h>
 #include <coreplugin/icore.h>
 #include <coreplugin/idocument.h>
 #include <projectexplorer/target.h>
@@ -555,7 +555,7 @@ ROSRunControl::ROSRunControl(RunConfiguration *rc, Id id):
     RunControl(rc, id),
     d(new ROSRunControlPrivate)
 {
-  setIcon(ProjectExplorer::Icons::RUN_SMALL);
+  setIcon(Core::Icons::RUN_SMALL);
 
   m_rc = qobject_cast<ROSRunConfiguration *>(rc);
   d->running = false;

@@ -142,7 +142,6 @@ ROSImportWizardPage::ROSImportWizardPage(QWidget *parent) :
     d->m_ui.setupUi(this);
     d->m_ui.distributionComboBox->addItems(ROSUtils::installedDistributions());
 
-    d->m_ui.pathChooser->
     connect(d->m_ui.pathChooser, &Utils::PathChooser::validChanged,
             this, &ROSImportWizardPage::slotProjectPathValidChanged);
     connect(d->m_ui.nameLineEdit, &Utils::FancyLineEdit::validChanged,
@@ -333,6 +332,7 @@ ROSProjectWizard::ROSProjectWizard()
 Core::BaseFileWizard *ROSProjectWizard::create(QWidget *parent,
                                                    const Core::WizardDialogParameters &parameters) const
 {
+    Q_UNUSED(parameters)
     ROSProjectWizardDialog *wizard = new ROSProjectWizardDialog(this, parent);
 
     foreach (QWizardPage *p, wizard->extensionPages())

@@ -38,8 +38,11 @@ namespace Constants {
 // Project
 const char ROSPROJECT_ID[]  = "ROSProjectManager.ROSProject";
 const char PROJECTCONTEXT[]     = "ROSProject.ProjectContext";
-const char ROSMIMETYPE[]    = "text/x-ros-project"; // ### FIXME
+const char ROSMIMETYPE[]    = "application/ros.project";
 const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
+
+const char ROS_WIZARD_CATEGORY[] = "A.ROS";
+const char ROS_WIZARD_CATEGORY_DISPLAY[] = "ROS";
 
 const char SOURCE_HEADER_FILE_FILTER[] = "*.c; *.cc; *.cpp; *.c++; *.cp; *.cxx; *.h; *.hh; *.hpp; *.h++; *.hp; *.hxx;";
 

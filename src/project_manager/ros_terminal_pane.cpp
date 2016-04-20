@@ -42,7 +42,7 @@ ROSTerminalPane::ROSTerminalPane() :
     m_tabWidget->setTabsClosable(true);
 
     m_stopButton->setToolTip(tr("Kill active terminal's child process"));
-    m_stopButton->setIcon(ProjectExplorer::Icons::STOP_SMALL.icon());
+    m_stopButton->setIcon(Core::Icons::STOP_SMALL.icon());
     m_zoomInButton->setToolTip(tr("Increase Font Size"));
     m_zoomInButton->setIcon(Core::Icons::PLUS.icon());
     m_zoomOutButton->setToolTip(tr("Decrease Font Size"));
