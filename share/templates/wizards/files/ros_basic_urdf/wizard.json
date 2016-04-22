@@ -1,0 +1,72 @@
+{
+    "version": 1,
+    "supportedProjectTypes": [ ],
+    "id": "C.ROS",
+    "category": "A.ROS",
+    "trDescription": "Creates a basic ROS urdf file.",
+    "trDisplayName": "Basic urdf file",
+    "trDisplayCategory": "ROS",
+    "icon": "../../global/genericfilewizard.png",
+    "enabled": "%{JS: [ %{Plugins} ].indexOf('ROSProjectManager') >= 0}",
+
+    "options":
+    [
+        { "key": "TargetPath", "value": "%{Path}/%{Name}"},
+        { "key": "FileName", "value": "%{JS: Util.fileName('%{TargetPath}', '.urdf')}" }
+    ],
+
+
+    "pages" :
+    [
+        {
+            "trDisplayName": "Define URDF",
+            "trShortTitle": "Details",
+            "typeId": "Fields",
+            "data" :
+            [
+                {
+                    "name": "RobotName",
+                    "trDisplayName": "Robot Name:",
+                    "mandatory": true,
+                    "type": "LineEdit"
+                },
+                {
+                    "name": "Name",
+                    "trDisplayName": "File Name:",
+                    "mandatory": true,
+                    "type": "LineEdit"
+                },
+                {
+                    "name": "Path",
+                    "trDisplayName": "Path:",
+                    "mandatory": true,
+                    "type": "PathChooser",
+                    "data":
+                    {
+                        "kind": "existingDirectory",
+                        "basePath": "%{InitialPath}",
+                        "path": "%{InitialPath}"
+                    }
+                }
+            ]
+        },
+        {
+            "trDisplayName": "Project Management",
+            "trShortTitle": "Summary",
+            "typeId": "Summary"
+        }
+    ],
+    "generators" :
+    [
+        {
+            "typeId": "File",
+            "data":
+            {
+                "source": "file.urdf",
+                "target": "%{FileName}",
+                "openInEditor": true,
+                "options": { "key": "Cpp:License:FileName", "value": "%{JS: Util.completeBaseName('%{FileName}')}" }
+            }
+        }
+    ]
+}

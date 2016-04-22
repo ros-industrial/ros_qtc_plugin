@@ -40,6 +40,7 @@
 #include "ros_project.h"
 #include "ros_utils.h"
 #include "ros_project_constants.h"
+#include "ros_package_wizard.h"
 
 #include <coreplugin/icore.h>
 #include <coreplugin/actionmanager/actionmanager.h>
@@ -85,7 +86,7 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     addAutoReleasedObject(new ROSRunControlFactory);
     addAutoReleasedObject(new ROSRunStepFactory);
 
-    IWizardFactory::registerFactoryCreator([]() { return QList<IWizardFactory *>() << new ROSProjectWizard; });
+    IWizardFactory::registerFactoryCreator([]() { return QList<IWizardFactory *>() << new ROSProjectWizard << new ROSPackageWizard; });
 
     ActionContainer *mproject =
             ActionManager::actionContainer(ProjectExplorer::Constants::M_PROJECTCONTEXT);
