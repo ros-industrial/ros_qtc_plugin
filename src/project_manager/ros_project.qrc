@@ -2,5 +2,6 @@
     <qresource prefix="/rosproject">
         <file>ROSProjectManager.mimetypes.xml</file>
         <file>50x50pix.png</file>
+        <file>folderpackage.png</file>
     </qresource>
 </RCC>

@@ -1,7 +1,7 @@
 {
     "version": 1,
     "supportedProjectTypes": [ ],
-    "id": "C.ROS",
+    "id": "ZB.ROS",
     "category": "A.ROS",
     "trDescription": "Creates a basic ROS urdf file.",
     "trDisplayName": "Basic urdf file",

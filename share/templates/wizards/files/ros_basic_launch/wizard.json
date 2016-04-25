@@ -1,7 +1,7 @@
 {
     "version": 1,
     "supportedProjectTypes": [ ],
-    "id": "B.ROS",
+    "id": "ZA.ROS",
     "category": "A.ROS",
     "trDescription": "Creates a basic ROS launch file.",
     "trDisplayName": "Basic launch file",

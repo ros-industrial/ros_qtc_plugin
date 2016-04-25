@@ -1,0 +1,27 @@
+<!--
+  Manipulator specific version of the state visualizer.
+
+  Defaults provided for %{Model}:
+   - J23_coupled = true
+
+  Usage:
+    robot_state_visualize_%{Model}.launch robot_ip:=<value>
+-->
+<launch>
+  <arg name="robot_ip" />
+  <arg name="J23_coupled" default="true" />
+
+  <rosparam command="load" file="$(find %{PackageName})/config/joint_names_%{Model}.yaml" />
+
+  <include file="$(find %{Manufacturer}_driver)/launch/robot_interface.launch">
+    <arg name="robot_ip"    value="$(arg robot_ip)" />
+    <arg name="J23_coupled" value="$(arg J23_coupled)" />
+  </include>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" 
+    type="robot_state_publisher" />
+
+  <include file="$(find %{PackageName})/launch/load_%{Model}.launch" />
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find industrial_robot_client)/config/robot_state_visualize.rviz" required="true" />
+</launch>

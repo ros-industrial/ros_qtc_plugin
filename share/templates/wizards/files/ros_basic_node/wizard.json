@@ -1,7 +1,7 @@
 {
     "version": 1,
     "supportedProjectTypes": [ ],
-    "id": "D.ROS",
+    "id": "ZC.ROS",
     "category": "A.ROS",
     "trDescription": "Creates a basic ROS node.",
     "trDisplayName": "Basic Node",

@@ -1,0 +1,23 @@
+<launch>
+  <arg name="ip_str" value="127.0.0.1" />
+
+  <group ns="load_%{Model}__">
+    <include file="$(find %{PackageName})/launch/load_%{Model}.launch"/>
+  </group>
+
+  <group ns="test_%{Model}__">
+    <include file="$(find %{PackageName})/launch/test_irb2400.launch"/>
+  </group>
+
+  <group ns="robot_interface_download_%{Model}__">
+    <include file="$(find %{PackageName})/launch/robot_interface_download_%{Model}.launch">
+      <arg name="robot_ip" value="$(arg ip_str)" />
+    </include>
+  </group>
+
+  <group ns="robot_state_visualize_%{Model}__">
+    <include file="$(find %{PackageName})/launch/robot_state_visualize_%{Model}.launch">
+      <arg name="robot_ip" value="$(arg ip_str)" />
+    </include>
+  </group>
+</launch>
