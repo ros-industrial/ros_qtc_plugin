@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+<xacro:macro name="%{RobotName}" params="prefix">
+    <!-- link list -->
+    <link name="${prefix}base_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/visual/base_link.stl"/>
+            </geometry>
+            <material name="visual_material">
+                <color rgba="1 0 0 1"/>
+            </material>
+        </visual>
+        <collision>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/collision/base_link.stl"/>
+            </geometry>
+            <material name="collision_material">
+                <color rgba="1 0 0 1"/>
+            </material>
+        </collision>
+    </link>
+    <link name="${prefix}link_1">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/visual/link_1.stl"/>
+            </geometry>
+            <material name="visual_material"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/collision/link_1.stl"/>
+            </geometry>
+            <material name="collision_material"/>
+        </collision>
+    </link>
+    <link name="${prefix}link_2">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/visual/link_2.stl"/>
+            </geometry>
+            <material name="visual_material"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/collision/link_2_whole.stl"/>
+            </geometry>
+            <material name="collision_material"/>
+        </collision>
+    </link>
+    <link name="${prefix}link_3">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/visual/link_3.stl"/>
+            </geometry>
+            <material name="visual_material"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/collision/link_3.stl"/>
+            </geometry>
+            <material name="collision_material"/>
+        </collision>
+    </link>
+    <link name="${prefix}link_4">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/visual/link_4.stl"/>
+            </geometry>
+            <material name="visual_material"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/collision/link_4.stl"/>
+            </geometry>
+            <material name="collision_material"/>
+        </collision>
+    </link>
+    <link name="${prefix}link_5">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/visual/link_5.stl"/>
+            </geometry>
+            <material name="visual_material"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/collision/link_5.stl"/>
+            </geometry>
+            <material name="collision_material"/>
+        </collision>
+    </link>
+    <link name="${prefix}link_6">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/visual/link_6.stl"/>
+            </geometry>
+            <material name="visual_material"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://%{PackageName}/meshes/%{Model}/collision/link_6.stl"/>
+            </geometry>
+            <material name="collision_material"/>
+        </collision>
+    </link>
+    <link name="${prefix}tool0"/>
+    <!-- end of link list -->
+
+    <!-- joint list -->
+    <joint name="${prefix}joint_1" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="${prefix}base_link"/>
+        <child link="${prefix}link_1"/>
+        <axis xyz="0 0 0"/>
+        <limit lower="0" upper="0" effort="0" velocity="0"/>
+    </joint>
+    <joint name="${prefix}joint_2" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="${prefix}link_1"/>
+        <child link="${prefix}link_2"/>
+        <axis xyz="0 0 0"/>
+        <limit lower="0" upper="0" effort="0" velocity="0"/>
+    </joint>
+    <joint name="${prefix}joint_3" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="${prefix}link_2"/>
+        <child link="${prefix}link_3"/>
+        <axis xyz="0 0 0"/>
+        <limit lower="0" upper="0" effort="0" velocity="0"/>
+    </joint>
+    <joint name="${prefix}joint_4" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="${prefix}link_3"/>
+        <child link="${prefix}link_4"/>
+        <axis xyz="0 0 0"/>
+        <limit lower="0" upper="0" effort="0" velocity="0"/>
+    </joint>
+    <joint name="${prefix}joint_5" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="${prefix}link_4"/>
+        <child link="${prefix}link_5"/>
+        <axis xyz="0 0 0"/>
+        <limit lower="0" upper="0" effort="0" velocity="0"/>
+    </joint>
+    <joint name="${prefix}joint_6" type="revolute">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="${prefix}link_5"/>
+        <child link="${prefix}link_6"/>
+        <axis xyz="0 0 0"/>
+        <limit lower="0" upper="0" effort="0" velocity="0"/>
+    </joint>
+    <joint name="${prefix}joint_6-tool0" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="${prefix}link_6"/>
+        <child link="${prefix}tool0"/> 
+    </joint>
+    <!-- end of joint list -->
+
+    <!-- ROS base_link to Robot Manufacturer World Coordinates transform -->
+    <link name="${prefix}base" />
+    <joint name="${prefix}base_link-base" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <parent link="${prefix}base_link"/>
+        <child link="${prefix}base"/>
+    </joint>
+</xacro:macro>
+</robot>

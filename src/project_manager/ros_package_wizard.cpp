@@ -225,7 +225,7 @@ QStringList ROSPackageWizardDetailsPage::processList(const QString &text) const
 ROSPackageWizard::ROSPackageWizard()
 {
     setSupportedProjectTypes({});
-    setIcon(qApp->style()->standardIcon(QStyle::SP_DirIcon));
+    setIcon(QIcon(QLatin1String(":rosproject/folderpackage.png")));
     setDisplayName(tr("Package"));
     setId("A.ROS");
     setDescription(tr("Create a ROS package."));
