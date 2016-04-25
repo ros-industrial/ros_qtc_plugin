@@ -82,7 +82,7 @@ ROSPackageWizardDialog::ROSPackageWizardDialog(const Core::BaseFileWizardFactory
     addPage(m_detailsPage);
 }
 
-void ROSPackageWizardDialog::setPath(const QString &path) {m_detailsPage->setPath(path);}
+void ROSPackageWizardDialog::setPackagePath(const QString &path) {m_detailsPage->setPackagePath(path);}
 
 QString ROSPackageWizardDialog::packageName() const {return m_detailsPage->packageName();}
 
@@ -138,20 +138,11 @@ ROSPackageWizardDetailsPage::ROSPackageWizardDetailsPage(QWidget *parent) :
             this, &ROSPackageWizardDetailsPage::slotPackagePathValidChanged);
     connect(d->m_ui.packageNameLineEdit, &Utils::FancyLineEdit::validChanged,
             this, &ROSPackageWizardDetailsPage::slotPackageNameValidChanged);
-
-    connect(d->m_ui.pathChooser, &Utils::PathChooser::pathChanged,
-            this, &ROSPackageWizardDetailsPage::slotPackagePathChanged);
-
-    connect(d->m_ui.pathChooser, &Utils::PathChooser::returnPressed,
-            this, &ROSPackageWizardDetailsPage::slotActivated);
-    connect(d->m_ui.packageNameLineEdit, &Utils::FancyLineEdit::validReturnPressed,
-            this, &ROSPackageWizardDetailsPage::slotActivated);
-
 }
 
 ROSPackageWizardDetailsPage::~ROSPackageWizardDetailsPage() {delete d;}
 
-void ROSPackageWizardDetailsPage::setPath(const QString &path) {d->m_ui.pathChooser->setPath(path);}
+void ROSPackageWizardDetailsPage::setPackagePath(const QString &path) {d->m_ui.pathChooser->setPath(path);}
 
 QString ROSPackageWizardDetailsPage::packageName() const {return d->m_ui.packageNameLineEdit->text();}
 
@@ -179,18 +170,6 @@ void ROSPackageWizardDetailsPage::slotPackageNameValidChanged() {validChangedHel
 
 void ROSPackageWizardDetailsPage::slotPackagePathValidChanged() {validChangedHelper();}
 
-void ROSPackageWizardDetailsPage::slotPackagePathChanged(const QString &path)
-{
-  Q_UNUSED(path)
-
-  if (!d->m_ui.pathChooser->isValid())
-  {
-      d->m_ui.pathChooser->setPath(QLatin1String(""));
-  }
-
-  validChangedHelper();
-}
-
 void ROSPackageWizardDetailsPage::validChangedHelper()
 {
     const bool newComplete = d->m_ui.pathChooser->isValid() && d->m_ui.packageNameLineEdit->isValid();
@@ -198,12 +177,9 @@ void ROSPackageWizardDetailsPage::validChangedHelper()
         d->m_complete = newComplete;
         emit completeChanged();
     }
-}
 
-void ROSPackageWizardDetailsPage::slotActivated()
-{
-    if (d->m_complete)
-        emit activated();
+    if (!d->m_ui.pathChooser->isValid())
+      d->m_ui.pathChooser->setPath(QLatin1String(""));
 }
 
 QStringList ROSPackageWizardDetailsPage::processList(const QString &text) const
@@ -239,7 +215,7 @@ Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
 {
     Q_UNUSED(parameters)
     m_wizard = new ROSPackageWizardDialog(this, parent);
-    m_wizard->setPath(parameters.defaultPath());
+    m_wizard->setPackagePath(parameters.defaultPath());
 
     foreach (QWizardPage *p, m_wizard->extensionPages())
         m_wizard->addPage(p);

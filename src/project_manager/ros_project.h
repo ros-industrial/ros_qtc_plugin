@@ -49,7 +49,7 @@ public slots:
     void onDirectoryChanged(const QString &path);
 
 protected:
-    Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage);
+    Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage) override;
 
 private:
     void addDirectory(const QString &parentPath, const QString &dirName);

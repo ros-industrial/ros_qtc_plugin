@@ -1,33 +1,3 @@
-/****************************************************************************
-**
-** Copyright (C) 2015 The Qt Company Ltd.
-** Contact: http://www.qt.io/licensing
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company.  For licensing terms and
-** conditions see http://www.qt.io/terms-conditions.  For further information
-** use the contact form at http://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 or version 3 as published by the Free
-** Software Foundation and appearing in the file LICENSE.LGPLv21 and
-** LICENSE.LGPLv3 included in the packaging of this file.  Please review the
-** following information to ensure the GNU Lesser General Public License
-** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
-** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
-**
-** In addition, as a special exception, The Qt Company gives you certain additional
-** rights.  These rights are described in The Qt Company LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
-**
-****************************************************************************/
-
 #ifndef ROSMAKESTEP_H
 #define ROSMAKESTEP_H
 
@@ -56,36 +26,79 @@ public:
     ROSMakeStep(ProjectExplorer::BuildStepList *parent);
     ~ROSMakeStep();
 
-    bool init(QList<const BuildStep *> &earlierSteps);
-    void run(QFutureInterface<bool> &fi);
-    ROSBuildConfiguration *rosBuildConfiguration() const;
+    bool init(QList<const BuildStep *> &earlierSteps) override;
+    void run(QFutureInterface<bool> &fi) override;
+    ProjectExplorer::BuildStepConfigWidget *createConfigWidget() override;
+    bool immutable() const override;
+    QVariantMap toMap() const override;
 
-    ProjectExplorer::BuildStepConfigWidget *createConfigWidget();
-    bool immutable() const;
+    /**
+     * @brief Check if target is an active build target.
+     * @param target a QString name of target to check.
+     * @return True if an active build target, otherwise returns false.
+     */
     bool buildsTarget(const QString &target) const;
+
+    /**
+     * @brief Set a build target active status.
+     * @param target a QString name of target.
+     * @param on a bool representing the status of the build target.
+     */
     void setBuildTarget(const QString &target, bool on);
+
+    /**
+     * @brief Get all catkin_make arguments.
+     * @param initial_arguments a QString of initial arguments to be prepended.
+     * @return a QString of all arguments.
+     */
     QString allArguments(QString initial_arguments) const;
+
+    /**
+     * @brief Get the make command for the ROS project.
+     * @return a QString.
+     */
     QString makeCommand() const;
 
+    /**
+     * @brief Set the make status to clean.
+     * @param clean a bool representing the clean status.
+     */
     void setClean(bool clean);
+
+    /**
+     * @brief Check if make status is clean.
+     * @return a bool.
+     */
     bool isClean() const;
 
-    QVariantMap toMap() const;
+
+    /**
+     * @brief Get the ROS build configuration.
+     * @return a ROSBuildConfiguration.
+     */
+    ROSBuildConfiguration *rosBuildConfiguration() const;
 
 protected:
     ROSMakeStep(ProjectExplorer::BuildStepList *parent, ROSMakeStep *bs);
     ROSMakeStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
-    QStringList automaticallyAddedArguments() const;
-    bool fromMap(const QVariantMap &map);
+    bool fromMap(const QVariantMap &map) override;
 
 private:
+    /**
+     * @brief Constructor routine.
+     */
     void ctor();
+
+    /**
+     * @brief Get active build configuration.
+     * @return a ROSBuildConfiguration
+     */
     ROSBuildConfiguration *targetsActiveBuildConfiguration() const;
 
-    QStringList m_buildTargets;
-    QString m_makeArguments;
-    QString m_makeCommand;
-    bool m_clean;
+    QStringList m_buildTargets; /**< A QStringList of active build configurations. */
+    QString m_makeArguments; /**< A QString of catkin_make arguments. */
+    QString m_makeCommand; /**< A QString of ROS make command catkin_make. */
+    bool m_clean; /**< A bool representing the clean status of the make. */
 };
 
 class ROSMakeStepConfigWidget : public ProjectExplorer::BuildStepConfigWidget
@@ -95,20 +108,41 @@ class ROSMakeStepConfigWidget : public ProjectExplorer::BuildStepConfigWidget
 public:
     ROSMakeStepConfigWidget(ROSMakeStep *makeStep);
     ~ROSMakeStepConfigWidget();
-    QString displayName() const;
-    QString summaryText() const;
+    QString displayName() const override;
+    QString summaryText() const override;
 
 private slots:
+    /**
+     * @brief A slot that is called anytime a target option are change.
+     * @param item a QListWidgetItem that was changed.
+     */
     void itemChanged(QListWidgetItem *item);
+
+    /**
+     * @brief A slot that is called anytime the make command are edited.
+     */
     void makeLineEditTextEdited();
+
+    /**
+     * @brief A slot that is called anytime the make arguments are edited.
+     */
     void makeArgumentsLineEditTextEdited();
+
+    /**
+     * @brief A slot that is called to update the override label.
+     */
     void updateMakeOverrrideLabel();
+
+    /**
+     * @brief A slot that is called anytime any component of the make
+     * configuration widget is chaned to update all necessary information.
+     */
     void updateDetails();
 
 private:
-    Ui::ROSMakeStep *m_ui;
-    ROSMakeStep *m_makeStep;
-    QString m_summaryText;
+    Ui::ROSMakeStep *m_ui; /**< A UI of the ros make step */
+    ROSMakeStep *m_makeStep; /**< The ROSMakeStep object */
+    QString m_summaryText; /**< The summary text showing the actual command that is executed. */
 };
 
 class ROSMakeStepFactory : public ProjectExplorer::IBuildStepFactory
@@ -118,18 +152,15 @@ class ROSMakeStepFactory : public ProjectExplorer::IBuildStepFactory
 public:
     explicit ROSMakeStepFactory(QObject *parent = 0);
 
-    bool canCreate(ProjectExplorer::BuildStepList *parent, Core::Id id) const;
-    ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent, Core::Id id);
-    bool canClone(ProjectExplorer::BuildStepList *parent,
-                  ProjectExplorer::BuildStep *source) const;
-    ProjectExplorer::BuildStep *clone(ProjectExplorer::BuildStepList *parent,
-                                      ProjectExplorer::BuildStep *source);
-    bool canRestore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) const;
-    ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent,
-                                        const QVariantMap &map);
+    QList<Core::Id> availableCreationIds(ProjectExplorer::BuildStepList *bc) const override;
+    QString displayNameForId(Core::Id id) const override;
 
-    QList<Core::Id> availableCreationIds(ProjectExplorer::BuildStepList *bc) const;
-    QString displayNameForId(Core::Id id) const;
+    bool canCreate(ProjectExplorer::BuildStepList *parent, Core::Id id) const override;
+    ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent, Core::Id id) override;
+    bool canClone(ProjectExplorer::BuildStepList *parent, ProjectExplorer::BuildStep *source) const override;
+    ProjectExplorer::BuildStep *clone(ProjectExplorer::BuildStepList *parent, ProjectExplorer::BuildStep *source) override;
+    bool canRestore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) const override;
+    ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) override;
 };
 
 } // namespace Internal

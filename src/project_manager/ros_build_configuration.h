@@ -1,33 +1,3 @@
-/****************************************************************************
-**
-** Copyright (C) 2015 The Qt Company Ltd.
-** Contact: http://www.qt.io/licensing
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company.  For licensing terms and
-** conditions see http://www.qt.io/terms-conditions.  For further information
-** use the contact form at http://www.qt.io/contact-us.
-**
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 or version 3 as published by the Free
-** Software Foundation and appearing in the file LICENSE.LGPLv21 and
-** LICENSE.LGPLv3 included in the packaging of this file.  Please review the
-** following information to ensure the GNU Lesser General Public License
-** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
-** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
-**
-** In addition, as a special exception, The Qt Company gives you certain additional
-** rights.  These rights are described in The Qt Company LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
-**
-****************************************************************************/
-
 #ifndef ROSBUILDCONFIGURATION_H
 #define ROSBUILDCONFIGURATION_H
 
@@ -42,11 +12,6 @@
 #include <utils/qtcassert.h>
 #include <QCheckBox>
 #include <QProcess>
-
-namespace Utils {
-class FileName;
-class PathChooser;
-} // namespace Utils
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -64,33 +29,53 @@ class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
 public:
     explicit ROSBuildConfiguration(ProjectExplorer::Target *parent);
 
-    ProjectExplorer::NamedWidget *createConfigWidget();
-    QList<ProjectExplorer::NamedWidget *> createSubConfigWidgets();
+    ProjectExplorer::NamedWidget *createConfigWidget() override;
+    QList<ProjectExplorer::NamedWidget *> createSubConfigWidgets() override;
+    BuildType buildType() const override;
+    QVariantMap toMap() const override;
 
-    BuildType buildType() const;
-
-    QVariantMap toMap() const;
-
+    /**
+     * @brief Set the initial build arguments for catkin_make.
+     * @param arguments a QString of arguments.
+     */
     void setInitialArguments(const QString &arguments);
+
+    /**
+     * @brief Get the initial build arguments for catkin_make.
+     * @return a QString
+     */
     QString initialArguments() const;
 
+    /**
+     * @brief Set the ros distribution for the build configuration.
+     * @param distribution a QString representing the ros distribution.
+     */
     void setROSDistribution(const QString &distribution);
+
+    /**
+     * @brief Get the ros distribution of the build configuration.
+     * @return a QString.
+     */
     QString rosDistribution() const;
 
+    /**
+     * @brief Source the workspace to setup the build configuration
+     * environment variables.
+     */
     void sourceWorkspace();
 
 protected:
     ROSBuildConfiguration(ProjectExplorer::Target *parent, ROSBuildConfiguration *source);
     ROSBuildConfiguration(ProjectExplorer::Target *parent, Core::Id id);
 
-    bool fromMap(const QVariantMap &map);
+    bool fromMap(const QVariantMap &map) override;
 
     friend class ROSBuildSettingsWidget;
 
 private:
-    QString m_initialArguments;
-    QString m_rosDistribution;
-    ProjectExplorer::NamedWidget *m_buildEnvironmentWidget;
+    QString m_initialArguments; /**< Initial catkin_make arguments. */
+    QString m_rosDistribution; /**< ROS Distribution */
+    ProjectExplorer::NamedWidget *m_buildEnvironmentWidget; /**< Build configuration environment widget */
 
 };
 
@@ -102,21 +87,27 @@ public:
     explicit ROSBuildConfigurationFactory(QObject *parent = 0);
     ~ROSBuildConfigurationFactory();
 
-    int priority(const ProjectExplorer::Target *parent) const;
-    QList<ProjectExplorer::BuildInfo *> availableBuilds(const ProjectExplorer::Target *parent) const;
-    int priority(const ProjectExplorer::Kit *k, const QString &projectPath) const;
-    QList<ProjectExplorer::BuildInfo *> availableSetups(const ProjectExplorer::Kit *k,
-                                                        const QString &projectPath) const;
-    ProjectExplorer::BuildConfiguration *create(ProjectExplorer::Target *parent,
-                                                const ProjectExplorer::BuildInfo *info) const;
+    int priority(const ProjectExplorer::Target *parent) const override;
+    QList<ProjectExplorer::BuildInfo *> availableBuilds(const ProjectExplorer::Target *parent) const override;
+    int priority(const ProjectExplorer::Kit *k, const QString &projectPath) const override;
+    QList<ProjectExplorer::BuildInfo *> availableSetups(const ProjectExplorer::Kit *k, const QString &projectPath) const override;
+    ProjectExplorer::BuildConfiguration *create(ProjectExplorer::Target *parent, const ProjectExplorer::BuildInfo *info) const override;
+    bool canClone(const ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *source) const override;
+    ProjectExplorer::BuildConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *source) override;
+    bool canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const override;
+    ProjectExplorer::BuildConfiguration *restore(ProjectExplorer::Target *parent, const QVariantMap &map) override;
 
-    bool canClone(const ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *source) const;
-    ProjectExplorer::BuildConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *source);
-    bool canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const;
-    ProjectExplorer::BuildConfiguration *restore(ProjectExplorer::Target *parent, const QVariantMap &map);
 private:
+    /**
+     * @brief Check whether target is supported.
+     * @param t a ProjectExplorer::Target
+     * @return True if valid, otherwise false.
+     */
     bool canHandle(const ProjectExplorer::Target *t) const;
 
+    /**
+     * @brief Represents all available catkin_make build types.
+     */
     enum BuildType { BuildTypeNone = 0,
                      BuildTypeDebug = 1,
                      BuildTypeRelease = 2,
@@ -124,9 +115,20 @@ private:
                      BuildTypeMinSizeRel = 4,
                      BuildTypeLast = 5 };
 
+    /**
+     * @brief Creates a ROSBuildInfo
+     * @param k a ProjectExplorer::Kit
+     * @param projectPath a path to the project.
+     * @param type BuildType
+     * @return a ROSBuildInfo
+     */
     ROSBuildInfo *createBuildInfo(const ProjectExplorer::Kit *k, const QString &projectPath, BuildType type) const;
 };
 
+/**
+ * @brief The ROS settings widget. This provides a UI for changing ROS
+ * build setting.
+ */
 class ROSBuildSettingsWidget : public ProjectExplorer::NamedWidget
 {
     Q_OBJECT
@@ -136,16 +138,29 @@ public:
     ~ROSBuildSettingsWidget();
 
 private slots:
+    /**
+     * @brief A slot that is called anytime the source button is clicked.
+     *
+     * It will source the workspace and setup environment variables.
+     */
     void on_source_pushButton_clicked();
 
+    /**
+     * @brief A slot that is called anytime the ros distribution is changed.
+     * @param arg1 a QString representing the ros distribution.
+     */
     void on_ros_distribution_comboBox_currentIndexChanged(const QString &arg1);
 
 private:
-    Ui::ROSBuildConfiguration *m_ui;
-    ROSBuildConfiguration *m_buildConfiguration;
-    QMap<QString, QString> m_rosDistributions;
+    Ui::ROSBuildConfiguration *m_ui; /**< ROS Build configuration UI object. */
+    ROSBuildConfiguration *m_buildConfiguration; /**< Pointer to the ROSBuildConfiguration. */
+    QMap<QString, QString> m_rosDistributions; /**< Map of available ros distributions. */
 };
 
+/**
+ * @brief The ROS build environment widget. This provides a UI for changing
+ * environment variables unique to the project.
+ */
 class ROSBuildEnvironmentWidget : public ProjectExplorer::NamedWidget
 {
   Q_OBJECT
@@ -154,16 +169,37 @@ public:
   ROSBuildEnvironmentWidget(ProjectExplorer::BuildConfiguration *bc);
 
 private slots:
+  /**
+   * @brief A slot that is called anytime a environment variable is changed
+   * and passes the changes to the ROSBuildConfiguration.
+   */
   void environmentModelUserChangesChanged();
+
+  /**
+   * @brief A slot that is called anytime the clear system environment is
+   * checked.
+   *
+   * It will set the ROSBuildConfiguration environment back to the base
+   * environment.
+   * @param checked a bool.
+   */
   void clearSystemEnvironmentCheckBoxClicked(bool checked);
+
+  /** @brief A slot that is called anytime a environment variable is changed within
+   * the ROSBuildConfiguration and updates the change with the Widget.
+   */
   void environmentChanged();
 
 protected:
-  ProjectExplorer::EnvironmentWidget *m_buildEnvironmentWidget;
-  QCheckBox *m_clearSystemEnvironmentCheckBox;
-  ProjectExplorer::BuildConfiguration *m_buildConfiguration;
+  ProjectExplorer::EnvironmentWidget *m_buildEnvironmentWidget; /**< The environment widget. */
+  QCheckBox *m_clearSystemEnvironmentCheckBox; /**< The clear system evironment checkbox object. */
+  ProjectExplorer::BuildConfiguration *m_buildConfiguration; /** The build configuration associated to this widget. */
 };
 
+/**
+ * @brief This class represents all information required for building
+ * a ROS project.
+ */
 class ROSBuildInfo : public ProjectExplorer::BuildInfo
 {
 public:
@@ -180,8 +216,8 @@ public:
         arguments = bc->initialArguments();
     }
 
-    Utils::Environment environment;
-    QString arguments;
+    Utils::Environment environment; /**< ROS build environment. */
+    QString arguments; /**< ROS catkin_make arguments. */
 };
 
 } // namespace Internal
