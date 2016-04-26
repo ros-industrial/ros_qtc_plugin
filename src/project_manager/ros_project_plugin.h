@@ -24,7 +24,7 @@ public:
 
 private slots:
     void reloadProjectIncludeDirectories();
-
+    void removeProjectDirectory();
 };
 
 } // namespace Internal

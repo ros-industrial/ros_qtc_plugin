@@ -41,11 +41,13 @@
 #include "ros_utils.h"
 #include "ros_project_constants.h"
 #include "ros_package_wizard.h"
+#include "remove_directory_dialog.h"
 
 #include <coreplugin/icore.h>
 #include <coreplugin/actionmanager/actionmanager.h>
 #include <coreplugin/actionmanager/actioncontainer.h>
 #include <coreplugin/actionmanager/command.h>
+#include <coreplugin/removefiledialog.h>
 
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/projecttree.h>
@@ -57,6 +59,7 @@
 #include <projectexplorer/buildstep.h>
 #include <projectexplorer/compileoutputwindow.h>
 #include <projectexplorer/appoutputpane.h>
+#include <projectexplorer/projecttreewidget.h>
 
 #include <extensionsystem/pluginmanager.h>
 #include <extensionsystem/invoker.h>
@@ -67,6 +70,8 @@
 
 #include <QtPlugin>
 #include <QDebug>
+#include <QApplication>
+#include <QMessageBox>
 
 using namespace Core;
 using namespace ProjectExplorer;
@@ -92,12 +97,24 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
             ActionManager::actionContainer(ProjectExplorer::Constants::M_PROJECTCONTEXT);
 
     auto reloadProjectIncludeDirectoriesAction = new QAction(tr("Reload Project Include Directories..."), this);
-    Command *command = ActionManager::registerAction(reloadProjectIncludeDirectoriesAction,
-        "ROSProjectManager.reloadProjectIncludeDirectories", Context(Constants::PROJECTCONTEXT));
-    command->setAttribute(Command::CA_Hide);
-    mproject->addAction(command, ProjectExplorer::Constants::G_PROJECT_FILES);
-
+    Command *reloadCommand = ActionManager::registerAction(reloadProjectIncludeDirectoriesAction,
+        Constants::ROS_RELOAD_INCLUDE_DIRS, Context(Constants::PROJECTCONTEXT));
+    reloadCommand->setAttribute(Command::CA_Hide);
+    mproject->addAction(reloadCommand, ProjectExplorer::Constants::G_PROJECT_FILES);
     connect(reloadProjectIncludeDirectoriesAction, &QAction::triggered, this, &ROSProjectPlugin::reloadProjectIncludeDirectories);
+
+    // This will context menu action for deleting and renaming project folders from the ProjectTree.
+    ActionContainer *mfolderContextMenu = ActionManager::actionContainer(ProjectExplorer::Constants::M_FOLDERCONTEXT);
+
+    auto removeProjectDirectoryAction = new QAction(tr("Remove Directory..."), this);
+    Command *removeCommand = ActionManager::registerAction(removeProjectDirectoryAction,
+        Constants::ROS_REMOVE_DIR, Context(Constants::PROJECTCONTEXT));
+    removeCommand->setAttribute(Command::CA_Hide);
+    mfolderContextMenu->addAction(removeCommand, ProjectExplorer::Constants::G_FOLDER_FILES);
+    connect(removeProjectDirectoryAction, &QAction::triggered, this, &ROSProjectPlugin::removeProjectDirectory);
+
+    Command *renameCommand = ActionManager::command(ProjectExplorer::Constants::RENAMEFILE);
+    mfolderContextMenu->addAction(renameCommand, ProjectExplorer::Constants::G_FOLDER_FILES);
 
     return true;
 }
@@ -122,6 +139,22 @@ void ROSProjectPlugin::reloadProjectIncludeDirectories()
     }
 
     delete runCmake;
+}
+
+void ROSProjectPlugin::removeProjectDirectory()
+{
+  ProjectExplorer::Node *currentNode = ProjectExplorer::ProjectTree::currentNode();
+  QTC_ASSERT(currentNode && currentNode->nodeType() == ProjectExplorer::FolderNodeType, return);
+
+  QString filePath = currentNode->filePath().toString();
+  RemoveDirectoryDialog removeDirectoryDialog(filePath, ICore::mainWindow());
+
+  if (removeDirectoryDialog.exec() == QDialog::Accepted)
+  {
+      const bool deleteDirectory = removeDirectoryDialog.isDeleteDirectoryChecked();
+      if (deleteDirectory)
+          QDir(filePath).removeRecursively();
+  }
 }
 
 } // namespace Internal
