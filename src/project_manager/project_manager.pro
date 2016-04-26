@@ -24,7 +24,8 @@ HEADERS = \
     ros_run_step.h \
     ros_run_steps.h \
     ros_terminal_pane.h \
-    ros_package_wizard.h
+    ros_package_wizard.h \
+    remove_directory_dialog.h
 
 SOURCES = \
     ros_project_wizard.cpp \
@@ -40,7 +41,8 @@ SOURCES = \
     ros_run_step.cpp \
     ros_run_steps.cpp \
     ros_terminal_pane.cpp \
-    ros_package_wizard.cpp
+    ros_package_wizard.cpp \
+    remove_directory_dialog.cpp
 
 RESOURCES += ros_project.qrc
 FORMS += ros_make_step.ui \
@@ -48,6 +50,7 @@ FORMS += ros_make_step.ui \
     ros_import_wizard_page.ui \
     ros_run_configuration.ui \
     ros_generic_configuration.ui \
-    ros_package_wizard_details_page.ui
+    ros_package_wizard_details_page.ui \
+    remove_directory_dialog.ui
 
 

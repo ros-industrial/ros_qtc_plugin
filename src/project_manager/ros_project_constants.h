@@ -39,11 +39,20 @@ namespace Constants {
 const char ROSPROJECT_ID[]  = "ROSProjectManager.ROSProject";
 const char PROJECTCONTEXT[]     = "ROSProject.ProjectContext";
 const char ROSMIMETYPE[]    = "application/ros.project";
+
+// ROS default install directory
 const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
 
+// Context menu actions
+const char ROS_RELOAD_INCLUDE_DIRS[] = "ROSProjectManager.reloadProjectIncludeDirectories";
+const char ROS_REMOVE_DIR[] = "ROSProjectManager.removeDirectory";
+
+// ROS wizards constants
 const char ROS_WIZARD_CATEGORY[] = "A.ROS";
 const char ROS_WIZARD_CATEGORY_DISPLAY[] = "ROS";
 
+
+// ROS C++ constants
 const char SOURCE_HEADER_FILE_FILTER[] = "*.c; *.cc; *.cpp; *.c++; *.cp; *.cxx; *.h; *.hh; *.hpp; *.h++; *.hp; *.hxx;";
 
 const QStringList SOURCE_FILE_EXTENSIONS = QStringList() << QLatin1Literal("c")
