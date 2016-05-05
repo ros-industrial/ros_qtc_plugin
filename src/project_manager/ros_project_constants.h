@@ -51,6 +51,8 @@ const char ROS_REMOVE_DIR[] = "ROSProjectManager.removeDirectory";
 const char ROS_WIZARD_CATEGORY[] = "A.ROS";
 const char ROS_WIZARD_CATEGORY_DISPLAY[] = "ROS";
 
+// Project Exclude Extension
+const QStringList ROS_EXCLUDE_FILE_EXTENSION = QStringList() << QLatin1Literal("*.autosave");
 
 // ROS C++ constants
 const char SOURCE_HEADER_FILE_FILTER[] = "*.c; *.cc; *.cpp; *.c++; *.cp; *.cxx; *.h; *.hh; *.hpp; *.h++; *.hp; *.hxx;";

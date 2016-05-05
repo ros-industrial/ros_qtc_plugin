@@ -1,6 +1,8 @@
 #ifndef ROSPROJECT_H
 #define ROSPROJECT_H
 
+
+#include "ros_workspace_watcher.h"
 #include "ros_project_manager.h"
 #include "ros_project_nodes.h"
 #include "ros_utils.h"
@@ -13,7 +15,6 @@
 #include <coreplugin/idocument.h>
 
 #include <QFuture>
-#include <QFileSystemWatcher>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -45,27 +46,18 @@ public:
     Utils::FileName buildDirectory() const;
     Utils::FileName sourceDirectory() const;
 
-public slots:
-    void onDirectoryChanged(const QString &path);
-
 protected:
     Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage);
 
 private:
-    void addDirectory(const QString &parentPath, const QString &dirName);
-    void removeDirectory(const QString &parentPath, const QString &dirName);
-    void renameDirectory(const QString &parentPath, const QString &oldDirName, const QString &newDirName);
     bool saveProjectFile();
     void parseProjectFile();
     void refreshCppCodeModel();
-    void print();
 
     QString m_projectName;
-    QHash<QString, ROSUtils::FolderContent> m_workspaceContent;
+    ROSWorkspaceWatcher *m_workspaceWatcher;
     QStringList m_watchDirectories;
-    QStringList m_workspaceFiles;
     QStringList m_projectIncludePaths;
-    QFileSystemWatcher m_watcher;
     QFuture<void> m_codeModelFuture;
 };
 
@@ -87,6 +79,8 @@ public:
 private:
     ROSProject *m_project;
 };
+
+
 
 } // namespace Internal
 } // namespace ROSProjectManager
