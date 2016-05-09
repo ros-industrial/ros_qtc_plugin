@@ -1,16 +1,15 @@
 #ifndef ROSOUTPUTPANE_H
 #define ROSOUTPUTPANE_H
 
-#include <coreplugin/ioutputpane.h>
+#include "terminal_tab_widget.h"
 
+#include <coreplugin/ioutputpane.h>
 #include <projectexplorer/processparameters.h>
 #include <utils/qtcprocess.h>
 
 #include <QTabWidget>
 #include <QToolButton>
 #include <QProcess>
-
-#include <qtermwidget5/qtermwidget.h>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -43,26 +42,21 @@ public:
   void goToNext() override;
   void goToPrev() override;
 
-  QTermWidget &startTerminal(int startnow = 1, const QString name = QLatin1String("Terminal"));
+  int createTerminal(const QString &name, const QDir &workingDirectory = QDir());
+  int createTerminal(const QDir &workingDirectory);
+  int createTerminal();
 
-  void sendText(const QString &text);
+  void sendInput(const QString &text);
+  void sendInput(const int &id, const QString &text);
 
 private slots:
-  void updateZoomEnabled();
-  void zoomIn();
-  void zoomOut();
   void startTerminalButton();
   void stopProcess();
-  void closeTerminal(int index);
 
 private:
-  QList<QTermWidget *> m_terminals;
-  QTabWidget * m_tabWidget;
-  QStringList m_tabNames;
 
+  TerminalTabWidget *m_terminalWidget;
   QToolButton *m_stopButton;
-  QToolButton *m_zoomInButton;
-  QToolButton *m_zoomOutButton;
   QToolButton *m_newTerminalButton;
 };
 

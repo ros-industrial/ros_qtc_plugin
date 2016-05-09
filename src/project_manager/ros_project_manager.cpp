@@ -93,9 +93,9 @@ void ROSManager::unregisterProject(ROSProject *project)
     m_projects.removeAll(project);
 }
 
-QTermWidget &ROSManager::startTerminal(int startnow, const QString name)
+ROSTerminalPane *ROSManager::getTerminalPane()
 {
-  return m_terminalPane->startTerminal(startnow, name);
+  return m_terminalPane;
 }
 
 } // namespace Internal

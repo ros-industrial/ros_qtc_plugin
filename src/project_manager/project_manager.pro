@@ -2,12 +2,16 @@ include(../../ros_qtc_plugins.pri)
 include(project_manager.pri)
 include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
 
-QTW_LIBRARY_PATH = $$(QTERMWIDGET_LIBRARY_PATH)
-isEmpty(QTW_LIBRARY_PATH):QTW_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
-QTW_INCLUDE_PATH = $$(QTERMWIDGET_INCLUDE_PATH)
-isEmpty(QTW_INCLUDE_PATH):QTW_INCLUDE_PATH=/usr/local/include
-LIBS += -L$$QTW_LIBRARY_PATH -lqtermwidget5
-INCLUDEPATH += $$(QTERMWIDGET_INCLUDE_PATH)
+#QTW_LIBRARY_PATH = $$(QTERMWIDGET_LIBRARY_PATH)
+#isEmpty(QTW_LIBRARY_PATH):QTW_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu
+#QTW_INCLUDE_PATH = $$(QTERMWIDGET_INCLUDE_PATH)
+#isEmpty(QTW_INCLUDE_PATH):QTW_INCLUDE_PATH=/usr/local/include
+#LIBS += -L$$QTW_LIBRARY_PATH -lqtermwidget5
+#INCLUDEPATH += $$(QTERMWIDGET_INCLUDE_PATH)
+
+INCLUDEPATH += /usr/include
+INCLUDEPATH += /usr/include/KDE
+LIBS += -L/usr/lib -lkdecore -lkparts
 
 HEADERS = \
     ros_project_wizard.h \
@@ -26,7 +30,8 @@ HEADERS = \
     ros_terminal_pane.h \
     ros_package_wizard.h \
     remove_directory_dialog.h \
-    ros_workspace_watcher.h
+    ros_workspace_watcher.h \
+    terminal_tab_widget.h
 
 SOURCES = \
     ros_project_wizard.cpp \
@@ -44,7 +49,8 @@ SOURCES = \
     ros_terminal_pane.cpp \
     ros_package_wizard.cpp \
     remove_directory_dialog.cpp \
-    ros_workspace_watcher.cpp
+    ros_workspace_watcher.cpp \
+    terminal_tab_widget.cpp
 
 RESOURCES += ros_project.qrc
 FORMS += ros_make_step.ui \

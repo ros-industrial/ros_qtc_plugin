@@ -57,7 +57,7 @@ public:
 
     static ROSManager *instance();
 
-    QTermWidget &startTerminal(int startnow = 1, const QString name = QString());
+    ROSTerminalPane *getTerminalPane();
 
 private:
     QList<ROSProject *> m_projects;

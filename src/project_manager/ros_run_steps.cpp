@@ -4,11 +4,10 @@
 #include "ui_ros_generic_configuration.h"
 #include "ros_build_configuration.h"
 #include "ros_utils.h"
+#include "ros_terminal_pane.h"
 
 #include <projectexplorer/project.h>
 #include <projectexplorer/processparameters.h>
-
-#include <qtermwidget5/qtermwidget.h>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -318,7 +317,6 @@ void ROSGenericRunStep::run(QFutureInterface<bool> &fi)
   Q_UNUSED(fi);
 
   ROSProject *rp = qobject_cast<ROSProject *>(target()->project());
-  ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
 
   QString command;
   command = QString::fromLatin1("%1 %2 %3 %4\n")
@@ -327,19 +325,15 @@ void ROSGenericRunStep::run(QFutureInterface<bool> &fi)
            m_target,
            m_arguments);
 
-  //create terminal without starting shell
-  QTermWidget &terminal = ROSManager::instance()->startTerminal(0, QString::fromLatin1("%1 %2 %3").arg(m_command, m_package, m_target));
+  ROSTerminalPane *terminal = ROSManager::instance()->getTerminalPane();
 
-  terminal.setWorkingDirectory(rp->projectDirectory().toString());
-
-  //start bash now that everything is setup
-  terminal.startShellProgram();
+  terminal->createTerminal(QString::fromLatin1("%1 %2 %3").arg(m_command, m_package, m_target), QDir(rp->projectDirectory().toString()));
 
   // source workspace (This is a hack because the setEnvironment is not working as I expected)
-  terminal.sendText(QLatin1String("source devel/setup.bash\n"));
+  terminal->sendInput(QLatin1String("source devel/setup.bash\n"));
 
   //send roslaunch command
-  terminal.sendText(command);
+  terminal->sendInput(command);
 }
 
 QVariantMap ROSGenericRunStep::toMap() const
