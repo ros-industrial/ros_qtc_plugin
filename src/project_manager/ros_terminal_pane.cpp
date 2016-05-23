@@ -150,7 +150,7 @@ QTermWidget &ROSTerminalPane::startTerminal(int startnow, const QString name)
 
   // Need to create a qtc dark color scheme for the terminal
   // Example: https://github.com/lxde/qtermwidget/blob/10e17968e4457da2b91675984e17009ee6e1e7aa/lib/color-schemes/Linux.colorscheme
-  widget->setColorScheme(s->value(QLatin1String("ColorScheme"), QLatin1String("Linux")).toString());
+  widget->setColorScheme(s->value(QLatin1String("ColorScheme"), QLatin1String("DarkPastels")).toString());
 //  QFont f(s->value(QLatin1String("FontName"), TERMINALPLUGINDEFAULTFONT).toString());
 //  f.setPointSize(s->value(QLatin1String("FontSize"), 10).toInt());
 //  widget->setTerminalFont(f);
