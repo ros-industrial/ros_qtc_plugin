@@ -1,0 +1,3 @@
+[submodule "src/project_manager/qtermwidget"]
+	path = src/project_manager/qtermwidget
+	url = https://github.com/Levi-Armstrong/qtermwidget.git

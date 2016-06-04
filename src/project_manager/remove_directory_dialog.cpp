@@ -1,5 +1,5 @@
 #include "remove_directory_dialog.h"
-#include "ui_remove_director_dialog.h"
+#include "ui_remove_directory_dialog.h"
 #include <QDir>
 
 using namespace Core;

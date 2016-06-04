@@ -33,7 +33,7 @@
 
 #include <projectexplorer/iprojectmanager.h>
 #include <projectexplorer/processparameters.h>
-#include <qtermwidget5/qtermwidget.h>
+#include "qtermwidget/lib/qtermwidget.h"
 #include "ros_terminal_pane.h"
 
 namespace ROSProjectManager {

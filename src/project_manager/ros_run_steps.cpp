@@ -6,9 +6,7 @@
 #include "ros_utils.h"
 
 #include <projectexplorer/project.h>
-#include <projectexplorer/processparameters.h>
-
-#include <qtermwidget5/qtermwidget.h>
+#include "qtermwidget.h"
 
 namespace ROSProjectManager {
 namespace Internal {
