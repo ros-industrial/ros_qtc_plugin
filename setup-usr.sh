@@ -13,13 +13,23 @@ DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-ros.desktop
 mkdir -p $BASE_PATH
 
 # Clone Qt Creator and build it from source
-cd $BASE_PATH && git clone -b 4.0 https://github.com/qtproject/qt-creator.git
+if [ ! -d "$QTC_SOURCE" ]; then 
+    cd $BASE_PATH && git clone -b 4.0 https://github.com/qtproject/qt-creator.git
+else
+    cd $BASE_PATH/qt-creator && git fetch && git pull
+fi 
 mkdir -p $QTC_BUILD
 cd $QTC_BUILD && qmake -r $QTC_SOURCE/qtcreator.pro
 cd $QTC_BUILD && make -j8
 
 # Clone ROS Qt Creator Plugin and build it from source
-cd $BASE_PATH && git clone --recursive -b master https://github.com/Levi-Armstrong/ros_qtc_plugins.git
+if [ ! -d "$ROS_SOURCE" ]; then 
+    cd $BASE_PATH && git clone --recursive -b master https://github.com/Levi-Armstrong/ros_qtc_plugins.git
+else
+    cd $BASE_PATH/ros_qtc_plugins && git fetch && git pull
+    cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git fetch
+    cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git pull
+fi 
 mkdir -p $ROS_BUILD
 cd $ROS_BUILD && qmake -r $ROS_SOURCE/ros_qtc_plugins.pro
 cd $ROS_BUILD && make -j8

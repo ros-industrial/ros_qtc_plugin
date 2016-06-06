@@ -1,8 +1,7 @@
 #!/bin/bash
 
 BASE_PATH=$HOME/qtc_plugins
-if [ "$(dirname "$PWD")" != "$BASE_PATH" ]
-then 
+if [ "$(dirname "$PWD")" != "$BASE_PATH" ]; then 
     echo 'ERROR: ros_qtc_plugins must be located in: '$BASE_PATH
     exit 1
 fi 
@@ -16,7 +15,11 @@ ROS_SOURCE=$BASE_PATH/ros_qtc_plugins
 DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-ros.desktop
 
 # Clone Qt Creator and build it from source
-cd $BASE_PATH && git clone -b 4.0 https://github.com/qtproject/qt-creator.git
+if [ ! -d "$QTC_SOURCE" ]; then 
+    cd $BASE_PATH && git clone -b 4.0 https://github.com/qtproject/qt-creator.git
+else
+    cd $BASE_PATH/qt-creator && git fetch && git pull
+fi 
 mkdir -p $QTC_BUILD
 cd $QTC_BUILD && qmake -r $QTC_SOURCE/qtcreator.pro
 cd $QTC_BUILD && make -j8
