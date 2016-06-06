@@ -1,5 +1,5 @@
-QTC_SOURCE = $$(HOME)/qtc_plugins/qt-creator
-QTC_BUILD = $$(HOME)/qtc_plugins/qt-creator-build
+QTC_SOURCE = $$(ROS_QTC_SOURCE)/qt-creator
+QTC_BUILD = $$(ROS_QTC_SOURCE)/qt-creator-build
 
 ## set the QTC_SOURCE environment variable to override the setting here
 QTCREATOR_SOURCES = $$QTC_SOURCE

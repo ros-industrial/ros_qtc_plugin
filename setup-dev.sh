@@ -1,10 +1,10 @@
 #!/bin/bash
 
-BASE_PATH=$HOME/qtc_plugins
-if [ "$(dirname "$PWD")" != "$BASE_PATH" ]; then 
-    echo 'ERROR: ros_qtc_plugins must be located in: '$BASE_PATH
-    exit 1
-fi 
+# Install build dependencies
+echo "Install build dependencies: build-essential libgl1-mesa-dev"
+sudo apt-get install build-essential libgl1-mesa-dev
+
+BASE_PATH=$(dirname "$PWD")
 
 QTC_BUILD=$BASE_PATH/qt-creator-build
 QTC_SOURCE=$BASE_PATH/qt-creator
@@ -13,6 +13,15 @@ ROS_BUILD=$BASE_PATH/ros_qtc_plugins-build
 ROS_SOURCE=$BASE_PATH/ros_qtc_plugins
 
 DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-ros.desktop
+ROS_QTC_SOURCE=$HOME/.local/share/ros_qtc.source
+
+#Set perminate environment vairable holding the location to Qt Creator source
+if [ ! -f "$ROS_QTC_SOURCE" ]; then
+    echo 'source '$ROS_QTC_SOURCE >> ~/.bashrc
+fi
+> $ROS_QTC_SOURCE
+echo 'export ROS_QTC_SOURCE='$BASE_PATH >> $ROS_QTC_SOURCE
+source $ROS_QTC_SOURCE
 
 # Clone Qt Creator and build it from source
 if [ ! -d "$QTC_SOURCE" ]; then 
