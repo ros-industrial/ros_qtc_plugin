@@ -68,5 +68,5 @@ ln -s $DESKTOP_FILE $HOME/Desktop/QtCreator.desktop
 # Create user command line launch
 echo 'Add Qt Creator ROS command line launcher: /usr/local/bin/qtcreator-ros'
 sudo rm -f /usr/local/bin/qtcreator-ros 
-sudo ln -s $QTC_BUILD/bin/qtcreator /usr/local/bin/qtcreator-ros
+sudo ln -s $DESKTOP_FILE /usr/local/bin/qtcreator-ros
 
