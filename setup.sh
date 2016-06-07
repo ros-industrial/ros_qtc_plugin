@@ -1,10 +1,21 @@
 #!/bin/bash
+if [ "$#" != 1 ] || ([ "$1" != "-u" ] && [ "$1" != "-d" ]); then
+    echo "Usage: bash setup.sh argument"
+    echo "Arguments:"
+    echo "    -u : Run setup for users"
+    echo "    -d : Run setup for developers"
+    exit 85
+fi
 
 # Install build dependencies
 echo "Install build dependencies: build-essential libgl1-mesa-dev"
 sudo apt-get install build-essential libgl1-mesa-dev
 
-BASE_PATH=$PWD/qtc_plugins
+if [ "$1" == "-u" ]; then
+    BASE_PATH=$PWD/qtc_plugins
+else
+    BASE_PATH=$(dirname "$PWD")
+fi
 
 QTC_BUILD=$BASE_PATH/qt-creator-build
 QTC_SOURCE=$BASE_PATH/qt-creator
@@ -23,8 +34,6 @@ fi
 echo 'export ROS_QTC_SOURCE='$BASE_PATH >> $ROS_QTC_SOURCE
 source $ROS_QTC_SOURCE
 
-mkdir -p $BASE_PATH
-
 # Clone Qt Creator and build it from source
 if [ ! -d "$QTC_SOURCE" ]; then 
     cd $BASE_PATH && git clone -b 4.0 https://github.com/qtproject/qt-creator.git
@@ -35,14 +44,16 @@ mkdir -p $QTC_BUILD
 cd $QTC_BUILD && qmake -r $QTC_SOURCE/qtcreator.pro
 cd $QTC_BUILD && make -j8
 
-# Clone ROS Qt Creator Plugin and build it from source
-if [ ! -d "$ROS_SOURCE" ]; then 
-    cd $BASE_PATH && git clone --recursive -b master https://github.com/Levi-Armstrong/ros_qtc_plugins.git
-else
-    cd $BASE_PATH/ros_qtc_plugins && git fetch && git pull
-    cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git fetch
-    cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git pull
-fi 
+# Build ROS Qt Creator Plugin
+if [ "$1" == "-u" ]; then
+    if [ ! -d "$ROS_SOURCE" ]; then 
+        cd $BASE_PATH && git clone --recursive -b master https://github.com/Levi-Armstrong/ros_qtc_plugins.git
+    else
+        cd $BASE_PATH/ros_qtc_plugins && git fetch && git pull
+        cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git fetch
+        cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git pull
+    fi 
+fi
 mkdir -p $ROS_BUILD
 cd $ROS_BUILD && qmake -r $ROS_SOURCE/ros_qtc_plugins.pro
 cd $ROS_BUILD && make -j8
@@ -50,6 +61,8 @@ cd $ROS_BUILD && make -j8
 # Create desktop launch icon
 rm -f $DESKTOP_FILE 
 > $DESKTOP_FILE 
+echo '#!/usr/bin/env xdg-open' >> $DESKTOP_FILE
+echo '' >> $DESKTOP_FILE
 echo '[Desktop Entry]' >> $DESKTOP_FILE
 echo 'Version=4.0' >> $DESKTOP_FILE
 echo 'Encoding=UTF-8' >> $DESKTOP_FILE
