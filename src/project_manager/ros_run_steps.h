@@ -10,69 +10,6 @@ namespace Internal {
 
 namespace Ui { class ROSGenericStep; }
 
-//class ROSLaunchStep : public RunStep
-//{
-//    Q_OBJECT
-//    friend class ROSRunStepFactory;
-
-//public:
-//  ROSLaunchStep(RunStepList *parent);
-//  ~ROSLaunchStep();
-
-//  bool init(QList<const RunStep *> &earlierSteps) override;
-
-//  void run(QFutureInterface<bool> &fi) override;
-
-//  RunStepConfigWidget *createConfigWidget() override;
-
-
-//  QVariantMap toMap() const override;
-
-//  ROSRunConfiguration *rosRunConfiguration() const;
-//  ROSRunConfiguration *targetsActiveRunConfiguration() const;
-
-//  QString packageName() const;
-//  QString launchFileName() const;
-//  QString launchFileArguments() const;
-
-//  void setPackageName(const QString &packageName);
-//  void setLaunchFileName(const QString &launchFileName);
-//  void setLaunchFileArguments(const QString &launchFileArguments);
-
-//protected:
-//  ROSLaunchStep(RunStepList *rsl, Core::Id id);
-//  ROSLaunchStep(RunStepList *rsl, RunStep *rs);
-
-//  bool fromMap(const QVariantMap &map) override;
-
-//private:
-//  QString m_arguments;
-//  QString m_packageName;
-//  QString m_target;
-//};
-
-//class ROSLaunchStepConfigWidget : public RunStepConfigWidget
-//{
-//  Q_OBJECT
-//public:
-//  ROSLaunchStepConfigWidget(ROSLaunchStep *launchStep);
-//  ~ROSLaunchStepConfigWidget();
-//  QString summaryText() const override;
-//  QString displayName() const override;
-
-//private slots:
-//  void packageNameComboBox_currentIndexChanged(const QString &arg1);
-
-//  void launchFileComboBox_currentIndexChanged(const QString &arg1);
-
-//  void argumentsLineEdit_textChanged(const QString &arg1);
-
-//private:
-//    Ui::ROSLaunchStep *m_ui;
-//    ROSLaunchStep *m_rosLaunchStep;
-//};
-
-
 class ROSGenericRunStep : public RunStep
 {
     Q_OBJECT

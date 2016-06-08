@@ -78,7 +78,7 @@ ROSRunConfiguration::ROSRunConfiguration(Target *parent, Id id) :
     m_isEnabled(false)
 {
     m_stepList->setDefaultDisplayName(tr("Run"));
-    m_isEnabled = true; //Added for testing
+//    m_isEnabled = true; //Added for testing
     ctor();
 }
 
@@ -182,66 +182,6 @@ RunStepList* ROSRunConfiguration::stepList() const
   return m_stepList;
 }
 
-//void ROSRunConfiguration::changeCurrentFile(IEditor *editor)
-//{
-//    if (!editor)
-//        editor = EditorManager::currentEditor();
-
-//    if (editor)
-//        m_currentFileFilename = editor->document()->filePath().toString();
-//    updateEnabled();
-//}
-
-//void ROSRunConfiguration::updateEnabled()
-//{
-//    bool qmlFileFound = false;
-//    if (mainScriptSource() == FileInEditor) {
-//        Utils::MimeDatabase mimeDataBase;
-//        IDocument *document = EditorManager::currentDocument();
-//        Utils::MimeType mainScriptMimeType = mimeDataBase.mimeTypeForFile(mainScript());
-//        if (document) {
-//            m_currentFileFilename = document->filePath().toString();
-//            if (mainScriptMimeType.matchesName(QLatin1String(ProjectExplorer::Constants::QML_MIMETYPE)))
-//                qmlFileFound = true;
-//        }
-//        if (!document
-//                || mainScriptMimeType.matchesName(QLatin1String(QmlJSTools::Constants::QMLPROJECT_MIMETYPE))) {
-//            // find a qml file with lowercase filename. This is slow, but only done
-//            // in initialization/other border cases.
-//            foreach (const QString &filename, target()->project()->files(Project::AllFiles)) {
-//                const QFileInfo fi(filename);
-
-//                if (!filename.isEmpty() && fi.baseName()[0].isLower()
-//                        && mimeDataBase.mimeTypeForFile(fi).matchesName(QLatin1String(ProjectExplorer::Constants::QML_MIMETYPE)))
-//                {
-//                    m_currentFileFilename = filename;
-//                    qmlFileFound = true;
-//                    break;
-//                }
-
-//            }
-//        }
-//    } else { // use default one
-//        qmlFileFound = !mainScript().isEmpty();
-//    }
-
-//    bool newValue = QFileInfo::exists(executable()) && qmlFileFound;
-//    m_isEnabled = newValue;
-
-//    // Always emit change signal to force reevaluation of run/debug buttons
-//    emit enabledChanged();
-//}
-
-//bool ROSRunConfiguration::isValidVersion(QtSupport::BaseQtVersion *version)
-//{
-//    if (version
-//            && version->type() == QLatin1String(QtSupport::Constants::DESKTOPQT)
-//            && !version->qmlviewerCommand().isEmpty()) {
-//        return true;
-//    }
-//    return false;
-//}
-
 /*!
   \class ROSRunConfigurationFactory
 */
@@ -329,129 +269,6 @@ bool ROSRunConfigurationFactory::canHandle(ProjectExplorer::Target *parent) cons
     return deviceType == ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE;
 }
 
-///*!
-//  \class ROSLaunchConfigurationWidget
-//*/
-
-//ROSLaunchConfigurationWidget::ROSLaunchConfigurationWidget() :
-//  m_ui(new Ui::ROSLaunchConfiguration())
-//{
-//  m_ui->setupUi(this);
-//}
-
-//QString ROSLaunchConfigurationWidget::displayName() const
-//{
-//  return QLatin1String("ROS Launch Process Step");
-//}
-
-//QString ROSLaunchConfigurationWidget::summaryText() const
-//{
-//  return QString();
-//}
-
-/*!
-  \class ROSRunConfigurationWidget
-*/
-//ROSRunConfigurationWidget::ROSRunConfigurationWidget(ROSRunConfiguration *rc) :
-//    m_ui(new Ui::ROSRunConfiguration()), m_runConfiguration(rc)
-//{
-//  m_ui->setupUi(this);
-//  RunStepsPage *runSteps = new RunStepsPage(rc);
-//  m_ui->verticalLayout->addWidget(runSteps);
-
-////  m_addButtonMenu = new QMenu();
-////  m_addButtonMenu->addAction(m_ui->actionROS_Launch);
-////  m_addButtonMenu->addAction(m_ui->actionROS_Run);
-////  m_ui->m_addRunStepButton->setMenu(m_addButtonMenu);
-
-//}
-//void ROSRunConfigurationWidget::on_actionROS_Launch_triggered()
-//{
-//  Utils::DetailsWidget *detailsWidget = new Utils::DetailsWidget;
-
-//  ROSLaunchConfigurationWidget *test = new ROSLaunchConfigurationWidget();
-////  ProjectExplorer::Internal::ToolWidget *toolWidget = new ProjectExplorer::Internal::ToolWidget(detailsWidget);
-////  toolWidget->setBuildStepEnabled(true);
-//  detailsWidget->setWidget(test);
-////  detailsWidget->setToolWidget(toolWidget);
-//  detailsWidget->setContentsMargins(0, 0, 0, 1);
-//  detailsWidget->setSummaryText(test->displayName());
-//  m_ui->verticalLayout->addWidget(detailsWidget);
-//}
-
-static bool caseInsensitiveLessThan(const QString &s1, const QString &s2)
-{
-    return s1.toLower() < s2.toLower();
-}
-
-//void ROSRunConfigurationWidget::updateFileComboBox()
-//{
-//    ProjectExplorer::Project *project = m_runConfiguration->target()->project();
-//    QDir projectDir(project->projectDirectory().toString());
-
-////    if (m_runConfiguration->mainScriptSource() == QmlProjectRunConfiguration::FileInProjectFile) {
-////        const QString mainScriptInFilePath
-////                = projectDir.relativeFilePath(m_runConfiguration->mainScript());
-////        m_fileListModel->clear();
-////        m_fileListModel->appendRow(new QStandardItem(mainScriptInFilePath));
-////        m_fileListCombo->setEnabled(false);
-////        return;
-////    }
-
-//    m_fileListCombo->setEnabled(true);
-//    m_fileListModel->clear();
-////    m_fileListModel->appendRow(new QStandardItem(QLatin1String(CURRENT_FILE)));
-//    QModelIndex currentIndex;
-
-//    QStringList sortedFiles = project->files(ProjectExplorer::Project::AllFiles);
-
-//    // make paths relative to project directory
-//    QStringList relativeFiles;
-//    foreach (const QString &fn, sortedFiles) {
-//        relativeFiles += projectDir.relativeFilePath(fn);
-//    }
-//    sortedFiles = relativeFiles;
-
-//    qStableSort(sortedFiles.begin(), sortedFiles.end(), caseInsensitiveLessThan);
-
-//    QString mainScriptPath;
-////    if (m_runConfiguration->mainScriptSource() != QmlProjectRunConfiguration::FileInEditor)
-////        mainScriptPath = projectDir.relativeFilePath(m_runConfiguration->mainScript());
-
-//    foreach (const QString &fn, sortedFiles) {
-//        QFileInfo fileInfo(fn);
-//        if (fileInfo.suffix() != QLatin1String("qml"))
-//            continue;
-
-//        QStandardItem *item = new QStandardItem(fn);
-//        m_fileListModel->appendRow(item);
-
-//        if (mainScriptPath == fn)
-//            currentIndex = item->index();
-//    }
-
-//    if (currentIndex.isValid())
-//        m_fileListCombo->setCurrentIndex(currentIndex.row());
-//    else
-//        m_fileListCombo->setCurrentIndex(0);
-//}
-
-//void ROSRunConfigurationWidget::setMainScript(int index)
-//{
-////    if (index == 0) {
-////        m_runConfiguration->setScriptSource(QmlProjectRunConfiguration::FileInEditor);
-////    } else {
-////        const QString path = m_fileListModel->data(m_fileListModel->index(index, 0)).toString();
-////        m_runConfiguration->setScriptSource(QmlProjectRunConfiguration::FileInSettings, path);
-////    }
-//}
-
-//void ROSRunConfigurationWidget::onViewerArgsChanged()
-//{
-////    if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(sender()))
-////        m_runConfiguration->m_qmlViewerArgs = lineEdit->text();
-//}
-
 /*!
   \class ROSRunControlFactory https://github.com/qtproject/qt-creator/blob/66bdd60947b946b8aa30141e3871f33226f0cc37/src/plugins/remotelinux/remotelinuxruncontrol.cpp
 */
@@ -479,50 +296,6 @@ RunControl *ROSRunControlFactory::create(RunConfiguration *rc, Core::Id mode,
 
     if (mode == ProjectExplorer::Constants::NORMAL_RUN_MODE)
         return new ROSRunControl(rc);
-
-    // Added temporary for testing
-//    return new ROSRunControl(rc);
-//    if (mode == ProjectExplorer::Constants::DEBUG_RUN_MODE
-//            || mode == ProjectExplorer::Constants::DEBUG_RUN_MODE_WITH_BREAK_ON_MAIN) {
-//        IDevice::ConstPtr dev = DeviceKitInformation::device(runConfig->target()->kit());
-//        if (!dev) {
-//            *errorMessage = tr("Cannot debug: Kit has no device.");
-//            return 0;
-//        }
-//        auto * const rc = qobject_cast<ROSRunConfiguration *>(runConfig);
-//        QTC_ASSERT(rc, return 0);
-//        if (rc->portsUsedByDebuggers() > dev->freePorts().count()) {
-//            *errorMessage = tr("Cannot debug: Not enough free ports available.");
-//            return 0;
-//        }
-//        auto *crc = qobject_cast<RemoteLinuxCustomRunConfiguration *>(rc);
-//        if (crc && crc->localExecutableFilePath().isEmpty()) {
-//            *errorMessage = tr("Cannot debug: Local executable is not set.");
-//            return 0;
-//        }
-
-//        DebuggerStartParameters params = LinuxDeviceDebugSupport::startParameters(rc);
-//        DebuggerRunControl * const runControl = createDebuggerRunControl(params, runConfig, errorMessage, mode);
-//        if (!runControl)
-//            return 0;
-//        LinuxDeviceDebugSupport * const debugSupport =
-//                new LinuxDeviceDebugSupport(rc, runControl);
-//        connect(runControl, SIGNAL(finished()), debugSupport, SLOT(handleDebuggingFinished()));
-//        return runControl;
-//    }
-
-//    if (mode == ProjectExplorer::Constants::QML_PROFILER_RUN_MODE) {
-//        auto * const rc = qobject_cast<AbstractRemoteLinuxRunConfiguration *>(runConfig);
-//        QTC_ASSERT(rc, return 0);
-//        auto runControl = AnalyzerManager::createRunControl(runConfig, mode);
-//        AnalyzerConnection connection;
-//        connection.connParams =
-//            DeviceKitInformation::device(runConfig->target()->kit())->sshParameters();
-//        connection.analyzerHost = connection.connParams.host;
-//        runControl->setConnection(connection);
-//        (void) new RemoteLinuxAnalyzeSupport(rc, runControl, mode);
-//        return runControl;
-//    }
 
     QTC_CHECK(false);
     return 0;

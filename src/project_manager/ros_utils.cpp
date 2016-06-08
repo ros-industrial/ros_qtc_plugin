@@ -364,14 +364,6 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir, 
     }
   }
 
-// This should be removed because it cause issues with code completion when have a local package that is installed.
-//  // Next make sure /opt/ros/distribution/includes was added
-//  includePath = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY)).appendPath(rosDistribution).appendPath(QLatin1String("include")).toString();
-//  if(!includePaths.contains(includePath))
-//  {
-//    includePaths.append(includePath);
-//  }
-
   return includePaths;
 }
 
