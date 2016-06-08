@@ -11,7 +11,7 @@ fi
 echo "Install build dependencies: build-essential libgl1-mesa-dev"
 sudo apt-get install build-essential libgl1-mesa-dev
 
-if [ "$1" == "-u" ]; then
+if ([ "$1" == "-u" ] && [ $(basename "$PWD") != 'ros_qtc_plugins' ]) ; then
     BASE_PATH=$PWD/qtc_plugins
 else
     BASE_PATH=$(dirname "$PWD")
@@ -50,10 +50,11 @@ if [ "$1" == "-u" ]; then
         cd $BASE_PATH && git clone --recursive -b master https://github.com/Levi-Armstrong/ros_qtc_plugins.git
     else
         cd $BASE_PATH/ros_qtc_plugins && git fetch && git pull
-        cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git fetch
-        cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git pull
     fi 
 fi
+cd $BASE_PATH/ros_qtc_plugins && git submodule update --init --recursive
+cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git fetch
+cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git pull
 mkdir -p $ROS_BUILD
 cd $ROS_BUILD && qmake -r $ROS_SOURCE/ros_qtc_plugins.pro
 cd $ROS_BUILD && make -j8
