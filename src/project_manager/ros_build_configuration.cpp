@@ -120,24 +120,12 @@ void ROSBuildConfiguration::sourceWorkspace()
 
   if (ROSUtils::sourceWorkspace(&process, ws_dir , rosDistribution()))
   {
-    QList<Utils::EnvironmentItem> current_env = userEnvironmentChanges();
     Utils::Environment source_env = Utils::Environment(process.processEnvironment().toStringList());
     source_env.set(QLatin1String("PWD"), ws_dir.toString());
 
-    // Need to check if additional user changes are not overwritten
     QList<Utils::EnvironmentItem> diff = baseEnvironment().diff(source_env);
-
     if (!diff.isEmpty())
-    {
-      foreach(Utils::EnvironmentItem it, current_env)
-      {
-		//TODO: The append does not work correctly on every environment variable
-        source_env.appendOrSet(it.name, it.value);
-      }
-
-      diff = baseEnvironment().diff(source_env);
       setUserEnvironmentChanges(diff);
-    }
   }
 }
 
