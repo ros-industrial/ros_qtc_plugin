@@ -1,2 +1,2 @@
 # ros_qtc_plugins
-This contains ROS related plugins for Qt Creator. See the repository wiki for addition information.
+This contains ROS related plugins for Qt Creator. See the repository [wiki](https://github.com/ros-industrial/ros_qtc_plugin/wiki) for addition information.
