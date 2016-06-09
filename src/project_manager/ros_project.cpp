@@ -8,6 +8,7 @@
 #include <coreplugin/documentmanager.h>
 #include <coreplugin/icontext.h>
 #include <coreplugin/icore.h>
+#include <coreplugin/vcsmanager.h>
 #include <cpptools/cpptoolsconstants.h>
 #include <cpptools/cppmodelmanager.h>
 #include <cpptools/projectpartbuilder.h>
@@ -47,6 +48,10 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
     setProjectManager(manager);
     setDocument(new ROSProjectFile(this, fileName));
     DocumentManager::addDocument(document(), true);
+
+    ROSProjectNode *project_node = new ROSProjectNode(this->projectFilePath());
+    connect(Core::VcsManager::instance(), &Core::VcsManager::repositoryChanged,
+            this, &ROSProject::repositoryChanged);
     setRootProjectNode(new ROSProjectNode(this->projectFilePath()));
 
     setProjectContext(Context(Constants::PROJECTCONTEXT));
@@ -285,6 +290,11 @@ Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *erro
 
       refresh();
       return RestoreResult::Ok;
+}
+
+void ROSProject::repositoryChanged(const QString &repository)
+{
+  static_cast<ROSProjectNode *>(rootProjectNode())->updateVersionControlInfo(repository);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

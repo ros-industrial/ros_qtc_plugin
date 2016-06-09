@@ -4,6 +4,8 @@
 
 #include <utils/fileutils.h>
 #include <coreplugin/idocument.h>
+#include <coreplugin/vcsmanager.h>
+#include <coreplugin/iversioncontrol.h>
 #include <projectexplorer/projectexplorer.h>
 
 #include <QFileInfo>
@@ -35,7 +37,7 @@ bool ROSProjectNode::removeFile(const QString &parentPath, const QString &fileNa
 
 bool ROSProjectNode::addFile(const QString &parentPath, const QString &fileName)
 {
-    FolderNode *folder = findFolderbyAbsolutePath(parentPath);
+  FolderNode *folder = findFolderbyAbsolutePath(parentPath);
   if(!folder)
     folder = createFolderbyAbsolutePath(parentPath);
 
@@ -73,7 +75,7 @@ bool ROSProjectNode::removeDirectory(const QString &parentPath, const QString &d
   FolderNode *folder = findFolderbyAbsolutePath(parentPath);
   foreach (FolderNode *fn, folder->subFolderNodes())
   {
-      if (fn->displayName() == dirName)
+      if (getFolderName(fn) == dirName)
       {
           folder->removeFolderNodes(QList<FolderNode *>() << fn);
           return true;
@@ -104,6 +106,7 @@ bool ROSProjectNode::renameDirectory(const QString &parentPath, const QString &o
   Utils::FileName folderPath =  Utils::FileName::fromString(newFilePath + QLatin1Char('/'));
   folder->setAbsoluteFilePathAndLine(folderPath, -1);
   folder->setDisplayName(newDirName);
+  updateVersionControlInfoHelper(folder);
   renameDirectoryHelper(folder);
 
   return true;
@@ -121,13 +124,13 @@ void ROSProjectNode::renameDirectoryHelper(FolderNode * &folder)
   // Update subFolders
   foreach(FolderNode *fn, folder->subFolderNodes())
   {
-    QString newFilePath = folder->filePath().toString() + fn->displayName() + QLatin1Char('/');
+    QString newFilePath = folder->filePath().toString() + getFolderName(fn) + QLatin1Char('/');
     fn->setAbsoluteFilePathAndLine(Utils::FileName::fromString(newFilePath), -1);
     renameDirectoryHelper(fn);
   }
 }
 
-FolderNode *ROSProjectNode::findFolderbyAbsolutePath(const QString &absolutePath)
+FolderNode *ROSProjectNode::findFolderbyAbsolutePath(const QString &absolutePath) const
 {
   if (filePath().parentDir().toString() != absolutePath)
   {
@@ -154,7 +157,7 @@ FolderNode *ROSProjectNode::createFolderbyAbsolutePath(const QString &absolutePa
 {
   Utils::FileName folder = Utils::FileName::fromString(absolutePath);
   FolderNode *folderNode = new FolderNode(Utils::FileName::fromString(absolutePath + QLatin1Char('/')));
-  folderNode->setDisplayName(folder.fileName());
+  updateVersionControlInfoHelper(folderNode);
 
   FolderNode *parent = findFolderbyAbsolutePath(folder.parentDir().toString());
 
@@ -180,6 +183,46 @@ QList<ProjectAction> ROSProjectNode::supportedActions(Node *node) const
         << AddExistingDirectory
         << RemoveFile
         << Rename;
+}
+
+bool ROSProjectNode::hasVersionControl(const QString &absolutePath, QString &vcsTopic) const
+{
+  if (Core::IVersionControl *vc = Core::VcsManager::findVersionControlForDirectory(absolutePath))
+  {
+    if (absolutePath == Core::VcsManager::findTopLevelForDirectory(absolutePath))
+    {
+      vcsTopic = vc->vcsTopic(absolutePath);
+      return true;
+    }
+  }
+  return false;
+}
+
+void ROSProjectNode::updateVersionControlInfo(const QString &absolutePath) const
+{
+  updateVersionControlInfoHelper(findFolderbyAbsolutePath(absolutePath));
+}
+
+void ROSProjectNode::updateVersionControlInfoHelper(FolderNode *folderNode) const
+{
+  QString branch;
+  if (hasVersionControl(getFolderPath(folderNode), branch))
+      folderNode->setDisplayName(QString::fromLatin1("%1 [%2]").arg(getFolderName(folderNode), branch));
+  else
+      folderNode->setDisplayName(getFolderName(folderNode));
+}
+
+QString ROSProjectNode::getFolderName(FolderNode *folderNode) const
+{
+  QString path = getFolderPath(folderNode);
+  return Utils::FileName::fromString(path).fileName();
+}
+
+QString ROSProjectNode::getFolderPath(FolderNode *folderNode) const
+{
+  QString path = folderNode->filePath().toString();
+  path.chop(1);
+  return path;
 }
 
 } // namespace Internal

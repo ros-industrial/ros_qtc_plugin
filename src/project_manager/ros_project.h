@@ -53,6 +53,7 @@ private:
     bool saveProjectFile();
     void parseProjectFile();
     void refreshCppCodeModel();
+    void repositoryChanged(const QString &repository);
 
     QString m_projectName;
     ROSWorkspaceWatcher *m_workspaceWatcher;

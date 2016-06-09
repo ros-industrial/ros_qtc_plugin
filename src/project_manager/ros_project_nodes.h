@@ -37,12 +37,18 @@ public:
     bool removeDirectory(const QString &parentPath, const QString &dirName);
     bool addDirectory(const QString &parentPath, const QString &dirName);
     bool addDirectory(const QString &dirPath);
-    bool renameDirectory(const QString &parentPath, const QString &oldDirName, const QString &newDirName);
+    bool renameDirectory(const QString &parentPath, const QString &oldDirName, const QString &newDirName); 
+    void updateVersionControlInfo(const QString &absolutePath) const;
+
 
 private:
     void renameDirectoryHelper(FolderNode *&folder);
-    FolderNode *findFolderbyAbsolutePath(const QString &absolutePath);
+    FolderNode *findFolderbyAbsolutePath(const QString &absolutePath) const;
     FolderNode *createFolderbyAbsolutePath(const QString &absolutePath);
+    bool hasVersionControl(const QString &absolutePath, QString &vcsTopic) const;
+    void updateVersionControlInfoHelper(FolderNode *folderNode) const;
+    QString getFolderName(FolderNode *folderNode) const;
+    QString getFolderPath(FolderNode *folderNode) const;
 };
 
 } // namespace Internal
