@@ -1,6 +1,6 @@
 TEMPLATE = aux
 
-include(../ros_qtc_plugins.pri)
+include(../ros_qtc_plugin.pri)
 
 STATIC_BASE = $$PWD
 STATIC_OUTPUT_BASE = $$IDE_DATA_PATH
