@@ -1,4 +1,4 @@
-include(../../ros_qtc_plugins.pri)
+include(../../ros_qtc_plugin.pri)
 include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
 
 DEFINES -= QT_NO_CAST_FROM_ASCII

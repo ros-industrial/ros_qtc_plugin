@@ -11,7 +11,7 @@ fi
 echo "Install build dependencies: build-essential libgl1-mesa-dev"
 sudo apt-get install build-essential libgl1-mesa-dev
 
-if ([ "$1" == "-u" ] && [ $(basename "$PWD") != 'ros_qtc_plugins' ]) ; then
+if ([ "$1" == "-u" ] && [ $(basename "$PWD") != 'ros_qtc_plugin' ]) ; then
     BASE_PATH=$PWD/qtc_plugins
 else
     BASE_PATH=$(dirname "$PWD")
@@ -20,8 +20,8 @@ fi
 QTC_BUILD=$BASE_PATH/qt-creator-build
 QTC_SOURCE=$BASE_PATH/qt-creator
 
-ROS_BUILD=$BASE_PATH/ros_qtc_plugins-build
-ROS_SOURCE=$BASE_PATH/ros_qtc_plugins
+ROS_BUILD=$BASE_PATH/ros_qtc_plugin-build
+ROS_SOURCE=$BASE_PATH/ros_qtc_plugin
 
 DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-ros.desktop
 ROS_QTC_SOURCE=$HOME/.local/share/ros_qtc.source
@@ -47,16 +47,16 @@ cd $QTC_BUILD && make -j8
 # Build ROS Qt Creator Plugin
 if [ "$1" == "-u" ]; then
     if [ ! -d "$ROS_SOURCE" ]; then 
-        cd $BASE_PATH && git clone --recursive -b master https://github.com/Levi-Armstrong/ros_qtc_plugins.git
+        cd $BASE_PATH && git clone --recursive -b master https://github.com/ros-industrial/ros_qtc_plugin.git
     else
-        cd $BASE_PATH/ros_qtc_plugins && git fetch && git pull
+        cd $BASE_PATH/ros_qtc_plugin && git fetch && git pull
     fi 
 fi
-cd $BASE_PATH/ros_qtc_plugins && git submodule update --init --recursive
-cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git fetch
-cd $BASE_PATH/ros_qtc_plugins && git submodule foreach git pull
+cd $BASE_PATH/ros_qtc_plugin && git submodule update --init --recursive
+cd $BASE_PATH/ros_qtc_plugin && git submodule foreach git fetch
+cd $BASE_PATH/ros_qtc_plugin && git submodule foreach git pull
 mkdir -p $ROS_BUILD
-cd $ROS_BUILD && qmake -r $ROS_SOURCE/ros_qtc_plugins.pro
+cd $ROS_BUILD && qmake -r $ROS_SOURCE/ros_qtc_plugin.pro
 cd $ROS_BUILD && make -j8
 
 # Create desktop launch icon
