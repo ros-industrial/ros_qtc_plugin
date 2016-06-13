@@ -54,6 +54,9 @@ const char ROS_WIZARD_CATEGORY_DISPLAY[] = "ROS";
 // Project Exclude Extension
 const QStringList ROS_EXCLUDE_FILE_EXTENSION = QStringList() << QLatin1Literal("*.autosave");
 
+// ROS Cpp Code Style ID
+const char ROS_CPP_CODE_STYLE_ID[] = "ROSProject.CppCodeStyle";
+
 // ROS C++ constants
 const char SOURCE_HEADER_FILE_FILTER[] = "*.c; *.cc; *.cpp; *.c++; *.cp; *.cxx; *.h; *.hh; *.hpp; *.h++; *.hp; *.hxx;";
 

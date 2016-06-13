@@ -49,6 +49,14 @@
 #include <coreplugin/actionmanager/command.h>
 #include <coreplugin/removefiledialog.h>
 
+#include <cpptools/cppcodestylepreferences.h>
+#include <cpptools/cpptoolssettings.h>
+#include <cpptools/cpptoolsconstants.h>
+
+#include <texteditor/codestylepool.h>
+#include <texteditor/tabsettings.h>
+#include <texteditor/texteditorsettings.h>
+
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/projecttree.h>
 #include <projectexplorer/selectablefilesmodel.h>
@@ -116,7 +124,57 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     Command *renameCommand = ActionManager::command(ProjectExplorer::Constants::RENAMEFILE);
     mfolderContextMenu->addAction(renameCommand, ProjectExplorer::Constants::G_FOLDER_FILES);
 
+    createCppCodeStyle();
+
     return true;
+}
+
+void ROSProjectPlugin::createCppCodeStyle()
+{
+  TextEditor::CodeStylePool *pool = TextEditor::TextEditorSettings::codeStylePool(CppTools::Constants::CPP_SETTINGS_ID);
+
+  // ROS style
+  CppTools::CppCodeStylePreferences *rosCodeStyle = new CppTools::CppCodeStylePreferences();
+  rosCodeStyle->setId(Constants::ROS_CPP_CODE_STYLE_ID);
+  rosCodeStyle->setDisplayName(tr("ROS"));
+  rosCodeStyle->setReadOnly(true);
+  TextEditor::TabSettings rosTabSettings;
+  rosTabSettings.m_tabPolicy = TextEditor::TabSettings::SpacesOnlyTabPolicy;
+  rosTabSettings.m_tabSize = 2;
+  rosTabSettings.m_indentSize = 2;
+  rosTabSettings.m_continuationAlignBehavior = TextEditor::TabSettings::ContinuationAlignWithIndent;
+  rosCodeStyle->setTabSettings(rosTabSettings);
+
+  CppTools::CppCodeStyleSettings rosCodeStyleSettings;
+  rosCodeStyleSettings.alignAssignments = false;
+  rosCodeStyleSettings.bindStarToIdentifier = true;
+  rosCodeStyleSettings.bindStarToLeftSpecifier = false;
+  rosCodeStyleSettings.bindStarToRightSpecifier = false;
+  rosCodeStyleSettings.bindStarToTypeName = false;
+  rosCodeStyleSettings.extraPaddingForConditionsIfConfusingAlign = true;
+  rosCodeStyleSettings.indentAccessSpecifiers = false;
+  rosCodeStyleSettings.indentBlockBody = true;
+  rosCodeStyleSettings.indentBlockBraces = false;
+  rosCodeStyleSettings.indentBlocksRelativeToSwitchLabels = false;
+  rosCodeStyleSettings.indentClassBraces = false;
+  rosCodeStyleSettings.indentControlFlowRelativeToSwitchLabels = true;
+  rosCodeStyleSettings.indentDeclarationsRelativeToAccessSpecifiers = true;
+  rosCodeStyleSettings.indentEnumBraces = false;
+  rosCodeStyleSettings.indentFunctionBody = true;
+  rosCodeStyleSettings.indentFunctionBraces = false;
+  rosCodeStyleSettings.indentNamespaceBody = false;
+  rosCodeStyleSettings.indentNamespaceBraces = false;
+  rosCodeStyleSettings.indentStatementsRelativeToSwitchLabels = true;
+  rosCodeStyleSettings.indentSwitchLabels = false;
+  rosCodeStyle->setCodeStyleSettings(rosCodeStyleSettings);
+
+  pool->addCodeStyle(rosCodeStyle);
+
+  // Since the ROS Cpp code style can not be added until after the CppToolsSettings instance is create
+  // the Cpp code style must be reloaded from settings to capture if it is set ROS Cpp code style.
+  QSettings *s = Core::ICore::settings();
+  CppTools::CppCodeStylePreferences *originalCppCodeStylePreferences = CppTools::CppToolsSettings::instance()->cppCodeStyle();
+  originalCppCodeStylePreferences->fromSettings(QLatin1String(CppTools::Constants::CPP_SETTINGS_ID), s);
 }
 
 void ROSProjectPlugin::reloadProjectIncludeDirectories()
