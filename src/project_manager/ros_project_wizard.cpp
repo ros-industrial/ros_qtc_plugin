@@ -36,6 +36,14 @@
 #include <coreplugin/icore.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/customwizard/customwizard.h>
+#include <projectexplorer/projecttree.h>
+#include <projectexplorer/editorconfiguration.h>
+#include <projectexplorer/project.h>
+
+#include <cpptools/cppcodestylepreferences.h>
+#include <cpptools/cpptoolsconstants.h>
+
+#include <texteditor/icodestylepreferences.h>
 
 #include <utils/filewizardpage.h>
 #include <utils/mimetypes/mimedatabase.h>
@@ -375,7 +383,20 @@ bool ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core::Generated
                                              QString *errorMessage) const
 {
     Q_UNUSED(w);
-    return ProjectExplorer::CustomProjectWizard::postGenerateOpen(l, errorMessage);
+
+    bool success = ProjectExplorer::CustomProjectWizard::postGenerateOpen(l, errorMessage);
+
+    ProjectExplorer::Project *project = ProjectExplorer::ProjectTree::currentProject();
+    if (!project)
+        return success;
+
+    // This will need to be moved to ROS settings when it has been created.
+    // Set the Cpp code style for the project.
+    ProjectExplorer::EditorConfiguration *editorConfiguration = project->editorConfiguration();
+    TextEditor::ICodeStylePreferences *codeStylePreferences = editorConfiguration->codeStyle(CppTools::Constants::CPP_SETTINGS_ID);
+    codeStylePreferences->setCurrentDelegate(Constants::ROS_CPP_CODE_STYLE_ID);
+
+    return success;
 }
 
 } // namespace Internal
