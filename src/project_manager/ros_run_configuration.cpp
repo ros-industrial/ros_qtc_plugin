@@ -78,7 +78,7 @@ ROSRunConfiguration::ROSRunConfiguration(Target *parent, Id id) :
     m_isEnabled(false)
 {
     m_stepList->setDefaultDisplayName(tr("Run"));
-//    m_isEnabled = true; //Added for testing
+    m_isEnabled = true; //TODO: Need to create a way to ask the ros project if it is ok.
     ctor();
 }
 
