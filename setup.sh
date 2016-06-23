@@ -41,6 +41,7 @@ else
     cd $BASE_PATH/qt-creator && git fetch && git pull
 fi 
 mkdir -p $QTC_BUILD
+cd $QTC_BUILD && make clean
 cd $QTC_BUILD && qmake -r $QTC_SOURCE/qtcreator.pro
 cd $QTC_BUILD && make -j8
 
@@ -56,6 +57,7 @@ cd $BASE_PATH/ros_qtc_plugin && git submodule update --init --recursive
 cd $BASE_PATH/ros_qtc_plugin && git submodule foreach git fetch
 cd $BASE_PATH/ros_qtc_plugin && git submodule foreach git pull
 mkdir -p $ROS_BUILD
+cd $ROS_BUILD && make clean
 cd $ROS_BUILD && qmake -r $ROS_SOURCE/ros_qtc_plugin.pro
 cd $ROS_BUILD && make -j8
 
