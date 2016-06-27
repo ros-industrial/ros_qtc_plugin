@@ -47,6 +47,14 @@ class ROSRunControlFactory;
 
 namespace Ui { class ROSRunConfiguration; class ROSLaunchConfiguration;}
 
+class ROSRunnable
+{
+public:
+    static void *staticTypeId;
+};
+bool operator==(const ROSRunnable &r1, const ROSRunnable &r2);
+
+
 class ROSRunConfiguration : public ProjectExplorer::RunConfiguration
 {
     Q_OBJECT
@@ -65,8 +73,9 @@ public:
 
     ProjectExplorer::Abi abi() const override;
 
+    ProjectExplorer::Runnable runnable() const override;
+
     RunStepList *stepList() const;
-    QString executable() const;
 
 protected:
     ROSRunConfiguration(ProjectExplorer::Target *parent, Core::Id id);

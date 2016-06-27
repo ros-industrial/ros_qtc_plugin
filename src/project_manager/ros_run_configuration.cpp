@@ -38,6 +38,7 @@
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorericons.h>
 #include <projectexplorer/buildstepspage.h>
+#include <projectexplorer/runnables.h>
 
 #include <qtsupport/qtkitinformation.h>
 #include <qtsupport/qtoutputformatter.h>
@@ -65,7 +66,14 @@ namespace Internal {
 
 const char ROS_RC_ID[] = "ROSProjectManager.ROSRunConfiguration";
 const char ROS_RUN_STEP_LIST_ID[] = "ROSProjectManager.ROSRunConfiguration.RunStepList";
-//const char ROS_RUN_CONTROL_ID[] = "ROSProjectManager.ROSRunControl";
+
+bool operator==(const ROSRunnable &r1, const ROSRunnable &r2)
+{
+    return true;
+}
+
+void *ROSRunnable::staticTypeId = &ROSRunnable::staticTypeId;
+
 
 ROSRunConfiguration::ROSRunConfiguration(Target *parent):
     ROSRunConfiguration(parent, Core::Id(ROS_RC_ID))
@@ -77,8 +85,7 @@ ROSRunConfiguration::ROSRunConfiguration(Target *parent, Id id) :
     m_stepList(new RunStepList(this, Core::Id(ROS_RUN_STEP_LIST_ID))),
     m_isEnabled(false)
 {
-    m_stepList->setDefaultDisplayName(tr("Run"));
-    m_isEnabled = true; //TODO: Need to create a way to ask the ros project if it is ok.
+    m_stepList->setDefaultDisplayName(tr("Run"));   
     ctor();
 }
 
@@ -92,13 +99,13 @@ ROSRunConfiguration::ROSRunConfiguration(Target *parent, ROSRunConfiguration *so
 
 bool ROSRunConfiguration::isEnabled() const
 {
-    return m_isEnabled;
+    return m_stepList->enabled();
 }
 
 QString ROSRunConfiguration::disabledReason() const
 {
     if (!m_isEnabled)
-        return tr("No qmlviewer or qmlscene found.");
+        return tr("No ROS run step for active project.");
     return QString();
 }
 
@@ -121,19 +128,6 @@ setDisplayName(tr("ROS Run Configuration", "ROS run configuration display name."
 //    updateEnabled();
 }
 
-QString ROSRunConfiguration::executable() const
-{
-//    QtSupport::BaseQtVersion *version = qtVersion();
-//    if (!version)
-//        return QString();
-
-//    if (id() == Constants::QML_SCENE_RC_ID)
-//        return version->qmlsceneCommand();
-//    return version->qmlviewerCommand();
-}
-
-
-
 QWidget *ROSRunConfiguration::createConfigurationWidget()
 {
     return new RunStepsPage(this);
@@ -149,6 +143,12 @@ Abi ROSRunConfiguration::abi() const
     Abi hostAbi = Abi::hostAbi();
     return Abi(hostAbi.architecture(), hostAbi.os(), hostAbi.osFlavor(),
                Abi::RuntimeQmlFormat, hostAbi.wordWidth());
+}
+
+ProjectExplorer::Runnable ROSRunConfiguration::runnable() const
+{
+    ROSRunnable r;
+    return r;
 }
 
 QVariantMap ROSRunConfiguration::toMap() const

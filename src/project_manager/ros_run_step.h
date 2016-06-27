@@ -113,6 +113,7 @@ public:
     int count() const;
     bool isEmpty() const;
     bool contains(Core::Id id) const;
+    bool enabled() const;
 
     void insertStep(int position, RunStep *step);
     void appendStep(RunStep *step) { insertStep(count(), step); }
