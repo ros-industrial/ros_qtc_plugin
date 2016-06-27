@@ -243,6 +243,7 @@ void RunStepListWidget::updateEnabledState()
             }
         }
     }
+    updateRunStepButtonsState();
 }
 
 void RunStepListWidget::init(RunStepList *bsl)
@@ -454,27 +455,29 @@ void RunStepListWidget::setupUi()
 
 void RunStepListWidget::updateRunStepButtonsState()
 {
-    if (m_runStepsData.count() != m_runStepList->count())
-        return;
-    for (int i = 0; i < m_runStepsData.count(); ++i) {
-        RunStepsWidgetData *s = m_runStepsData.at(i);
-        m_disableMapper->setMapping(s->toolWidget, i);
-        s->toolWidget->setRemoveEnabled(!m_runStepList->at(i)->immutable());
-        m_removeMapper->setMapping(s->toolWidget, i);
+    if (m_runStepsData.count() == m_runStepList->count()) {
+        for (int i = 0; i < m_runStepsData.count(); ++i) {
+            RunStepsWidgetData *s = m_runStepsData.at(i);
+            m_disableMapper->setMapping(s->toolWidget, i);
+            s->toolWidget->setRemoveEnabled(!m_runStepList->at(i)->immutable());
+            m_removeMapper->setMapping(s->toolWidget, i);
 
-        s->toolWidget->setUpEnabled((i > 0)
-                                    && !(m_runStepList->at(i)->immutable()
-                                         && m_runStepList->at(i - 1)->immutable()));
-        m_upMapper->setMapping(s->toolWidget, i);
-        s->toolWidget->setDownEnabled((i + 1 < m_runStepList->count())
-                                      && !(m_runStepList->at(i)->immutable()
-                                           && m_runStepList->at(i + 1)->immutable()));
-        m_downMapper->setMapping(s->toolWidget, i);
+            s->toolWidget->setUpEnabled((i > 0)
+                                        && !(m_runStepList->at(i)->immutable()
+                                             && m_runStepList->at(i - 1)->immutable()));
+            m_upMapper->setMapping(s->toolWidget, i);
+            s->toolWidget->setDownEnabled((i + 1 < m_runStepList->count())
+                                          && !(m_runStepList->at(i)->immutable()
+                                               && m_runStepList->at(i + 1)->immutable()));
+            m_downMapper->setMapping(s->toolWidget, i);
 
-        // Only show buttons when needed
-        s->toolWidget->setDownVisible(m_runStepList->count() != 1);
-        s->toolWidget->setUpVisible(m_runStepList->count() != 1);
+            // Only show buttons when needed
+            s->toolWidget->setDownVisible(m_runStepList->count() != 1);
+            s->toolWidget->setUpVisible(m_runStepList->count() != 1);
+        }
     }
+
+    emit runStepListChanged();
 }
 
 RunStepsPage::RunStepsPage(ROSRunConfiguration *rc) :
@@ -485,6 +488,8 @@ RunStepsPage::RunStepsPage(ROSRunConfiguration *rc) :
     layout->setMargin(0);
     layout->setSpacing(0);
     layout->addWidget(m_widget);
+
+    connect(m_widget,SIGNAL(runStepListChanged()), rc, SIGNAL(requestRunActionsUpdate()));
 
     m_widget->init(rc->stepList());
     setDisplayName(tr("ROS Run Steps"));

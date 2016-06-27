@@ -104,6 +104,9 @@ public:
 
     void init(RunStepList *bsl);
 
+signals:
+    void runStepListChanged();
+
 private:
     void updateAddRunStepMenu();
     void addRunStep(int pos);

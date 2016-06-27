@@ -52,7 +52,7 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
     ROSProjectNode *project_node = new ROSProjectNode(this->projectFilePath());
     connect(Core::VcsManager::instance(), &Core::VcsManager::repositoryChanged,
             this, &ROSProject::repositoryChanged);
-    setRootProjectNode(new ROSProjectNode(this->projectFilePath()));
+    setRootProjectNode(project_node);
 
     setProjectContext(Context(Constants::PROJECTCONTEXT));
     setProjectLanguages(Context(ProjectExplorer::Constants::LANG_CXX));

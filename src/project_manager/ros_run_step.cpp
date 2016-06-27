@@ -216,6 +216,16 @@ bool RunStepList::contains(Core::Id id) const
     });
 }
 
+bool RunStepList::enabled() const
+{
+    foreach(RunStep *rs, m_steps)
+    {
+        if (rs->enabled() == true)
+            return true;
+    }
+    return false;
+}
+
 void RunStepList::cloneSteps(RunStepList *source)
 {
     Q_ASSERT(source);
