@@ -70,9 +70,11 @@ ROSTerminalPane::ROSTerminalPane() :
     m_newTerminalButton->setToolTip(tr("Add new terminal"));
     m_newTerminalButton->setIcon(Core::Icons::NEWFILE.icon());
 
+    updateToolBarButtonsEnabled();
+
     connect(TextEditor::TextEditorSettings::instance(),
                 &TextEditor::TextEditorSettings::behaviorSettingsChanged,
-                this, &ROSTerminalPane::updateZoomEnabled);
+                this, &ROSTerminalPane::updateToolBarButtonsEnabled);
 
     connect(m_zoomInButton, &QToolButton::clicked,
                 this, &ROSTerminalPane::zoomIn);
@@ -98,11 +100,15 @@ ROSTerminalPane::~ROSTerminalPane()
   delete m_newTerminalButton;
 }
 
-void ROSTerminalPane::updateZoomEnabled()
+void ROSTerminalPane::updateToolBarButtonsEnabled()
 {
   const TextEditor::BehaviorSettings &settings
           = TextEditor::TextEditorSettings::behaviorSettings();
-  bool zoomEnabled  = settings.m_scrollWheelZooming;
+
+  bool hasTerminal = (m_terminals.count() > 0);
+  bool zoomEnabled  = settings.m_scrollWheelZooming && hasTerminal;
+
+  m_stopButton->setEnabled(hasTerminal);
   m_zoomInButton->setEnabled(zoomEnabled);
   m_zoomOutButton->setEnabled(zoomEnabled);
 }
@@ -133,6 +139,9 @@ void ROSTerminalPane::closeTerminal(int index)
   m_tabNames.removeAll(m_tabWidget->tabText(index));
   m_terminals.removeAll(qobject_cast<QTermWidget*>(m_tabWidget->currentWidget()));
   m_tabWidget->removeTab(index);
+
+  updateToolBarButtonsEnabled();
+
   emit navigateStateUpdate();
 }
 
@@ -164,6 +173,7 @@ QTermWidget &ROSTerminalPane::startTerminal(int startnow, const QString name)
 
   //don't start shell yet
   QTermWidget *widget = new QTermWidget(startnow);
+  widget->setScrollBarPosition(QTermWidget::ScrollBarRight);
 
   QSettings *s = Core::ICore::settings();
   s->beginGroup(QLatin1String("ROSTerminal"));
@@ -178,7 +188,7 @@ QTermWidget &ROSTerminalPane::startTerminal(int startnow, const QString name)
 
   m_terminals.append(widget);
 
-  updateZoomEnabled();
+  updateToolBarButtonsEnabled();
 
   //Create a unique tab name
   tabNamePrefix = tabName;
@@ -222,7 +232,8 @@ void ROSTerminalPane::setFocus()
 
 void ROSTerminalPane::clearContents()
 {
-    qobject_cast<QTermWidget *>(m_tabWidget->currentWidget())->clear();
+    if (m_terminals.count() > 0)
+        qobject_cast<QTermWidget *>(m_tabWidget->currentWidget())->clear();
 }
 
 QWidget *ROSTerminalPane::outputWidget(QWidget *parent)
