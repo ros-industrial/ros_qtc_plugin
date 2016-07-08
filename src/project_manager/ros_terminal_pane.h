@@ -68,7 +68,7 @@ public:
   void sendText(const QString &text);
 
 private slots:
-  void updateZoomEnabled();
+  void updateToolBarButtonsEnabled();
   void zoomIn();
   void zoomOut();
   void startTerminalButton();
