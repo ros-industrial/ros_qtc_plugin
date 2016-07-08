@@ -136,6 +136,21 @@ void ROSTerminalPane::closeTerminal(int index)
   emit navigateStateUpdate();
 }
 
+void ROSTerminalPane::termKeyPressed(QKeyEvent *event)
+{
+    if (event->modifiers().testFlag(Qt::ControlModifier) && event->modifiers().testFlag(Qt::ShiftModifier))
+    {
+        if (event->key() == Qt::Key_C)
+        {
+            qobject_cast<QTermWidget *>(m_tabWidget->currentWidget())->copyClipboard();
+        }
+        else if (event->key() == Qt::Key_V)
+        {
+            qobject_cast<QTermWidget *>(m_tabWidget->currentWidget())->pasteClipboard();
+        }
+    }
+}
+
 void ROSTerminalPane::stopProcess()
 {
   foreach(QObject *obj, m_tabWidget->currentWidget()->children())
@@ -164,6 +179,9 @@ QTermWidget &ROSTerminalPane::startTerminal(int startnow, const QString name)
 
   //don't start shell yet
   QTermWidget *widget = new QTermWidget(startnow);
+
+  // This is to capture copy and paste key events
+  connect(widget, SIGNAL(termKeyPressed(QKeyEvent*)), this, SLOT(termKeyPressed(QKeyEvent*)));
 
   QSettings *s = Core::ICore::settings();
   s->beginGroup(QLatin1String("ROSTerminal"));

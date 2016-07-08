@@ -74,6 +74,7 @@ private slots:
   void startTerminalButton();
   void stopProcess();
   void closeTerminal(int index);
+  void termKeyPressed(QKeyEvent *event);
 
 private:
   QList<QTermWidget *> m_terminals;
