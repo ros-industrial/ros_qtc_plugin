@@ -15,6 +15,7 @@ sudo apt-get install build-essential libgl1-mesa-dev
 
 if (([ "$1" == "-u" ] || [ "$1" == "-ui" ]) && [ $(basename "$PWD") != 'ros_qtc_plugin' ]) ; then
     BASE_PATH=$PWD/qtc_plugins
+    mkdir -p $BASE_PATH
 else
     BASE_PATH=$(dirname "$PWD")
 fi
@@ -26,15 +27,6 @@ ROS_BUILD=$BASE_PATH/ros_qtc_plugin-build
 ROS_SOURCE=$BASE_PATH/ros_qtc_plugin
 
 DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-ros.desktop
-ROS_QTC_SOURCE=$HOME/.local/share/ros_qtc.source
-
-#Set perminate environment vairable holding the location to Qt Creator source
-if [ ! -f "$ROS_QTC_SOURCE" ]; then
-    echo 'source '$ROS_QTC_SOURCE >> ~/.bashrc
-fi
-> $ROS_QTC_SOURCE
-echo 'export ROS_QTC_SOURCE='$BASE_PATH >> $ROS_QTC_SOURCE
-source $ROS_QTC_SOURCE
 
 # Clone Qt Creator and build it from source
 if [ ! -d "$QTC_SOURCE" ]; then 
