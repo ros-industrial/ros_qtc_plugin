@@ -338,10 +338,13 @@ ROSRunControl::ROSRunControl(RunConfiguration *rc, Id id):
 
 void ROSRunControl::start()
 {
-  foreach(RunStep *rs, m_rc->stepList()->steps())
-  {
-    rs->run(m_futureInterfaceForAysnc);
-  }
+    foreach(RunStep *rs, m_rc->stepList()->steps())
+    {
+        if (rs->enabled() == true)
+        {
+            rs->run(m_futureInterfaceForAysnc);
+        }
+    }
 
 //  d->running = true;
 //  emit started();
