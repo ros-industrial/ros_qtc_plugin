@@ -320,7 +320,8 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir, 
 {
   // Parse CodeBlocks Project File
   // Need to search for all of the tags <Add directory="include path" />
-  QStringList includePaths;
+  QStringList workspace_includes;
+  QStringList system_includes;
   QXmlStreamReader cbpXml;
   Utils::FileName cbpPath = workspaceDir;
   cbpPath.appendPath(QLatin1String("build")).appendPath(QLatin1String("Project.cbp"));
@@ -328,7 +329,7 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir, 
   if (!cbpFile.open(QFile::ReadOnly | QFile::Text))
   {
     qDebug() << "Error opening CodeBlocks Project File";
-    return includePaths;
+    return workspace_includes;
   }
 
   cbpXml.setDevice(&cbpFile);
@@ -344,9 +345,14 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir, 
           if(attr.name().toString() == QLatin1String("directory"))
           {
             QString attribute_value = attr.value().toString();
-            if(!includePaths.contains(attribute_value))
+            if (attribute_value.startsWith(workspaceDir.toString()))
             {
-              includePaths.append(attribute_value);
+              if (!workspace_includes.contains(attribute_value))
+                workspace_includes.append(attribute_value);
+            }
+            else if(!system_includes.contains(attribute_value))
+            {
+              system_includes.append(attribute_value);
             }
           }
         }
@@ -364,9 +370,9 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir, 
   while (itSrc.hasNext())
   {
     includePath = itSrc.next();
-    if(!includePaths.contains(includePath))
+    if(!workspace_includes.contains(includePath))
     {
-      includePaths.append(includePath);
+      workspace_includes.append(includePath);
     }
   }
 
@@ -378,13 +384,15 @@ QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir, 
   while (itDevel.hasNext())
   {
     includePath = itDevel.next();
-    if(!includePaths.contains(includePath))
+    if(!workspace_includes.contains(includePath))
     {
-      includePaths.append(includePath);
+      workspace_includes.append(includePath);
     }
   }
 
-  return includePaths;
+  // The order matters so it will search local first then system
+  workspace_includes.append(system_includes);
+  return workspace_includes;
 }
 
 QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
