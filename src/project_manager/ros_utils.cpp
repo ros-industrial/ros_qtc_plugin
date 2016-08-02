@@ -288,32 +288,33 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
   ROSUtils::FolderContent content;
   QString folder = folderPath.toString();
 
-  // Get Directory data
-  content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs);
-  content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files);
-  workspaceFiles[folder] = content;
-  foreach (QString file, content.files)
-  {
-    fileList.append(QDir(folder).absoluteFilePath(file));
-  }
-
-  // Get SubDirectory Information
-  const QDir srcDir(folder);
-  QDirIterator itSrc(srcDir.absolutePath(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-  while (itSrc.hasNext())
-  {
-    folder = itSrc.next();
+    // Get Directory data
     content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs);
     content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files);
     workspaceFiles[folder] = content;
 
     foreach (QString file, content.files)
     {
-      fileList.append(QDir(folder).absoluteFilePath(file));
+        fileList.append(QDir(folder).absoluteFilePath(file));
     }
-  }
 
-  return workspaceFiles;
+    // Get SubDirectory Information
+    const QDir srcDir(folder);
+    QDirIterator itSrc(srcDir.absolutePath(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
+    while (itSrc.hasNext())
+    {
+        folder = itSrc.next();
+        content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs);
+        content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files);
+        workspaceFiles[folder] = content;
+
+        foreach (QString file, content.files)
+        {
+            fileList.append(QDir(folder).absoluteFilePath(file));
+        }
+    }
+
+    return workspaceFiles;
 }
 
 QStringList ROSUtils::getWorkspaceIncludes(const Utils::FileName &workspaceDir, const QString &rosDistribution)
