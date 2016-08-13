@@ -30,7 +30,7 @@
 #include <QToolButton>
 #include <QProcess>
 
-#include "qtermwidget.h"
+#include <qtermwidget5/qtermwidget.h>
 
 namespace ROSProjectManager {
 namespace Internal {
