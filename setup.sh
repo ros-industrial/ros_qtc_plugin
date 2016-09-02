@@ -20,6 +20,8 @@ else
     BASE_PATH=$(dirname "$PWD")
 fi
 
+QMAKE_PATH=/opt/qt57/bin/qmake
+
 QTC_BUILD=$BASE_PATH/qt-creator-build
 QTC_SOURCE=$BASE_PATH/qt-creator
 
@@ -30,23 +32,23 @@ DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-ros.desktop
 
 # Clone Qt Creator and build it from source
 if [ ! -d "$QTC_SOURCE" ]; then 
-    cd $BASE_PATH && git clone -b 4.0 https://github.com/qtproject/qt-creator.git
+    cd $BASE_PATH && git clone -b 4.1 https://github.com/qtproject/qt-creator.git
 else
     cd $BASE_PATH/qt-creator && git fetch && git pull
 fi 
 mkdir -p $QTC_BUILD
 cd $QTC_BUILD && make clean
 if ([ "$1" == "-u" ] || [ "$1" == "-d" ]); then
-  cd $QTC_BUILD && qmake $QTC_SOURCE/qtcreator.pro -r
+  cd $QTC_BUILD && $QMAKE_PATH $QTC_SOURCE/qtcreator.pro -r
 else
-  cd $QTC_BUILD && qmake $QTC_SOURCE/qtcreator.pro -r CONFIG+=qml_debug CONFIG+=force_debug_info CONFIG+=separate_debug_info
+  cd $QTC_BUILD && $QMAKE_PATH $QTC_SOURCE/qtcreator.pro -r CONFIG+=qml_debug CONFIG+=force_debug_info CONFIG+=separate_debug_info
 fi
 cd $QTC_BUILD && make -j8
 
 # Build ROS Qt Creator Plugin
 if ([ "$1" == "-u" ] || [ "$1" == "-ui" ]); then
     if [ ! -d "$ROS_SOURCE" ]; then 
-        cd $BASE_PATH && git clone --recursive -b master https://github.com/ros-industrial/ros_qtc_plugin.git
+        cd $BASE_PATH && git clone -b master https://github.com/ros-industrial/ros_qtc_plugin.git
     else
         cd $BASE_PATH/ros_qtc_plugin && git fetch && git pull
     fi 
@@ -57,9 +59,9 @@ cd $BASE_PATH/ros_qtc_plugin && git submodule foreach git pull
 mkdir -p $ROS_BUILD
 cd $ROS_BUILD && make clean
 if ([ "$1" == "-u" ] || [ "$1" == "-d" ]); then
-  cd $ROS_BUILD && qmake $ROS_SOURCE/ros_qtc_plugin.pro -r
+  cd $ROS_BUILD && $QMAKE_PATH $ROS_SOURCE/ros_qtc_plugin.pro -r
 else
-  cd $ROS_BUILD && qmake $ROS_SOURCE/ros_qtc_plugin.pro -r CONFIG+=qml_debug CONFIG+=force_debug_info CONFIG+=separate_debug_info
+  cd $ROS_BUILD && $QMAKE_PATH $ROS_SOURCE/ros_qtc_plugin.pro -r CONFIG+=qml_debug CONFIG+=force_debug_info CONFIG+=separate_debug_info
 fi
 cd $ROS_BUILD && make -j8
 
