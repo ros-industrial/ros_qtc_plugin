@@ -107,19 +107,10 @@ class ROSMakeStepFactory : public ProjectExplorer::IBuildStepFactory
 
 public:
     explicit ROSMakeStepFactory(QObject *parent = 0);
-
-    bool canCreate(ProjectExplorer::BuildStepList *parent, Core::Id id) const;
-    ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent, Core::Id id);
-    bool canClone(ProjectExplorer::BuildStepList *parent,
-                  ProjectExplorer::BuildStep *source) const;
-    ProjectExplorer::BuildStep *clone(ProjectExplorer::BuildStepList *parent,
-                                      ProjectExplorer::BuildStep *source);
-    bool canRestore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) const;
-    ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent,
-                                        const QVariantMap &map);
-
-    QList<Core::Id> availableCreationIds(ProjectExplorer::BuildStepList *bc) const;
-    QString displayNameForId(Core::Id id) const;
+    QList<ProjectExplorer::BuildStepInfo> availableSteps(ProjectExplorer::BuildStepList *parent) const override;
+    ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent, Core::Id id) override;
+    ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) override;
+    ProjectExplorer::BuildStep *clone(ProjectExplorer::BuildStepList *parent, ProjectExplorer::BuildStep *product) override;
 };
 
 } // namespace Internal

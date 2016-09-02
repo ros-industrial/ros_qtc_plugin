@@ -40,7 +40,7 @@
 #include <projectexplorer/kitmanager.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <qtsupport/baseqtversion.h>
-#include <qtsupport/customexecutablerunconfiguration.h>
+#include <projectexplorer/customexecutablerunconfiguration.h>
 #include <qtsupport/qtkitinformation.h>
 #include <utils/fileutils.h>
 #include <utils/qtcassert.h>
@@ -305,7 +305,7 @@ Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *erro
               continue;
           }
           if (!t->activeRunConfiguration())
-              t->addRunConfiguration(new QtSupport::CustomExecutableRunConfiguration(t));
+              t->addRunConfiguration(new ProjectExplorer::CustomExecutableRunConfiguration(t));
       }
 
       refresh();
