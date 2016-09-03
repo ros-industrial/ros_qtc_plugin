@@ -332,17 +332,9 @@ ROSMakeStepFactory::ROSMakeStepFactory(QObject *parent) :
 {
 }
 
-bool ROSMakeStepFactory::canCreate(BuildStepList *parent, const Id id) const
-{
-    if (parent->target()->project()->id() == Constants::ROSPROJECT_ID)
-        return id == ROS_MS_ID;
-    return false;
-}
-
 BuildStep *ROSMakeStepFactory::create(BuildStepList *parent, const Id id)
 {
-    if (!canCreate(parent, id))
-        return 0;
+    Q_UNUSED(id);
     ROSMakeStep *step = new ROSMakeStep(parent);
     if (parent->id() == ProjectExplorer::Constants::BUILDSTEPS_CLEAN) {
         step->setClean(true);
@@ -353,29 +345,13 @@ BuildStep *ROSMakeStepFactory::create(BuildStepList *parent, const Id id)
     return step;
 }
 
-bool ROSMakeStepFactory::canClone(BuildStepList *parent, BuildStep *source) const
-{
-    return canCreate(parent, source->id());
-}
-
 BuildStep *ROSMakeStepFactory::clone(BuildStepList *parent, BuildStep *source)
 {
-    if (!canClone(parent, source))
-        return 0;
-    ROSMakeStep *old(qobject_cast<ROSMakeStep *>(source));
-    Q_ASSERT(old);
-    return new ROSMakeStep(parent, old);
-}
-
-bool ROSMakeStepFactory::canRestore(BuildStepList *parent, const QVariantMap &map) const
-{
-    return canCreate(parent, idFromMap(map));
+    return new ROSMakeStep(parent, qobject_cast<ROSMakeStep *>(source));
 }
 
 BuildStep *ROSMakeStepFactory::restore(BuildStepList *parent, const QVariantMap &map)
 {
-    if (!canRestore(parent, map))
-        return 0;
     ROSMakeStep *bs(new ROSMakeStep(parent));
     if (bs->fromMap(map))
         return bs;
@@ -383,19 +359,12 @@ BuildStep *ROSMakeStepFactory::restore(BuildStepList *parent, const QVariantMap 
     return 0;
 }
 
-QList<Id> ROSMakeStepFactory::availableCreationIds(BuildStepList *parent) const
+QList<ProjectExplorer::BuildStepInfo> ROSMakeStepFactory::availableSteps(BuildStepList *parent) const
 {
-    if (parent->target()->project()->id() == Constants::ROSPROJECT_ID)
-        return QList<Id>() << Id(ROS_MS_ID);
-    return QList<Id>();
-}
+    if (parent->target()->project()->id() != Constants::ROSPROJECT_ID)
+        return {};
 
-QString ROSMakeStepFactory::displayNameForId(const Id id) const
-{
-    if (id == ROS_MS_ID)
-        return QCoreApplication::translate("ROSProjectManager::Internal::ROSMakeStep",
-                                           ROS_MS_DISPLAY_NAME);
-    return QString();
+    return {{ROS_MS_ID,  QCoreApplication::translate("ROSProjectManager::Internal::ROSMakeStep", ROS_MS_DISPLAY_NAME)}};
 }
 
 } // namespace Internal
