@@ -29,6 +29,7 @@
 #include <coreplugin/icontext.h>
 #include <coreplugin/icore.h>
 #include <coreplugin/vcsmanager.h>
+#include <coreplugin/progressmanager/progressmanager.h>
 #include <cpptools/cpptoolsconstants.h>
 #include <cpptools/cppmodelmanager.h>
 #include <cpptools/projectpartbuilder.h>
@@ -91,13 +92,14 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
             this, SIGNAL(fileListChanged()));
 
     connect(this, &ROSProject::fileListChanged,
-            this, &ROSProject::refresh);
+            this, &ROSProject::refreshCppCodeModel);
 
 }
 
 ROSProject::~ROSProject()
 {
     m_codeModelFuture.cancel();
+    m_projectFutureInterface->cancel();
     projectManager()->unregisterProject(this);
 }
 
@@ -193,6 +195,16 @@ void ROSProject::parseProjectFile()
 
 void ROSProject::refresh()
 {
+    m_projectFutureInterface = new QFutureInterface<void>();
+
+    m_projectFutureInterface->setProgressRange(0, 100);
+    Core::ProgressManager::addTask(m_projectFutureInterface->future(),
+                                   tr("Reading Project \"%1\"").arg(displayName()),
+                                   Constants::ROS_READING_PROJECT);
+
+
+    m_projectFutureInterface->reportStarted();
+
     QSet<QString> oldWatchDirectories = m_watchDirectories.toSet();
     parseProjectFile();
     QSet<QString> newWatchDirectories = m_watchDirectories.toSet();
@@ -200,18 +212,28 @@ void ROSProject::refresh()
     QStringList addedDirectories = (newWatchDirectories - oldWatchDirectories).toList();
     QStringList removedDirectories = (oldWatchDirectories - newWatchDirectories).toList();
 
-    foreach (QString dir, removedDirectories) {
-      Utils::FileName removedDir = projectDirectory().appendPath(dir);
+    int cnt = 0;
+    int max = removedDirectories.size() + addedDirectories.size();
 
+    foreach (QString dir, removedDirectories) {
+      cnt += 1;
+      Utils::FileName removedDir = projectDirectory().appendPath(dir);
       if (removedDir.isChildOf(projectDirectory()))
         m_workspaceWatcher->unwatchFolder(removedDir.parentDir().toString(), dir);
+
+      m_projectFutureInterface->setProgressValue(floor(100.0 * (float)cnt / (float)max));
     }
 
     foreach (QString dir, addedDirectories) {
+      cnt += 1;
       Utils::FileName addedDir = projectDirectory().appendPath(dir);
       if (addedDir.isChildOf(projectDirectory()) && addedDir.exists())
         m_workspaceWatcher->watchFolder(addedDir.parentDir().toString(), dir);
+
+      m_projectFutureInterface->setProgressValue(floor(100.0 * (float)cnt / (float)max));
     }
+    m_projectFutureInterface->setProgressValue(100);
+    m_projectFutureInterface->reportFinished();
 
     // This will occure when include directories are added.
     if (addedDirectories.isEmpty() && removedDirectories.isEmpty())
