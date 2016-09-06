@@ -81,6 +81,8 @@ void ROSMakeStep::ctor()
 {
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSMakeStep",
                                                       ROS_MS_DISPLAY_NAME));
+
+    m_percentProgress = QRegExp(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
 }
 
 ROSBuildConfiguration *ROSMakeStep::rosBuildConfiguration() const
@@ -194,6 +196,32 @@ QString ROSMakeStep::makeCommand() const
 void ROSMakeStep::run(QFutureInterface<bool> &fi)
 {
     AbstractProcessStep::run(fi);
+}
+
+void ROSMakeStep::processStarted()
+{
+    futureInterface()->setProgressRange(0, 100);
+    AbstractProcessStep::processStarted();
+}
+
+void ROSMakeStep::processFinished(int exitCode, QProcess::ExitStatus status)
+{
+    AbstractProcessStep::processFinished(exitCode, status);
+    futureInterface()->setProgressValue(100);
+}
+
+void ROSMakeStep::stdOutput(const QString &line)
+{
+    AbstractProcessStep::stdOutput(line);
+    int pos = 0;
+    while ((pos = m_percentProgress.indexIn(line, pos)) != -1) {
+        bool ok = false;
+        int percent = m_percentProgress.cap(1).toInt(&ok);
+        if (ok)
+            futureInterface()->setProgressValue(percent);
+
+        pos += m_percentProgress.matchedLength();
+    }
 }
 
 BuildStepConfigWidget *ROSMakeStep::createConfigWidget()

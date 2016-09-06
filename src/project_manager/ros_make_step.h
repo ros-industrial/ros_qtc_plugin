@@ -46,12 +46,12 @@ public:
     ROSMakeStep(ProjectExplorer::BuildStepList *parent);
     ~ROSMakeStep();
 
-    bool init(QList<const BuildStep *> &earlierSteps);
-    void run(QFutureInterface<bool> &fi);
-    ROSBuildConfiguration *rosBuildConfiguration() const;
+    bool init(QList<const BuildStep *> &earlierSteps) override;
+    void run(QFutureInterface<bool> &fi) override;
+    ProjectExplorer::BuildStepConfigWidget *createConfigWidget() override;
+    bool immutable() const override;
 
-    ProjectExplorer::BuildStepConfigWidget *createConfigWidget();
-    bool immutable() const;
+    ROSBuildConfiguration *rosBuildConfiguration() const;
     bool buildsTarget(const QString &target) const;
     void setBuildTarget(const QString &target, bool on);
     QString allArguments(QString initial_arguments) const;
@@ -66,7 +66,11 @@ protected:
     ROSMakeStep(ProjectExplorer::BuildStepList *parent, ROSMakeStep *bs);
     ROSMakeStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     QStringList automaticallyAddedArguments() const;
-    bool fromMap(const QVariantMap &map);
+    bool fromMap(const QVariantMap &map) override;
+
+    void stdOutput(const QString &line) override;
+    void processStarted() override;
+    void processFinished(int exitCode, QProcess::ExitStatus status) override;
 
 private:
     void ctor();
@@ -75,6 +79,7 @@ private:
     QStringList m_buildTargets;
     QString m_makeArguments;
     QString m_makeCommand;
+    QRegExp m_percentProgress;
     bool m_clean;
 };
 
