@@ -30,6 +30,9 @@ const char ROSPROJECT_ID[]  = "ROSProjectManager.ROSProject";
 const char PROJECTCONTEXT[]     = "ROSProject.ProjectContext";
 const char ROSMIMETYPE[]    = "application/ros.project";
 
+// Tasks
+const char ROS_READING_PROJECT[] = "ROSProjectManager.ReadingProject";
+
 // ROS default install directory
 const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
 

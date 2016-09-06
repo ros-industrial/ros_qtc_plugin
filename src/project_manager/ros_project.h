@@ -35,6 +35,7 @@
 #include <coreplugin/idocument.h>
 
 #include <QFuture>
+#include <QFutureInterface>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -80,6 +81,7 @@ private:
     QStringList m_watchDirectories;
     QStringList m_projectIncludePaths;
     QFuture<void> m_codeModelFuture;
+    QFutureInterface<void> *m_projectFutureInterface = nullptr;
 };
 
 class ROSProjectFile : public Core::IDocument
