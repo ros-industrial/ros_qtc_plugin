@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ROSProjectManager::Internal::ROSMakeStep</class>
- <widget class="QWidget" name="ROSProjectManager::Internal::ROSMakeStep">
+ <class>ROSProjectManager::Internal::ROSCatkinMakeStep</class>
+ <widget class="QWidget" name="ROSProjectManager::Internal::ROSCatkinMakeStep">
   <property name="geometry">
    <rect>
     <x>0</x>

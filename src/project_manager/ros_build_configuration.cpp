@@ -20,7 +20,7 @@
  */
 #include "ros_build_configuration.h"
 
-#include "ros_make_step.h"
+#include "ros_catkin_make_step.h"
 #include "ros_project.h"
 #include "ros_project_constants.h"
 #include "ros_utils.h"
@@ -201,12 +201,12 @@ BuildConfiguration *ROSBuildConfigurationFactory::create(Target *parent, const B
     Q_ASSERT(buildSteps);
     Q_ASSERT(cleanSteps);
 
-    ROSMakeStep *makeStep = new ROSMakeStep(buildSteps);
+    ROSCatkinMakeStep *makeStep = new ROSCatkinMakeStep(buildSteps);
     buildSteps->insertStep(0, makeStep);
 
     makeStep->setBuildTarget(QLatin1String("all"), /* on = */ true);
 
-    ROSMakeStep *cleanMakeStep = new ROSMakeStep(cleanSteps);
+    ROSCatkinMakeStep *cleanMakeStep = new ROSCatkinMakeStep(cleanSteps);
     cleanSteps->insertStep(0, cleanMakeStep);
     cleanMakeStep->setBuildTarget(QLatin1String("clean"), /* on = */ true);
     cleanMakeStep->setClean(true);

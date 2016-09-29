@@ -21,7 +21,7 @@
 #include "ros_project.h"
 
 #include "ros_build_configuration.h"
-#include "ros_make_step.h"
+#include "ros_catkin_make_step.h"
 #include "ros_project_constants.h"
 #include "ros_utils.h"
 
