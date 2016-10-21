@@ -22,9 +22,7 @@
 
 #include <extensionsystem/pluginmanager.h>
 #include <utils/algorithm.h>
-
-
-
+#include <QDebug>
 
 static const char runStepEnabledKey[] = "ProjectExplorer.RunStep.Enabled";
 

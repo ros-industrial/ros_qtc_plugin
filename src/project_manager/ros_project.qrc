@@ -3,5 +3,6 @@
         <file>ROSProjectManager.mimetypes.xml</file>
         <file>50x50pix.png</file>
         <file>folderpackage.png</file>
+        <file>pencil_icon.png</file>
     </qresource>
 </RCC>

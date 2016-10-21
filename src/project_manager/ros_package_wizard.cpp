@@ -301,13 +301,13 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   if (!m_wizard->maintainers().isEmpty())
       cmd += m_wizard->maintainers().join(QLatin1Literal(" -m ")).insert(0,QLatin1Literal(" -m "));
 
-  cmd += QString::fromLatin1(" --rosdistro \"%1\"").arg(bc->rosDistribution());
+  cmd += QString::fromLatin1(" --rosdistro \"%1\"").arg(project->distribution());
 
   // create package using ros command catkin_create_pkg
   Utils::FileName packagePath = Utils::FileName::fromString(m_wizard->packagePath());
   catkin_create_pkg->setWorkingDirectory(packagePath.toString());
 
-  ROSUtils::sourceROS(catkin_create_pkg, bc->rosDistribution());
+  ROSUtils::sourceROS(catkin_create_pkg, project->distribution());
   catkin_create_pkg->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << cmd);
   catkin_create_pkg->waitForFinished();
   bool success;

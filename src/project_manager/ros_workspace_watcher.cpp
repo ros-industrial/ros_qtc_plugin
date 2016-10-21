@@ -22,6 +22,8 @@
 #include "ros_project_constants.h"
 #include "ros_project.h"
 
+#include <QDebug>
+
 namespace ROSProjectManager {
 namespace Internal {
 

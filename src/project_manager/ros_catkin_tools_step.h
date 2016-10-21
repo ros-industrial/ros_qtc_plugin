@@ -18,35 +18,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ROSCATKINMAKESTEP_H
-#define ROSCATKINMAKESTEP_H
+#ifndef ROSCATKINTOOLSSTEP_H
+#define ROSCATKINTOOLSSTEP_H
 
 #include <projectexplorer/abstractprocessstep.h>
+
 #include "ros_build_configuration.h"
+
+#include <QDialog>
+#include <yaml-cpp/yaml.h>
 
 QT_BEGIN_NAMESPACE
 class QListWidgetItem;
+class QAction;
 QT_END_NAMESPACE
 
 namespace ROSProjectManager {
 namespace Internal {
 
-class ROSCatkinMakeStepWidget;
-class ROSCatkinMakeStepFactory;
-namespace Ui { class ROSCatkinMakeStep; }
+class ROSCatkinToolsStepWidget;
+class ROSCatkinToolsStepFactory;
+namespace Ui {class ROSCatkinToolsStep; class ROSCatkinToolsConfigEditor;}
 
-class ROSCatkinMakeStep : public ProjectExplorer::AbstractProcessStep
+class ROSCatkinToolsStep : public ProjectExplorer::AbstractProcessStep
 {
     Q_OBJECT
 
-    friend class ROSCatkinMakeStepWidget;
-    friend class ROSCatkinMakeStepFactory;
+    friend class ROSCatkinToolsStepWidget;
+    friend class ROSCatkinToolsStepFactory;
 
 public:
     enum BuildTargets {BUILD = 0, CLEAN = 1};
 
-    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent);
-    ~ROSCatkinMakeStep();
+    ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent);
+    ~ROSCatkinToolsStep();
 
     bool init(QList<const BuildStep *> &earlierSteps) override;
     void run(QFutureInterface<bool> &fi) override;
@@ -61,9 +66,11 @@ public:
 
     QVariantMap toMap() const;
 
+
+
 protected:
-    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent, ROSCatkinMakeStep *bs);
-    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
+    ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, ROSCatkinToolsStep *bs);
+    ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     QStringList automaticallyAddedArguments() const;
     bool fromMap(const QVariantMap &map) override;
 
@@ -76,19 +83,21 @@ private:
     ROSBuildConfiguration *targetsActiveBuildConfiguration() const;
 
     BuildTargets m_target;
+    QString m_catkinToolsArguments;
     QString m_catkinMakeArguments;
     QString m_cmakeArguments;
     QString m_makeArguments;
     QRegExp m_percentProgress;
 };
 
-class ROSCatkinMakeStepWidget : public ProjectExplorer::BuildStepConfigWidget
+
+class ROSCatkinToolsStepWidget : public ProjectExplorer::BuildStepConfigWidget
 {
     Q_OBJECT
 
 public:
-    ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep);
-    ~ROSCatkinMakeStepWidget();
+    ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep);
+    ~ROSCatkinToolsStepWidget();
     QString displayName() const;
     QString summaryText() const;
 
@@ -96,17 +105,64 @@ private slots:
     void updateDetails();
 
 private:
-    Ui::ROSCatkinMakeStep *m_ui;
-    ROSCatkinMakeStep *m_makeStep;
+    Ui::ROSCatkinToolsStep *m_ui;
+    ROSCatkinToolsStep *m_makeStep;
     QString m_summaryText;
+    QString m_profile;
+    QMenu *m_addButtonMenu;
+    QMenu *m_profileMenu;
+
+    void updateAddProfileButtonMenu();
+    void updateProfileButtonMenu();
+    void setProfile(const QString profileName);
+    void cloneProfile(const QString profileName);
+    void renameProfile(const QString profileName);
+    void deleteProfile(const QString profileName);
+    void editProfile(const QString profileName);
+
+    QString uniqueName(const QString &name);
 };
 
-class ROSCatkinMakeStepFactory : public ProjectExplorer::IBuildStepFactory
+class ROSCatkinToolsProfileEditorDialog : public QDialog
+{
+    Q_OBJECT
+public:
+    ROSCatkinToolsProfileEditorDialog(Utils::FileName filePath);
+
+};
+
+class ROSCatkinToolsConfigEditorWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    ROSCatkinToolsConfigEditorWidget();
+    ~ROSCatkinToolsConfigEditorWidget();
+
+    bool parseProfileConfig(Utils::FileName filePath);
+    bool saveProfileConfig();
+    bool isModified() const;
+
+private slots:
+    void onActionEditFilePathListTriggered();
+    void onActionEditPackageListTriggered();
+    void onActionEditStingListTriggered();
+
+private:
+    Ui::ROSCatkinToolsConfigEditor *m_ui;
+    QAction *m_editor;
+    bool m_modified;
+    Utils::FileName m_profileConfigPath;
+    YAML::Node m_profile_original;
+    YAML::Node m_profile_current;
+
+};
+
+class ROSCatkinToolsStepFactory : public ProjectExplorer::IBuildStepFactory
 {
     Q_OBJECT
 
 public:
-    explicit ROSCatkinMakeStepFactory(QObject *parent = 0);
+    explicit ROSCatkinToolsStepFactory(QObject *parent = 0);
     QList<ProjectExplorer::BuildStepInfo> availableSteps(ProjectExplorer::BuildStepList *parent) const override;
     ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent, Core::Id id) override;
     ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) override;
@@ -116,4 +172,4 @@ public:
 } // namespace Internal
 } // namespace ROSProjectManager
 
-#endif // ROSCATKINMAKESTEP_H
+#endif // ROSCATKINTOOLSSTEP_H

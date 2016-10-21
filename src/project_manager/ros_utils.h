@@ -36,6 +36,15 @@ class ROSUtils
 public:
   ROSUtils();
 
+  enum BuildSystem { CatkinMake = 0,
+                     CatkinTools = 1 };
+
+  enum BuildType { BuildTypeNone = 0,
+                   BuildTypeDebug = 1,
+                   BuildTypeRelease = 2,
+                   BuildTypeRelWithDebInfo = 3,
+                   BuildTypeMinSizeRel = 4,
+                   BuildTypeLast = 5 };
   /**
    * @brief The FolderContent struct used to store file and folder information
    */
@@ -52,7 +61,7 @@ public:
    * @param buildDir - Build directory of the workspace
    * @return True if successful
    */
-  static bool generateCodeBlocksProjectFile(QProcess *process, const Utils::FileName &sourceDir, const Utils::FileName &buildDir);
+  static bool generateCodeBlocksProjectFile(QProcess *process, const Utils::FileName &workspaceDir, const BuildSystem buildSystem);
 
   /**
    * @brief sourceROS - Source ROS
@@ -69,28 +78,14 @@ public:
    * @param rosDistribution - ROS distribution
    * @return True if successful
    */
-  static bool sourceWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution);
+  static bool sourceWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem buildSystem);
 
   /**
    * @brief isWorkspaceInitialized - Check whether provided workspace has been initialized
    * @param workspaceDir - Workspace directory
    * @return True if workspace is initialized
    */
-  static bool isWorkspaceInitialized(const Utils::FileName &workspaceDir);
-
-  /**
-   * @brief hasDevelDirectory - Check whether provided workspace has a devel directory
-   * @param workspaceDir - Workspace directory
-   * @return True if devel directory exists
-   */
-  static bool hasDevelDirectory(const Utils::FileName &workspaceDir);
-
-  /**
-   * @brief hasBuildDirectory - Check whether provided workspace has a build directory
-   * @param workspaceDir - Workspace directory
-   * @return True if build directory exists
-   */
-  static bool hasBuildDirectory(const Utils::FileName &workspaceDir);
+  static bool isWorkspaceInitialized(const Utils::FileName &workspaceDir, const BuildSystem BuildSystem);
 
   /**
    * @brief initializeWorkspace - Initialize workspace
@@ -99,7 +94,7 @@ public:
    * @param rosDistribution - ROS Distribution
    * @return True if successfully executed
    */
-  static bool initializeWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution);
+  static bool initializeWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem buildSystem);
 
   /**
    * @brief buildWorkspace - Build workspace
@@ -107,7 +102,7 @@ public:
    * @param workspaceDir - Workspace Directory
    * @return True if successfully executed
    */
-  static bool buildWorkspace(QProcess *process, const Utils::FileName &workspaceDir);
+  static bool buildWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const ROSUtils::BuildSystem buildSystem);
 
   /**
    * @brief installedDistributions - Gets a list of installed ROS Distributions
@@ -122,7 +117,7 @@ public:
    * @param includePaths - List of required include directories
    * @return A bool whether the Qt ROS Project file was succesfully updated
    */
-  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QStringList &watchDirectories, const QStringList &includePaths);
+  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QString distribution, const QStringList &watchDirectories, const QStringList &includePaths);
 
   /**
    * @brief getWorkspaceFiles - Gets all fo the files in a ROS Workspace
@@ -144,7 +139,7 @@ public:
    * @param rosDistribution - ROS Distribution
    * @return QStringList of include directories
    */
-  static QStringList getWorkspaceIncludes(const Utils::FileName &workspaceDir, const QString &rosDistribution);
+  static QStringList getWorkspaceIncludes(const Utils::FileName &workspaceDir);
 
   /**
    * @brief getROSPackages - Executes the bash command "rospack list" and returns
@@ -169,6 +164,17 @@ public:
    * @return QStringList of executables
    */
   static QStringList getROSPackageExecutables(const QString &packageName, const QStringList &env);
+
+  static bool removeCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString profileName);
+  static bool renameCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString &oldProfileName, const QString &newProfileName);
+  static QString getCatkinToolsActiveProfile(const Utils::FileName &workspaceDir);
+  static bool setCatkinToolsActiveProfile(const Utils::FileName &workspaceDir, const QString profileName);
+  static QStringList getCatkinToolsProfileNames(const Utils::FileName &workspaceDir);
+  static Utils::FileName getCatkinToolsProfilePath(const Utils::FileName &workspaceDir, const QString profileName);
+
+  static QString getCMakeBuildTypeArgument(ROSUtils::BuildType &buildType);
+
+
 
 private:
 

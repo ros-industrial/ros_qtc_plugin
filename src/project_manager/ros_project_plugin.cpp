@@ -27,6 +27,7 @@
 #include "ros_project_wizard.h"
 #include "ros_project_constants.h"
 #include "ros_catkin_make_step.h"
+#include "ros_catkin_tools_step.h"
 #include "ros_project.h"
 #include "ros_utils.h"
 #include "ros_project_constants.h"
@@ -84,6 +85,7 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
 
     addAutoReleasedObject(new ROSManager);
     addAutoReleasedObject(new ROSCatkinMakeStepFactory);
+    addAutoReleasedObject(new ROSCatkinToolsStepFactory);
     addAutoReleasedObject(new ROSBuildConfigurationFactory);
     addAutoReleasedObject(new ROSRunConfigurationFactory);
     addAutoReleasedObject(new ROSRunControlFactory);
@@ -177,11 +179,11 @@ void ROSProjectPlugin::reloadProjectIncludeDirectories()
     ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(rosProject->activeTarget()->activeBuildConfiguration());
 
     // Generate CodeBlocks Project File
-    if (ROSUtils::sourceWorkspace(runCmake, rosProject->projectDirectory(), bc->rosDistribution()))
+    if (ROSUtils::sourceWorkspace(runCmake, rosProject->projectDirectory(), rosProject->distribution(), bc->buildSystem()))
     {
-      if (ROSUtils::generateCodeBlocksProjectFile(runCmake, rosProject->sourceDirectory(), rosProject->buildDirectory()))
+      if (ROSUtils::generateCodeBlocksProjectFile(runCmake, rosProject->projectDirectory(), bc->buildSystem()))
       {
-        QStringList projectIncludes = ROSUtils::getWorkspaceIncludes(rosProject->projectDirectory(), bc->rosDistribution());
+        QStringList projectIncludes = ROSUtils::getWorkspaceIncludes(rosProject->projectDirectory());
         rosProject->setIncludes(projectIncludes);
       }
     }

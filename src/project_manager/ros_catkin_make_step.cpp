@@ -21,7 +21,7 @@
 #include "ros_catkin_make_step.h"
 #include "ros_project_constants.h"
 #include "ros_project.h"
-#include "ui_ros_make_step.h"
+#include "ui_ros_catkin_make_step.h"
 
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/buildsteplist.h>
@@ -46,33 +46,31 @@ namespace Internal {
 
 const char ROS_CMS_ID[] = "ROSProjectManager.ROSCatkinMakeStep";
 const char ROS_CMS_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("ROSProjectManager::Internal::ROSCatkinMakeStep",
-                                                     "catkin_make");
+                                                     "CatkinMake Step");
 
-const char ROS_CMS_BUILD_TARGETS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.BuildTargets";
+const char ROS_CMS_TARGET_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.Target";
+const char ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.CatkinMakeArguments";
+const char ROS_CMS_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.CMakeArguments";
 const char ROS_CMS_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.MakeArguments";
-const char ROS_CMS_MAKE_COMMAND_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.MakeCommand";
-const char ROS_CMS_CLEAN_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.Clean";
 
 ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent) :
-    AbstractProcessStep(parent, Id(ROS_CMS_ID)),
-    m_clean(false)
+    AbstractProcessStep(parent, Id(ROS_CMS_ID))
 {
     ctor();
 }
 
 ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, const Id id) :
-    AbstractProcessStep(parent, id),
-    m_clean(false)
+    AbstractProcessStep(parent, id)
 {
     ctor();
 }
 
 ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, ROSCatkinMakeStep *bs) :
     AbstractProcessStep(parent, bs),
-    m_buildTargets(bs->m_buildTargets),
-    m_makeArguments(bs->m_makeArguments),
-    m_makeCommand(bs->m_makeCommand),
-    m_clean(bs->m_clean)
+    m_target(bs->m_target),
+    m_catkinMakeArguments(bs->m_catkinMakeArguments),
+    m_cmakeArguments(bs->m_cmakeArguments),
+    m_makeArguments(bs->m_makeArguments)
 {
     ctor();
 }
@@ -116,6 +114,7 @@ bool ROSCatkinMakeStep::init(QList<const BuildStep *> &earlierSteps)
         return false;
     }
 
+    // TODO: Need to get build data (build directory, environment, etc.) based on build System
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
     pp->setWorkingDirectory(bc->buildDirectory().toString());
@@ -125,13 +124,13 @@ bool ROSCatkinMakeStep::init(QList<const BuildStep *> &earlierSteps)
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
     pp->setEnvironment(env);
     pp->setCommand(makeCommand());
-    pp->setArguments(allArguments(bc->initialArguments()));
+    pp->setArguments(allArguments(bc->cmakeBuildType()));
     pp->resolveAll();
 
     // If we are cleaning, then make can fail with an error code, but that doesn't mean
     // we should stop the clean queue
     // That is mostly so that rebuild works on an already clean project
-    setIgnoreReturnValue(m_clean);
+    setIgnoreReturnValue(m_target == CLEAN);
 
     setOutputParser(new GnuMakeParser());
     IOutputParser *parser = target()->kit()->createOutputParser();
@@ -142,55 +141,55 @@ bool ROSCatkinMakeStep::init(QList<const BuildStep *> &earlierSteps)
     return AbstractProcessStep::init(earlierSteps);
 }
 
-void ROSCatkinMakeStep::setClean(bool clean)
-{
-    m_clean = clean;
-}
-
-bool ROSCatkinMakeStep::isClean() const
-{
-    return m_clean;
-}
-
 QVariantMap ROSCatkinMakeStep::toMap() const
 {
     QVariantMap map(AbstractProcessStep::toMap());
 
-    map.insert(QLatin1String(ROS_CMS_BUILD_TARGETS_KEY), m_buildTargets);
+    map.insert(QLatin1String(ROS_CMS_TARGET_KEY), m_target);
+    map.insert(QLatin1String(ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY), m_catkinMakeArguments);
+    map.insert(QLatin1String(ROS_CMS_CMAKE_ARGUMENTS_KEY), m_cmakeArguments);
     map.insert(QLatin1String(ROS_CMS_MAKE_ARGUMENTS_KEY), m_makeArguments);
-    map.insert(QLatin1String(ROS_CMS_MAKE_COMMAND_KEY), m_makeCommand);
-    map.insert(QLatin1String(ROS_CMS_CLEAN_KEY), m_clean);
     return map;
 }
 
 bool ROSCatkinMakeStep::fromMap(const QVariantMap &map)
 {
-    m_buildTargets = map.value(QLatin1String(ROS_CMS_BUILD_TARGETS_KEY)).toStringList();
+    m_target = (BuildTargets)map.value(QLatin1String(ROS_CMS_TARGET_KEY)).toInt();
+    m_catkinMakeArguments = map.value(QLatin1String(ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY)).toString();
+    m_cmakeArguments = map.value(QLatin1String(ROS_CMS_CMAKE_ARGUMENTS_KEY)).toString();
     m_makeArguments = map.value(QLatin1String(ROS_CMS_MAKE_ARGUMENTS_KEY)).toString();
-    m_makeCommand = map.value(QLatin1String(ROS_CMS_MAKE_COMMAND_KEY)).toString();
-    m_clean = map.value(QLatin1String(ROS_CMS_CLEAN_KEY)).toBool();
 
     return BuildStep::fromMap(map);
 }
 
-QString ROSCatkinMakeStep::allArguments(QString initial_arguments) const
+QString ROSCatkinMakeStep::allArguments(ROSUtils::BuildType buildType) const
 {
-    QString args = m_makeArguments;
-    args.prepend(initial_arguments + QLatin1Char(' '));
+    QString args;
 
-    Utils::QtcProcess::addArgs(&args, m_buildTargets);
+    switch(m_target) {
+    case BUILD:
+        Utils::QtcProcess::addArgs(&args, m_catkinMakeArguments);
+        Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(ROSUtils::getCMakeBuildTypeArgument(buildType)));
+        if (!m_cmakeArguments.isEmpty())
+            Utils::QtcProcess::addArgs(&args, m_cmakeArguments);
+        break;
+    case CLEAN:
+        Utils::QtcProcess::addArgs(&args, QLatin1String("clean"));
+        Utils::QtcProcess::addArgs(&args, m_catkinMakeArguments);
+        if (!m_cmakeArguments.isEmpty())
+            Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
+        break;
+    }
+
+    if (!m_makeArguments.isEmpty())
+        Utils::QtcProcess::addArgs(&args, QString("--make-args %1").arg(m_makeArguments));
+
     return args;
 }
 
 QString ROSCatkinMakeStep::makeCommand() const
 {
-    QString command = m_makeCommand;
-    if (command.isEmpty())
-    {
-      command = QLatin1String("catkin_make");
-    }
-
-    return command;
+    return QLatin1String("catkin_make");;
 }
 
 void ROSCatkinMakeStep::run(QFutureInterface<bool> &fi)
@@ -226,7 +225,7 @@ void ROSCatkinMakeStep::stdOutput(const QString &line)
 
 BuildStepConfigWidget *ROSCatkinMakeStep::createConfigWidget()
 {
-    return new ROSCatkinMakeStepConfigWidget(this);
+    return new ROSCatkinMakeStepWidget(this);
 }
 
 bool ROSCatkinMakeStep::immutable() const
@@ -234,86 +233,66 @@ bool ROSCatkinMakeStep::immutable() const
     return false;
 }
 
-bool ROSCatkinMakeStep::buildsTarget(const QString &target) const
+ROSCatkinMakeStep::BuildTargets ROSCatkinMakeStep::buildsTarget() const
 {
-    return m_buildTargets.contains(target);
+    return m_target;
 }
 
-void ROSCatkinMakeStep::setBuildTarget(const QString &target, bool on)
+void ROSCatkinMakeStep::setBuildTarget(const BuildTargets &target)
 {
-    QStringList old = m_buildTargets;
-    if (on && !old.contains(target))
-         old << target;
-    else if (!on && old.contains(target))
-        old.removeOne(target);
-
-    m_buildTargets = old;
+    m_target = target;
 }
 
 //
-// ROSMakeStepConfigWidget
+// ROSCatkinMakeStepConfigWidget
 //
 
-ROSCatkinMakeStepConfigWidget::ROSCatkinMakeStepConfigWidget(ROSCatkinMakeStep *makeStep)
+ROSCatkinMakeStepWidget::ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep)
     : m_makeStep(makeStep)
 {
-    m_ui = new Ui::ROSMakeStep;
+    m_ui = new Ui::ROSCatkinMakeStep;
     m_ui->setupUi(this);
 
     ROSProject *pro = static_cast<ROSProject *>(m_makeStep->target()->project());
-    foreach (const QString &target, pro->buildTargets()) {
-        QListWidgetItem *item = new QListWidgetItem(target, m_ui->targetsList);
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(m_makeStep->buildsTarget(item->text()) ? Qt::Checked : Qt::Unchecked);
-    }
 
-    m_ui->makeLineEdit->setText(m_makeStep->m_makeCommand);
+    m_ui->catkinMakeArgumentsLineEdit->setText(m_makeStep->m_catkinMakeArguments);
+    m_ui->cmakeArgumentsLineEdit->setText(m_makeStep->m_cmakeArguments);
     m_ui->makeArgumentsLineEdit->setText(m_makeStep->m_makeArguments);
-    updateMakeOverrrideLabel();
+
     updateDetails();
 
-    connect(m_ui->targetsList, &QListWidget::itemChanged,
-            this, &ROSCatkinMakeStepConfigWidget::itemChanged);
-    connect(m_ui->makeLineEdit, &QLineEdit::textEdited,
-            this, &ROSCatkinMakeStepConfigWidget::makeLineEditTextEdited);
-    connect(m_ui->makeArgumentsLineEdit, &QLineEdit::textEdited,
-            this, &ROSCatkinMakeStepConfigWidget::makeArgumentsLineEditTextEdited);
+    connect(m_ui->catkinMakeArgumentsLineEdit, &QLineEdit::textEdited,
+            this, &ROSCatkinMakeStepWidget::updateDetails);
 
-    connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
-            this, SLOT(updateMakeOverrrideLabel()));
+    connect(m_ui->cmakeArgumentsLineEdit, &QLineEdit::textEdited,
+            this, &ROSCatkinMakeStepWidget::updateDetails);
+
+    connect(m_ui->makeArgumentsLineEdit, &QLineEdit::textEdited,
+            this, &ROSCatkinMakeStepWidget::updateDetails);
+
     connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
             this, SLOT(updateDetails()));
 
-    connect(m_makeStep->target(), SIGNAL(kitChanged()),
-            this, SLOT(updateMakeOverrrideLabel()));
-
     connect(pro, &ROSProject::environmentChanged,
-            this, &ROSCatkinMakeStepConfigWidget::updateMakeOverrrideLabel);
-    connect(pro, &ROSProject::environmentChanged,
-            this, &ROSCatkinMakeStepConfigWidget::updateDetails);
+            this, &ROSCatkinMakeStepWidget::updateDetails);
 }
 
-ROSCatkinMakeStepConfigWidget::~ROSCatkinMakeStepConfigWidget()
+ROSCatkinMakeStepWidget::~ROSCatkinMakeStepWidget()
 {
     delete m_ui;
 }
 
-QString ROSCatkinMakeStepConfigWidget::displayName() const
+QString ROSCatkinMakeStepWidget::displayName() const
 {
-    return tr("Make", "GenericMakestep display name.");
+    return tr("CatkinMake", "CatkinMake display name.");
 }
 
-void ROSCatkinMakeStepConfigWidget::updateMakeOverrrideLabel()
+void ROSCatkinMakeStepWidget::updateDetails()
 {
-    BuildConfiguration *bc = m_makeStep->buildConfiguration();
-    if (!bc)
-        bc = m_makeStep->target()->activeBuildConfiguration();
+    m_makeStep->m_catkinMakeArguments = m_ui->catkinMakeArgumentsLineEdit->text();
+    m_makeStep->m_cmakeArguments = m_ui->cmakeArgumentsLineEdit->text();
+    m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
-    m_ui->makeLabel->setText(tr("Override %1:").arg(QDir::toNativeSeparators(m_makeStep->makeCommand())));
-}
-
-void ROSCatkinMakeStepConfigWidget::updateDetails()
-{
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
     if (!bc)
         bc = m_makeStep->targetsActiveBuildConfiguration();
@@ -323,36 +302,18 @@ void ROSCatkinMakeStepConfigWidget::updateDetails()
     param.setWorkingDirectory(bc->buildDirectory().toString());
     param.setEnvironment(bc->environment());
     param.setCommand(m_makeStep->makeCommand());
-    param.setArguments(m_makeStep->allArguments(bc->initialArguments()));
+    param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType()));
     m_summaryText = param.summary(displayName());
     emit updateSummary();
 }
 
-QString ROSCatkinMakeStepConfigWidget::summaryText() const
+QString ROSCatkinMakeStepWidget::summaryText() const
 {
     return m_summaryText;
 }
 
-void ROSCatkinMakeStepConfigWidget::itemChanged(QListWidgetItem *item)
-{
-    m_makeStep->setBuildTarget(item->text(), item->checkState() & Qt::Checked);
-    updateDetails();
-}
-
-void ROSCatkinMakeStepConfigWidget::makeLineEditTextEdited()
-{
-    m_makeStep->m_makeCommand = m_ui->makeLineEdit->text();
-    updateDetails();
-}
-
-void ROSCatkinMakeStepConfigWidget::makeArgumentsLineEditTextEdited()
-{
-    m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
-    updateDetails();
-}
-
 //
-// ROSMakeStepFactory
+// ROSCatkinMakeStepFactory
 //
 
 ROSCatkinMakeStepFactory::ROSCatkinMakeStepFactory(QObject *parent) :
@@ -365,10 +326,9 @@ BuildStep *ROSCatkinMakeStepFactory::create(BuildStepList *parent, const Id id)
     Q_UNUSED(id);
     ROSCatkinMakeStep *step = new ROSCatkinMakeStep(parent);
     if (parent->id() == ProjectExplorer::Constants::BUILDSTEPS_CLEAN) {
-        step->setClean(true);
-        step->setBuildTarget(QLatin1String("clean"), /* on = */ true);
+        step->setBuildTarget(ROSCatkinMakeStep::CLEAN);
     } else if (parent->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD) {
-        step->setBuildTarget(QLatin1String("all"), /* on = */ true);
+        step->setBuildTarget(ROSCatkinMakeStep::BUILD);
     }
     return step;
 }
@@ -392,7 +352,7 @@ QList<ProjectExplorer::BuildStepInfo> ROSCatkinMakeStepFactory::availableSteps(B
     if (parent->target()->project()->id() != Constants::ROSPROJECT_ID)
         return {};
 
-    return {{ROS_CMS_ID,  QCoreApplication::translate("ROSProjectManager::Internal::ROSMakeStep", ROS_CMS_DISPLAY_NAME)}};
+    return {{ROS_CMS_ID,  QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep", ROS_CMS_DISPLAY_NAME)}};
 }
 
 } // namespace Internal

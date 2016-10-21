@@ -68,6 +68,7 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
     setId(Constants::ROSPROJECT_ID);
     setProjectManager(manager);
     setDocument(new ROSProjectFile(this, fileName));
+
     DocumentManager::addDocument(document(), true);
 
     ROSProjectNode *project_node = new ROSProjectNode(this->projectFilePath());
@@ -88,6 +89,8 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
 
     projectManager()->registerProject(this);
 
+    refresh();
+
     connect(m_workspaceWatcher, SIGNAL(fileListChanged()),
             this, SIGNAL(fileListChanged()));
 
@@ -103,16 +106,6 @@ ROSProject::~ROSProject()
     projectManager()->unregisterProject(this);
 }
 
-Utils::FileName ROSProject::buildDirectory() const
-{
-  return projectDirectory().appendPath(tr("build"));
-}
-
-Utils::FileName ROSProject::sourceDirectory() const
-{
-  return projectDirectory().appendPath(tr("src"));
-}
-
 bool ROSProject::saveProjectFile()
 {
     DocumentManager::expectFileChange(projectFilePath().toString());
@@ -122,12 +115,17 @@ bool ROSProject::saveProjectFile()
     if (!saver.hasError())
     {
       QXmlStreamWriter workspaceXml(saver.file());
-      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_watchDirectories, m_projectIncludePaths);
+      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_distribution, m_watchDirectories, m_projectIncludePaths);
       saver.setResult(&workspaceXml);
     }
     bool result = saver.finalize(ICore::mainWindow());
     DocumentManager::unexpectFileChange(projectFilePath().toString());
     return result;
+}
+
+QString ROSProject::distribution() const
+{
+    return m_distribution;
 }
 
 bool ROSProject::addIncludes(const QStringList &includePaths)
@@ -165,7 +163,22 @@ void ROSProject::parseProjectFile()
       workspaceXml.setDevice(&workspaceFile);
       while(workspaceXml.readNextStartElement())
       {
-        if(workspaceXml.name() == QLatin1String("WatchDirectories"))
+        if (workspaceXml.name() == QLatin1String("Distribution"))
+        {
+            QXmlStreamAttributes attributes = workspaceXml.attributes();
+            if (attributes.hasAttribute(QLatin1String("name")))
+            {
+                m_distribution = attributes.value(QLatin1String("name")).toString();
+            }
+            else
+            {
+                //TODO: Add robust way to extract version of ubuntu and set distribution
+                m_distribution = QLatin1String("indigo");
+                qDebug() << "Error parsing ros distribution from project file. Using indigo.";
+            }
+            workspaceXml.readNextStartElement();
+        }
+        else if(workspaceXml.name() == QLatin1String("WatchDirectories"))
         {
           while(workspaceXml.readNextStartElement())
           {
@@ -296,14 +309,6 @@ QStringList ROSProject::files(FilesMode fileMode) const
 ROSManager *ROSProject::projectManager() const
 {
   return static_cast<ROSManager *>(Project::projectManager());
-}
-
-QStringList ROSProject::buildTargets() const
-{
-    QStringList targets;
-    targets.append(QLatin1String("all"));
-    targets.append(QLatin1String("clean"));
-    return targets;
 }
 
 Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *errorMessage)

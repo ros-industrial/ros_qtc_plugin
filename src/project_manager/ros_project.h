@@ -54,18 +54,14 @@ public:
     ROSManager *projectManager() const override;
     QStringList files(FilesMode fileMode) const override;
 
-    QStringList buildTargets() const;
-
     bool addIncludes(const QStringList &includePaths);
     bool setIncludes(const QStringList &includePaths);
 
     void refresh();
 
+    QString distribution() const;
     QStringList projectIncludePaths() const;
     QStringList workspaceFiles() const;
-
-    Utils::FileName buildDirectory() const;
-    Utils::FileName sourceDirectory() const;
 
 protected:
     Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage);
@@ -77,6 +73,7 @@ private:
     void repositoryChanged(const QString &repository);
 
     QString m_projectName;
+    QString m_distribution;
     ROSWorkspaceWatcher *m_workspaceWatcher;
     QStringList m_watchDirectories;
     QStringList m_projectIncludePaths;

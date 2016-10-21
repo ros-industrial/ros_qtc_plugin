@@ -52,6 +52,7 @@
 #include <QLabel>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
+#include <QDebug>
 
 using namespace Core;
 using namespace ProjectExplorer;

@@ -21,6 +21,8 @@
 #ifndef ROSPROJECTWIZARD_H
 #define ROSPROJECTWIZARD_H
 
+#include "ros_utils.h"
+
 #include <coreplugin/basefilewizard.h>
 #include <coreplugin/basefilewizardfactory.h>
 #include <utils/wizard.h>
@@ -47,10 +49,8 @@ public:
 
     QString projectName() const;
     QString distribution() const;
+    ROSUtils::BuildSystem buildSystem() const;
     Utils::FileName workspaceDirectory() const;
-    Utils::FileName develDirectory() const;
-    Utils::FileName sourceDirectory() const;
-    Utils::FileName buildDirectory() const;
 
     ROSImportWizardPage *m_firstPage;
 };
@@ -70,10 +70,8 @@ public:
 
     QString projectName() const;
     QString distribution() const;
+    ROSUtils::BuildSystem buildSystem() const;
     Utils::FileName workspaceDirectory() const;
-    Utils::FileName develDirectory() const;
-    Utils::FileName sourceDirectory() const;
-    Utils::FileName buildDirectory() const;
 
     // Validate a base name entry field (potentially containing extension)
     static bool validateBaseName(const QString &name, QString *errorMessage = 0);
@@ -84,20 +82,12 @@ signals:
 private slots:
     void slotProjectNameValidChanged();
     void slotProjectPathValidChanged();
-    void slotProjectPathChanged(const QString &path);
     void slotActivated();
-    void slotGenerateCodeBlocksProjectFile();
-    void slotUpdateStdError();
-    void slotUpdateStdText();
+//    void slotUpdateStdError();
+//    void slotUpdateStdText();
 
 private:
     ROSImportWizardPagePrivate *d;
-    QProcess *m_runCmake;
-    Utils::FileName m_wsDir;
-    Utils::FileName m_bldDir;
-    Utils::FileName m_srcDir;
-    Utils::FileName m_devDir;
-    bool m_hasValidCodeBlocksProjectFile;
 
     void validChangedHelper();
 };
@@ -111,10 +101,13 @@ public:
     ROSProjectWizard();
 
 protected:
-    Core::BaseFileWizard *create(QWidget *parent, const Core::WizardDialogParameters &parameters) const;
+    Core::BaseFileWizard *create(QWidget *parent, const Core::WizardDialogParameters &parameters) const override;
     Core::GeneratedFiles generateFiles(const QWizard *w, QString *errorMessage) const override;
     bool postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l,
                            QString *errorMessage) const override;
+
+    void initializeProject(const ROSProjectWizardDialog *wizard, const ROSUtils::BuildSystem buildSystem);
+
 };
 
 } // namespace Internal

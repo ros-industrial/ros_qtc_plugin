@@ -19,7 +19,6 @@
  * limitations under the License.
  */
 #include "ros_project_wizard.h"
-#include "ros_utils.h"
 #include "ui_ros_import_wizard_page.h"
 #include "ros_project_constants.h"
 
@@ -91,24 +90,14 @@ QString ROSProjectWizardDialog::distribution() const
     return m_firstPage->distribution();
 }
 
+ROSUtils::BuildSystem ROSProjectWizardDialog::buildSystem() const
+{
+    return m_firstPage->buildSystem();
+}
+
 Utils::FileName ROSProjectWizardDialog::workspaceDirectory() const
 {
     return m_firstPage->workspaceDirectory();
-}
-
-Utils::FileName ROSProjectWizardDialog::develDirectory() const
-{
-    return m_firstPage->develDirectory();
-}
-
-Utils::FileName ROSProjectWizardDialog::buildDirectory() const
-{
-    return m_firstPage->buildDirectory();
-}
-
-Utils::FileName ROSProjectWizardDialog::sourceDirectory() const
-{
-    return m_firstPage->sourceDirectory();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -133,9 +122,7 @@ ROSImportWizardPagePrivate::ROSImportWizardPagePrivate() :
 
 ROSImportWizardPage::ROSImportWizardPage(QWidget *parent) :
     WizardPage(parent),
-    d(new ROSImportWizardPagePrivate),
-    m_runCmake(NULL),
-    m_hasValidCodeBlocksProjectFile(false)
+    d(new ROSImportWizardPagePrivate)
 {
     d->m_ui.setupUi(this);
     d->m_ui.distributionComboBox->addItems(ROSUtils::installedDistributions());
@@ -144,12 +131,6 @@ ROSImportWizardPage::ROSImportWizardPage(QWidget *parent) :
             this, &ROSImportWizardPage::slotProjectPathValidChanged);
     connect(d->m_ui.nameLineEdit, &Utils::FancyLineEdit::validChanged,
             this, &ROSImportWizardPage::slotProjectNameValidChanged);
-
-    connect(d->m_ui.pathChooser, &Utils::PathChooser::pathChanged,
-            this, &ROSImportWizardPage::slotProjectPathChanged);
-
-    connect(d->m_ui.generateProjectFileButton, &QPushButton::pressed,
-            this, &ROSImportWizardPage::slotGenerateCodeBlocksProjectFile);
 
     connect(d->m_ui.pathChooser, &Utils::PathChooser::returnPressed,
             this, &ROSImportWizardPage::slotActivated);
@@ -161,7 +142,6 @@ ROSImportWizardPage::ROSImportWizardPage(QWidget *parent) :
 ROSImportWizardPage::~ROSImportWizardPage()
 {
     delete d;
-    delete m_runCmake;
 }
 
 QString ROSImportWizardPage::projectName() const
@@ -172,6 +152,11 @@ QString ROSImportWizardPage::projectName() const
 QString ROSImportWizardPage::distribution() const
 {
     return d->m_ui.distributionComboBox->currentText();
+}
+
+ROSUtils::BuildSystem ROSImportWizardPage::buildSystem() const
+{
+    return (ROSUtils::BuildSystem)d->m_ui.buildSystemComboBox->currentIndex();
 }
 
 bool ROSImportWizardPage::isComplete() const
@@ -191,94 +176,11 @@ void ROSImportWizardPage::setForceFirstCapitalLetterForFileName(bool b)
 
 Utils::FileName ROSImportWizardPage::workspaceDirectory() const
 {
-  return m_wsDir;
-}
-
-Utils::FileName ROSImportWizardPage::buildDirectory() const
-{
-  return m_bldDir;
-}
-
-Utils::FileName ROSImportWizardPage::sourceDirectory() const
-{
-  return m_srcDir;
-}
-
-Utils::FileName ROSImportWizardPage::develDirectory() const
-{
-  return m_devDir;
-}
-
-void ROSImportWizardPage::slotGenerateCodeBlocksProjectFile()
-{
-  // Generate CodeBlocks Project File
-  m_runCmake = new QProcess();
-  connect(m_runCmake, SIGNAL(readyReadStandardOutput()),this, SLOT(slotUpdateStdText()));
-  connect(m_runCmake, SIGNAL(readyReadStandardError()),this, SLOT(slotUpdateStdError()));
-  m_hasValidCodeBlocksProjectFile = false;
-  if (ROSUtils::sourceWorkspace(m_runCmake, m_wsDir, distribution()))
-  {
-    if (ROSUtils::generateCodeBlocksProjectFile(m_runCmake, m_srcDir, m_bldDir))
-    {
-      m_hasValidCodeBlocksProjectFile = true;
-    }
-  }
-  validChangedHelper();
-  slotActivated();
-}
-
-void ROSImportWizardPage::slotUpdateStdText()
-{
-  QByteArray strdata = m_runCmake->readAllStandardOutput();
-  d->m_ui.outputTextEdit->append(QString::fromLatin1(strdata.data()).simplified());
-  QCoreApplication::processEvents();
-}
-
-void ROSImportWizardPage::slotUpdateStdError()
-{
-  QByteArray strdata = m_runCmake->readAllStandardError();
-  d->m_ui.outputTextEdit->append(QString::fromLatin1(strdata.data()).simplified());
-  QCoreApplication::processEvents();
+  return Utils::FileName::fromString(d->m_ui.pathChooser->path());
 }
 
 void ROSImportWizardPage::slotProjectNameValidChanged()
 {
-  validChangedHelper();
-}
-
-void ROSImportWizardPage::slotProjectPathChanged(const QString &path)
-{
-  Q_UNUSED(path)
-  m_hasValidCodeBlocksProjectFile = false;
-  int result = QMessageBox::No;
-
-  if (d->m_ui.pathChooser->isValid() && !ROSUtils::isWorkspaceInitialized(Utils::FileName::fromString(d->m_ui.pathChooser->path())))
-  { 
-      result = QMessageBox::warning(this, tr("ROS Project Manager"),
-                                    tr("The workspace has not been initialized!\n"
-                                       "If the path you provided is correct it will be initialized; would you like to proceed?"),
-                                    QMessageBox::Yes | QMessageBox::No);
-  }
-  else if (d->m_ui.pathChooser->isValid() && ROSUtils::isWorkspaceInitialized(Utils::FileName::fromString(d->m_ui.pathChooser->path())))
-  {
-      result = QMessageBox::Yes;
-  }
-
-  if (result == QMessageBox::Yes)
-  {
-      m_wsDir = Utils::FileName::fromString(d->m_ui.pathChooser->path());
-      m_bldDir = Utils::FileName::fromString(d->m_ui.pathChooser->path() + QLatin1String("/build"));
-      m_srcDir = Utils::FileName::fromString(d->m_ui.pathChooser->path() + QLatin1String("/src"));
-      m_devDir = Utils::FileName::fromString(d->m_ui.pathChooser->path() + QLatin1String("/devel"));
-
-      d->m_ui.generateProjectFileButton->setEnabled(true);
-  }
-  else
-  {
-      d->m_ui.pathChooser->setPath(QLatin1String(""));
-      d->m_ui.generateProjectFileButton->setEnabled(false);
-  }
-
   validChangedHelper();
 }
 
@@ -290,7 +192,7 @@ void ROSImportWizardPage::slotProjectPathValidChanged()
 
 void ROSImportWizardPage::validChangedHelper()
 {
-    const bool newComplete = d->m_ui.pathChooser->isValid() && d->m_ui.nameLineEdit->isValid() && m_hasValidCodeBlocksProjectFile;
+    const bool newComplete = d->m_ui.pathChooser->isValid() && d->m_ui.nameLineEdit->isValid();
     if (newComplete != d->m_complete) {
         d->m_complete = newComplete;
         emit completeChanged();
@@ -349,17 +251,22 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
 
     const QString projectName = wizard->projectName();
     const QString workspaceFileName = QFileInfo(wsDir, projectName + QLatin1String(".workspace")).absoluteFilePath();
+    const ROSUtils::BuildSystem buildSystem = wizard->buildSystem();
+    const QString distribution = wizard->distribution();
 
-    // Set watch directory to workspace source
-    QStringList watchDirectories = QStringList() << QLatin1String("src");
+    // Set watch directory to workspace
+    QProcess *gen = new QProcess();
+    gen->setWorkingDirectory(wsDir.absolutePath());
+    ROSUtils::sourceWorkspace(gen, wizard->workspaceDirectory(), distribution, buildSystem);
+    ROSUtils::generateCodeBlocksProjectFile(gen, wizard->workspaceDirectory(), buildSystem);
+    delete gen;
 
-    // Parse CodeBlocks Project File
-    QStringList includePaths = ROSUtils::getWorkspaceIncludes(wizard->workspaceDirectory(), wizard->distribution());
+    QStringList includePaths = ROSUtils::getWorkspaceIncludes(wizard->workspaceDirectory());
 
     Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
     QString content;
     QXmlStreamWriter workspaceXml(&content);
-    ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, watchDirectories, includePaths);
+    ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, distribution, QStringList() << QLatin1String("src"), includePaths);
     generatedWorkspaceFile.setContents(content);
     generatedWorkspaceFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
 
@@ -387,6 +294,24 @@ bool ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core::Generated
     codeStylePreferences->setCurrentDelegate(Constants::ROS_CPP_CODE_STYLE_ID);
 
     return success;
+}
+
+void ROSProjectWizard::initializeProject(const ROSProjectWizardDialog *wizard, const ROSUtils::BuildSystem buildSystem)
+{
+    switch (buildSystem) {
+    case ROSUtils::CatkinMake:
+    {
+        if (ROSUtils::isWorkspaceInitialized(wizard->workspaceDirectory(), buildSystem))
+        {
+
+        }
+
+    }
+    case ROSUtils::CatkinTools:
+    {
+
+    }
+    }
 }
 
 } // namespace Internal
