@@ -51,6 +51,7 @@ const char ROS_CTS_ID[] = "ROSProjectManager.ROSCatkinToolsStep";
 const char ROS_CTS_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("ROSProjectManager::Internal::ROSCatkinToolsStep",
                                                      "CatkinTools Step");
 const char ROS_CTS_TARGET_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.Target";
+const char ROS_CTS_ACTIVE_PROFILE_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.ActiveProfile";
 const char ROS_CTS_CATKIN_TOOLS_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.CatkinToolsArguments";
 const char ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.CatkinMakeArguments";
 const char ROS_CTS_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.CMakeArguments";
@@ -71,6 +72,7 @@ ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, const Id id) :
 ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, ROSCatkinToolsStep *bs) :
     AbstractProcessStep(parent, bs),
     m_target(bs->m_target),
+    m_activeProfile(bs->m_activeProfile),
     m_catkinToolsArguments(bs->m_catkinToolsArguments),
     m_catkinMakeArguments(bs->m_catkinMakeArguments),
     m_cmakeArguments(bs->m_cmakeArguments),
@@ -83,6 +85,9 @@ void ROSCatkinToolsStep::ctor()
 {
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinToolsStep",
                                                       ROS_CTS_DISPLAY_NAME));
+
+    if (m_activeProfile.isEmpty())
+        m_activeProfile = "default";
 
     m_percentProgress = QRegExp(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
 }
@@ -118,10 +123,13 @@ bool ROSCatkinToolsStep::init(QList<const BuildStep *> &earlierSteps)
         return false;
     }
 
+    // Set Catkin Tools Active Profile
+    ROSUtils::setCatkinToolsActiveProfile(bc->project()->projectDirectory(), activeProfile());
+
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
-    pp->setWorkingDirectory(bc->buildDirectory().toString());
-    Utils::Environment env = bc->environment();
+    pp->setWorkingDirectory(ROSUtils::getWorkspaceBuildSpace(bc->project()->projectDirectory(), bc->buildSystem()).toString());
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(bc->project()->projectDirectory(), bc->project()->distribution(), bc->buildSystem()).toStringList());
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
@@ -149,6 +157,7 @@ QVariantMap ROSCatkinToolsStep::toMap() const
     QVariantMap map(AbstractProcessStep::toMap());
 
     map.insert(QLatin1String(ROS_CTS_TARGET_KEY), m_target);
+    map.insert(QLatin1String(ROS_CTS_ACTIVE_PROFILE_KEY), m_activeProfile);
     map.insert(QLatin1String(ROS_CTS_CATKIN_TOOLS_ARGUMENTS_KEY), m_catkinToolsArguments);
     map.insert(QLatin1String(ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY), m_catkinMakeArguments);
     map.insert(QLatin1String(ROS_CTS_CMAKE_ARGUMENTS_KEY), m_cmakeArguments);
@@ -159,6 +168,7 @@ QVariantMap ROSCatkinToolsStep::toMap() const
 bool ROSCatkinToolsStep::fromMap(const QVariantMap &map)
 {
     m_target = (BuildTargets)map.value(QLatin1String(ROS_CTS_TARGET_KEY)).toInt();
+    m_activeProfile = map.value(QLatin1String(ROS_CTS_ACTIVE_PROFILE_KEY)).toString();
     m_catkinToolsArguments = map.value(QLatin1String(ROS_CTS_CATKIN_TOOLS_ARGUMENTS_KEY)).toString();
     m_catkinMakeArguments = map.value(QLatin1String(ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY)).toString();
     m_cmakeArguments = map.value(QLatin1String(ROS_CTS_CMAKE_ARGUMENTS_KEY)).toString();
@@ -257,12 +267,22 @@ void ROSCatkinToolsStep::setBuildTarget(const BuildTargets &target)
     m_target = target;
 }
 
+QString ROSCatkinToolsStep::activeProfile() const
+{
+    return m_activeProfile;
+}
+
+void ROSCatkinToolsStep::setActiveProfile(const QString &profileName)
+{
+    m_activeProfile = profileName;
+}
+
 //
 // ROSCatkinToolsStepWidget
 //
 
 ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
-    : m_makeStep(makeStep), m_profile(QLatin1String("default"))
+    : m_makeStep(makeStep)
 {
     m_ui = new Ui::ROSCatkinToolsStep;
     m_ui->setupUi(this);
@@ -273,8 +293,9 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     m_ui->catkinMakeArgumentsLineEdit->setText(m_makeStep->m_catkinMakeArguments);
     m_ui->cmakeArgumentsLineEdit->setText(m_makeStep->m_cmakeArguments);
     m_ui->makeArgumentsLineEdit->setText(m_makeStep->m_makeArguments);
+    m_ui->profilePushButton->setText(m_makeStep->m_activeProfile);
 
-    m_ui->profilePushButton->setStyleSheet("Text-align:left");
+    qDebug() << m_makeStep->activeProfile();
 
     m_addButtonMenu = new QMenu(this);
     m_ui->addPushButton->setMenu(m_addButtonMenu);
@@ -289,13 +310,13 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     updateAddProfileButtonMenu();
 
     connect(m_ui->removePushButton, &QAbstractButton::clicked,
-            this, [this]() { deleteProfile(m_profile); });
+            this, [this]() { deleteProfile(m_makeStep->activeProfile()); });
 
     connect(m_ui->renamePushButton, &QAbstractButton::clicked,
-            this, [this]() { renameProfile(m_profile); });
+            this, [this]() { renameProfile(m_makeStep->activeProfile()); });
 
     connect(m_ui->editPushButton, &QAbstractButton::clicked,
-            this, [this]() { editProfile(m_profile); });
+            this, [this]() { editProfile(m_makeStep->activeProfile()); });
 
     connect(m_ui->catkinToolsArgumentsLineEdit, &QLineEdit::textEdited,
             this, &ROSCatkinToolsStepWidget::updateDetails);
@@ -338,9 +359,6 @@ void ROSCatkinToolsStepWidget::updateDetails()
         bc = m_makeStep->targetsActiveBuildConfiguration();
 
     ProcessParameters param;
-    param.setMacroExpander(bc->macroExpander());
-    param.setWorkingDirectory(bc->buildDirectory().toString());
-    param.setEnvironment(bc->environment());
     param.setCommand(m_makeStep->makeCommand());
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType()));
     m_summaryText = param.summary(displayName());
@@ -366,7 +384,7 @@ void ROSCatkinToolsStepWidget::updateProfileButtonMenu()
 {
     m_profileMenu->clear();
 
-    QStringList profileNames = ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->target()->project()->projectDirectory());
+    QStringList profileNames = ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory());
     foreach( QString profile, profileNames)
     {
         QAction *action = m_profileMenu->addAction(profile);
@@ -376,13 +394,13 @@ void ROSCatkinToolsStepWidget::updateProfileButtonMenu()
 
 void ROSCatkinToolsStepWidget::setProfile(const QString profileName)
 {
-    m_profile = profileName;
+    m_makeStep->setActiveProfile(profileName);
     m_ui->profilePushButton->setText(profileName);
 }
 
 void ROSCatkinToolsStepWidget::cloneProfile(const QString profileName)
 {
-
+    ROSUtils::cloneCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName, uniqueName(profileName));
 }
 
 void ROSCatkinToolsStepWidget::renameProfile(const QString profileName)
@@ -400,7 +418,7 @@ void ROSCatkinToolsStepWidget::renameProfile(const QString profileName)
     if (name.isEmpty())
         return;
 
-    if (!ROSUtils::renameCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->target()->project()->projectDirectory(), profileName, name))
+    if (!ROSUtils::renameCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName, name))
         return;
 
     setProfile(name);
@@ -408,25 +426,24 @@ void ROSCatkinToolsStepWidget::renameProfile(const QString profileName)
 
 void ROSCatkinToolsStepWidget::editProfile(const QString profileName)
 {
-    Utils::FileName profile = ROSUtils::getCatkinToolsProfilePath(m_makeStep->rosBuildConfiguration()->target()->project()->projectDirectory(), profileName);
-    profile.appendPath(QLatin1String("config.yaml"));
+    Utils::FileName profile = ROSUtils::getCatkinToolsProfileConfigFile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
     ROSCatkinToolsProfileEditorDialog *editor = new ROSCatkinToolsProfileEditorDialog(profile);
     editor->show();
 }
 
 void ROSCatkinToolsStepWidget::deleteProfile(const QString profileName)
 {
-    ROSUtils::removeCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->target()->project()->projectDirectory(), profileName);
+    ROSUtils::removeCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
 }
 
 QString ROSCatkinToolsStepWidget::uniqueName(const QString &name)
 {
     QString result = name.trimmed();
-    QStringList profileNames = ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->target()->project()->projectDirectory());
+    QStringList profileNames = ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory());
     if (!result.isEmpty()) {
         QStringList pNames;
         foreach (QString profile, profileNames) {
-            if (profile == m_profile)
+            if (profile == m_makeStep->activeProfile())
                 continue;
             pNames.append(profile);
         }
@@ -511,7 +528,6 @@ bool ROSCatkinToolsConfigEditorWidget::isModified() const
 
 void ROSCatkinToolsConfigEditorWidget::onActionEditFilePathListTriggered()
 {
-
     qDebug() << m_editor->parent()->objectName();
 }
 

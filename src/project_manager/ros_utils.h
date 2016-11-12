@@ -23,6 +23,7 @@
 
 #include <QProcess>
 #include <QXmlStreamWriter>
+#include <QProcessEnvironment>
 
 namespace Utils {
 class FileName;
@@ -167,13 +168,24 @@ public:
 
   static bool removeCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString profileName);
   static bool renameCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString &oldProfileName, const QString &newProfileName);
+  static bool cloneCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString &profileName, const QString &newProfileName);
+  static bool createCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString profileName);
   static QString getCatkinToolsActiveProfile(const Utils::FileName &workspaceDir);
   static bool setCatkinToolsActiveProfile(const Utils::FileName &workspaceDir, const QString profileName);
   static QStringList getCatkinToolsProfileNames(const Utils::FileName &workspaceDir);
+
+
+  static Utils::FileName getCatkinToolsProfilesPath(const Utils::FileName &workspaceDir);
+  static Utils::FileName getCatkinToolsProfilesYamlFile(const Utils::FileName &workspaceDir);
   static Utils::FileName getCatkinToolsProfilePath(const Utils::FileName &workspaceDir, const QString profileName);
+  static Utils::FileName getCatkinToolsProfileConfigFile(const Utils::FileName &workspaceDir, const QString profileName);
 
   static QString getCMakeBuildTypeArgument(ROSUtils::BuildType &buildType);
 
+  static Utils::FileName getWorkspaceSourceSpace(const Utils::FileName &workspaceDir, const BuildSystem buildSystem);
+  static Utils::FileName getWorkspaceBuildSpace(const Utils::FileName &workspaceDir, const BuildSystem buildSystem);
+  static Utils::FileName getWorkspaceDevelSpace(const Utils::FileName &workspaceDir, const BuildSystem buildSystem);
+  static QProcessEnvironment getWorkspaceEnvironment(const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem buildSystem);
 
 
 private:

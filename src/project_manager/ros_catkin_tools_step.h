@@ -61,6 +61,10 @@ public:
     ROSBuildConfiguration *rosBuildConfiguration() const;
     BuildTargets buildsTarget() const;
     void setBuildTarget(const BuildTargets &target);
+
+    QString activeProfile() const;
+    void setActiveProfile(const QString &profileName);
+
     QString allArguments(ROSUtils::BuildType buildType) const;
     QString makeCommand() const;
 
@@ -83,6 +87,7 @@ private:
     ROSBuildConfiguration *targetsActiveBuildConfiguration() const;
 
     BuildTargets m_target;
+    QString m_activeProfile;
     QString m_catkinToolsArguments;
     QString m_catkinMakeArguments;
     QString m_cmakeArguments;
@@ -108,7 +113,6 @@ private:
     Ui::ROSCatkinToolsStep *m_ui;
     ROSCatkinToolsStep *m_makeStep;
     QString m_summaryText;
-    QString m_profile;
     QMenu *m_addButtonMenu;
     QMenu *m_profileMenu;
 

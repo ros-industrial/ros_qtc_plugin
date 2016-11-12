@@ -4,5 +4,6 @@
         <file>50x50pix.png</file>
         <file>folderpackage.png</file>
         <file>pencil_icon.png</file>
+        <file>config.yaml</file>
     </qresource>
 </RCC>

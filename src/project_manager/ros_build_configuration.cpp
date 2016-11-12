@@ -102,6 +102,11 @@ void ROSBuildConfiguration::setCMakeBuildType(ROSUtils::BuildType &buildType)
     m_cmakeBuildType = buildType;
 }
 
+ROSProject *ROSBuildConfiguration::project()
+{
+    return qobject_cast<ROSProject *>(target()->project());
+}
+
 void ROSBuildConfiguration::sourceWorkspace()
 {
   // Need to source ros and devel directory to setup enviroment variables

@@ -22,6 +22,7 @@
 #define ROSBUILDCONFIGURATION_H
 
 #include "ros_utils.h"
+#include "ros_project.h"
 
 #include <projectexplorer/buildconfiguration.h>
 #include <projectexplorer/namedwidget.h>
@@ -71,6 +72,8 @@ public:
     void setCMakeBuildType(ROSUtils::BuildType &buildType);
 
     void sourceWorkspace();
+
+    ROSProject *project();
 
 protected:
     ROSBuildConfiguration(ProjectExplorer::Target *parent, ROSBuildConfiguration *source);
