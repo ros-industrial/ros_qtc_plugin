@@ -87,9 +87,10 @@ ROSUtils::BuildSystem ROSBuildConfiguration::buildSystem() const
     return m_buildSystem;
 }
 
-void ROSBuildConfiguration::setBuildSystem(ROSUtils::BuildSystem &build_system)
+void ROSBuildConfiguration::setBuildSystem(const ROSUtils::BuildSystem &buildSystem)
 {
-    m_buildSystem = build_system;
+    m_buildSystem = buildSystem;
+    emit buildSystemChanged(buildSystem);
 }
 
 ROSUtils::BuildType ROSBuildConfiguration::cmakeBuildType() const
@@ -97,9 +98,10 @@ ROSUtils::BuildType ROSBuildConfiguration::cmakeBuildType() const
     return m_cmakeBuildType;
 }
 
-void ROSBuildConfiguration::setCMakeBuildType(ROSUtils::BuildType &buildType)
+void ROSBuildConfiguration::setCMakeBuildType(const ROSUtils::BuildType &buildType)
 {
     m_cmakeBuildType = buildType;
+    emit cmakeBuildTypeChanged(buildType);
 }
 
 ROSProject *ROSBuildConfiguration::project()
@@ -163,7 +165,7 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableBuilds(const Target *p
     if (path.exists())
         buildSystem = ROSUtils::CatkinTools;
 
-    for (int type = ROSUtils::BuildTypeNone + 1; type != ROSUtils::BuildTypeLast; ++type)
+    for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeMinSizeRel; ++type)
     {
       ROSBuildInfo *info = createBuildInfo(parent->kit(), buildSystem, ROSUtils::BuildType(type));
       result << info;
@@ -192,7 +194,7 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableSetups(const Kit *k, c
     if (path.exists())
         buildSystem = ROSUtils::CatkinTools;
 
-    for (int type = ROSUtils::BuildTypeNone + 1; type != ROSUtils::BuildTypeLast; ++type) {
+    for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeMinSizeRel; ++type) {
       ROSBuildInfo *info = createBuildInfo(k, buildSystem, ROSUtils::BuildType(type));
       result << info;
     }
@@ -295,26 +297,20 @@ ROSBuildInfo *ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const 
     info->kitId = k->id();
     info->buildSystem = build_system;
     info->cmakeBuildType = type;
+    info->typeName = ROSUtils::buildTypeName(type);
+    info->displayName = info->typeName;
 
     switch (type) {
     case ROSUtils::BuildTypeDebug:
-        info->typeName = tr("Debug");
-        info->displayName = info->typeName;
         info->buildType = BuildConfiguration::Debug;
         break;
     case ROSUtils::BuildTypeMinSizeRel:
-        info->typeName = tr("Minimum Size Release");
-        info->displayName = info->typeName;
         info->buildType = BuildConfiguration::Release;
         break;
     case ROSUtils::BuildTypeRelWithDebInfo:
-        info->typeName = tr("Release with Debug Information");
-        info->displayName = info->typeName;
         info->buildType = BuildConfiguration::Profile;
         break;
     default:
-        info->typeName = tr("Release");
-        info->displayName = info->typeName;
         info->buildType = BuildConfiguration::Release;
         break;
     }
@@ -344,9 +340,13 @@ ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
     m_ui = new Ui::ROSBuildConfiguration;
     m_ui->setupUi(this);
     m_ui->buildSystemComboBox->setCurrentIndex(bc->buildSystem());
+    m_ui->buildTypeComboBox->setCurrentIndex(bc->cmakeBuildType());
 
     connect(m_ui->buildSystemComboBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(buildSystemChanged(int)));
+
+    connect(m_ui->buildTypeComboBox, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(buildTypeChanged(int)));
 
     setDisplayName(tr("ROS Manager"));
 }
@@ -358,8 +358,12 @@ ROSBuildSettingsWidget::~ROSBuildSettingsWidget()
 
 void ROSBuildSettingsWidget::buildSystemChanged(int index)
 {
-    ROSUtils::BuildSystem bs = (ROSUtils::BuildSystem)index;
-    m_buildConfiguration->setBuildSystem(bs);
+    m_buildConfiguration->setBuildSystem(((ROSUtils::BuildSystem)index));
+}
+
+void ROSBuildSettingsWidget::buildTypeChanged(int index)
+{
+    m_buildConfiguration->setCMakeBuildType(((ROSUtils::BuildType)index));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -415,3 +419,5 @@ void ROSBuildEnvironmentWidget::environmentChanged()
 
 } // namespace Internal
 } // namespace GenericProjectManager
+
+

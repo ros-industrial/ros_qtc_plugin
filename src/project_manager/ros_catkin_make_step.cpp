@@ -37,6 +37,8 @@
 #include <utils/qtcprocess.h>
 
 #include <QDir>
+#include <QComboBox>
+#include <QLabel>
 
 using namespace Core;
 using namespace ProjectExplorer;
@@ -81,6 +83,10 @@ void ROSCatkinMakeStep::ctor()
                                                       ROS_CMS_DISPLAY_NAME));
 
     m_percentProgress = QRegExp(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
+
+    ROSBuildConfiguration *bc = rosBuildConfiguration();
+    if (bc->buildSystem() != ROSUtils::CatkinMake)
+        setEnabled(false);
 }
 
 ROSBuildConfiguration *ROSCatkinMakeStep::rosBuildConfiguration() const
@@ -233,7 +239,7 @@ bool ROSCatkinMakeStep::immutable() const
     return false;
 }
 
-ROSCatkinMakeStep::BuildTargets ROSCatkinMakeStep::buildsTarget() const
+ROSCatkinMakeStep::BuildTargets ROSCatkinMakeStep::buildTarget() const
 {
     return m_target;
 }
@@ -253,8 +259,6 @@ ROSCatkinMakeStepWidget::ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep)
     m_ui = new Ui::ROSCatkinMakeStep;
     m_ui->setupUi(this);
 
-    ROSProject *pro = static_cast<ROSProject *>(m_makeStep->target()->project());
-
     m_ui->catkinMakeArgumentsLineEdit->setText(m_makeStep->m_catkinMakeArguments);
     m_ui->cmakeArgumentsLineEdit->setText(m_makeStep->m_cmakeArguments);
     m_ui->makeArgumentsLineEdit->setText(m_makeStep->m_makeArguments);
@@ -270,11 +274,22 @@ ROSCatkinMakeStepWidget::ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep)
     connect(m_ui->makeArgumentsLineEdit, &QLineEdit::textEdited,
             this, &ROSCatkinMakeStepWidget::updateDetails);
 
-    connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
-            this, SLOT(updateDetails()));
+    connect(m_makeStep, SIGNAL(enabledChanged()),
+            this, SLOT(enabledChanged()));
 
+    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    connect(bc, SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
+            this, SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
+
+    connect(bc, &ROSBuildConfiguration::cmakeBuildTypeChanged,
+            this, &ROSCatkinMakeStepWidget::updateDetails);
+
+    ROSProject *pro = static_cast<ROSProject *>(m_makeStep->target()->project());
     connect(pro, &ROSProject::environmentChanged,
             this, &ROSCatkinMakeStepWidget::updateDetails);
+
+    connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
+            this, SLOT(updateDetails()));
 }
 
 ROSCatkinMakeStepWidget::~ROSCatkinMakeStepWidget()
@@ -294,9 +309,6 @@ void ROSCatkinMakeStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    if (!bc)
-        bc = m_makeStep->targetsActiveBuildConfiguration();
-
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
     param.setWorkingDirectory(bc->buildDirectory().toString());
@@ -305,6 +317,18 @@ void ROSCatkinMakeStepWidget::updateDetails()
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType()));
     m_summaryText = param.summary(displayName());
     emit updateSummary();
+}
+
+void ROSCatkinMakeStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSystem)
+{
+    m_makeStep->setEnabled((buildSystem == ROSUtils::CatkinMake));
+}
+
+void ROSCatkinMakeStepWidget::enabledChanged()
+{
+    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    if(m_makeStep->enabled() && (bc->buildSystem() != ROSUtils::CatkinMake))
+        m_makeStep->setEnabled(false);
 }
 
 QString ROSCatkinMakeStepWidget::summaryText() const

@@ -7,13 +7,16 @@
     <x>0</x>
     <y>0</y>
     <width>682</width>
-    <height>53</height>
+    <height>70</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QFormLayout" name="formLayout">
+   <property name="fieldGrowthPolicy">
+    <enum>QFormLayout::ExpandingFieldsGrow</enum>
+   </property>
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -27,7 +30,7 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>200</width>
+       <width>250</width>
        <height>0</height>
       </size>
      </property>
@@ -48,6 +51,43 @@
      <property name="text">
       <string>Build System:</string>
      </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="buildTypeLabel">
+     <property name="text">
+      <string>Build Type:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="buildTypeComboBox">
+     <property name="minimumSize">
+      <size>
+       <width>250</width>
+       <height>0</height>
+      </size>
+     </property>
+     <item>
+      <property name="text">
+       <string>Debug</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Release</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Release with Debug Information</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Minimum Size Release</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>

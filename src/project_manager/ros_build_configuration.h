@@ -61,19 +61,23 @@ public:
     ProjectExplorer::NamedWidget *createConfigWidget() override;
     QList<ProjectExplorer::NamedWidget *> createSubConfigWidgets() override;
 
-    BuildType buildType() const;
+    BuildType buildType() const override;
 
     QVariantMap toMap() const override;
 
     ROSUtils::BuildSystem buildSystem() const;
-    void setBuildSystem(ROSUtils::BuildSystem &build_system);
+    void setBuildSystem(const ROSUtils::BuildSystem &buildSystem);
 
     ROSUtils::BuildType cmakeBuildType() const;
-    void setCMakeBuildType(ROSUtils::BuildType &buildType);
+    void setCMakeBuildType(const ROSUtils::BuildType &buildType);
 
     void sourceWorkspace();
 
     ROSProject *project();
+
+signals:
+    void buildSystemChanged(const ROSUtils::BuildSystem &buildSystem);
+    void cmakeBuildTypeChanged(const ROSUtils::BuildType &buildType);
 
 protected:
     ROSBuildConfiguration(ProjectExplorer::Target *parent, ROSBuildConfiguration *source);
@@ -126,6 +130,7 @@ public:
 
 private slots:
     void buildSystemChanged(int index);
+    void buildTypeChanged(int index);
 
 private:
     Ui::ROSBuildConfiguration *m_ui;

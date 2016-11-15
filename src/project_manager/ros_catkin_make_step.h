@@ -54,7 +54,7 @@ public:
     bool immutable() const override;
 
     ROSBuildConfiguration *rosBuildConfiguration() const;
-    BuildTargets buildsTarget() const;
+    BuildTargets buildTarget() const;
     void setBuildTarget(const BuildTargets &target);
     QString allArguments(ROSUtils::BuildType buildType) const;
     QString makeCommand() const;
@@ -94,6 +94,8 @@ public:
 
 private slots:
     void updateDetails();
+    void updateBuildSystem(const ROSUtils::BuildSystem &buildSystem);
+    void enabledChanged();
 
 private:
     Ui::ROSCatkinMakeStep *m_ui;

@@ -39,6 +39,20 @@ ROSUtils::ROSUtils()
 
 }
 
+QString ROSUtils::buildTypeName(const ROSUtils::BuildType &buildType)
+{
+    switch (buildType) {
+    case ROSUtils::BuildTypeDebug:
+        return QLatin1String("Debug");
+    case ROSUtils::BuildTypeMinSizeRel:
+        return QLatin1String("Minimum Size Release");
+    case ROSUtils::BuildTypeRelWithDebInfo:
+        return QLatin1String("Release with Debug Information");
+    case ROSUtils::BuildTypeRelease:
+        return QLatin1String("Release");
+    }
+}
+
 bool ROSUtils::generateCodeBlocksProjectFile(QProcess *process, const Utils::FileName &workspaceDir, const BuildSystem buildSystem)
 {
 

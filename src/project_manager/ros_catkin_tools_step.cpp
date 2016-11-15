@@ -90,6 +90,10 @@ void ROSCatkinToolsStep::ctor()
         m_activeProfile = "default";
 
     m_percentProgress = QRegExp(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
+
+    ROSBuildConfiguration *bc = rosBuildConfiguration();
+    if (bc->buildSystem() != ROSUtils::CatkinTools)
+        setEnabled(false);
 }
 
 ROSBuildConfiguration *ROSCatkinToolsStep::rosBuildConfiguration() const
@@ -257,7 +261,7 @@ bool ROSCatkinToolsStep::immutable() const
     return false;
 }
 
-ROSCatkinToolsStep::BuildTargets ROSCatkinToolsStep::buildsTarget() const
+ROSCatkinToolsStep::BuildTargets ROSCatkinToolsStep::buildTarget() const
 {
     return m_target;
 }
@@ -287,15 +291,11 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     m_ui = new Ui::ROSCatkinToolsStep;
     m_ui->setupUi(this);
 
-    ROSProject *pro = static_cast<ROSProject *>(m_makeStep->target()->project());
-
     m_ui->catkinToolsArgumentsLineEdit->setText(m_makeStep->m_catkinToolsArguments);
     m_ui->catkinMakeArgumentsLineEdit->setText(m_makeStep->m_catkinMakeArguments);
     m_ui->cmakeArgumentsLineEdit->setText(m_makeStep->m_cmakeArguments);
     m_ui->makeArgumentsLineEdit->setText(m_makeStep->m_makeArguments);
     m_ui->profilePushButton->setText(m_makeStep->m_activeProfile);
-
-    qDebug() << m_makeStep->activeProfile();
 
     m_addButtonMenu = new QMenu(this);
     m_ui->addPushButton->setMenu(m_addButtonMenu);
@@ -330,11 +330,22 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     connect(m_ui->makeArgumentsLineEdit, &QLineEdit::textEdited,
             this, &ROSCatkinToolsStepWidget::updateDetails);
 
-    connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
-            this, SLOT(updateDetails()));
+    connect(m_makeStep, SIGNAL(enabledChanged()),
+            this, SLOT(enabledChanged()));
 
+    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    connect(bc, SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
+            this, SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
+
+    connect(bc, &ROSBuildConfiguration::cmakeBuildTypeChanged,
+            this, &ROSCatkinToolsStepWidget::updateDetails);
+
+    ROSProject *pro = static_cast<ROSProject *>(m_makeStep->target()->project());
     connect(pro, &ROSProject::environmentChanged,
             this, &ROSCatkinToolsStepWidget::updateDetails);
+
+    connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
+            this, SLOT(updateDetails()));
 }
 
 ROSCatkinToolsStepWidget::~ROSCatkinToolsStepWidget()
@@ -355,14 +366,23 @@ void ROSCatkinToolsStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    if (!bc)
-        bc = m_makeStep->targetsActiveBuildConfiguration();
-
     ProcessParameters param;
     param.setCommand(m_makeStep->makeCommand());
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType()));
     m_summaryText = param.summary(displayName());
     emit updateSummary();
+}
+
+void ROSCatkinToolsStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSystem)
+{
+    m_makeStep->setEnabled((buildSystem == ROSUtils::CatkinTools));
+}
+
+void ROSCatkinToolsStepWidget::enabledChanged()
+{
+    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    if(m_makeStep->enabled() && (bc->buildSystem() != ROSUtils::CatkinTools))
+        m_makeStep->setEnabled(false);
 }
 
 QString ROSCatkinToolsStepWidget::summaryText() const

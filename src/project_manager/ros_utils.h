@@ -40,12 +40,11 @@ public:
   enum BuildSystem { CatkinMake = 0,
                      CatkinTools = 1 };
 
-  enum BuildType { BuildTypeNone = 0,
-                   BuildTypeDebug = 1,
-                   BuildTypeRelease = 2,
-                   BuildTypeRelWithDebInfo = 3,
-                   BuildTypeMinSizeRel = 4,
-                   BuildTypeLast = 5 };
+  enum BuildType { BuildTypeDebug = 0,
+                   BuildTypeRelease = 1,
+                   BuildTypeRelWithDebInfo = 2,
+                   BuildTypeMinSizeRel = 3};
+
   /**
    * @brief The FolderContent struct used to store file and folder information
    */
@@ -54,6 +53,13 @@ public:
     QStringList files;
     QStringList directories;
   };
+
+  /**
+   * @brief Convert ENUM BuiltType to QString
+   * @param buildType ENUM BuildType
+   * @return QString for ENUM BuildType
+   */
+  static QString buildTypeName(const ROSUtils::BuildType &buildType);
 
   /**
    * @brief generateCodeBlocksProjectFile - Generates a CodeBlocks project file from which include directories are extracted.
