@@ -179,12 +179,9 @@ public:
   static QString getCatkinToolsActiveProfile(const Utils::FileName &workspaceDir);
   static bool setCatkinToolsActiveProfile(const Utils::FileName &workspaceDir, const QString profileName);
   static QStringList getCatkinToolsProfileNames(const Utils::FileName &workspaceDir);
+  static Utils::FileName getCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString profileName);
 
 
-  static Utils::FileName getCatkinToolsProfilesPath(const Utils::FileName &workspaceDir);
-  static Utils::FileName getCatkinToolsProfilesYamlFile(const Utils::FileName &workspaceDir);
-  static Utils::FileName getCatkinToolsProfilePath(const Utils::FileName &workspaceDir, const QString profileName);
-  static Utils::FileName getCatkinToolsProfileConfigFile(const Utils::FileName &workspaceDir, const QString profileName);
 
   static QString getCMakeBuildTypeArgument(ROSUtils::BuildType &buildType);
 
@@ -203,6 +200,11 @@ private:
    * @return True if successful
    */
   static bool sourceWorkspaceHelper(QProcess *process, const QString &path);
+
+  static Utils::FileName getCatkinToolsProfilesPath(const Utils::FileName &workspaceDir);
+  static Utils::FileName getCatkinToolsProfilesYamlFile(const Utils::FileName &workspaceDir);
+  static Utils::FileName getCatkinToolsProfilePath(const Utils::FileName &workspaceDir, const QString profileName);
+  static Utils::FileName getCatkinToolsProfileConfigFile(const Utils::FileName &workspaceDir, const QString profileName);
 
 };
 

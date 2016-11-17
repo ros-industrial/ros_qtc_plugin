@@ -295,22 +295,29 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     m_ui->catkinMakeArgumentsLineEdit->setText(m_makeStep->m_catkinMakeArguments);
     m_ui->cmakeArgumentsLineEdit->setText(m_makeStep->m_cmakeArguments);
     m_ui->makeArgumentsLineEdit->setText(m_makeStep->m_makeArguments);
-    m_ui->profilePushButton->setText(m_makeStep->m_activeProfile);
+    setProfile(m_makeStep->m_activeProfile);
 
     m_addButtonMenu = new QMenu(this);
     m_ui->addPushButton->setMenu(m_addButtonMenu);
 
+    QAction *cloneAction = m_addButtonMenu->addAction(tr("&Clone Selected"));
+    connect(cloneAction, &QAction::triggered,
+            this, [this]() { cloneProfile(m_makeStep->activeProfile()); });
+
+    QAction *newAction = m_addButtonMenu->addAction(tr("&New Profile"));
+    connect(newAction, &QAction::triggered,
+            this, &ROSCatkinToolsStepWidget::newProfile);
+
     m_profileMenu = new QMenu(this);
     m_ui->profilePushButton->setMenu(m_profileMenu);
 
-    connect(m_ui->profilePushButton, &QAbstractButton::clicked,
+    connect(m_profileMenu, &QMenu::aboutToShow,
             this, &ROSCatkinToolsStepWidget::updateProfileButtonMenu);
 
     updateDetails();
-    updateAddProfileButtonMenu();
 
     connect(m_ui->removePushButton, &QAbstractButton::clicked,
-            this, [this]() { deleteProfile(m_makeStep->activeProfile()); });
+            this, [this]() { removeProfile(m_makeStep->activeProfile()); });
 
     connect(m_ui->renamePushButton, &QAbstractButton::clicked,
             this, [this]() { renameProfile(m_makeStep->activeProfile()); });
@@ -390,16 +397,6 @@ QString ROSCatkinToolsStepWidget::summaryText() const
     return m_summaryText;
 }
 
-void ROSCatkinToolsStepWidget::updateAddProfileButtonMenu()
-{
-    m_addButtonMenu->clear();
-
-    QAction *cloneAction = m_addButtonMenu->addAction(tr("&Clone Selected"));
-    connect(cloneAction, &QAction::triggered,
-            this, [this]() { cloneProfile(QString()); });
-
-}
-
 void ROSCatkinToolsStepWidget::updateProfileButtonMenu()
 {
     m_profileMenu->clear();
@@ -415,12 +412,34 @@ void ROSCatkinToolsStepWidget::updateProfileButtonMenu()
 void ROSCatkinToolsStepWidget::setProfile(const QString profileName)
 {
     m_makeStep->setActiveProfile(profileName);
-    m_ui->profilePushButton->setText(profileName);
+    m_ui->profilePushButton->setText(QString(" %1").arg(profileName));
 }
 
 void ROSCatkinToolsStepWidget::cloneProfile(const QString profileName)
 {
-    ROSUtils::cloneCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName, uniqueName(profileName));
+    QString name = uniqueName(profileName, false);
+    ROSUtils::cloneCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName, name);
+    setProfile(name);
+}
+
+void ROSCatkinToolsStepWidget::newProfile()
+{
+    bool ok;
+    QString name = QInputDialog::getText(this, tr("New Profile..."),
+                                         tr("Pofile Name:"),
+                                         QLineEdit::Normal,
+                                         QLatin1String("default"), &ok);
+    if (!ok)
+        return;
+
+    name = uniqueName(name, false);
+    if (name.isEmpty())
+        return;
+
+    if (!ROSUtils::createCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), name))
+        return;
+
+    setProfile(name);
 }
 
 void ROSCatkinToolsStepWidget::renameProfile(const QString profileName)
@@ -434,7 +453,7 @@ void ROSCatkinToolsStepWidget::renameProfile(const QString profileName)
     if (!ok)
         return;
 
-    name = uniqueName(name);
+    name = uniqueName(name, true);
     if (name.isEmpty())
         return;
 
@@ -446,29 +465,37 @@ void ROSCatkinToolsStepWidget::renameProfile(const QString profileName)
 
 void ROSCatkinToolsStepWidget::editProfile(const QString profileName)
 {
-    Utils::FileName profile = ROSUtils::getCatkinToolsProfileConfigFile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
+    Utils::FileName profile = ROSUtils::getCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
+
     ROSCatkinToolsProfileEditorDialog *editor = new ROSCatkinToolsProfileEditorDialog(profile);
     editor->show();
 }
 
-void ROSCatkinToolsStepWidget::deleteProfile(const QString profileName)
+void ROSCatkinToolsStepWidget::removeProfile(const QString profileName)
 {
     ROSUtils::removeCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
+    setProfile(ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory())[0]);
 }
 
-QString ROSCatkinToolsStepWidget::uniqueName(const QString &name)
+QString ROSCatkinToolsStepWidget::uniqueName(const QString &name, const bool &isRename)
 {
     QString result = name.trimmed();
     QStringList profileNames = ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory());
     if (!result.isEmpty()) {
-        QStringList pNames;
-        foreach (QString profile, profileNames) {
-            if (profile == m_makeStep->activeProfile())
-                continue;
-            pNames.append(profile);
+        if(isRename)
+        {
+            QStringList pNames;
+            foreach (QString profile, profileNames) {
+                if (profile == m_makeStep->activeProfile())
+                    continue;
+                pNames.append(profile);
+            }
+            return Project::makeUnique(result, pNames);
         }
-        result = Project::makeUnique(result, pNames);
+
+        return Project::makeUnique(result, profileNames);
     }
+
     return result;
 }
 

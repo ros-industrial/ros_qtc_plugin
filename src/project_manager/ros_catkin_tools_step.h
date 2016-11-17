@@ -121,12 +121,13 @@ private:
     void updateAddProfileButtonMenu();
     void updateProfileButtonMenu();
     void setProfile(const QString profileName);
+    void newProfile();
     void cloneProfile(const QString profileName);
     void renameProfile(const QString profileName);
-    void deleteProfile(const QString profileName);
+    void removeProfile(const QString profileName);
     void editProfile(const QString profileName);
 
-    QString uniqueName(const QString &name);
+    QString uniqueName(const QString &name, const bool &isRename);
 };
 
 class ROSCatkinToolsProfileEditorDialog : public QDialog
