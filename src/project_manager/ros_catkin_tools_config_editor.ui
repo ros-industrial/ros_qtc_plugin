@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>784</height>
+    <height>819</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -71,6 +71,9 @@
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
         <property name="clearButtonEnabled">
          <bool>false</bool>
         </property>
@@ -112,6 +115,9 @@
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
         <property name="clearButtonEnabled">
          <bool>false</bool>
         </property>
@@ -133,6 +139,9 @@
       <item row="1" column="1">
        <widget class="QLineEdit" name="blacklist_lineEdit">
         <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
          <bool>true</bool>
         </property>
         <property name="clearButtonEnabled">
@@ -267,8 +276,8 @@
       <string>Space Options</string>
      </property>
      <layout class="QFormLayout" name="formLayout_8">
-      <item row="0" column="0">
-       <widget class="QLabel" name="space_devel_option_label">
+      <item row="2" column="0">
+       <widget class="QLabel" name="space_devel_layout_label">
         <property name="minimumSize">
          <size>
           <width>60</width>
@@ -276,12 +285,54 @@
          </size>
         </property>
         <property name="text">
-         <string>Devel:</string>
+         <string>Devel Layout:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="space_install_option_label">
+        <property name="text">
+         <string>Install:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="space_devel_option_comboBox">
+       <widget class="QComboBox" name="space_install_option_comboBox">
+        <item>
+         <property name="text">
+          <string>No</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Yes</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="space_install_layout_label">
+        <property name="text">
+         <string>Install Layout:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="space_install_layout_comboBox">
+        <item>
+         <property name="text">
+          <string>Merged</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Isolated</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="space_devel_layout_comboBox">
         <item>
          <property name="text">
           <string>Link</string>
@@ -295,37 +346,6 @@
         <item>
          <property name="text">
           <string>Isolate</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="space_install_option_label">
-        <property name="text">
-         <string>Install:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="space_install_option_comboBox">
-        <item>
-         <property name="text">
-          <string>No Install</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Install</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Isolated Install</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Merged Install</string>
          </property>
         </item>
        </widget>
@@ -456,6 +476,9 @@
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="1" column="0">
@@ -473,6 +496,9 @@
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="2" column="0">
@@ -488,6 +514,9 @@
       <item row="2" column="1">
        <widget class="QLineEdit" name="catkin_args_lineEdit">
         <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
          <bool>true</bool>
         </property>
        </widget>

@@ -24,6 +24,7 @@
 #include "ui_ros_catkin_tools_step.h"
 #include "ui_ros_catkin_tools_config_editor.h"
 
+#include <boost/algorithm/string/join.hpp>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/gnumakeparser.h>
@@ -547,10 +548,58 @@ bool ROSCatkinToolsConfigEditorWidget::parseProfileConfig(Utils::FileName filePa
     m_modified = false;
 
     // both work for getting list of string (preferece to use vector)
-    std::list<std::string> l = m_profile_original["jobs_args"].as<std::list<std::string> >();
-    std::vector<std::string> l2 = m_profile_original["jobs_args"].as<std::vector<std::string> >();
-    qDebug() << QString::fromStdString(l2[0]);
+    m_ui->blacklist_lineEdit->setText(convertListToString("blacklist"));
+    m_ui->space_build_lineEdit->setText(parseString("build_space"));
+    m_ui->catkin_args_lineEdit->setText(convertListToString("catkin_make_args"));
+    m_ui->cmake_args_lineEdit->setText(convertListToString("cmake_args"));
+    m_ui->space_devel_layout_comboBox->setCurrentText(parseString("devel_layout"));
+    m_ui->space_devel_lineEdit->setText(parseString("devel_space"));
+    m_ui->extend_paths_lineEdit->setText(convertListToString("extended_path"));
+    m_ui->space_install_option_comboBox->setCurrentIndex(parseBool("install"));
+    m_ui->space_install_lineEdit->setText(parseString("install_space"));
+    m_ui->space_install_layout_comboBox->setCurrentIndex(parseBool("isolate_install"));
+    //TODO: Need to figure out how to parse jobs and package jobs
+    m_ui->space_log_lineEdit->setText(parseString("log_space"));
+    m_ui->make_args_lineEdit->setText(convertListToString("make_args"));
+    m_ui->space_source_lineEdit->setText(parseString("source_space"));
+    m_ui->env_cache_checkBox->setChecked(parseBool("use_env_cache"));
+    m_ui->jobserver_checkBox->setChecked(parseBool("use_internal_make_jobserver"));
+    m_ui->whitelist_lineEdit->setText(convertListToString("whitelist"));
     return true;
+}
+
+std::vector<std::string> ROSCatkinToolsConfigEditorWidget::parseList(std::string key)
+{
+    if (m_profile_current[key].Type() != YAML::NodeType::Sequence)
+        return std::vector<std::string>();
+
+    return m_profile_current[key].as<std::vector<std::string> >();
+}
+
+QString ROSCatkinToolsConfigEditorWidget::parseString(std::string key)
+{
+    if (m_profile_current[key].Type() != YAML::NodeType::Scalar)
+        return QString();
+
+    return QString::fromStdString(m_profile_current[key].as<std::string>());
+}
+
+bool ROSCatkinToolsConfigEditorWidget::parseBool(std::string key)
+{
+    if (m_profile_current[key].Type() != YAML::NodeType::Scalar)
+        return false;
+
+    return m_profile_current[key].as<bool>();
+}
+
+QString ROSCatkinToolsConfigEditorWidget::convertListToString(std::string key)
+{
+    return convertListToString(parseList(key));
+}
+
+QString ROSCatkinToolsConfigEditorWidget::convertListToString(std::vector<std::string> list)
+{
+    return "[" + QString::fromStdString(boost::algorithm::join(list, "; ")) + "]";
 }
 
 bool ROSCatkinToolsConfigEditorWidget::saveProfileConfig()
@@ -603,7 +652,8 @@ ROSCatkinToolsProfileEditorDialog::ROSCatkinToolsProfileEditorDialog(Utils::File
     vlayout->addWidget(editorWidget);
     setLayout(vlayout);
     setWindowTitle(QLatin1String("Catkin Tools Configuration Editor"));
-    editorWidget->parseProfileConfig(filePath);
+    if(!editorWidget->parseProfileConfig(filePath))
+        this->close();
 }
 
 //

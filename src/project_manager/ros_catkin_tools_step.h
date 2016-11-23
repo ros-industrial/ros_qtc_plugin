@@ -155,6 +155,13 @@ private slots:
     void onActionEditStingListTriggered();
 
 private:
+    std::vector<std::string> parseList(std::string key);
+    QString parseString(std::string key);
+    bool parseBool(std::string key);
+
+    QString convertListToString(std::string key);
+    QString convertListToString(std::vector<std::string> list);
+
     Ui::ROSCatkinToolsConfigEditor *m_ui;
     QAction *m_editor;
     bool m_modified;
