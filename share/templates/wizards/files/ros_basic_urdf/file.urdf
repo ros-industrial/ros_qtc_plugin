@@ -1,6 +1,11 @@
 <?xml version="1.0" ?>
 <robot name="%{RobotName}" xmlns:xacro="http://ros.org/wiki/xacro">
-    <link name="base"/>
-    <link name="tool0"/>
+  <link name="base"/>
+  <link name="tool0"/>
 
-</launch>
+  <joint name="base_to_tool0" type="fixed">
+    <parent link="base"/>
+    <child link="tool0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+</robot>
