@@ -123,7 +123,7 @@ bool ROSCatkinMakeStep::init(QList<const BuildStep *> &earlierSteps)
     // TODO: Need to get build data (build directory, environment, etc.) based on build System
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
-    pp->setWorkingDirectory(ROSUtils::getWorkspaceBuildSpace(bc->project()->projectDirectory(), bc->buildSystem()).toString());
+    pp->setWorkingDirectory(bc->project()->projectDirectory().toString());
     Utils::Environment env(ROSUtils::getWorkspaceEnvironment(bc->project()->projectDirectory(), bc->project()->distribution(), bc->buildSystem()).toStringList());
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
@@ -175,7 +175,7 @@ QString ROSCatkinMakeStep::allArguments(ROSUtils::BuildType buildType) const
     switch(m_target) {
     case BUILD:
         Utils::QtcProcess::addArgs(&args, m_catkinMakeArguments);
-        Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(ROSUtils::getCMakeBuildTypeArgument(buildType)));
+        Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(ROSUtils::getCMakeBuildTypeArgument(buildType)));
         if (!m_cmakeArguments.isEmpty())
             Utils::QtcProcess::addArgs(&args, m_cmakeArguments);
         break;

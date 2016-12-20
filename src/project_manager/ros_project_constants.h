@@ -37,7 +37,6 @@ const char ROS_READING_PROJECT[] = "ROSProjectManager.ReadingProject";
 const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
 
 // Context menu actions
-const char ROS_RELOAD_INCLUDE_DIRS[] = "ROSProjectManager.reloadProjectIncludeDirectories";
 const char ROS_REMOVE_DIR[] = "ROSProjectManager.removeDirectory";
 
 // ROS wizards constants

@@ -32,7 +32,9 @@
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <cpptools/cpptoolsconstants.h>
 #include <cpptools/cppmodelmanager.h>
+#include <cpptools/projectinfo.h>
 #include <cpptools/projectpartbuilder.h>
+#include <cpptools/projectpartheaderpath.h>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/abi.h>
 #include <projectexplorer/buildsteplist.h>
@@ -40,6 +42,7 @@
 #include <projectexplorer/kitinformation.h>
 #include <projectexplorer/kitmanager.h>
 #include <projectexplorer/projectexplorerconstants.h>
+#include <projectexplorer/buildmanager.h>
 #include <qtsupport/baseqtversion.h>
 #include <projectexplorer/customexecutablerunconfiguration.h>
 #include <qtsupport/qtkitinformation.h>
@@ -67,13 +70,11 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
 {
     setId(Constants::ROSPROJECT_ID);
     setProjectManager(manager);
-    setDocument(new ROSProjectFile(this, fileName));
 
+    setDocument(new ROSProjectFile(this, fileName));
     DocumentManager::addDocument(document(), true);
 
     ROSProjectNode *project_node = new ROSProjectNode(this->projectFilePath());
-    connect(Core::VcsManager::instance(), &Core::VcsManager::repositoryChanged,
-            this, &ROSProject::repositoryChanged);
     setRootProjectNode(project_node);
 
     setProjectContext(Context(Constants::PROJECTCONTEXT));
@@ -90,6 +91,13 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
     projectManager()->registerProject(this);
 
     refresh();
+
+    // Setup signal/slot connections
+    connect(Core::VcsManager::instance(), &Core::VcsManager::repositoryChanged,
+            this, &ROSProject::repositoryChanged);
+
+    connect(ProjectExplorer::BuildManager::instance(), SIGNAL(buildQueueFinished(bool)),
+            this, SLOT(buildQueueFinished(bool)));
 
     connect(m_workspaceWatcher, SIGNAL(fileListChanged()),
             this, SIGNAL(fileListChanged()));
@@ -115,7 +123,7 @@ bool ROSProject::saveProjectFile()
     if (!saver.hasError())
     {
       QXmlStreamWriter workspaceXml(saver.file());
-      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_distribution, m_watchDirectories, m_projectIncludePaths);
+      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_distribution, m_watchDirectories);
       saver.setResult(&workspaceXml);
     }
     bool result = saver.finalize(ICore::mainWindow());
@@ -128,27 +136,9 @@ QString ROSProject::distribution() const
     return m_distribution;
 }
 
-bool ROSProject::addIncludes(const QStringList &includePaths)
+ROSBuildConfiguration* ROSProject::rosBuildConfiguration() const
 {
-    foreach (const QString &includePath, includePaths)
-    {
-      if (QDir(includePath).exists())
-        m_projectIncludePaths.append(includePath);
-    }
-
-    m_projectIncludePaths.removeDuplicates();
-    bool result = saveProjectFile();
-
-    refresh();
-
-    return result;
-}
-
-bool ROSProject::setIncludes(const QStringList &includePaths)
-{
-    m_projectIncludePaths.clear();
-    bool result = addIncludes(includePaths);
-    return result;
+    return static_cast<ROSBuildConfiguration *>(activeTarget()->activeBuildConfiguration());
 }
 
 void ROSProject::parseProjectFile()
@@ -158,23 +148,26 @@ void ROSProject::parseProjectFile()
     if (workspaceFile.open(QFile::ReadOnly | QFile::Text))
     {
       m_watchDirectories.clear();
-      m_projectIncludePaths.clear();
 
       workspaceXml.setDevice(&workspaceFile);
       while(workspaceXml.readNextStartElement())
       {
         if (workspaceXml.name() == QLatin1String("Distribution"))
         {
+            QStringList distributions = ROSUtils::installedDistributions();
             QXmlStreamAttributes attributes = workspaceXml.attributes();
             if (attributes.hasAttribute(QLatin1String("name")))
             {
                 m_distribution = attributes.value(QLatin1String("name")).toString();
+                if (!distributions.isEmpty() && !distributions.contains(m_distribution))
+                    m_distribution = distributions.first();
             }
             else
             {
-                //TODO: Add robust way to extract version of ubuntu and set distribution
-                m_distribution = QLatin1String("indigo");
-                qDebug() << "Error parsing ros distribution from project file. Using indigo.";
+                if (!distributions.isEmpty())
+                    m_distribution = distributions.first();
+                else
+                    qDebug() << "Project file Distribution tag did not have a name attribute.";
             }
             workspaceXml.readNextStartElement();
         }
@@ -185,16 +178,6 @@ void ROSProject::parseProjectFile()
             if(workspaceXml.name() == QLatin1String("Directory"))
             {
               m_watchDirectories.append(workspaceXml.readElementText());
-            }
-          }
-        }
-        else if(workspaceXml.name() == QLatin1String("IncludePaths"))
-        {
-          while(workspaceXml.readNextStartElement())
-          {
-            if(workspaceXml.name() == QLatin1String("Directory"))
-            {
-              m_projectIncludePaths.append(workspaceXml.readElementText());
             }
           }
         }
@@ -248,21 +231,19 @@ void ROSProject::refresh()
     m_projectFutureInterface->setProgressValue(100);
     m_projectFutureInterface->reportFinished();
 
-    // This will occure when include directories are added.
-    if (addedDirectories.isEmpty() && removedDirectories.isEmpty())
-      refreshCppCodeModel();
-
 //    m_workspaceWatcher->print();
 }
 
 void ROSProject::refreshCppCodeModel()
 {
+    // TODO: Need to run this in its own thread
+    m_wsPackageInfo = ROSUtils::getWorkspacePackageInfo(projectDirectory(), rosBuildConfiguration()->buildSystem());
+
     CppTools::CppModelManager *modelManager = CppTools::CppModelManager::instance();
 
-    m_codeModelFuture.cancel();
+    m_codeModelFuture.cancel(); // This may need to be removed
 
     CppTools::ProjectInfo pInfo(this);
-    CppTools::ProjectPartBuilder ppBuilder(pInfo);
 
     CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
     if (QtSupport::BaseQtVersion *qtVersion =
@@ -273,26 +254,25 @@ void ROSProject::refreshCppCodeModel()
             activeQtVersion = CppTools::ProjectPart::Qt5;
     }
 
-    ppBuilder.setQtVersion(activeQtVersion);
-    ppBuilder.setIncludePaths(projectIncludePaths());
-    ppBuilder.setCxxFlags(QStringList() << QLatin1String("-std=c++11"));
+    QStringList workspaceFiles = m_workspaceWatcher->getWorkspaceFiles();
 
-    const QList<Id> languages = ppBuilder.createProjectPartsForFiles(m_workspaceWatcher->getWorkspaceFiles());
-    foreach (Id language, languages)
-        setProjectLanguage(language, true);
 
+    foreach(ROSUtils::PackageInfo package, m_wsPackageInfo)
+    {
+        CppTools::ProjectPartBuilder ppBuilder(pInfo);
+        ppBuilder.setDisplayName(package.name);
+        ppBuilder.setProjectFile(this->projectFilePath().toString());
+        ppBuilder.setQtVersion(activeQtVersion);
+        ppBuilder.setIncludePaths(package.includes);
+        ppBuilder.setCxxFlags(package.flags);
+
+        QStringList packageFiles = workspaceFiles.filter(package.path);
+        const QList<Id> languages = ppBuilder.createProjectPartsForFiles(packageFiles);
+        foreach (Id language, languages)
+            setProjectLanguage(language, true);
+    }
     pInfo.finish();
     m_codeModelFuture = modelManager->updateProjectInfo(pInfo);
-}
-
-QStringList ROSProject::projectIncludePaths() const
-{
-    return m_projectIncludePaths;
-}
-
-QStringList ROSProject::workspaceFiles() const
-{
-    return m_workspaceWatcher->getWorkspaceFiles();
 }
 
 QString ROSProject::displayName() const
@@ -342,6 +322,11 @@ Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *erro
 void ROSProject::repositoryChanged(const QString &repository)
 {
   static_cast<ROSProjectNode *>(rootProjectNode())->updateVersionControlInfo(repository);
+}
+
+void ROSProject::buildQueueFinished(bool success)
+{
+    refreshCppCodeModel();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

@@ -54,21 +54,24 @@ public:
     QStringList directories;
   };
 
+  struct PackageInfo
+  {
+      QString name;         /**< @brief Package Name */
+      QString path;         /**< @brief Package directory path */
+      QStringList includes; /**< @brief Package include directories */
+      QStringList flags;    /**< @brief Package cxx build flags */
+      QString cbpFile;     /**< @brief Path to the CodeBlocks file */
+
+      bool exists();
+      bool cbpFileExists();
+  };
+
   /**
    * @brief Convert ENUM BuiltType to QString
    * @param buildType ENUM BuildType
    * @return QString for ENUM BuildType
    */
   static QString buildTypeName(const ROSUtils::BuildType &buildType);
-
-  /**
-   * @brief generateCodeBlocksProjectFile - Generates a CodeBlocks project file from which include directories are extracted.
-   * @param process - QProcess to execute the CMAKE command
-   * @param sourceDir - Source directory of the workspace
-   * @param buildDir - Build directory of the workspace
-   * @return True if successful
-   */
-  static bool generateCodeBlocksProjectFile(QProcess *process, const Utils::FileName &workspaceDir, const BuildSystem buildSystem);
 
   /**
    * @brief sourceROS - Source ROS
@@ -118,13 +121,13 @@ public:
   static QStringList installedDistributions();
 
   /**
-   * @brief gererateQtCreatorWorkspaceFile - Generates/Updates the Qt ROS Project File
-   * @param file - The Qt ROS Project Files
-   * @param files - List of Workspace Files
-   * @param includePaths - List of required include directories
+   * @brief Generates/Updates the Qt ROS Project File
+   * @param file The Qt ROS Project Files
+   * @param distribution ROS Distribution
+   * @param watchDirectories List of directories to watch
    * @return A bool whether the Qt ROS Project file was succesfully updated
    */
-  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QString distribution, const QStringList &watchDirectories, const QStringList &includePaths);
+  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QString distribution, const QStringList &watchDirectories);
 
   /**
    * @brief getWorkspaceFiles - Gets all fo the files in a ROS Workspace
@@ -141,13 +144,12 @@ public:
   static QHash<QString, FolderContent> getFolderContent(const Utils::FileName &folderPath, QStringList &fileList);
 
   /**
-   * @brief getWorkspaceIncludes - Gets all of the include directories
-   * @param workspaceDir - Path of the ROS Workspace
-   * @param rosDistribution - ROS Distribution
-   * @return QStringList of include directories
+   * @brief Get all of the workspace packages and its neccessary information.
+   * @param workspaceDir Path of the workspace
+   * @param buildSystem Workspace build system
+   * @return QMap(Package Name, PackageInfo)
    */
-  static QStringList getWorkspaceIncludes(const Utils::FileName &workspaceDir);
-
+  static QMap<QString, ROSUtils::PackageInfo> getWorkspacePackageInfo(const Utils::FileName &workspaceDir, const BuildSystem buildSystem);
   /**
    * @brief getROSPackages - Executes the bash command "rospack list" and returns
    * a map of QMap(Package Name, Path to package)
@@ -155,6 +157,23 @@ public:
    * @return QMap(Package Name, Path to package)
    */
   static QMap<QString, QString> getROSPackages(const QStringList &env);
+
+  /**
+   * @brief Get all of the ros packages within the provided workspace directory.
+   * @param workspaceDir Workspace directory path
+   * @param buildSystem Workspace build system
+   * @return QMap(Package Name, Path to package)
+   */
+  static QMap<QString, QString> getWorkspacePackages(const Utils::FileName &workspaceDir, const BuildSystem buildSystem);
+
+  /**
+   * @brief Get all of the code block files within workspace build directory.
+   * @param workspaceDir Workspace directory path
+   * @param buildSystem Workspace build system
+   * @return QMap(CodeBlock File Name, CodeBlock File Path)
+   */
+  static QMap<QString, QString> getWorkspaceCodeBlockFiles(const Utils::FileName &workspaceDir, const BuildSystem buildSystem);
+
 
   /**
    * @brief getROSPackageLaunchFiles - Gets all launch file associated to a package
@@ -171,6 +190,7 @@ public:
    * @return QStringList of executables
    */
   static QStringList getROSPackageExecutables(const QString &packageName, const QStringList &env);
+
 
   static bool removeCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString profileName);
   static bool renameCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString &oldProfileName, const QString &newProfileName);
@@ -201,10 +221,20 @@ private:
    */
   static bool sourceWorkspaceHelper(QProcess *process, const QString &path);
 
+  /**
+   * @brief This will parse the CodeBlock file and get the build info (incudes, Cxx Flags, etc.)
+   * @param workspaceDir Workspace path
+   * @param buildSystem Workspace build system
+   * @param package Package Info Objects
+   * @return True if successful, otherwise false.
+   */
+  static bool getPackageBuildInfo(const Utils::FileName &workspaceDir, const BuildSystem buildSystem, ROSUtils::PackageInfo &package);
+
   static Utils::FileName getCatkinToolsProfilesPath(const Utils::FileName &workspaceDir);
   static Utils::FileName getCatkinToolsProfilesYamlFile(const Utils::FileName &workspaceDir);
   static Utils::FileName getCatkinToolsProfilePath(const Utils::FileName &workspaceDir, const QString profileName);
   static Utils::FileName getCatkinToolsProfileConfigFile(const Utils::FileName &workspaceDir, const QString profileName);
+
 
 };
 

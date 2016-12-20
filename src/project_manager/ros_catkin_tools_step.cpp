@@ -193,7 +193,7 @@ QString ROSCatkinToolsStep::allArguments(ROSUtils::BuildType buildType) const
         if (!m_catkinMakeArguments.isEmpty())
             Utils::QtcProcess::addArgs(&args, QString("--catkin-make-args %1").arg(m_catkinMakeArguments));
 
-        Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(ROSUtils::getCMakeBuildTypeArgument(buildType)));
+        Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(ROSUtils::getCMakeBuildTypeArgument(buildType)));
         if (!m_cmakeArguments.isEmpty())
             Utils::QtcProcess::addArgs(&args, m_cmakeArguments);
         break;

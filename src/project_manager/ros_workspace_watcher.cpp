@@ -47,7 +47,10 @@ void ROSWorkspaceWatcher::watchFolder(const QString &parentPath, const QString &
     item.next();
     subDirectories.append(item.key());
 
+    // Add directory node
     static_cast<ROSProjectNode *>(m_project->rootProjectNode())->addDirectory(item.key());
+
+    // Add all files in the directory node
     foreach (QString file, item.value().files)
     {
       static_cast<ROSProjectNode *>(m_project->rootProjectNode())->addFile(item.key(), file);

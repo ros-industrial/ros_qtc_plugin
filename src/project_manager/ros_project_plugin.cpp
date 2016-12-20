@@ -93,16 +93,6 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
 
     IWizardFactory::registerFactoryCreator([]() { return QList<IWizardFactory *>() << new ROSProjectWizard << new ROSPackageWizard; });
 
-    ActionContainer *mproject =
-            ActionManager::actionContainer(ProjectExplorer::Constants::M_PROJECTCONTEXT);
-
-    auto reloadProjectIncludeDirectoriesAction = new QAction(tr("Reload Project Include Directories..."), this);
-    Command *reloadCommand = ActionManager::registerAction(reloadProjectIncludeDirectoriesAction,
-        Constants::ROS_RELOAD_INCLUDE_DIRS, Context(Constants::PROJECTCONTEXT));
-    reloadCommand->setAttribute(Command::CA_Hide);
-    mproject->addAction(reloadCommand, ProjectExplorer::Constants::G_PROJECT_FILES);
-    connect(reloadProjectIncludeDirectoriesAction, &QAction::triggered, this, &ROSProjectPlugin::reloadProjectIncludeDirectories);
-
     // This will context menu action for deleting and renaming project folders from the ProjectTree.
     ActionContainer *mfolderContextMenu = ActionManager::actionContainer(ProjectExplorer::Constants::M_FOLDERCONTEXT);
 
@@ -167,28 +157,6 @@ void ROSProjectPlugin::createCppCodeStyle()
   QSettings *s = Core::ICore::settings();
   CppTools::CppCodeStylePreferences *originalCppCodeStylePreferences = CppTools::CppToolsSettings::instance()->cppCodeStyle();
   originalCppCodeStylePreferences->fromSettings(QLatin1String(CppTools::Constants::CPP_SETTINGS_ID), s);
-}
-
-void ROSProjectPlugin::reloadProjectIncludeDirectories()
-{
-    ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectTree::currentProject());
-    if (!rosProject)
-        return;
-
-    QProcess *runCmake = new QProcess();
-    ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(rosProject->activeTarget()->activeBuildConfiguration());
-
-    // Generate CodeBlocks Project File
-    if (ROSUtils::sourceWorkspace(runCmake, rosProject->projectDirectory(), rosProject->distribution(), bc->buildSystem()))
-    {
-      if (ROSUtils::generateCodeBlocksProjectFile(runCmake, rosProject->projectDirectory(), bc->buildSystem()))
-      {
-        QStringList projectIncludes = ROSUtils::getWorkspaceIncludes(rosProject->projectDirectory());
-        rosProject->setIncludes(projectIncludes);
-      }
-    }
-
-    delete runCmake;
 }
 
 void ROSProjectPlugin::removeProjectDirectory()

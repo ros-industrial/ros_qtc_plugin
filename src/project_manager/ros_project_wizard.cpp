@@ -254,19 +254,10 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
     const ROSUtils::BuildSystem buildSystem = wizard->buildSystem();
     const QString distribution = wizard->distribution();
 
-    // Set watch directory to workspace
-    QProcess *gen = new QProcess();
-    gen->setWorkingDirectory(wsDir.absolutePath());
-    ROSUtils::sourceWorkspace(gen, wizard->workspaceDirectory(), distribution, buildSystem);
-    ROSUtils::generateCodeBlocksProjectFile(gen, wizard->workspaceDirectory(), buildSystem);
-    delete gen;
-
-    QStringList includePaths = ROSUtils::getWorkspaceIncludes(wizard->workspaceDirectory());
-
     Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
     QString content;
     QXmlStreamWriter workspaceXml(&content);
-    ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, distribution, QStringList() << QLatin1String("src"), includePaths);
+    ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, distribution, QStringList() << QDir(ROSUtils::getWorkspaceSourceSpace(wizard->workspaceDirectory(), buildSystem).toString()).dirName());
     generatedWorkspaceFile.setContents(content);
     generatedWorkspaceFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
 

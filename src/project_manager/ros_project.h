@@ -41,6 +41,7 @@ namespace ROSProjectManager {
 namespace Internal {
 
 class ROSProjectFile;
+class ROSBuildConfiguration;
 
 class ROSProject : public ProjectExplorer::Project
 {
@@ -54,14 +55,13 @@ public:
     ROSManager *projectManager() const override;
     QStringList files(FilesMode fileMode) const override;
 
-    bool addIncludes(const QStringList &includePaths);
-    bool setIncludes(const QStringList &includePaths);
-
     void refresh();
 
     QString distribution() const;
-    QStringList projectIncludePaths() const;
-    QStringList workspaceFiles() const;
+    ROSBuildConfiguration* rosBuildConfiguration() const;
+
+public slots:
+    void buildQueueFinished(bool success);
 
 protected:
     Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage);
@@ -76,9 +76,9 @@ private:
     QString m_distribution;
     ROSWorkspaceWatcher *m_workspaceWatcher;
     QStringList m_watchDirectories;
-    QStringList m_projectIncludePaths;
     QFuture<void> m_codeModelFuture;
     QFutureInterface<void> *m_projectFutureInterface = nullptr;
+    QMap<QString, ROSUtils::PackageInfo> m_wsPackageInfo;
 };
 
 class ROSProjectFile : public Core::IDocument

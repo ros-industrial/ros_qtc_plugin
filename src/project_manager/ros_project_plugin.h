@@ -43,13 +43,6 @@ public:
     void extensionsInitialized() override {}
 
 private slots:
-    /**
-     * @brief This will reload the project include directories.
-     *
-     * If libraries are add to a CMakeList.txt this must me called so
-     * the proper include directories get add to the cpp model.
-     */
-    void reloadProjectIncludeDirectories();
 
     /**
      * @brief This will remove the selected FolderNode in the project tree.
