@@ -90,7 +90,7 @@ void ROSCatkinToolsStep::ctor()
     if (m_activeProfile.isEmpty())
         m_activeProfile = "default";
 
-    m_percentProgress = QRegExp(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
+    m_percentProgress = QRegExp(QLatin1String(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
 
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (bc->buildSystem() != ROSUtils::CatkinTools)
@@ -245,14 +245,12 @@ void ROSCatkinToolsStep::processFinished(int exitCode, QProcess::ExitStatus stat
 void ROSCatkinToolsStep::stdOutput(const QString &line)
 {
     AbstractProcessStep::stdOutput(line);
-    int pos = 0;
-    while ((pos = m_percentProgress.indexIn(line, pos)) != -1) {
+    if (m_percentProgress.indexIn(line, 0) != -1)
+    {
         bool ok = false;
-        int percent = m_percentProgress.cap(1).toInt(&ok);
+        int percent = (m_percentProgress.cap(1).toDouble(&ok)/m_percentProgress.cap(2).toDouble(&ok)) * 100.0;
         if (ok)
             futureInterface()->setProgressValue(percent);
-
-        pos += m_percentProgress.matchedLength();
     }
 }
 
