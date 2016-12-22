@@ -65,7 +65,7 @@ public:
     QString activeProfile() const;
     void setActiveProfile(const QString &profileName);
 
-    QString allArguments(ROSUtils::BuildType buildType) const;
+    QString allArguments(ROSUtils::BuildType buildType, bool includeDefault = true) const;
     QString makeCommand() const;
 
     QVariantMap toMap() const;

@@ -177,7 +177,7 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableBuilds(const Target *p
 int ROSBuildConfigurationFactory::priority(const Kit *k, const QString &projectPath) const
 {
     Utils::MimeDatabase mdb;
-    if (k && mdb.mimeTypeForFile(projectPath).matchesName(QLatin1String(Constants::ROSMIMETYPE)))
+    if (k && mdb.mimeTypeForFile(projectPath).matchesName(QLatin1String(Constants::ROS_MIME_TYPE)))
         return 0;
     return -1;
 }

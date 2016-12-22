@@ -168,22 +168,26 @@ bool ROSCatkinMakeStep::fromMap(const QVariantMap &map)
     return BuildStep::fromMap(map);
 }
 
-QString ROSCatkinMakeStep::allArguments(ROSUtils::BuildType buildType) const
+QString ROSCatkinMakeStep::allArguments(ROSUtils::BuildType buildType, bool includeDefault) const
 {
     QString args;
 
     switch(m_target) {
     case BUILD:
         Utils::QtcProcess::addArgs(&args, m_catkinMakeArguments);
-        Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(ROSUtils::getCMakeBuildTypeArgument(buildType)));
-        if (!m_cmakeArguments.isEmpty())
-            Utils::QtcProcess::addArgs(&args, m_cmakeArguments);
+        if (includeDefault)
+            Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments));
+        else
+            if (!m_cmakeArguments.isEmpty())
+                Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
+
         break;
     case CLEAN:
         Utils::QtcProcess::addArgs(&args, QLatin1String("clean"));
         Utils::QtcProcess::addArgs(&args, m_catkinMakeArguments);
         if (!m_cmakeArguments.isEmpty())
             Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
+
         break;
     }
 
@@ -309,12 +313,14 @@ void ROSCatkinMakeStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(bc->project()->projectDirectory(), bc->project()->distribution(), bc->buildSystem()).toStringList());
+
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
     param.setWorkingDirectory(bc->buildDirectory().toString());
-    param.setEnvironment(bc->environment());
+    param.setEnvironment(env);
     param.setCommand(m_makeStep->makeCommand());
-    param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType()));
+    param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));
     m_summaryText = param.summary(displayName());
     emit updateSummary();
 }
@@ -373,7 +379,7 @@ BuildStep *ROSCatkinMakeStepFactory::restore(BuildStepList *parent, const QVaria
 
 QList<ProjectExplorer::BuildStepInfo> ROSCatkinMakeStepFactory::availableSteps(BuildStepList *parent) const
 {
-    if (parent->target()->project()->id() != Constants::ROSPROJECT_ID)
+    if (parent->target()->project()->id() != Constants::ROS_PROJECT_ID)
         return {};
 
     return {{ROS_CMS_ID,  QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep", ROS_CMS_DISPLAY_NAME)}};

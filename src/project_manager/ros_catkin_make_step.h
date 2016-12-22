@@ -56,7 +56,7 @@ public:
     ROSBuildConfiguration *rosBuildConfiguration() const;
     BuildTargets buildTarget() const;
     void setBuildTarget(const BuildTargets &target);
-    QString allArguments(ROSUtils::BuildType buildType) const;
+    QString allArguments(ROSUtils::BuildType buildType, bool includeDefault = true) const;
     QString makeCommand() const;
 
     QVariantMap toMap() const;

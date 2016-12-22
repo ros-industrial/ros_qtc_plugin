@@ -45,22 +45,22 @@ public:
                    BuildTypeRelWithDebInfo = 2,
                    BuildTypeMinSizeRel = 3};
 
-  /**
-   * @brief The FolderContent struct used to store file and folder information
-   */
+  /** @brief The FolderContent struct used to store file and folder information */
   struct FolderContent
   {
-    QStringList files;
-    QStringList directories;
+    QStringList files;       /**< @brief Directory Files */
+    QStringList directories; /**< @brief Directory Subdirectories */
   };
 
+  /** @brief Contains all relavent package information */
   struct PackageInfo
   {
       QString name;         /**< @brief Package Name */
       QString path;         /**< @brief Package directory path */
+      QString filepath;     /**< @brief Package package.xml filepath */
       QStringList includes; /**< @brief Package include directories */
       QStringList flags;    /**< @brief Package cxx build flags */
-      QString cbpFile;     /**< @brief Path to the CodeBlocks file */
+      QString cbpFile;      /**< @brief Path to the CodeBlocks file */
 
       bool exists();
       bool cbpFileExists();
@@ -74,49 +74,53 @@ public:
   static QString buildTypeName(const ROSUtils::BuildType &buildType);
 
   /**
-   * @brief sourceROS - Source ROS
-   * @param process - QProcess to execute the ROS bash command
-   * @param rosDistribution - ROS distribution
-   * @return True if successful
+   * @brief Source ROS
+   * @param process QProcess to execute the ROS bash command
+   * @param rosDistribution ROS distribution
+   * @return True if successful, otherwise false
    */
   static bool sourceROS(QProcess *process, const QString &rosDistribution);
 
   /**
-   * @brief sourceWorkspace - Source Workspace
-   * @param process - QProcess to execute the ROS bash command
-   * @param workspaceDir - Workspace directory
-   * @param rosDistribution - ROS distribution
+   * @brief Source Workspace
+   * @param process QProcess to execute the ROS bash command
+   * @param workspaceDir Workspace directory
+   * @param rosDistribution ROS distribution
+   * @param buildSystem Workspace build system
    * @return True if successful
    */
   static bool sourceWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem buildSystem);
 
   /**
-   * @brief isWorkspaceInitialized - Check whether provided workspace has been initialized
-   * @param workspaceDir - Workspace directory
-   * @return True if workspace is initialized
+   * @brief Check whether the provided workspace has been initialized
+   * @param workspaceDir Workspace directory
+   * @param buildSystem Workspace build system
+   * @return True if workspace is initialized, otherwise false
    */
   static bool isWorkspaceInitialized(const Utils::FileName &workspaceDir, const BuildSystem BuildSystem);
 
   /**
-   * @brief initializeWorkspace - Initialize workspace
-   * @param process - QProcess to execute the ROS bash command
-   * @param workspaceDir - Workspace directory
-   * @param rosDistribution - ROS Distribution
-   * @return True if successfully executed
+   * @brief Initialize workspace
+   * @param process QProcess to execute the ROS bash command
+   * @param workspaceDir Workspace directory
+   * @param rosDistribution ROS Distribution
+   * @param buildSystem Workspace build system
+   * @return True if successfully executed, otherwise false
    */
   static bool initializeWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem buildSystem);
 
   /**
-   * @brief buildWorkspace - Build workspace
-   * @param process - QProcess to execute the catkin_make
-   * @param workspaceDir - Workspace Directory
-   * @return True if successfully executed
+   * @brief Build workspace
+   * @param process QProcess to execute the catkin_make
+   * @param workspaceDir Workspace Directory
+   * @param buildSystem Workspace build system
+   * @return True if successfully executed, otherwise false
    */
   static bool buildWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const ROSUtils::BuildSystem buildSystem);
 
   /**
-   * @brief installedDistributions - Gets a list of installed ROS Distributions
-   * @return QStringList of installed ROS Distribution Names
+   * @brief Gets a list of installed ROS Distributions
+   * @return QStringList List of installed ROS distribution names
    */
   static QStringList installedDistributions();
 
@@ -125,21 +129,15 @@ public:
    * @param file The Qt ROS Project Files
    * @param distribution ROS Distribution
    * @param watchDirectories List of directories to watch
-   * @return A bool whether the Qt ROS Project file was succesfully updated
+   * @return True if Qt ROS Project file was succesfully updated, otherwise false
    */
   static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QString distribution, const QStringList &watchDirectories);
 
   /**
-   * @brief getWorkspaceFiles - Gets all fo the files in a ROS Workspace
-   * @param workspaceDir - Path to the ROS Workspace
-   * @return QHash<QString, QStringList> Directory, List of file paths
-   */
-  static QHash<QString, QStringList> getWorkspaceFiles(const Utils::FileName &workspaceDir);
-
-  /**
-   * @brief getFolderContent - Gets all fo the files in a given folder
-   * @param folderPath - Path to the foder
-   * @return QHash<QString, QStringList> Directory, List of file paths
+   * @brief Gets all fo the files in a given folder
+   * @param folderPath Path to the foder
+   * @param fileList List of files in directory
+   * @return QHash<QString, FolderContent> Directory, FolderContent
    */
   static QHash<QString, FolderContent> getFolderContent(const Utils::FileName &folderPath, QStringList &fileList);
 
@@ -151,9 +149,8 @@ public:
    */
   static QMap<QString, ROSUtils::PackageInfo> getWorkspacePackageInfo(const Utils::FileName &workspaceDir, const BuildSystem buildSystem);
   /**
-   * @brief getROSPackages - Executes the bash command "rospack list" and returns
-   * a map of QMap(Package Name, Path to package)
-   * @param env - Is the environment to use for getting the list of available packages.
+   * @brief Executes the bash command "rospack list" and returns a map of QMap(Package Name, Path to package)
+   * @param env Is the environment to use for getting the list of available packages.
    * @return QMap(Package Name, Path to package)
    */
   static QMap<QString, QString> getROSPackages(const QStringList &env);
@@ -176,17 +173,17 @@ public:
 
 
   /**
-   * @brief getROSPackageLaunchFiles - Gets all launch file associated to a package
-   * @param packagePath - ROS Package Name
-   * @param OnlyNames - Flag to determine if you only need the file name versus the path
+   * @brief Gets all launch files associated to a package
+   * @param packagePath ROS Package Name
+   * @param OnlyNames Flag to determine if you only need the file name versus the path
    * @return QStringList of launch files
    */
   static QStringList getROSPackageLaunchFiles(const QString &packagePath, bool OnlyNames = true);
 
   /**
-   * @brief getROSPackageExecutables - Gets all of the executables associated to a package
-   * @param packageName - ROS Package Name
-   * @param env - ROS Workspace Environment
+   * @brief Gets all of the executables associated to a package
+   * @param packageName ROS Package Name
+   * @param env ROS Workspace Environment
    * @return QStringList of executables
    */
   static QStringList getROSPackageExecutables(const QString &packageName, const QStringList &env);

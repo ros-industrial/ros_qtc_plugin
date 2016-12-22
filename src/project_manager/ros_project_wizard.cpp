@@ -219,7 +219,7 @@ bool ROSImportWizardPage::validateBaseName(const QString &name, QString *errorMe
 
 ROSProjectWizard::ROSProjectWizard()
 {
-    setSupportedProjectTypes({ Constants::ROSPROJECT_ID });
+    setSupportedProjectTypes({ Constants::ROS_PROJECT_ID });
     setIcon(QIcon(QLatin1String(":rosproject/50x50pix.png")));
     setDisplayName(tr("Import ROS Workspace"));
     setId("Z.ROSIndustrial");

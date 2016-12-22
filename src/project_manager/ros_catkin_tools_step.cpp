@@ -135,6 +135,7 @@ bool ROSCatkinToolsStep::init(QList<const BuildStep *> &earlierSteps)
     pp->setMacroExpander(bc->macroExpander());
     pp->setWorkingDirectory(ROSUtils::getWorkspaceBuildSpace(bc->project()->projectDirectory(), bc->buildSystem()).toString());
     Utils::Environment env(ROSUtils::getWorkspaceEnvironment(bc->project()->projectDirectory(), bc->project()->distribution(), bc->buildSystem()).toStringList());
+    qDebug() << env.toStringList();
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
@@ -181,7 +182,7 @@ bool ROSCatkinToolsStep::fromMap(const QVariantMap &map)
     return BuildStep::fromMap(map);
 }
 
-QString ROSCatkinToolsStep::allArguments(ROSUtils::BuildType buildType) const
+QString ROSCatkinToolsStep::allArguments(ROSUtils::BuildType buildType, bool includeDefault) const
 {
     QString args;
 
@@ -193,9 +194,12 @@ QString ROSCatkinToolsStep::allArguments(ROSUtils::BuildType buildType) const
         if (!m_catkinMakeArguments.isEmpty())
             Utils::QtcProcess::addArgs(&args, QString("--catkin-make-args %1").arg(m_catkinMakeArguments));
 
-        Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(ROSUtils::getCMakeBuildTypeArgument(buildType)));
-        if (!m_cmakeArguments.isEmpty())
-            Utils::QtcProcess::addArgs(&args, m_cmakeArguments);
+        if (includeDefault)
+            Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments));
+        else
+            if (!m_cmakeArguments.isEmpty())
+                Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
+
         break;
     case CLEAN:
         Utils::QtcProcess::addArgs(&args, QLatin1String("clean"));
@@ -374,9 +378,14 @@ void ROSCatkinToolsStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(bc->project()->projectDirectory(), bc->project()->distribution(), bc->buildSystem()).toStringList());
+
     ProcessParameters param;
+    param.setMacroExpander(bc->macroExpander());
+    param.setWorkingDirectory(bc->buildDirectory().toString());
+    param.setEnvironment(env);
     param.setCommand(m_makeStep->makeCommand());
-    param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType()));
+    param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));
     m_summaryText = param.summary(displayName());
     emit updateSummary();
 }
@@ -693,7 +702,7 @@ BuildStep *ROSCatkinToolsStepFactory::restore(BuildStepList *parent, const QVari
 
 QList<ProjectExplorer::BuildStepInfo> ROSCatkinToolsStepFactory::availableSteps(BuildStepList *parent) const
 {
-    if (parent->target()->project()->id() != Constants::ROSPROJECT_ID)
+    if (parent->target()->project()->id() != Constants::ROS_PROJECT_ID)
         return {};
 
     return {{ROS_CTS_ID,  QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinToolsConfigStep", ROS_CTS_DISPLAY_NAME)}};

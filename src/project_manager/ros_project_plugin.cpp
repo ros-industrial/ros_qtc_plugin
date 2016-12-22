@@ -98,7 +98,7 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
 
     auto removeProjectDirectoryAction = new QAction(tr("Remove Directory..."), this);
     Command *removeCommand = ActionManager::registerAction(removeProjectDirectoryAction,
-        Constants::ROS_REMOVE_DIR, Context(Constants::PROJECTCONTEXT));
+        Constants::ROS_REMOVE_DIR, Context(Constants::ROS_PROJECT_CONTEXT));
     removeCommand->setAttribute(Command::CA_Hide);
     mfolderContextMenu->addAction(removeCommand, ProjectExplorer::Constants::G_FOLDER_FILES);
     connect(removeProjectDirectoryAction, &QAction::triggered, this, &ROSProjectPlugin::removeProjectDirectory);

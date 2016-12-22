@@ -68,7 +68,7 @@ namespace Internal {
 ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
   : m_workspaceWatcher(new ROSWorkspaceWatcher(this))
 {
-    setId(Constants::ROSPROJECT_ID);
+    setId(Constants::ROS_PROJECT_ID);
     setProjectManager(manager);
 
     setDocument(new ROSProjectFile(this, fileName));
@@ -77,7 +77,7 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
     ROSProjectNode *project_node = new ROSProjectNode(this->projectFilePath());
     setRootProjectNode(project_node);
 
-    setProjectContext(Context(Constants::PROJECTCONTEXT));
+    setProjectContext(Context(Constants::ROS_PROJECT_CONTEXT));
     setProjectLanguages(Context(ProjectExplorer::Constants::LANG_CXX));
 
     m_projectName = projectFilePath().toFileInfo().completeBaseName();
@@ -101,10 +101,6 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
 
     connect(m_workspaceWatcher, SIGNAL(fileListChanged()),
             this, SIGNAL(fileListChanged()));
-
-    connect(this, &ROSProject::fileListChanged,
-            this, &ROSProject::refreshCppCodeModel);
-
 }
 
 ROSProject::~ROSProject()
@@ -174,12 +170,8 @@ void ROSProject::parseProjectFile()
         else if(workspaceXml.name() == QLatin1String("WatchDirectories"))
         {
           while(workspaceXml.readNextStartElement())
-          {
             if(workspaceXml.name() == QLatin1String("Directory"))
-            {
               m_watchDirectories.append(workspaceXml.readElementText());
-            }
-          }
         }
       }
     }
@@ -261,7 +253,7 @@ void ROSProject::refreshCppCodeModel()
     {
         CppTools::ProjectPartBuilder ppBuilder(pInfo);
         ppBuilder.setDisplayName(package.name);
-        ppBuilder.setProjectFile(this->projectFilePath().toString());
+        ppBuilder.setProjectFile(package.filepath);
         ppBuilder.setQtVersion(activeQtVersion);
         ppBuilder.setIncludePaths(package.includes);
         ppBuilder.setCxxFlags(package.flags);
@@ -315,7 +307,7 @@ Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *erro
               t->addRunConfiguration(new ProjectExplorer::CustomExecutableRunConfiguration(t));
       }
 
-      refresh();
+      refreshCppCodeModel();
       return RestoreResult::Ok;
 }
 
@@ -339,8 +331,8 @@ ROSProjectFile::ROSProjectFile(ROSProject *parent, QString fileName)
     : IDocument(parent),
       m_project(parent)
 {
-    setId("ROS.ProjectFile");
-    setMimeType(QLatin1String(Constants::ROSMIMETYPE));
+    setId(Constants::ROS_PROJECT_FILE_ID);
+    setMimeType(QLatin1String(Constants::ROS_MIME_TYPE));
     setFilePath(Utils::FileName::fromString(fileName));
 }
 
