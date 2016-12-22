@@ -212,26 +212,89 @@ bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
   return false;
 }
 
-bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const QString distribution, const QStringList &watchDirectories)
+bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const ROSProjectFileContent &content)
 {
-  xmlFile.setAutoFormatting(true);
-  xmlFile.writeStartDocument();
-  xmlFile.writeStartElement(QLatin1String("Workspace"));
+    xmlFile.setAutoFormatting(true);
+    xmlFile.writeStartDocument();
+    xmlFile.writeStartElement(QLatin1String("Workspace"));
 
-  xmlFile.writeStartElement(QLatin1String("Distribution"));
-  xmlFile.writeAttribute(QLatin1String("name"), distribution);
-  xmlFile.writeEndElement();
+    xmlFile.writeStartElement(QLatin1String("Distribution"));
+    xmlFile.writeAttribute(QLatin1String("name"), content.distribution);
+    xmlFile.writeEndElement();
 
-  xmlFile.writeStartElement(QLatin1String("WatchDirectories"));
-  foreach (QString str, watchDirectories)
-  {
-    xmlFile.writeTextElement(QLatin1String("Directory"), str);
-  }
-  xmlFile.writeEndElement();
+    xmlFile.writeStartElement(QLatin1String("DefaultBuildSystem"));
+    xmlFile.writeAttribute(QLatin1String("value"), QString::number(content.defaultBuildSystem));
+    xmlFile.writeEndElement();
 
-  xmlFile.writeEndElement();
-  xmlFile.writeEndDocument();
-  return xmlFile.hasError();
+    xmlFile.writeStartElement(QLatin1String("WatchDirectories"));
+    foreach (QString str, content.watchDirectories)
+        xmlFile.writeTextElement(QLatin1String("Directory"), str);
+
+    xmlFile.writeEndElement();
+
+    xmlFile.writeEndElement();
+    xmlFile.writeEndDocument();
+    return xmlFile.hasError();
+}
+
+bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FileName &filePath, ROSProjectFileContent &content)
+{
+    QXmlStreamReader workspaceXml;
+    QFile workspaceFile(filePath.toString());
+    if (workspaceFile.open(QFile::ReadOnly | QFile::Text))
+    {
+        content.watchDirectories.clear();
+
+        workspaceXml.setDevice(&workspaceFile);
+        while(workspaceXml.readNextStartElement())
+        {
+            if (workspaceXml.name() == QLatin1String("Distribution"))
+            {
+                QStringList distributions = ROSUtils::installedDistributions();
+                QXmlStreamAttributes attributes = workspaceXml.attributes();
+                if (attributes.hasAttribute(QLatin1String("name")))
+                {
+                    content.distribution = attributes.value(QLatin1String("name")).toString();
+                    if (!distributions.isEmpty() && !distributions.contains(content.distribution))
+                        content.distribution = distributions.first();
+                }
+                else
+                {
+                    if (!distributions.isEmpty())
+                        content.distribution = distributions.first();
+                    else
+                        qDebug() << "Project file Distribution tag did not have a name attribute.";
+                }
+
+                workspaceXml.readNextStartElement();
+            }
+            else if (workspaceXml.name() == QLatin1String("DefaultBuildSystem"))
+            {
+                QXmlStreamAttributes attributes = workspaceXml.attributes();
+                if (attributes.hasAttribute(QLatin1String("value")))
+                {
+                    content.defaultBuildSystem = (ROSUtils::BuildSystem)attributes.value(QLatin1String("value")).toInt();
+                }
+                else
+                {
+                    content.defaultBuildSystem = ROSUtils::CatkinMake;
+                    qDebug() << "Project file DefaultBuildSystem tag did not have a value attribute.";
+                }
+
+                workspaceXml.readNextStartElement();
+            }
+            else if (workspaceXml.name() == QLatin1String("WatchDirectories"))
+            {
+                while(workspaceXml.readNextStartElement())
+                    if(workspaceXml.name() == QLatin1String("Directory"))
+                        content.watchDirectories.append(workspaceXml.readElementText());
+            }
+        }
+        return true;
+    }
+
+    qDebug() << QString("Error opening Workspace Project File: %1").arg(filePath.toString());
+    return false;
 }
 
 QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::FileName &folderPath, QStringList &fileList)

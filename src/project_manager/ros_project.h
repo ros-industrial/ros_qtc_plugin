@@ -58,6 +58,7 @@ public:
     void refresh();
 
     QString distribution() const;
+    ROSUtils::BuildSystem defaultBuildSystem() const;
     ROSBuildConfiguration* rosBuildConfiguration() const;
 
 public slots:
@@ -73,9 +74,8 @@ private:
     void repositoryChanged(const QString &repository);
 
     QString m_projectName;
-    QString m_distribution;
+    ROSUtils::ROSProjectFileContent m_projectFileContent;
     ROSWorkspaceWatcher *m_workspaceWatcher;
-    QStringList m_watchDirectories;
     QFuture<void> m_codeModelFuture;
     QFutureInterface<void> *m_projectFutureInterface = nullptr;
     QMap<QString, ROSUtils::PackageInfo> m_wsPackageInfo;

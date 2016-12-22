@@ -159,11 +159,7 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableBuilds(const Target *p
     QList<BuildInfo *> result;
 
     // Need to create a ROS Setting widget where the user sets the default build system to use here.
-    ROSUtils::BuildSystem buildSystem = ROSUtils::CatkinMake;
-    Utils::FileName path = Utils::FileName::fromString(parent->project()->projectDirectory().toString());
-    path.appendPath(QLatin1String(".catkin_tools"));
-    if (path.exists())
-        buildSystem = ROSUtils::CatkinTools;
+    ROSUtils::BuildSystem buildSystem = static_cast<ROSProject *>(parent->project())->defaultBuildSystem();
 
     for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeMinSizeRel; ++type)
     {
@@ -187,15 +183,11 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableSetups(const Kit *k, c
     QList<BuildInfo *> result;
 
     // Need to create a ROS Setting widget where the user sets the default build system to use here.
-    ROSUtils::BuildSystem buildSystem = ROSUtils::CatkinMake;
-    Utils::FileName path = Utils::FileName::fromString(projectPath);
-    path.appendPath(QLatin1String(".catkin_tools"));
-
-    if (path.exists())
-        buildSystem = ROSUtils::CatkinTools;
+    ROSUtils::ROSProjectFileContent projectFileContent;
+    ROSUtils::parseQtCreatorWorkspaceFile(Utils::FileName::fromString(projectPath), projectFileContent);
 
     for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeMinSizeRel; ++type) {
-      ROSBuildInfo *info = createBuildInfo(k, buildSystem, ROSUtils::BuildType(type));
+      ROSBuildInfo *info = createBuildInfo(k, projectFileContent.defaultBuildSystem, ROSUtils::BuildType(type));
       result << info;
     }
 

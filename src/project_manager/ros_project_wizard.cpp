@@ -251,13 +251,15 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
 
     const QString projectName = wizard->projectName();
     const QString workspaceFileName = QFileInfo(wsDir, projectName + QLatin1String(".workspace")).absoluteFilePath();
-    const ROSUtils::BuildSystem buildSystem = wizard->buildSystem();
-    const QString distribution = wizard->distribution();
+    ROSUtils::ROSProjectFileContent projectFileContent;
+    projectFileContent.defaultBuildSystem = wizard->buildSystem();
+    projectFileContent.distribution = wizard->distribution();
+    projectFileContent.watchDirectories.append(QDir(ROSUtils::getWorkspaceSourceSpace(wizard->workspaceDirectory(), projectFileContent.defaultBuildSystem).toString()).dirName());
 
     Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
     QString content;
     QXmlStreamWriter workspaceXml(&content);
-    ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, distribution, QStringList() << QDir(ROSUtils::getWorkspaceSourceSpace(wizard->workspaceDirectory(), buildSystem).toString()).dirName());
+    ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, projectFileContent);
     generatedWorkspaceFile.setContents(content);
     generatedWorkspaceFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
 
@@ -285,24 +287,6 @@ bool ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core::Generated
     codeStylePreferences->setCurrentDelegate(Constants::ROS_CPP_CODE_STYLE_ID);
 
     return success;
-}
-
-void ROSProjectWizard::initializeProject(const ROSProjectWizardDialog *wizard, const ROSUtils::BuildSystem buildSystem)
-{
-    switch (buildSystem) {
-    case ROSUtils::CatkinMake:
-    {
-        if (ROSUtils::isWorkspaceInitialized(wizard->workspaceDirectory(), buildSystem))
-        {
-
-        }
-
-    }
-    case ROSUtils::CatkinTools:
-    {
-
-    }
-    }
 }
 
 } // namespace Internal

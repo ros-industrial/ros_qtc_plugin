@@ -119,7 +119,7 @@ bool ROSProject::saveProjectFile()
     if (!saver.hasError())
     {
       QXmlStreamWriter workspaceXml(saver.file());
-      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_distribution, m_watchDirectories);
+      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_projectFileContent);
       saver.setResult(&workspaceXml);
     }
     bool result = saver.finalize(ICore::mainWindow());
@@ -129,7 +129,12 @@ bool ROSProject::saveProjectFile()
 
 QString ROSProject::distribution() const
 {
-    return m_distribution;
+    return m_projectFileContent.distribution;
+}
+
+ROSUtils::BuildSystem ROSProject::defaultBuildSystem() const
+{
+    return m_projectFileContent.defaultBuildSystem;
 }
 
 ROSBuildConfiguration* ROSProject::rosBuildConfiguration() const
@@ -139,46 +144,7 @@ ROSBuildConfiguration* ROSProject::rosBuildConfiguration() const
 
 void ROSProject::parseProjectFile()
 {
-    QXmlStreamReader workspaceXml;
-    QFile workspaceFile(projectFilePath().toString());
-    if (workspaceFile.open(QFile::ReadOnly | QFile::Text))
-    {
-      m_watchDirectories.clear();
-
-      workspaceXml.setDevice(&workspaceFile);
-      while(workspaceXml.readNextStartElement())
-      {
-        if (workspaceXml.name() == QLatin1String("Distribution"))
-        {
-            QStringList distributions = ROSUtils::installedDistributions();
-            QXmlStreamAttributes attributes = workspaceXml.attributes();
-            if (attributes.hasAttribute(QLatin1String("name")))
-            {
-                m_distribution = attributes.value(QLatin1String("name")).toString();
-                if (!distributions.isEmpty() && !distributions.contains(m_distribution))
-                    m_distribution = distributions.first();
-            }
-            else
-            {
-                if (!distributions.isEmpty())
-                    m_distribution = distributions.first();
-                else
-                    qDebug() << "Project file Distribution tag did not have a name attribute.";
-            }
-            workspaceXml.readNextStartElement();
-        }
-        else if(workspaceXml.name() == QLatin1String("WatchDirectories"))
-        {
-          while(workspaceXml.readNextStartElement())
-            if(workspaceXml.name() == QLatin1String("Directory"))
-              m_watchDirectories.append(workspaceXml.readElementText());
-        }
-      }
-    }
-    else
-    {
-      qDebug() << "Error opening Workspace Project File";
-    }
+    ROSUtils::parseQtCreatorWorkspaceFile(projectFilePath(), m_projectFileContent);
 }
 
 void ROSProject::refresh()
@@ -193,9 +159,9 @@ void ROSProject::refresh()
 
     m_projectFutureInterface->reportStarted();
 
-    QSet<QString> oldWatchDirectories = m_watchDirectories.toSet();
+    QSet<QString> oldWatchDirectories = m_projectFileContent.watchDirectories.toSet();
     parseProjectFile();
-    QSet<QString> newWatchDirectories = m_watchDirectories.toSet();
+    QSet<QString> newWatchDirectories = m_projectFileContent.watchDirectories.toSet();
 
     QStringList addedDirectories = (newWatchDirectories - oldWatchDirectories).toList();
     QStringList removedDirectories = (oldWatchDirectories - newWatchDirectories).toList();

@@ -66,6 +66,13 @@ public:
       bool cbpFileExists();
   };
 
+  struct ROSProjectFileContent
+  {
+      QString distribution;
+      ROSUtils::BuildSystem defaultBuildSystem;
+      QStringList watchDirectories;
+  };
+
   /**
    * @brief Convert ENUM BuiltType to QString
    * @param buildType ENUM BuildType
@@ -126,12 +133,18 @@ public:
 
   /**
    * @brief Generates/Updates the Qt ROS Project File
-   * @param file The Qt ROS Project Files
-   * @param distribution ROS Distribution
-   * @param watchDirectories List of directories to watch
+   * @param content Project content to write to file
    * @return True if Qt ROS Project file was succesfully updated, otherwise false
    */
-  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const QString distribution, const QStringList &watchDirectories);
+  static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file, const ROSProjectFileContent &content);
+
+  /**
+   * @brief Parse the Qt ROS Project File
+   * @param filePath Path to the Qt ROS Project File
+   * @param content Item to populate with data from file
+   * @return True if Qt ROS Project file was succesfully parsed, otherwise false
+   */
+  static bool parseQtCreatorWorkspaceFile(const Utils::FileName &filePath, ROSProjectFileContent &content);
 
   /**
    * @brief Gets all fo the files in a given folder

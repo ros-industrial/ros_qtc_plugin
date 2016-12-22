@@ -105,9 +105,6 @@ protected:
     Core::GeneratedFiles generateFiles(const QWizard *w, QString *errorMessage) const override;
     bool postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l,
                            QString *errorMessage) const override;
-
-    void initializeProject(const ROSProjectWizardDialog *wizard, const ROSUtils::BuildSystem buildSystem);
-
 };
 
 } // namespace Internal
