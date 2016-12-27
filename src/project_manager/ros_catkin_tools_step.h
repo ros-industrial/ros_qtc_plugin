@@ -26,6 +26,7 @@
 #include "ros_build_configuration.h"
 
 #include <QDialog>
+#include <QLineEdit>
 #include <yaml-cpp/yaml.h>
 
 QT_BEGIN_NAMESPACE
@@ -38,7 +39,9 @@ namespace Internal {
 
 class ROSCatkinToolsStepWidget;
 class ROSCatkinToolsStepFactory;
-namespace Ui {class ROSCatkinToolsStep; class ROSCatkinToolsConfigEditor;}
+namespace Ui {class ROSCatkinToolsStep;
+              class ROSCatkinToolsListEditor;
+              class ROSCatkinToolsConfigEditor;}
 
 class ROSCatkinToolsStep : public ProjectExplorer::AbstractProcessStep
 {
@@ -95,7 +98,6 @@ private:
     QRegExp m_percentProgress;
 };
 
-
 class ROSCatkinToolsStepWidget : public ProjectExplorer::BuildStepConfigWidget
 {
     Q_OBJECT
@@ -138,6 +140,51 @@ public:
 
 };
 
+class ROSCatkinToolsListEditorWidget : public QDialog
+{
+    Q_OBJECT
+public:
+    ROSCatkinToolsListEditorWidget(QWidget *parent = Q_NULLPTR);
+    ~ROSCatkinToolsListEditorWidget();
+
+    void setList(const QStringList &list);
+    QStringList list() const;
+
+private slots:
+    void listWidget_itemChanged();
+    void listWidget_itemSelectionChanged();
+
+    void addPushButton_clicked();
+    void removePushButton_clicked();
+
+    void moveUpPushButton_clicked();
+    void moveDownPushButton_clicked();
+
+private:
+    void addItem(const QString &str);
+
+    Ui::ROSCatkinToolsListEditor *m_ui;
+    QStringList m_list;
+};
+
+class ROSCatkinToolsListWidget: public QLineEdit
+{
+    Q_OBJECT
+public:
+    ROSCatkinToolsListWidget(QWidget *parent = Q_NULLPTR);
+    ~ROSCatkinToolsListWidget();
+
+    void setList(const QStringList &list);
+    QStringList list() const;
+
+private slots:
+    void onActionEditListTriggered();
+
+private:
+    ROSCatkinToolsListEditorWidget *m_editor;
+    QStringList m_list;
+};
+
 class ROSCatkinToolsConfigEditorWidget : public QWidget
 {
     Q_OBJECT
@@ -148,28 +195,27 @@ public:
     bool parseProfileConfig(Utils::FileName filePath);
     bool saveProfileConfig();
     bool isModified() const;
+    bool isValid() const;
 
-private slots:
-    void onActionEditFilePathListTriggered();
-    void onActionEditPackageListTriggered();
-    void onActionEditStingListTriggered();
+public slots:
+    void propertyChanged();
 
 private:
-    std::vector<std::string> parseList(std::string key);
-    QString parseString(std::string key);
-    bool parseBool(std::string key);
-
-    QString convertListToString(std::string key);
-    QString convertListToString(std::vector<std::string> list);
+    QStringList parseList(const std::string &key) const;
+    QString parseString(const std::string &key) const;
+    bool parseBool(const std::string &key) const;
+    std::vector<std::string> toStdVector(const QStringList &list) const;
+    QStringList toQStringList(const std::vector<std::string> &list) const;
 
     Ui::ROSCatkinToolsConfigEditor *m_ui;
-    QAction *m_editor;
+    ROSCatkinToolsListEditorWidget *m_editor;
     bool m_modified;
+    bool m_parsing;
     Utils::FileName m_profileConfigPath;
     YAML::Node m_profile_original;
     YAML::Node m_profile_current;
-
 };
+
 
 class ROSCatkinToolsStepFactory : public ProjectExplorer::IBuildStepFactory
 {

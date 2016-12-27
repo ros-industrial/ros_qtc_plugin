@@ -5,5 +5,11 @@
         <file>folderpackage.png</file>
         <file>pencil_icon.png</file>
         <file>config.yaml</file>
+        <file>add_icon.png</file>
+        <file>cancel_icon.png</file>
+        <file>down_icon.png</file>
+        <file>ok_icon.png</file>
+        <file>up_icon.png</file>
+        <file>remove_icon.png</file>
     </qresource>
 </RCC>

@@ -22,6 +22,7 @@
 #include "ros_project_constants.h"
 #include "ros_project.h"
 #include "ui_ros_catkin_tools_step.h"
+#include "ui_ros_catkin_tools_list_editor.h"
 #include "ui_ros_catkin_tools_config_editor.h"
 
 #include <boost/algorithm/string/join.hpp>
@@ -508,6 +509,158 @@ QString ROSCatkinToolsStepWidget::uniqueName(const QString &name, const bool &is
 }
 
 //
+// ROSCatkinToolsListEditorWidget
+//
+
+ROSCatkinToolsListEditorWidget::ROSCatkinToolsListEditorWidget(QWidget *parent) : QDialog (parent)
+{
+    m_ui = new Ui::ROSCatkinToolsListEditor;
+    m_ui->setupUi(this);
+    setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
+
+    connect(m_ui->listWidget, &QListWidget::itemChanged, this, &ROSCatkinToolsListEditorWidget::listWidget_itemChanged);
+    connect(m_ui->listWidget, &QListWidget::itemSelectionChanged, this, &ROSCatkinToolsListEditorWidget::listWidget_itemSelectionChanged);
+
+    connect(m_ui->addPushButton, &QAbstractButton::clicked, this, &ROSCatkinToolsListEditorWidget::addPushButton_clicked);
+    connect(m_ui->removePushButton, &QAbstractButton::clicked, this, &ROSCatkinToolsListEditorWidget::removePushButton_clicked);
+
+    connect(m_ui->moveUpPushButton, &QAbstractButton::clicked, this, &ROSCatkinToolsListEditorWidget::moveUpPushButton_clicked);
+    connect(m_ui->moveDownPushButton, &QAbstractButton::clicked, this, &ROSCatkinToolsListEditorWidget::moveDownPushButton_clicked);
+
+    connect(m_ui->cancelPushButton, &QAbstractButton::clicked, this, &ROSCatkinToolsListEditorWidget::reject);
+    connect(m_ui->acceptPushButton, &QAbstractButton::clicked, this, &ROSCatkinToolsListEditorWidget::accept);
+}
+
+ROSCatkinToolsListEditorWidget::~ROSCatkinToolsListEditorWidget()
+{
+    delete m_ui;
+}
+
+void ROSCatkinToolsListEditorWidget::setList(const QStringList &list)
+{
+    m_ui->listWidget->clear();
+    foreach (const QString &str, list)
+        addItem(str);
+
+    listWidget_itemChanged();
+}
+
+QStringList ROSCatkinToolsListEditorWidget::list() const
+{
+    return m_list;
+}
+
+void ROSCatkinToolsListEditorWidget::listWidget_itemChanged()
+{
+    int cnt = m_ui->listWidget->count();
+    m_ui->removePushButton->setEnabled(cnt != 0);
+
+    m_list.clear();
+    for (auto index = 0; index < cnt; index++)
+        m_list.append(m_ui->listWidget->item(index)->text().trimmed());
+}
+
+void ROSCatkinToolsListEditorWidget::listWidget_itemSelectionChanged()
+{
+    int cnt = m_ui->listWidget->count();
+    int index = m_ui->listWidget->currentRow();
+
+    m_ui->moveDownPushButton->setEnabled(cnt > 1 && index != cnt-1);
+    m_ui->moveUpPushButton->setEnabled(cnt > 1 && index != 0);
+}
+
+void ROSCatkinToolsListEditorWidget::addPushButton_clicked()
+{
+    addItem(QLatin1String("New Item"));
+
+    listWidget_itemChanged();
+}
+
+void ROSCatkinToolsListEditorWidget::removePushButton_clicked()
+{
+   qDeleteAll(m_ui->listWidget->selectedItems());
+
+   listWidget_itemChanged();
+}
+
+void ROSCatkinToolsListEditorWidget::moveUpPushButton_clicked()
+{
+    int currentIndex = m_ui->listWidget->currentRow();
+    if (currentIndex != -1)
+    {
+        QListWidgetItem *currentItem = m_ui->listWidget->takeItem(currentIndex);
+        m_ui->listWidget->insertItem(currentIndex-1, currentItem);
+        m_ui->listWidget->setCurrentRow(currentIndex-1);
+
+        listWidget_itemChanged();
+    }
+}
+
+void ROSCatkinToolsListEditorWidget::moveDownPushButton_clicked()
+{
+    int currentIndex = m_ui->listWidget->currentRow();
+    if (currentIndex != -1)
+    {
+        QListWidgetItem *currentItem = m_ui->listWidget->takeItem(currentIndex);
+        m_ui->listWidget->insertItem(currentIndex+1, currentItem);
+        m_ui->listWidget->setCurrentRow(currentIndex+1);
+
+        listWidget_itemChanged();
+    }
+}
+
+void ROSCatkinToolsListEditorWidget::addItem(const QString &str)
+{
+    QListWidgetItem *item = new QListWidgetItem();
+    item->setFlags(item->flags () | Qt::ItemIsEditable);
+    item->setText(str);
+    m_ui->listWidget->addItem(item);
+    m_ui->listWidget->setCurrentItem(item);
+    m_ui->listWidget->editItem(item);
+}
+
+
+//
+// ROSCatkinToolsListWidget
+//
+
+ROSCatkinToolsListWidget::ROSCatkinToolsListWidget(QWidget *parent) : QLineEdit(parent)
+{
+    this->setReadOnly(true);
+    m_editor = new ROSCatkinToolsListEditorWidget(this);
+
+    QAction *editor;
+    editor = this->addAction(QIcon(QLatin1String(":rosproject/pencil_icon.png")), QLineEdit::TrailingPosition);
+    connect(editor, SIGNAL(triggered(bool)), this, SLOT(onActionEditListTriggered()));
+}
+
+ROSCatkinToolsListWidget::~ROSCatkinToolsListWidget()
+{
+    delete m_editor;
+}
+
+void ROSCatkinToolsListWidget::onActionEditListTriggered()
+{
+    QPoint globalPos = this->mapToGlobal(this->rect().bottomLeft());
+    m_editor->setFixedSize(this->width(), m_editor->height());
+    m_editor->move(globalPos);
+
+    if(m_editor->exec() == QDialog::Accepted)
+        setList(m_editor->list());
+}
+
+void ROSCatkinToolsListWidget::setList(const QStringList &list)
+{
+    m_list = list;
+    setText(QString("[%1]").arg(list.join("; ")));
+}
+
+QStringList ROSCatkinToolsListWidget::list() const
+{
+    return m_list;
+}
+
+//
 // ROSCatkinToolsConfigEditorWidget
 //
 
@@ -517,29 +670,40 @@ ROSCatkinToolsConfigEditorWidget::ROSCatkinToolsConfigEditorWidget() : QWidget()
     m_ui->setupUi(this);
     m_modified = false;
 
-    QAction *editor;
-    editor = m_ui->extend_paths_lineEdit->addAction(QIcon(QLatin1String(":rosproject/pencil_icon.png")), QLineEdit::TrailingPosition);
-    connect(editor, SIGNAL(triggered(bool)), this, SLOT(onActionEditFilePathListTriggered()));
+    m_editor = new ROSCatkinToolsListEditorWidget();
 
-    editor = m_ui->whitelist_lineEdit->addAction(QIcon(QLatin1String(":rosproject/pencil_icon.png")), QLineEdit::TrailingPosition);
-    connect(editor, SIGNAL(triggered(bool)), this, SLOT(onActionEditPackageListTriggered()));
+    connect(m_ui->saveButton, &QAbstractButton::clicked, this, &ROSCatkinToolsConfigEditorWidget::saveProfileConfig);
 
-    editor = m_ui->blacklist_lineEdit->addAction(QIcon(QLatin1String(":rosproject/pencil_icon.png")), QLineEdit::TrailingPosition);
-    connect(editor, SIGNAL(triggered(bool)), this, SLOT(onActionEditPackageListTriggered()));
+    connect(m_ui->extend_path_chooser, &Utils::PathChooser::pathChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
 
-    editor = m_ui->cmake_args_lineEdit->addAction(QIcon(QLatin1String(":rosproject/pencil_icon.png")), QLineEdit::TrailingPosition);
-    connect(editor, SIGNAL(triggered(bool)), this, SLOT(onActionEditStingListTriggered()));
+    connect(m_ui->blacklist_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->whitelist_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->space_source_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->space_build_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->space_devel_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->space_install_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->space_log_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->catkin_args_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->cmake_args_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->make_args_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
 
-    editor = m_ui->make_args_lineEdit->addAction(QIcon(QLatin1String(":rosproject/pencil_icon.png")), QLineEdit::TrailingPosition);
-    connect(editor, SIGNAL(triggered(bool)), this, SLOT(onActionEditStingListTriggered()));
+    connect(m_ui->space_devel_layout_comboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->space_install_option_comboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->space_install_layout_comboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
 
-    editor = m_ui->catkin_args_lineEdit->addAction(QIcon(QLatin1String(":rosproject/pencil_icon.png")), QLineEdit::TrailingPosition);
-    connect(editor, SIGNAL(triggered(bool)), this, SLOT(onActionEditStingListTriggered()));
+    connect(m_ui->jobs_checkBox, &QCheckBox::stateChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->package_jobs_checkBox, &QCheckBox::stateChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->env_cache_checkBox, &QCheckBox::stateChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->jobserver_checkBox, &QCheckBox::stateChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+
+    connect(m_ui->jobs_spinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->package_jobs_spinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
 }
 
 ROSCatkinToolsConfigEditorWidget::~ROSCatkinToolsConfigEditorWidget()
 {
     delete m_ui;
+    delete m_editor;
 }
 
 bool ROSCatkinToolsConfigEditorWidget::parseProfileConfig(Utils::FileName filePath)
@@ -550,63 +714,86 @@ bool ROSCatkinToolsConfigEditorWidget::parseProfileConfig(Utils::FileName filePa
         qWarning() << QString("Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString());
         return false;
     }
+    m_parsing = true;
+
     m_profile_original = YAML::LoadFile(m_profileConfigPath.toString().toStdString());
     m_profile_current = m_profile_original;
     m_modified = false;
 
-    // both work for getting list of string (preferece to use vector)
-    m_ui->blacklist_lineEdit->setText(convertListToString("blacklist"));
-    m_ui->space_build_lineEdit->setText(parseString("build_space"));
-    m_ui->catkin_args_lineEdit->setText(convertListToString("catkin_make_args"));
-    m_ui->cmake_args_lineEdit->setText(convertListToString("cmake_args"));
-    m_ui->space_devel_layout_comboBox->setCurrentText(parseString("devel_layout"));
-    m_ui->space_devel_lineEdit->setText(parseString("devel_space"));
-    m_ui->extend_paths_lineEdit->setText(convertListToString("extended_path"));
-    m_ui->space_install_option_comboBox->setCurrentIndex(parseBool("install"));
-    m_ui->space_install_lineEdit->setText(parseString("install_space"));
-    m_ui->space_install_layout_comboBox->setCurrentIndex(parseBool("isolate_install"));
-    //TODO: Need to figure out how to parse jobs and package jobs
-    m_ui->space_log_lineEdit->setText(parseString("log_space"));
-    m_ui->make_args_lineEdit->setText(convertListToString("make_args"));
+    m_ui->extend_path_chooser->setPath(parseString("extend_path"));
+
+    m_ui->whitelist_lineEdit->setList(parseList("whitelist"));
+    m_ui->blacklist_lineEdit->setList(parseList("blacklist"));
     m_ui->space_source_lineEdit->setText(parseString("source_space"));
+    m_ui->space_build_lineEdit->setText(parseString("build_space"));
+    m_ui->space_devel_lineEdit->setText(parseString("devel_space"));
+    m_ui->space_install_lineEdit->setText(parseString("install_space"));
+    m_ui->space_log_lineEdit->setText(parseString("log_space"));
+    m_ui->catkin_args_lineEdit->setList(parseList("catkin_make_args"));
+    m_ui->cmake_args_lineEdit->setList(parseList("cmake_args"));
+    m_ui->make_args_lineEdit->setList(parseList("make_args"));
+
+    QString layout = parseString("devel_layout");
+    layout[0] = layout[0].toUpper();
+    m_ui->space_devel_layout_comboBox->setCurrentText(layout);
+    m_ui->space_install_option_comboBox->setCurrentIndex(parseBool("install"));
+    m_ui->space_install_layout_comboBox->setCurrentIndex(parseBool("isolate_install"));
+
+    QStringList jobs_args = parseList("jobs_args");
+    m_ui->jobs_checkBox->setChecked(!jobs_args.isEmpty());
+    if (!jobs_args.isEmpty())
+        m_ui->jobs_spinBox->setValue(jobs_args[0].mid(2).trimmed().toInt());
+
+    //TODO: Need to figure out how to parse package jobs
+
     m_ui->env_cache_checkBox->setChecked(parseBool("use_env_cache"));
     m_ui->jobserver_checkBox->setChecked(parseBool("use_internal_make_jobserver"));
-    m_ui->whitelist_lineEdit->setText(convertListToString("whitelist"));
+
+    m_parsing = false;
     return true;
 }
 
-std::vector<std::string> ROSCatkinToolsConfigEditorWidget::parseList(std::string key)
+QStringList ROSCatkinToolsConfigEditorWidget::parseList(const std::string &key) const
 {
-    if (m_profile_current[key].Type() != YAML::NodeType::Sequence)
-        return std::vector<std::string>();
+    if (!m_profile_current[key].IsSequence())
+        return QStringList();
 
-    return m_profile_current[key].as<std::vector<std::string> >();
+    std::vector<std::string> vector_list = m_profile_current[key].as<std::vector<std::string> >();
+    return toQStringList(vector_list);
 }
 
-QString ROSCatkinToolsConfigEditorWidget::parseString(std::string key)
+QString ROSCatkinToolsConfigEditorWidget::parseString(const std::string &key) const
 {
-    if (m_profile_current[key].Type() != YAML::NodeType::Scalar)
+    if (!m_profile_current[key].IsScalar())
         return QString();
 
     return QString::fromStdString(m_profile_current[key].as<std::string>());
 }
 
-bool ROSCatkinToolsConfigEditorWidget::parseBool(std::string key)
+bool ROSCatkinToolsConfigEditorWidget::parseBool(const std::string &key) const
 {
-    if (m_profile_current[key].Type() != YAML::NodeType::Scalar)
+    if (!m_profile_current[key].IsScalar())
         return false;
 
     return m_profile_current[key].as<bool>();
 }
 
-QString ROSCatkinToolsConfigEditorWidget::convertListToString(std::string key)
+std::vector<std::string> ROSCatkinToolsConfigEditorWidget::toStdVector(const QStringList &list) const
 {
-    return convertListToString(parseList(key));
+    std::vector<std::string> l;
+    for (auto const& str: list)
+        l.push_back(str.toStdString());
+
+    return l;
 }
 
-QString ROSCatkinToolsConfigEditorWidget::convertListToString(std::vector<std::string> list)
+QStringList ROSCatkinToolsConfigEditorWidget::toQStringList(const std::vector<std::string> &list) const
 {
-    return "[" + QString::fromStdString(boost::algorithm::join(list, "; ")) + "]";
+    QStringList l;
+    for (auto const& str: list)
+        l.append(QString::fromStdString(str));
+
+    return l;
 }
 
 bool ROSCatkinToolsConfigEditorWidget::saveProfileConfig()
@@ -616,12 +803,59 @@ bool ROSCatkinToolsConfigEditorWidget::saveProfileConfig()
         qWarning() << QString("Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString());
         return false;
     }
+
     std::ofstream fout(m_profileConfigPath.toString().toStdString());
     fout << m_profile_current; // dump it back into the file
+    fout.close();
 
     m_profile_original = m_profile_current;
     m_modified = false;
+    m_ui->saveButton->setEnabled(false);
+
     return true;
+}
+
+void ROSCatkinToolsConfigEditorWidget::propertyChanged()
+{
+    if (!m_parsing)
+    {
+        m_modified = true;
+
+        if (!m_ui->extend_path_chooser->path().isEmpty())
+            m_profile_original["extend_path"] = m_ui->extend_path_chooser->path().trimmed().toStdString();
+        else
+            m_profile_original["extend_path"] = "null";
+
+        m_profile_original["whitelist"] = toStdVector(m_ui->whitelist_lineEdit->list());
+        m_profile_original["blacklist"] = toStdVector(m_ui->blacklist_lineEdit->list());
+
+        m_profile_original["source_space"] = m_ui->space_source_lineEdit->text().trimmed().toStdString();
+        m_profile_original["build_space"] = m_ui->space_build_lineEdit->text().trimmed().toStdString();
+        m_profile_original["devel_space"] = m_ui->space_devel_lineEdit->text().trimmed().toStdString();
+        m_profile_original["install_space"] = m_ui->space_install_lineEdit->text().trimmed().toStdString();
+        m_profile_original["log_space"] = m_ui->space_log_lineEdit->text().trimmed().toStdString();
+
+        m_profile_original["catkin_make_args"] = toStdVector(m_ui->catkin_args_lineEdit->list());
+        m_profile_original["cmake_args"] = toStdVector(m_ui->cmake_args_lineEdit->list());
+        m_profile_original["make_args"] = toStdVector(m_ui->make_args_lineEdit->list());
+
+        m_profile_original["devel_layout"] = m_ui->space_devel_layout_comboBox->currentText().toLower().trimmed().toStdString();
+        m_profile_original["install"] = m_ui->space_install_option_comboBox->currentIndex() ? "true" : "false";
+        m_profile_original["isolate_install"] = m_ui->space_install_layout_comboBox->currentIndex() ? "true" : "false";
+
+        std::vector<std::string> jobs_args;
+        if (m_ui->jobs_checkBox->checkState() == Qt::Checked)
+            jobs_args.push_back(QString("-j%1").arg(m_ui->jobs_spinBox->value()).toStdString());
+
+        m_profile_original["jobs_args"] = jobs_args;
+
+        //TODO: Need to figure out how to parse jobs and package jobs
+
+        m_profile_original["use_env_cache"] = m_ui->env_cache_checkBox->checkState() == Qt::Checked ? "true" : "false";
+        m_profile_original["use_internal_make_jobserver"] = m_ui->jobserver_checkBox->checkState() == Qt::Checked ? "true" : "false";
+
+        m_ui->saveButton->setEnabled(isValid());
+    }
 }
 
 bool ROSCatkinToolsConfigEditorWidget::isModified() const
@@ -629,24 +863,20 @@ bool ROSCatkinToolsConfigEditorWidget::isModified() const
     return m_modified;
 }
 
-void ROSCatkinToolsConfigEditorWidget::onActionEditFilePathListTriggered()
+bool ROSCatkinToolsConfigEditorWidget::isValid() const
 {
-    qDebug() << m_editor->parent()->objectName();
+    bool valid = true;
+    if (!m_ui->extend_path_chooser->path().isEmpty())
+        valid &= m_ui->extend_path_chooser->isValid();
+
+    valid &= m_ui->space_source_lineEdit->isValid();
+    valid &= m_ui->space_build_lineEdit->isValid();
+    valid &= m_ui->space_devel_lineEdit->isValid();
+    valid &= m_ui->space_install_lineEdit->isValid();
+    valid &= m_ui->space_log_lineEdit->isValid();
+
+    return valid;
 }
-
-void ROSCatkinToolsConfigEditorWidget::onActionEditPackageListTriggered()
-{
-
-    qDebug() << m_editor->parent()->objectName();
-}
-
-void ROSCatkinToolsConfigEditorWidget::onActionEditStingListTriggered()
-{
-
-    qDebug() << m_editor->parent()->objectName();
-}
-
-
 
 //
 // ROSCatkinToolsProfileEditorDialog
@@ -654,6 +884,7 @@ void ROSCatkinToolsConfigEditorWidget::onActionEditStingListTriggered()
 
 ROSCatkinToolsProfileEditorDialog::ROSCatkinToolsProfileEditorDialog(Utils::FileName filePath) : QDialog()
 {
+    setWindowFlags(Qt::WindowStaysOnTopHint | Qt::Dialog);
     QVBoxLayout *vlayout = new QVBoxLayout();
     ROSCatkinToolsConfigEditorWidget *editorWidget = new ROSCatkinToolsConfigEditorWidget();
     vlayout->addWidget(editorWidget);

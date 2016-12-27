@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
+    <width>500</width>
     <height>0</height>
    </size>
   </property>
@@ -67,17 +67,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="extend_paths_lineEdit">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="clearButtonEnabled">
-         <bool>false</bool>
-        </property>
-       </widget>
+       <widget class="Utils::PathChooser" name="extend_path_chooser" native="true"/>
       </item>
      </layout>
     </widget>
@@ -111,7 +101,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="whitelist_lineEdit">
+       <widget class="ROSCatkinToolsListWidget" name="whitelist_lineEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -137,7 +127,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="blacklist_lineEdit">
+       <widget class="ROSCatkinToolsListWidget" name="blacklist_lineEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -205,7 +195,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="space_source_lineEdit">
+       <widget class="Utils::FileNameValidatingLineEdit" name="space_source_lineEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -215,7 +205,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="space_build_lineEdit">
+       <widget class="Utils::FileNameValidatingLineEdit" name="space_build_lineEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -225,7 +215,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="space_devel_lineEdit">
+       <widget class="Utils::FileNameValidatingLineEdit" name="space_devel_lineEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -235,7 +225,7 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QLineEdit" name="space_install_lineEdit">
+       <widget class="Utils::FileNameValidatingLineEdit" name="space_install_lineEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -252,7 +242,7 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QLineEdit" name="space_log_lineEdit">
+       <widget class="Utils::FileNameValidatingLineEdit" name="space_log_lineEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -335,17 +325,17 @@
        <widget class="QComboBox" name="space_devel_layout_comboBox">
         <item>
          <property name="text">
-          <string>Link</string>
+          <string>Linked</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Merge</string>
+          <string>Merged</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Isolate</string>
+          <string>Isolated</string>
          </property>
         </item>
        </widget>
@@ -472,7 +462,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLineEdit" name="cmake_args_lineEdit">
+       <widget class="ROSCatkinToolsListWidget" name="cmake_args_lineEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -492,7 +482,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="make_args_lineEdit">
+       <widget class="ROSCatkinToolsListWidget" name="make_args_lineEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -512,7 +502,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="catkin_args_lineEdit">
+       <widget class="ROSCatkinToolsListWidget" name="catkin_args_lineEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -563,6 +553,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="saveButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -607,6 +600,24 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Utils::FileNameValidatingLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>utils/filenamevalidatinglineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>Utils::PathChooser</class>
+   <extends>QWidget</extends>
+   <header>utils/pathchooser.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ROSCatkinToolsListWidget</class>
+   <extends>QLineEdit</extends>
+   <header>ros_catkin_tools_step.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
