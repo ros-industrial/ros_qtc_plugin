@@ -219,12 +219,11 @@ void ROSProject::refreshCppCodeModel()
     {
         CppTools::ProjectPartBuilder ppBuilder(pInfo);
         ppBuilder.setDisplayName(package.name);
-        ppBuilder.setProjectFile(package.filepath);
         ppBuilder.setQtVersion(activeQtVersion);
         ppBuilder.setIncludePaths(package.includes);
         ppBuilder.setCxxFlags(package.flags);
 
-        QStringList packageFiles = workspaceFiles.filter(package.path);
+        QStringList packageFiles = workspaceFiles.filter(package.path + QDir::separator());
         const QList<Id> languages = ppBuilder.createProjectPartsForFiles(packageFiles);
         foreach (Id language, languages)
             setProjectLanguage(language, true);
@@ -240,7 +239,7 @@ QString ROSProject::displayName() const
 
 QStringList ROSProject::files(FilesMode fileMode) const
 {
-    Q_UNUSED(fileMode)
+    Q_UNUSED(fileMode);
     return m_workspaceWatcher->getWorkspaceFiles();
 }
 
@@ -284,6 +283,7 @@ void ROSProject::repositoryChanged(const QString &repository)
 
 void ROSProject::buildQueueFinished(bool success)
 {
+    Q_UNUSED(success);
     refreshCppCodeModel();
 }
 
@@ -319,15 +319,15 @@ bool ROSProjectFile::isSaveAsAllowed() const
 
 IDocument::ReloadBehavior ROSProjectFile::reloadBehavior(ChangeTrigger state, ChangeType type) const
 {
-    Q_UNUSED(state)
-    Q_UNUSED(type)
+    Q_UNUSED(state);
+    Q_UNUSED(type);
     return BehaviorSilent;
 }
 
 bool ROSProjectFile::reload(QString *errorString, ReloadFlag flag, ChangeType type)
 {
-    Q_UNUSED(errorString)
-    Q_UNUSED(flag)
+    Q_UNUSED(errorString);
+    Q_UNUSED(flag);
     if (type == TypePermissions)
         return true;
 

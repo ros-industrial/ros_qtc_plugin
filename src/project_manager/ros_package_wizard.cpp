@@ -171,7 +171,7 @@ void ROSPackageWizardDetailsPage::slotPackagePathValidChanged() {validChangedHel
 
 void ROSPackageWizardDetailsPage::slotPackagePathChanged(const QString &path)
 {
-  Q_UNUSED(path)
+  Q_UNUSED(path);
 
   if (!d->m_ui.pathChooser->isValid())
   {
@@ -227,7 +227,7 @@ ROSPackageWizard::ROSPackageWizard()
 Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
                                                    const Core::WizardDialogParameters &parameters) const
 {
-    Q_UNUSED(parameters)
+    Q_UNUSED(parameters);
     m_wizard = new ROSPackageWizardDialog(this, parent);
     m_wizard->setPath(parameters.defaultPath());
 
@@ -240,8 +240,8 @@ Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
 Core::GeneratedFiles ROSPackageWizard::generateFiles(const QWizard *w,
                                                          QString *errorMessage) const
 {
-    Q_UNUSED(w)
-    Q_UNUSED(errorMessage)
+    Q_UNUSED(w);
+    Q_UNUSED(errorMessage);
 
     QString package;
     Utils::FileName packagePath = Utils::FileName::fromString(m_wizard->packagePath());
@@ -265,11 +265,10 @@ Core::GeneratedFiles ROSPackageWizard::generateFiles(const QWizard *w,
 
 bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *errorMessage) const
 {
-  Q_UNUSED(files)
-  Q_UNUSED(errorMessage)
+  Q_UNUSED(files);
+  Q_UNUSED(errorMessage);
 
   ROSProject *project = static_cast<ROSProject *>(ProjectExplorer::ProjectTree::currentProject());
-  ROSBuildConfiguration *bc = static_cast<ROSBuildConfiguration *>(project->activeTarget()->activeBuildConfiguration());
 
   QProcess *catkin_create_pkg = new QProcess();
 
@@ -328,9 +327,9 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
 bool ROSPackageWizard::postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l,
                                              QString *errorMessage) const
 {
-    Q_UNUSED(w)
-    Q_UNUSED(l)
-    Q_UNUSED(errorMessage)
+    Q_UNUSED(w);
+    Q_UNUSED(l);
+    Q_UNUSED(errorMessage);
 
     return true;
 }

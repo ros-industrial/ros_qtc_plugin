@@ -80,7 +80,7 @@ namespace Internal {
 
 bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
 {
-    Q_UNUSED(errorMessage)
+    Q_UNUSED(errorMessage);
     Utils::MimeDatabase::addMimeTypes(QLatin1String(":rosproject/ROSProjectManager.mimetypes.xml"));
 
     addAutoReleasedObject(new ROSManager);

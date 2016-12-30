@@ -232,7 +232,7 @@ ROSProjectWizard::ROSProjectWizard()
 Core::BaseFileWizard *ROSProjectWizard::create(QWidget *parent,
                                                    const Core::WizardDialogParameters &parameters) const
 {
-    Q_UNUSED(parameters)
+    Q_UNUSED(parameters);
     ROSProjectWizardDialog *wizard = new ROSProjectWizardDialog(this, parent);
 
     foreach (QWizardPage *p, wizard->extensionPages())
@@ -244,7 +244,7 @@ Core::BaseFileWizard *ROSProjectWizard::create(QWidget *parent,
 Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w,
                                                          QString *errorMessage) const
 {
-    Q_UNUSED(errorMessage)
+    Q_UNUSED(errorMessage);
 
     const ROSProjectWizardDialog *wizard = qobject_cast<const ROSProjectWizardDialog *>(w);
     const QDir wsDir(wizard->workspaceDirectory().toString());

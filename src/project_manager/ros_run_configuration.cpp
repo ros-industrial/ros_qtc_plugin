@@ -65,6 +65,8 @@ const char ROS_RUN_STEP_LIST_ID[] = "ROSProjectManager.ROSRunConfiguration.RunSt
 
 bool operator==(const ROSRunnable &r1, const ROSRunnable &r2)
 {
+    Q_UNUSED(r1);
+    Q_UNUSED(r2);
     return true;
 }
 
@@ -194,7 +196,7 @@ ROSRunConfigurationFactory::~ROSRunConfigurationFactory()
 
 QList<Core::Id> ROSRunConfigurationFactory::availableCreationIds(ProjectExplorer::Target *parent, CreationMode mode) const
 {
-    Q_UNUSED(mode)
+    Q_UNUSED(mode);
 
     if (!canHandle(parent))
         return QList<Core::Id>();
@@ -288,6 +290,7 @@ bool ROSRunControlFactory::canRun(RunConfiguration *rc, Core::Id mode) const
 RunControl *ROSRunControlFactory::create(RunConfiguration *rc, Core::Id mode,
                                                  QString *errorMessage)
 {
+    Q_UNUSED(errorMessage);
     QTC_ASSERT(canRun(rc, mode), return 0);
 
     if (mode == ProjectExplorer::Constants::NORMAL_RUN_MODE)
