@@ -308,7 +308,7 @@ ROSRunStepFactory::ROSRunStepFactory(QObject *parent) :
 
 bool ROSRunStepFactory::canCreate(RunStepList *parent, const Core::Id id) const
 {
-    if (parent->target()->project()->id() == Constants::ROSPROJECT_ID)
+    if (parent->target()->project()->id() == Constants::ROS_PROJECT_ID)
     {
       if (id == ROS_LAUNCH_ID || id == ROS_RUN_ID)
       {
@@ -395,7 +395,7 @@ RunStep *ROSRunStepFactory::restore(RunStepList *parent, const QVariantMap &map)
 
 QList<Core::Id> ROSRunStepFactory::availableCreationIds(RunStepList *parent) const
 {
-    if (parent->target()->project()->id() == Constants::ROSPROJECT_ID)
+    if (parent->target()->project()->id() == Constants::ROS_PROJECT_ID)
         return QList<Core::Id>() << Core::Id(ROS_LAUNCH_ID) << Core::Id(ROS_RUN_ID);
     return QList<Core::Id>();
 }

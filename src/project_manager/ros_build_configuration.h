@@ -21,6 +21,9 @@
 #ifndef ROSBUILDCONFIGURATION_H
 #define ROSBUILDCONFIGURATION_H
 
+#include "ros_utils.h"
+#include "ros_project.h"
+
 #include <projectexplorer/buildconfiguration.h>
 #include <projectexplorer/namedwidget.h>
 #include <projectexplorer/buildinfo.h>
@@ -32,6 +35,7 @@
 #include <utils/qtcassert.h>
 #include <QCheckBox>
 #include <QProcess>
+#include <QMenu>
 
 namespace Utils {
 class FileName;
@@ -54,32 +58,38 @@ class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
 public:
     explicit ROSBuildConfiguration(ProjectExplorer::Target *parent);
 
-    ProjectExplorer::NamedWidget *createConfigWidget();
-    QList<ProjectExplorer::NamedWidget *> createSubConfigWidgets();
+    ProjectExplorer::NamedWidget *createConfigWidget() override;
+    QList<ProjectExplorer::NamedWidget *> createSubConfigWidgets() override;
 
-    BuildType buildType() const;
+    BuildType buildType() const override;
 
-    QVariantMap toMap() const;
+    QVariantMap toMap() const override;
 
-    void setInitialArguments(const QString &arguments);
-    QString initialArguments() const;
+    ROSUtils::BuildSystem buildSystem() const;
+    void setBuildSystem(const ROSUtils::BuildSystem &buildSystem);
 
-    void setROSDistribution(const QString &distribution);
-    QString rosDistribution() const;
+    ROSUtils::BuildType cmakeBuildType() const;
+    void setCMakeBuildType(const ROSUtils::BuildType &buildType);
 
     void sourceWorkspace();
+
+    ROSProject *project();
+
+signals:
+    void buildSystemChanged(const ROSUtils::BuildSystem &buildSystem);
+    void cmakeBuildTypeChanged(const ROSUtils::BuildType &buildType);
 
 protected:
     ROSBuildConfiguration(ProjectExplorer::Target *parent, ROSBuildConfiguration *source);
     ROSBuildConfiguration(ProjectExplorer::Target *parent, Core::Id id);
 
-    bool fromMap(const QVariantMap &map);
+    bool fromMap(const QVariantMap &map) override;
 
     friend class ROSBuildSettingsWidget;
 
 private:
-    QString m_initialArguments;
-    QString m_rosDistribution;
+    ROSUtils::BuildSystem m_buildSystem;
+    ROSUtils::BuildType m_cmakeBuildType;
     ProjectExplorer::NamedWidget *m_buildEnvironmentWidget;
 
 };
@@ -107,14 +117,7 @@ public:
 private:
     bool canHandle(const ProjectExplorer::Target *t) const;
 
-    enum BuildType { BuildTypeNone = 0,
-                     BuildTypeDebug = 1,
-                     BuildTypeRelease = 2,
-                     BuildTypeRelWithDebInfo = 3,
-                     BuildTypeMinSizeRel = 4,
-                     BuildTypeLast = 5 };
-
-    ROSBuildInfo *createBuildInfo(const ProjectExplorer::Kit *k, const QString &projectPath, BuildType type) const;
+    ROSBuildInfo *createBuildInfo(const ProjectExplorer::Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const;
 };
 
 class ROSBuildSettingsWidget : public ProjectExplorer::NamedWidget
@@ -126,14 +129,12 @@ public:
     ~ROSBuildSettingsWidget();
 
 private slots:
-    void on_source_pushButton_clicked();
-
-    void on_ros_distribution_comboBox_currentIndexChanged(const QString &arg1);
+    void buildSystemChanged(int index);
+    void buildTypeChanged(int index);
 
 private:
     Ui::ROSBuildConfiguration *m_ui;
     ROSBuildConfiguration *m_buildConfiguration;
-    QMap<QString, QString> m_rosDistributions;
 };
 
 class ROSBuildEnvironmentWidget : public ProjectExplorer::NamedWidget
@@ -167,11 +168,13 @@ public:
         buildDirectory = bc->buildDirectory();
         kitId = bc->target()->kit()->id();
         environment = bc->environment();
-        arguments = bc->initialArguments();
+        buildSystem = bc->buildSystem();
+        cmakeBuildType = bc->cmakeBuildType();
     }
 
     Utils::Environment environment;
-    QString arguments;
+    ROSUtils::BuildSystem buildSystem;
+    ROSUtils::BuildType cmakeBuildType;
 };
 
 } // namespace Internal

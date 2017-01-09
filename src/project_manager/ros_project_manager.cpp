@@ -58,7 +58,7 @@ ROSManager *ROSManager::instance()
 
 QString ROSManager::mimeType() const
 {
-    return QLatin1String(Constants::ROSMIMETYPE);
+    return QLatin1String(Constants::ROS_MIME_TYPE);
 }
 
 ProjectExplorer::Project *ROSManager::openProject(const QString &fileName, QString *errorString)

@@ -18,8 +18,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ROSMAKESTEP_H
-#define ROSMAKESTEP_H
+#ifndef ROSCATKINMAKESTEP_H
+#define ROSCATKINMAKESTEP_H
 
 #include <projectexplorer/abstractprocessstep.h>
 #include "ros_build_configuration.h"
@@ -31,20 +31,22 @@ QT_END_NAMESPACE
 namespace ROSProjectManager {
 namespace Internal {
 
-class ROSMakeStepConfigWidget;
-class ROSMakeStepFactory;
-namespace Ui { class ROSMakeStep; }
+class ROSCatkinMakeStepWidget;
+class ROSCatkinMakeStepFactory;
+namespace Ui { class ROSCatkinMakeStep; }
 
-class ROSMakeStep : public ProjectExplorer::AbstractProcessStep
+class ROSCatkinMakeStep : public ProjectExplorer::AbstractProcessStep
 {
     Q_OBJECT
 
-    friend class ROSMakeStepConfigWidget;
-    friend class ROSMakeStepFactory;
+    friend class ROSCatkinMakeStepWidget;
+    friend class ROSCatkinMakeStepFactory;
 
 public:
-    ROSMakeStep(ProjectExplorer::BuildStepList *parent);
-    ~ROSMakeStep();
+    enum BuildTargets {BUILD = 0, CLEAN = 1};
+
+    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent);
+    ~ROSCatkinMakeStep();
 
     bool init(QList<const BuildStep *> &earlierSteps) override;
     void run(QFutureInterface<bool> &fi) override;
@@ -52,19 +54,16 @@ public:
     bool immutable() const override;
 
     ROSBuildConfiguration *rosBuildConfiguration() const;
-    bool buildsTarget(const QString &target) const;
-    void setBuildTarget(const QString &target, bool on);
-    QString allArguments(QString initial_arguments) const;
+    BuildTargets buildTarget() const;
+    void setBuildTarget(const BuildTargets &target);
+    QString allArguments(ROSUtils::BuildType buildType, bool includeDefault = true) const;
     QString makeCommand() const;
-
-    void setClean(bool clean);
-    bool isClean() const;
 
     QVariantMap toMap() const;
 
 protected:
-    ROSMakeStep(ProjectExplorer::BuildStepList *parent, ROSMakeStep *bs);
-    ROSMakeStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
+    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent, ROSCatkinMakeStep *bs);
+    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     QStringList automaticallyAddedArguments() const;
     bool fromMap(const QVariantMap &map) override;
 
@@ -76,42 +75,40 @@ private:
     void ctor();
     ROSBuildConfiguration *targetsActiveBuildConfiguration() const;
 
-    QStringList m_buildTargets;
+    BuildTargets m_target;
+    QString m_catkinMakeArguments;
+    QString m_cmakeArguments;
     QString m_makeArguments;
-    QString m_makeCommand;
     QRegExp m_percentProgress;
-    bool m_clean;
 };
 
-class ROSMakeStepConfigWidget : public ProjectExplorer::BuildStepConfigWidget
+class ROSCatkinMakeStepWidget : public ProjectExplorer::BuildStepConfigWidget
 {
     Q_OBJECT
 
 public:
-    ROSMakeStepConfigWidget(ROSMakeStep *makeStep);
-    ~ROSMakeStepConfigWidget();
+    ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep);
+    ~ROSCatkinMakeStepWidget();
     QString displayName() const;
     QString summaryText() const;
 
 private slots:
-    void itemChanged(QListWidgetItem *item);
-    void makeLineEditTextEdited();
-    void makeArgumentsLineEditTextEdited();
-    void updateMakeOverrrideLabel();
     void updateDetails();
+    void updateBuildSystem(const ROSUtils::BuildSystem &buildSystem);
+    void enabledChanged();
 
 private:
-    Ui::ROSMakeStep *m_ui;
-    ROSMakeStep *m_makeStep;
+    Ui::ROSCatkinMakeStep *m_ui;
+    ROSCatkinMakeStep *m_makeStep;
     QString m_summaryText;
 };
 
-class ROSMakeStepFactory : public ProjectExplorer::IBuildStepFactory
+class ROSCatkinMakeStepFactory : public ProjectExplorer::IBuildStepFactory
 {
     Q_OBJECT
 
 public:
-    explicit ROSMakeStepFactory(QObject *parent = 0);
+    explicit ROSCatkinMakeStepFactory(QObject *parent = 0);
     QList<ProjectExplorer::BuildStepInfo> availableSteps(ProjectExplorer::BuildStepList *parent) const override;
     ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent, Core::Id id) override;
     ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) override;
@@ -121,4 +118,4 @@ public:
 } // namespace Internal
 } // namespace ROSProjectManager
 
-#endif // ROSMAKESTEP_H
+#endif // ROSCATKINMAKESTEP_H

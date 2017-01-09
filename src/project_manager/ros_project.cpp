@@ -21,7 +21,7 @@
 #include "ros_project.h"
 
 #include "ros_build_configuration.h"
-#include "ros_make_step.h"
+#include "ros_catkin_make_step.h"
 #include "ros_project_constants.h"
 #include "ros_utils.h"
 
@@ -32,7 +32,9 @@
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <cpptools/cpptoolsconstants.h>
 #include <cpptools/cppmodelmanager.h>
+#include <cpptools/projectinfo.h>
 #include <cpptools/projectpartbuilder.h>
+#include <cpptools/projectpartheaderpath.h>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/abi.h>
 #include <projectexplorer/buildsteplist.h>
@@ -40,6 +42,7 @@
 #include <projectexplorer/kitinformation.h>
 #include <projectexplorer/kitmanager.h>
 #include <projectexplorer/projectexplorerconstants.h>
+#include <projectexplorer/buildmanager.h>
 #include <qtsupport/baseqtversion.h>
 #include <projectexplorer/customexecutablerunconfiguration.h>
 #include <qtsupport/qtkitinformation.h>
@@ -65,17 +68,16 @@ namespace Internal {
 ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
   : m_workspaceWatcher(new ROSWorkspaceWatcher(this))
 {
-    setId(Constants::ROSPROJECT_ID);
+    setId(Constants::ROS_PROJECT_ID);
     setProjectManager(manager);
+
     setDocument(new ROSProjectFile(this, fileName));
     DocumentManager::addDocument(document(), true);
 
     ROSProjectNode *project_node = new ROSProjectNode(this->projectFilePath());
-    connect(Core::VcsManager::instance(), &Core::VcsManager::repositoryChanged,
-            this, &ROSProject::repositoryChanged);
     setRootProjectNode(project_node);
 
-    setProjectContext(Context(Constants::PROJECTCONTEXT));
+    setProjectContext(Context(Constants::ROS_PROJECT_CONTEXT));
     setProjectLanguages(Context(ProjectExplorer::Constants::LANG_CXX));
 
     m_projectName = projectFilePath().toFileInfo().completeBaseName();
@@ -88,12 +90,17 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
 
     projectManager()->registerProject(this);
 
+    refresh();
+
+    // Setup signal/slot connections
+    connect(Core::VcsManager::instance(), &Core::VcsManager::repositoryChanged,
+            this, &ROSProject::repositoryChanged);
+
+    connect(ProjectExplorer::BuildManager::instance(), SIGNAL(buildQueueFinished(bool)),
+            this, SLOT(buildQueueFinished(bool)));
+
     connect(m_workspaceWatcher, SIGNAL(fileListChanged()),
             this, SIGNAL(fileListChanged()));
-
-    connect(this, &ROSProject::fileListChanged,
-            this, &ROSProject::refreshCppCodeModel);
-
 }
 
 ROSProject::~ROSProject()
@@ -101,16 +108,6 @@ ROSProject::~ROSProject()
     m_codeModelFuture.cancel();
     m_projectFutureInterface->cancel();
     projectManager()->unregisterProject(this);
-}
-
-Utils::FileName ROSProject::buildDirectory() const
-{
-  return projectDirectory().appendPath(tr("build"));
-}
-
-Utils::FileName ROSProject::sourceDirectory() const
-{
-  return projectDirectory().appendPath(tr("src"));
 }
 
 bool ROSProject::saveProjectFile()
@@ -122,7 +119,7 @@ bool ROSProject::saveProjectFile()
     if (!saver.hasError())
     {
       QXmlStreamWriter workspaceXml(saver.file());
-      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_watchDirectories, m_projectIncludePaths);
+      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_projectFileContent);
       saver.setResult(&workspaceXml);
     }
     bool result = saver.finalize(ICore::mainWindow());
@@ -130,67 +127,24 @@ bool ROSProject::saveProjectFile()
     return result;
 }
 
-bool ROSProject::addIncludes(const QStringList &includePaths)
+QString ROSProject::distribution() const
 {
-    foreach (const QString &includePath, includePaths)
-    {
-      if (QDir(includePath).exists())
-        m_projectIncludePaths.append(includePath);
-    }
-
-    m_projectIncludePaths.removeDuplicates();
-    bool result = saveProjectFile();
-
-    refresh();
-
-    return result;
+    return m_projectFileContent.distribution;
 }
 
-bool ROSProject::setIncludes(const QStringList &includePaths)
+ROSUtils::BuildSystem ROSProject::defaultBuildSystem() const
 {
-    m_projectIncludePaths.clear();
-    bool result = addIncludes(includePaths);
-    return result;
+    return m_projectFileContent.defaultBuildSystem;
+}
+
+ROSBuildConfiguration* ROSProject::rosBuildConfiguration() const
+{
+    return static_cast<ROSBuildConfiguration *>(activeTarget()->activeBuildConfiguration());
 }
 
 void ROSProject::parseProjectFile()
 {
-    QXmlStreamReader workspaceXml;
-    QFile workspaceFile(projectFilePath().toString());
-    if (workspaceFile.open(QFile::ReadOnly | QFile::Text))
-    {
-      m_watchDirectories.clear();
-      m_projectIncludePaths.clear();
-
-      workspaceXml.setDevice(&workspaceFile);
-      while(workspaceXml.readNextStartElement())
-      {
-        if(workspaceXml.name() == QLatin1String("WatchDirectories"))
-        {
-          while(workspaceXml.readNextStartElement())
-          {
-            if(workspaceXml.name() == QLatin1String("Directory"))
-            {
-              m_watchDirectories.append(workspaceXml.readElementText());
-            }
-          }
-        }
-        else if(workspaceXml.name() == QLatin1String("IncludePaths"))
-        {
-          while(workspaceXml.readNextStartElement())
-          {
-            if(workspaceXml.name() == QLatin1String("Directory"))
-            {
-              m_projectIncludePaths.append(workspaceXml.readElementText());
-            }
-          }
-        }
-      }
-    }
-    else
-    {
-      qDebug() << "Error opening Workspace Project File";
-    }
+    ROSUtils::parseQtCreatorWorkspaceFile(projectFilePath(), m_projectFileContent);
 }
 
 void ROSProject::refresh()
@@ -205,9 +159,9 @@ void ROSProject::refresh()
 
     m_projectFutureInterface->reportStarted();
 
-    QSet<QString> oldWatchDirectories = m_watchDirectories.toSet();
+    QSet<QString> oldWatchDirectories = m_projectFileContent.watchDirectories.toSet();
     parseProjectFile();
-    QSet<QString> newWatchDirectories = m_watchDirectories.toSet();
+    QSet<QString> newWatchDirectories = m_projectFileContent.watchDirectories.toSet();
 
     QStringList addedDirectories = (newWatchDirectories - oldWatchDirectories).toList();
     QStringList removedDirectories = (oldWatchDirectories - newWatchDirectories).toList();
@@ -235,21 +189,19 @@ void ROSProject::refresh()
     m_projectFutureInterface->setProgressValue(100);
     m_projectFutureInterface->reportFinished();
 
-    // This will occure when include directories are added.
-    if (addedDirectories.isEmpty() && removedDirectories.isEmpty())
-      refreshCppCodeModel();
-
 //    m_workspaceWatcher->print();
 }
 
 void ROSProject::refreshCppCodeModel()
 {
+    // TODO: Need to run this in its own thread
+    m_wsPackageInfo = ROSUtils::getWorkspacePackageInfo(projectDirectory(), rosBuildConfiguration()->buildSystem());
+
     CppTools::CppModelManager *modelManager = CppTools::CppModelManager::instance();
 
-    m_codeModelFuture.cancel();
+    m_codeModelFuture.cancel(); // This may need to be removed
 
     CppTools::ProjectInfo pInfo(this);
-    CppTools::ProjectPartBuilder ppBuilder(pInfo);
 
     CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
     if (QtSupport::BaseQtVersion *qtVersion =
@@ -260,26 +212,24 @@ void ROSProject::refreshCppCodeModel()
             activeQtVersion = CppTools::ProjectPart::Qt5;
     }
 
-    ppBuilder.setQtVersion(activeQtVersion);
-    ppBuilder.setIncludePaths(projectIncludePaths());
-    ppBuilder.setCxxFlags(QStringList() << QLatin1String("-std=c++11"));
+    QStringList workspaceFiles = m_workspaceWatcher->getWorkspaceFiles();
 
-    const QList<Id> languages = ppBuilder.createProjectPartsForFiles(m_workspaceWatcher->getWorkspaceFiles());
-    foreach (Id language, languages)
-        setProjectLanguage(language, true);
 
+    foreach(ROSUtils::PackageInfo package, m_wsPackageInfo)
+    {
+        CppTools::ProjectPartBuilder ppBuilder(pInfo);
+        ppBuilder.setDisplayName(package.name);
+        ppBuilder.setQtVersion(activeQtVersion);
+        ppBuilder.setIncludePaths(package.includes);
+        ppBuilder.setCxxFlags(package.flags);
+
+        QStringList packageFiles = workspaceFiles.filter(package.path + QDir::separator());
+        const QList<Id> languages = ppBuilder.createProjectPartsForFiles(packageFiles);
+        foreach (Id language, languages)
+            setProjectLanguage(language, true);
+    }
     pInfo.finish();
     m_codeModelFuture = modelManager->updateProjectInfo(pInfo);
-}
-
-QStringList ROSProject::projectIncludePaths() const
-{
-    return m_projectIncludePaths;
-}
-
-QStringList ROSProject::workspaceFiles() const
-{
-    return m_workspaceWatcher->getWorkspaceFiles();
 }
 
 QString ROSProject::displayName() const
@@ -289,21 +239,13 @@ QString ROSProject::displayName() const
 
 QStringList ROSProject::files(FilesMode fileMode) const
 {
-    Q_UNUSED(fileMode)
+    Q_UNUSED(fileMode);
     return m_workspaceWatcher->getWorkspaceFiles();
 }
 
 ROSManager *ROSProject::projectManager() const
 {
   return static_cast<ROSManager *>(Project::projectManager());
-}
-
-QStringList ROSProject::buildTargets() const
-{
-    QStringList targets;
-    targets.append(QLatin1String("all"));
-    targets.append(QLatin1String("clean"));
-    return targets;
 }
 
 Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *errorMessage)
@@ -330,13 +272,19 @@ Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *erro
               t->addRunConfiguration(new ProjectExplorer::CustomExecutableRunConfiguration(t));
       }
 
-      refresh();
+      refreshCppCodeModel();
       return RestoreResult::Ok;
 }
 
 void ROSProject::repositoryChanged(const QString &repository)
 {
   static_cast<ROSProjectNode *>(rootProjectNode())->updateVersionControlInfo(repository);
+}
+
+void ROSProject::buildQueueFinished(bool success)
+{
+    Q_UNUSED(success);
+    refreshCppCodeModel();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -349,8 +297,8 @@ ROSProjectFile::ROSProjectFile(ROSProject *parent, QString fileName)
     : IDocument(parent),
       m_project(parent)
 {
-    setId("ROS.ProjectFile");
-    setMimeType(QLatin1String(Constants::ROSMIMETYPE));
+    setId(Constants::ROS_PROJECT_FILE_ID);
+    setMimeType(QLatin1String(Constants::ROS_MIME_TYPE));
     setFilePath(Utils::FileName::fromString(fileName));
 }
 
@@ -371,15 +319,15 @@ bool ROSProjectFile::isSaveAsAllowed() const
 
 IDocument::ReloadBehavior ROSProjectFile::reloadBehavior(ChangeTrigger state, ChangeType type) const
 {
-    Q_UNUSED(state)
-    Q_UNUSED(type)
+    Q_UNUSED(state);
+    Q_UNUSED(type);
     return BehaviorSilent;
 }
 
 bool ROSProjectFile::reload(QString *errorString, ReloadFlag flag, ChangeType type)
 {
-    Q_UNUSED(errorString)
-    Q_UNUSED(flag)
+    Q_UNUSED(errorString);
+    Q_UNUSED(flag);
     if (type == TypePermissions)
         return true;
 

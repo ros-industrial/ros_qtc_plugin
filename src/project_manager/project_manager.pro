@@ -7,15 +7,15 @@ QTW_INCLUDE_PATH = $$(QTERMWIDGET_INCLUDE_PATH)
 isEmpty(QTW_INCLUDE_PATH):QTW_INCLUDE_PATH=/usr/local/include
 LIBS += -L$$QTW_LIBRARY_PATH -lqtermwidget5
 INCLUDEPATH += $$(QTW_INCLUDE_PATH)
+INCLUDEPATH += $$PWD
+
+CONFIG += link_pkgconfig
+PKGCONFIG += yaml-cpp
 
 HEADERS += $$files(*.h)
-HEADERS += $$files(qtermwidget/lib/*.h)
 
 SOURCES += $$files(*.cpp)
-SOURCES += $$files(qtermwidget/lib/*.cpp)
 
 RESOURCES += ros_project.qrc
 
 FORMS += $$files(*.ui)
-FORMS += $$files(qtermwidget/lib/*.ui)
-

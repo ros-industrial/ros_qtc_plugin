@@ -20,7 +20,8 @@
  */
 #include "ros_build_configuration.h"
 
-#include "ros_make_step.h"
+#include "ros_catkin_make_step.h"
+#include "ros_catkin_tools_step.h"
 #include "ros_project.h"
 #include "ros_project_constants.h"
 #include "ros_utils.h"
@@ -37,7 +38,6 @@
 #include <utils/qtcassert.h>
 
 #include <QFormLayout>
-#include <QInputDialog>
 
 using namespace ProjectExplorer;
 
@@ -45,8 +45,8 @@ namespace ROSProjectManager {
 namespace Internal {
 
 const char ROS_BC_ID[] = "ROSProjectManager.ROSBuildConfiguration";
-const char ROS_BC_INITIAL_ARGUMENTS[] = "ROSProjectManager.ROSBuildConfiguration.InitialArguments";
-const char ROS_BC_DISTRIBUTION[] = "ROSProjectManager.ROSBuildConfiguration.Distribution";
+const char ROS_BC_BUILD_SYSTEM[] = "ROSProjectManager.ROSBuildConfiguration.BuildSystem";
+const char ROS_BC_CMAKE_BUILD_TYPE[] = "ROSProjectManager.ROSBuildConfiguration.CMakeBuildType";
 
 ROSBuildConfiguration::ROSBuildConfiguration(Target *parent)
     : BuildConfiguration(parent, Core::Id(ROS_BC_ID))
@@ -59,8 +59,9 @@ ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, Core::Id id)
 }
 
 ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, ROSBuildConfiguration *source) :
-    BuildConfiguration(parent, source),m_initialArguments(source->m_initialArguments),
-    m_rosDistribution(source->m_rosDistribution)
+    BuildConfiguration(parent, source),
+    m_buildSystem(source->m_buildSystem),
+    m_cmakeBuildType(source->m_cmakeBuildType)
 {
     cloneSteps(source);
 }
@@ -69,49 +70,55 @@ QVariantMap ROSBuildConfiguration::toMap() const
 {
   QVariantMap map(BuildConfiguration::toMap());
 
-  map.insert(QLatin1String(ROS_BC_INITIAL_ARGUMENTS), m_initialArguments);
-  map.insert(QLatin1String(ROS_BC_DISTRIBUTION), m_rosDistribution);
-
+  map.insert(QLatin1String(ROS_BC_BUILD_SYSTEM), (int)m_buildSystem);
+  map.insert(QLatin1String(ROS_BC_CMAKE_BUILD_TYPE), (int)m_cmakeBuildType);
   return map;
 }
 
 bool ROSBuildConfiguration::fromMap(const QVariantMap &map)
 {
-  m_initialArguments = map.value(QLatin1String(ROS_BC_INITIAL_ARGUMENTS)).toString();
-  m_rosDistribution = map.value(QLatin1String(ROS_BC_DISTRIBUTION)).toString();
+  m_buildSystem = (ROSUtils::BuildSystem)map.value(QLatin1String(ROS_BC_BUILD_SYSTEM)).toInt();
+  m_cmakeBuildType = (ROSUtils::BuildType)map.value(QLatin1String(ROS_BC_CMAKE_BUILD_TYPE)).toInt();
   return BuildConfiguration::fromMap(map);
 }
 
-void ROSBuildConfiguration::setInitialArguments(const QString &arguments)
+ROSUtils::BuildSystem ROSBuildConfiguration::buildSystem() const
 {
-  m_initialArguments = arguments;
+    return m_buildSystem;
 }
 
-QString ROSBuildConfiguration::initialArguments() const
+void ROSBuildConfiguration::setBuildSystem(const ROSUtils::BuildSystem &buildSystem)
 {
-  return m_initialArguments;
+    m_buildSystem = buildSystem;
+    emit buildSystemChanged(buildSystem);
 }
 
-void ROSBuildConfiguration::setROSDistribution(const QString &distribution)
+ROSUtils::BuildType ROSBuildConfiguration::cmakeBuildType() const
 {
-  m_rosDistribution = distribution;
+    return m_cmakeBuildType;
 }
 
-QString ROSBuildConfiguration::rosDistribution() const
+void ROSBuildConfiguration::setCMakeBuildType(const ROSUtils::BuildType &buildType)
 {
-  return m_rosDistribution;
+    m_cmakeBuildType = buildType;
+    emit cmakeBuildTypeChanged(buildType);
+}
+
+ROSProject *ROSBuildConfiguration::project()
+{
+    return qobject_cast<ROSProject *>(target()->project());
 }
 
 void ROSBuildConfiguration::sourceWorkspace()
 {
   // Need to source ros and devel directory to setup enviroment variables
-  Utils::FileName ws_dir = target()->project()->projectDirectory();
+  ROSProject *prj = qobject_cast<ROSProject *>(target()->project());
   QProcess process;
 
-  if (ROSUtils::sourceWorkspace(&process, ws_dir , rosDistribution()))
+  if (ROSUtils::sourceWorkspace(&process, prj->projectDirectory(), prj->distribution(), m_buildSystem))
   {
     Utils::Environment source_env = Utils::Environment(process.processEnvironment().toStringList());
-    source_env.set(QLatin1String("PWD"), ws_dir.toString());
+    source_env.set(QLatin1String("PWD"), prj->projectDirectory().toString());
 
     QList<Utils::EnvironmentItem> diff = baseEnvironment().diff(source_env);
     if (!diff.isEmpty())
@@ -150,11 +157,13 @@ int ROSBuildConfigurationFactory::priority(const Target *parent) const
 QList<BuildInfo *> ROSBuildConfigurationFactory::availableBuilds(const Target *parent) const
 {
     QList<BuildInfo *> result;
-    QString project_path = parent->project()->projectDirectory().toString();
 
-    for (int type = BuildTypeNone; type != BuildTypeLast; ++type)
+    // Need to create a ROS Setting widget where the user sets the default build system to use here.
+    ROSUtils::BuildSystem buildSystem = static_cast<ROSProject *>(parent->project())->defaultBuildSystem();
+
+    for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeMinSizeRel; ++type)
     {
-      ROSBuildInfo *info = createBuildInfo(parent->kit(), project_path, BuildType(type));
+      ROSBuildInfo *info = createBuildInfo(parent->kit(), buildSystem, ROSUtils::BuildType(type));
       result << info;
     }
 
@@ -164,7 +173,7 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableBuilds(const Target *p
 int ROSBuildConfigurationFactory::priority(const Kit *k, const QString &projectPath) const
 {
     Utils::MimeDatabase mdb;
-    if (k && mdb.mimeTypeForFile(projectPath).matchesName(QLatin1String(Constants::ROSMIMETYPE)))
+    if (k && mdb.mimeTypeForFile(projectPath).matchesName(QLatin1String(Constants::ROS_MIME_TYPE)))
         return 0;
     return -1;
 }
@@ -173,8 +182,12 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableSetups(const Kit *k, c
 {
     QList<BuildInfo *> result;
 
-    for (int type = BuildTypeNone; type != BuildTypeLast; ++type) {
-      ROSBuildInfo *info = createBuildInfo(k, projectPath, BuildType(type));
+    // Need to create a ROS Setting widget where the user sets the default build system to use here.
+    ROSUtils::ROSProjectFileContent projectFileContent;
+    ROSUtils::parseQtCreatorWorkspaceFile(Utils::FileName::fromString(projectPath), projectFileContent);
+
+    for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeMinSizeRel; ++type) {
+      ROSBuildInfo *info = createBuildInfo(k, projectFileContent.defaultBuildSystem, ROSUtils::BuildType(type));
       result << info;
     }
 
@@ -194,25 +207,39 @@ BuildConfiguration *ROSBuildConfigurationFactory::create(Target *parent, const B
     bc->setDisplayName(ros_info.displayName);
     bc->setDefaultDisplayName(ros_info.displayName);
     bc->setBuildDirectory(ros_info.buildDirectory);
-    bc->setInitialArguments(ros_info.arguments);
+    bc->setBuildSystem(ros_info.buildSystem);
+    bc->setCMakeBuildType(ros_info.cmakeBuildType);
 
     BuildStepList *buildSteps = bc->stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
     BuildStepList *cleanSteps = bc->stepList(ProjectExplorer::Constants::BUILDSTEPS_CLEAN);
     Q_ASSERT(buildSteps);
     Q_ASSERT(cleanSteps);
 
-    ROSMakeStep *makeStep = new ROSMakeStep(buildSteps);
-    buildSteps->insertStep(0, makeStep);
+    switch (bc->buildSystem())
+    {
+    case ROSUtils::CatkinMake:
+    {
+        ROSCatkinMakeStep *makeStep = new ROSCatkinMakeStep(buildSteps);
+        buildSteps->insertStep(0, makeStep);
+        makeStep->setBuildTarget(ROSCatkinMakeStep::BUILD);
 
-    makeStep->setBuildTarget(QLatin1String("all"), /* on = */ true);
+        ROSCatkinMakeStep *cleanMakeStep = new ROSCatkinMakeStep(cleanSteps);
+        cleanSteps->insertStep(0, cleanMakeStep);
+        cleanMakeStep->setBuildTarget(ROSCatkinMakeStep::CLEAN);
+        break;
+    }
+    case ROSUtils::CatkinTools:
+    {
+        ROSCatkinToolsStep *makeStep = new ROSCatkinToolsStep(buildSteps);
+        buildSteps->insertStep(0, makeStep);
+        makeStep->setBuildTarget(ROSCatkinToolsStep::BUILD);
 
-    ROSMakeStep *cleanMakeStep = new ROSMakeStep(cleanSteps);
-    cleanSteps->insertStep(0, cleanMakeStep);
-    cleanMakeStep->setBuildTarget(QLatin1String("clean"), /* on = */ true);
-    cleanMakeStep->setClean(true);
-
-    //Source the workspace to setup initial environment variables for build configuration.
-    bc->sourceWorkspace();
+        ROSCatkinToolsStep *cleanMakeStep = new ROSCatkinToolsStep(cleanSteps);
+        cleanSteps->insertStep(0, cleanMakeStep);
+        cleanMakeStep->setBuildTarget(ROSCatkinToolsStep::CLEAN);
+        break;
+    }
+    }
 
     return bc;
 }
@@ -256,44 +283,27 @@ bool ROSBuildConfigurationFactory::canHandle(const Target *t) const
     return qobject_cast<ROSProject *>(t->project());
 }
 
-ROSBuildInfo *ROSBuildConfigurationFactory::createBuildInfo(const Kit *k,
-                                                          const QString &projectPath,
-                                                          BuildType type) const
+ROSBuildInfo *ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const
 {
     ROSBuildInfo *info = new ROSBuildInfo(this);
     info->kitId = k->id();
-    info->buildDirectory = Project::projectDirectory(Utils::FileName::fromString(projectPath)).appendPath(tr("build"));
+    info->buildSystem = build_system;
+    info->cmakeBuildType = type;
+    info->typeName = ROSUtils::buildTypeName(type);
+    info->displayName = info->typeName;
+
     switch (type) {
-    case BuildTypeNone:
-        info->displayName = tr("Default");
-        info->typeName = tr("Build");
-        break;
-    case BuildTypeDebug:
-        info->arguments = QLatin1String("-DCMAKE_BUILD_TYPE=Debug");
-        info->typeName = tr("Debug");
-        info->displayName = info->typeName;
+    case ROSUtils::BuildTypeDebug:
         info->buildType = BuildConfiguration::Debug;
         break;
-    case BuildTypeRelease:
-        info->arguments = QLatin1String("-DCMAKE_BUILD_TYPE=Release");
-        info->typeName = tr("Release");
-        info->displayName = info->typeName;
+    case ROSUtils::BuildTypeMinSizeRel:
         info->buildType = BuildConfiguration::Release;
         break;
-    case BuildTypeMinSizeRel:
-        info->arguments = QLatin1String("-DCMAKE_BUILD_TYPE=MinSizeRel");
-        info->typeName = tr("Minimum Size Release");
-        info->displayName = info->typeName;
-        info->buildType = BuildConfiguration::Release;
-        break;
-    case BuildTypeRelWithDebInfo:
-        info->arguments = QLatin1String("-DCMAKE_BUILD_TYPE=RelWithDebInfo");
-        info->typeName = tr("Release with Debug Information");
-        info->displayName = info->typeName;
+    case ROSUtils::BuildTypeRelWithDebInfo:
         info->buildType = BuildConfiguration::Profile;
         break;
     default:
-        QTC_CHECK(false);
+        info->buildType = BuildConfiguration::Release;
         break;
     }
 
@@ -302,22 +312,14 @@ ROSBuildInfo *ROSBuildConfigurationFactory::createBuildInfo(const Kit *k,
 
 BuildConfiguration::BuildType ROSBuildConfiguration::buildType() const
 {
-  if (m_initialArguments == QLatin1String("-DCMAKE_BUILD_TYPE=Debug"))
-  {
-    return Debug;
-  }
-  else if ((m_initialArguments == QLatin1String("-DCMAKE_BUILD_TYPE=Debug")) || (m_initialArguments == QLatin1String("-DCMAKE_BUILD_TYPE=MinSizeRel")))
-  {
-    return Release;
-  }
-  else if (m_initialArguments == QLatin1String("-DCMAKE_BUILD_TYPE=RelWithDebInfo"))
-  {
-    return Profile;
-  }
-  else
-  {
-    return Unknown;
-  }
+    switch (m_cmakeBuildType) {
+    case ROSUtils::BuildTypeDebug:
+        return Debug;
+    case ROSUtils::BuildTypeRelWithDebInfo:
+        return Profile;
+    default:
+        return Release;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -329,16 +331,14 @@ ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
 {
     m_ui = new Ui::ROSBuildConfiguration;
     m_ui->setupUi(this);
+    m_ui->buildSystemComboBox->setCurrentIndex(bc->buildSystem());
+    m_ui->buildTypeComboBox->setCurrentIndex(bc->cmakeBuildType());
 
-    // Get list of install ros distributions
-    m_ui->ros_distribution_comboBox->addItems(ROSUtils::installedDistributions());
-    m_ui->ros_distribution_comboBox->setCurrentIndex(m_ui->ros_distribution_comboBox->findText(bc->rosDistribution()));
+    connect(m_ui->buildSystemComboBox, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(buildSystemChanged(int)));
 
-    connect(m_ui->source_pushButton, SIGNAL(clicked()),
-                this, SLOT(on_source_pushButton_clicked()));
-
-    connect(m_ui->ros_distribution_comboBox, SIGNAL(currentIndexChanged(QString)),
-            this, SLOT(on_ros_distribution_comboBox_currentIndexChanged(QString)));
+    connect(m_ui->buildTypeComboBox, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(buildTypeChanged(int)));
 
     setDisplayName(tr("ROS Manager"));
 }
@@ -348,23 +348,21 @@ ROSBuildSettingsWidget::~ROSBuildSettingsWidget()
   delete m_ui;
 }
 
-void ROSBuildSettingsWidget::on_source_pushButton_clicked()
+void ROSBuildSettingsWidget::buildSystemChanged(int index)
 {
-    m_buildConfiguration->sourceWorkspace();
+    m_buildConfiguration->setBuildSystem(((ROSUtils::BuildSystem)index));
 }
 
-void ROSBuildSettingsWidget::on_ros_distribution_comboBox_currentIndexChanged(const QString &arg1)
+void ROSBuildSettingsWidget::buildTypeChanged(int index)
 {
-    m_buildConfiguration->setROSDistribution(arg1);
+    m_buildConfiguration->setCMakeBuildType(((ROSUtils::BuildType)index));
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////
 // ROSBuildEnvironmentWidget
 ////////////////////////////////////////////////////////////////////////////////////
 
 ROSBuildEnvironmentWidget::ROSBuildEnvironmentWidget(BuildConfiguration *bc)
-    : m_buildConfiguration(0)
 {
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->setMargin(0);
@@ -413,4 +411,5 @@ void ROSBuildEnvironmentWidget::environmentChanged()
 
 } // namespace Internal
 } // namespace GenericProjectManager
+
 

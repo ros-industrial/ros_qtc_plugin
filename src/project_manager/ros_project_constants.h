@@ -26,9 +26,10 @@ namespace ROSProjectManager {
 namespace Constants {
 
 // Project
-const char ROSPROJECT_ID[]  = "ROSProjectManager.ROSProject";
-const char PROJECTCONTEXT[]     = "ROSProject.ProjectContext";
-const char ROSMIMETYPE[]    = "application/ros.project";
+const char ROS_PROJECT_ID[]  = "ROSProjectManager.ROSProject";
+const char ROS_PROJECT_CONTEXT[] = "ROSProject.ProjectContext";
+const char ROS_PROJECT_FILE_ID[] = "ROSProject.ProjectFile";
+const char ROS_MIME_TYPE[]    = "application/ros.project";
 
 // Tasks
 const char ROS_READING_PROJECT[] = "ROSProjectManager.ReadingProject";
@@ -37,7 +38,6 @@ const char ROS_READING_PROJECT[] = "ROSProjectManager.ReadingProject";
 const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
 
 // Context menu actions
-const char ROS_RELOAD_INCLUDE_DIRS[] = "ROSProjectManager.reloadProjectIncludeDirectories";
 const char ROS_REMOVE_DIR[] = "ROSProjectManager.removeDirectory";
 
 // ROS wizards constants
