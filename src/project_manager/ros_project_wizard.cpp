@@ -37,6 +37,7 @@
 #include <utils/filewizardpage.h>
 #include <utils/mimetypes/mimedatabase.h>
 #include <utils/wizard.h>
+#include <utils/icon.h>
 
 #include <QApplication>
 #include <QDebug>
@@ -50,16 +51,11 @@
 #include <QXmlStreamReader>
 #include <QPlainTextEdit>
 #include <QMessageBox>
+#include <QBitmap>
 
 
 namespace ROSProjectManager {
 namespace Internal {
-
-
-static const char *const ConfigFileTemplate =
-        "// Add predefined macros for your project here. For example:\n"
-        "// #define THE_ANSWER 42\n"
-        ;
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -220,7 +216,23 @@ bool ROSImportWizardPage::validateBaseName(const QString &name, QString *errorMe
 ROSProjectWizard::ROSProjectWizard()
 {
     setSupportedProjectTypes({ Constants::ROS_PROJECT_ID });
-    setIcon(QIcon(QLatin1String(":rosproject/50x50pix.png")));
+
+    QPixmap pixmap(QLatin1String(":rosproject/ros_icon.png"));
+    QBitmap mask = pixmap.createMaskFromColor(Qt::transparent, Qt::MaskInColor);
+
+    QPixmap normalPixmap(pixmap.size());
+    normalPixmap.fill(Utils::creatorTheme()->color(Utils::Theme::TextColorNormal));
+    normalPixmap.setMask(mask);
+
+    QPixmap activePixmap(pixmap.size());
+    activePixmap.fill(Qt::blue);
+    activePixmap.setMask(mask);
+
+    QIcon rosIcon;
+    rosIcon.addPixmap(normalPixmap, QIcon::Normal);
+    rosIcon.addPixmap(activePixmap, QIcon::Selected);
+
+    setIcon(rosIcon);
     setDisplayName(tr("Import ROS Workspace"));
     setId("Z.ROSIndustrial");
     setDescription(tr("Used to import ROS Workspace."));
