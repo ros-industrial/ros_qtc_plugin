@@ -195,7 +195,7 @@ void ROSProject::refresh()
 void ROSProject::refreshCppCodeModel()
 {
     // TODO: Need to run this in its own thread
-    m_wsPackageInfo = ROSUtils::getWorkspacePackageInfo(projectDirectory(), rosBuildConfiguration()->buildSystem());
+    m_wsPackageInfo = ROSUtils::getWorkspacePackageInfo(projectDirectory(), rosBuildConfiguration()->buildSystem(), &m_wsPackageInfo);
 
     CppTools::CppModelManager *modelManager = CppTools::CppModelManager::instance();
 
