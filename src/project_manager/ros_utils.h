@@ -73,6 +73,8 @@ public:
         bool cbpFileExists();
     };
 
+    typedef QMap<QString, PackageInfo> PackageInfoMap;
+
     /** @brief Contains project file information */
     struct ROSProjectFileContent {
         QString distribution;                     /**< @brief ROS Distribution */
@@ -103,8 +105,10 @@ public:
      * @param buildSystem Workspace build system
      * @return True if successful
      */
-    static bool sourceWorkspace(QProcess *process, const Utils::FileName &workspaceDir,
-                                const QString &rosDistribution, const BuildSystem buildSystem);
+    static bool sourceWorkspace(QProcess *process,
+                                const Utils::FileName &workspaceDir,
+                                const QString &rosDistribution,
+                                const BuildSystem &buildSystem);
 
     /**
      * @brief Check whether the provided workspace has been initialized
@@ -113,7 +117,7 @@ public:
      * @return True if workspace is initialized, otherwise false
      */
     static bool isWorkspaceInitialized(const Utils::FileName &workspaceDir,
-                                       const BuildSystem BuildSystem);
+                                       const BuildSystem &BuildSystem);
 
     /**
      * @brief Initialize workspace
@@ -123,8 +127,10 @@ public:
      * @param buildSystem Workspace build system
      * @return True if successfully executed, otherwise false
      */
-    static bool initializeWorkspace(QProcess *process, const Utils::FileName &workspaceDir,
-                                    const QString &rosDistribution, const BuildSystem buildSystem);
+    static bool initializeWorkspace(QProcess *process,
+                                    const Utils::FileName &workspaceDir,
+                                    const QString &rosDistribution,
+                                    const BuildSystem &buildSystem);
 
     /**
      * @brief Build workspace
@@ -133,8 +139,9 @@ public:
      * @param buildSystem Workspace build system
      * @return True if successfully executed, otherwise false
      */
-    static bool buildWorkspace(QProcess *process, const Utils::FileName &workspaceDir,
-                               const ROSUtils::BuildSystem buildSystem);
+    static bool buildWorkspace(QProcess *process,
+                               const Utils::FileName &workspaceDir,
+                               const ROSUtils::BuildSystem &buildSystem);
 
     /**
      * @brief Gets a list of installed ROS Distributions
@@ -174,8 +181,9 @@ public:
      * @param buildSystem Workspace build system
      * @return QMap(Package Name, PackageInfo)
      */
-    static QMap<QString, ROSUtils::PackageInfo>
-    getWorkspacePackageInfo(const Utils::FileName &workspaceDir, const BuildSystem buildSystem);
+    static PackageInfoMap getWorkspacePackageInfo(const Utils::FileName &workspaceDir,
+                                                  const BuildSystem &buildSystem,
+                                                  const PackageInfoMap *cachedPackageInfo = NULL);
 
     /**
      * @brief Executes the bash command "rospack list" and returns a map of QMap(Package Name, Path
@@ -192,7 +200,7 @@ public:
      * @return QMap(Package Name, Path to package)
      */
     static QMap<QString, QString> getWorkspacePackages(const Utils::FileName &workspaceDir,
-                                                       const BuildSystem buildSystem);
+                                                       const BuildSystem &buildSystem);
 
     /**
      * @brief Get all of the code block files within workspace build directory.
@@ -201,7 +209,7 @@ public:
      * @return QMap(CodeBlock File Name, CodeBlock File Path)
      */
     static QMap<QString, QString> getWorkspaceCodeBlockFiles(const Utils::FileName &workspaceDir,
-                                                             const BuildSystem buildSystem);
+                                                             const BuildSystem &buildSystem);
 
     /**
      * @brief Gets all launch files associated to a package
@@ -226,7 +234,7 @@ public:
      * @return True if successful, otherwise false
      */
     static bool removeCatkinToolsProfile(const Utils::FileName &workspaceDir,
-                                         const QString profileName);
+                                         const QString &profileName);
 
     /**
      * @brief Rename catkin tools profile
@@ -247,7 +255,8 @@ public:
      * @return True if successful, otherwise false
      */
     static bool cloneCatkinToolsProfile(const Utils::FileName &workspaceDir,
-                                        const QString &profileName, const QString &newProfileName);
+                                        const QString &profileName,
+                                        const QString &newProfileName);
 
     /**
      * @brief Create a new catkin tools profile
@@ -272,7 +281,7 @@ public:
      * @return True if successful, otherwise false
      */
     static bool setCatkinToolsActiveProfile(const Utils::FileName &workspaceDir,
-                                            const QString profileName);
+                                            const QString &profileName);
 
     /**
      * @brief Get list of catkin tools profile names
@@ -288,7 +297,7 @@ public:
      * @return Utils::FileName Path to profile
      */
     static Utils::FileName getCatkinToolsProfile(const Utils::FileName &workspaceDir,
-                                                 const QString profileName);
+                                                 const QString &profileName);
 
     /**
      * @brief Get cmake build type argument
@@ -304,7 +313,7 @@ public:
      * @return Utils::FileName Path to source directory
      */
     static Utils::FileName getWorkspaceSourceSpace(const Utils::FileName &workspaceDir,
-                                                   const BuildSystem buildSystem);
+                                                   const BuildSystem &buildSystem);
 
     /**
      * @brief Get workspace build directory path
@@ -313,7 +322,7 @@ public:
      * @return Utils::FileName Path to build directory
      */
     static Utils::FileName getWorkspaceBuildSpace(const Utils::FileName &workspaceDir,
-                                                  const BuildSystem buildSystem);
+                                                  const BuildSystem &buildSystem);
 
     /**
      * @brief Get workspace devel directory path
@@ -322,7 +331,7 @@ public:
      * @return Utils::FileName Path to devel directory
      */
     static Utils::FileName getWorkspaceDevelSpace(const Utils::FileName &workspaceDir,
-                                                  const BuildSystem buildSystem);
+                                                  const BuildSystem &buildSystem);
 
     /**
      * @brief Get workspace environment
@@ -333,7 +342,7 @@ public:
      */
     static QProcessEnvironment getWorkspaceEnvironment(const Utils::FileName &workspaceDir,
                                                        const QString &rosDistribution,
-                                                       const BuildSystem buildSystem);
+                                                       const BuildSystem &buildSystem);
 
 private:
     /**
@@ -353,7 +362,8 @@ private:
      * @return True if successful, otherwise false.
      */
     static bool getPackageBuildInfo(const Utils::FileName &workspaceDir,
-                                    const BuildSystem buildSystem, ROSUtils::PackageInfo &package);
+                                    const BuildSystem &buildSystem,
+                                    PackageInfo &package);
 
     /**
      * @brief Get path to the profiles directory
@@ -379,7 +389,7 @@ private:
      * @return Utils::FileName Profile directory path
      */
     static Utils::FileName getCatkinToolsProfilePath(const Utils::FileName &workspaceDir,
-                                                     const QString profileName);
+                                                     const QString &profileName);
 
     /**
      * @brief Get the file path to given profile's config.yaml file
@@ -388,7 +398,7 @@ private:
      * @return Utils::FileName Path the profile's config.yaml file
      */
     static Utils::FileName getCatkinToolsProfileConfigFile(const Utils::FileName &workspaceDir,
-                                                           const QString profileName);
+                                                           const QString &profileName);
 };
 } // namespace Internal
 } // namespace ROSProjectManager

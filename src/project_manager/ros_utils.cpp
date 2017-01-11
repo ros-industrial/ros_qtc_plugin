@@ -64,7 +64,7 @@ bool ROSUtils::sourceROS(QProcess *process, const QString &rosDistribution)
   return results;
 }
 
-bool ROSUtils::sourceWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem buildSystem)
+bool ROSUtils::sourceWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem &buildSystem)
 {
     if (!initializeWorkspace(process, workspaceDir, rosDistribution, buildSystem))
         return false;
@@ -77,7 +77,7 @@ bool ROSUtils::sourceWorkspace(QProcess *process, const Utils::FileName &workspa
     return false;
 }
 
-bool ROSUtils::isWorkspaceInitialized(const Utils::FileName &workspaceDir, const ROSUtils::BuildSystem buildSystem)
+bool ROSUtils::isWorkspaceInitialized(const Utils::FileName &workspaceDir, const ROSUtils::BuildSystem &buildSystem)
 {
     switch (buildSystem) {
     case ROSUtils::CatkinMake:
@@ -106,7 +106,7 @@ bool ROSUtils::isWorkspaceInitialized(const Utils::FileName &workspaceDir, const
     return false;
 }
 
-bool ROSUtils::initializeWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem buildSystem)
+bool ROSUtils::initializeWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem &buildSystem)
 {
     if (sourceROS(process, rosDistribution))
         if (!isWorkspaceInitialized(workspaceDir, buildSystem))
@@ -144,7 +144,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const Utils::FileName &wor
     return true;
 }
 
-bool ROSUtils::buildWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const ROSUtils::BuildSystem buildSystem)
+bool ROSUtils::buildWorkspace(QProcess *process, const Utils::FileName &workspaceDir, const ROSUtils::BuildSystem &buildSystem)
 {
     switch(buildSystem) {
     case CatkinMake:
@@ -328,9 +328,9 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
     return workspaceFiles;
 }
 
-QMap<QString, ROSUtils::PackageInfo> ROSUtils::getWorkspacePackageInfo(const Utils::FileName &workspaceDir, const BuildSystem buildSystem)
+ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const Utils::FileName &workspaceDir, const BuildSystem &buildSystem, const PackageInfoMap *cachedPackageInfo)
 {
-    QMap<QString, ROSUtils::PackageInfo> wsPackageInfo;
+    PackageInfoMap wsPackageInfo;
     QMap<QString, QString> packages =  ROSUtils::getWorkspacePackages(workspaceDir, buildSystem);
     QMap<QString, QString> cbp = ROSUtils::getWorkspaceCodeBlockFiles(workspaceDir, buildSystem);
 
@@ -350,14 +350,28 @@ QMap<QString, ROSUtils::PackageInfo> ROSUtils::getWorkspacePackageInfo(const Uti
         }
         else
         {
-            qDebug() << QString("Unable to locate CodeBlocks file for package: %1").arg(package.name);
+            // Check if there is cached build info available
+            QString msg = QString("Unable to locate CodeBlocks file for package: %1").arg(package.name);
+            if (cachedPackageInfo)
+            {
+                auto packIt = cachedPackageInfo->find(package.name);
+                if (packIt != cachedPackageInfo->end())
+                {
+                    msg = QString("Using cached CodeBlocks data for package: %1").arg(package.name);
+                    package.cbpFile = packIt.value().cbpFile;
+                    package.flags = packIt.value().flags;
+                    package.includes = packIt.value().includes;
+                }
+
+            }
+            qDebug() << msg;
         }
         wsPackageInfo.insert(package.name, package);
     }
     return wsPackageInfo;
 }
 
-bool ROSUtils::getPackageBuildInfo(const Utils::FileName &workspaceDir, const BuildSystem buildSystem, ROSUtils::PackageInfo &package)
+bool ROSUtils::getPackageBuildInfo(const Utils::FileName &workspaceDir, const BuildSystem &buildSystem, ROSUtils::PackageInfo &package)
 {
 
   // Parse CodeBlocks Project File
@@ -456,7 +470,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   return QMap<QString, QString>();
 }
 
-QMap<QString, QString> ROSUtils::getWorkspacePackages(const Utils::FileName &workspaceDir, const BuildSystem buildSystem)
+QMap<QString, QString> ROSUtils::getWorkspacePackages(const Utils::FileName &workspaceDir, const BuildSystem &buildSystem)
 {
     QMap<QString, QString> packageMap;
     Utils::FileName srcPath = getWorkspaceSourceSpace(workspaceDir, buildSystem);
@@ -479,7 +493,7 @@ QMap<QString, QString> ROSUtils::getWorkspacePackages(const Utils::FileName &wor
     return packageMap;
 }
 
-QMap<QString, QString> ROSUtils::getWorkspaceCodeBlockFiles(const Utils::FileName &workspaceDir, const BuildSystem buildSystem)
+QMap<QString, QString> ROSUtils::getWorkspaceCodeBlockFiles(const Utils::FileName &workspaceDir, const BuildSystem &buildSystem)
 {
     QMap<QString, QString> cbpMap;
     Utils::FileName buildPath = getWorkspaceBuildSpace(workspaceDir, buildSystem);
@@ -583,21 +597,21 @@ Utils::FileName ROSUtils::getCatkinToolsProfilesYamlFile(const Utils::FileName &
     return profiles;
 }
 
-Utils::FileName ROSUtils::getCatkinToolsProfilePath(const Utils::FileName &workspaceDir, const QString profileName)
+Utils::FileName ROSUtils::getCatkinToolsProfilePath(const Utils::FileName &workspaceDir, const QString &profileName)
 {
     Utils::FileName profile = getCatkinToolsProfilesPath(workspaceDir);
     profile.appendPath(profileName);
     return profile;
 }
 
-Utils::FileName ROSUtils::getCatkinToolsProfileConfigFile(const Utils::FileName &workspaceDir, const QString profileName)
+Utils::FileName ROSUtils::getCatkinToolsProfileConfigFile(const Utils::FileName &workspaceDir, const QString &profileName)
 {
     Utils::FileName profile = getCatkinToolsProfilePath(workspaceDir, profileName);
     profile.appendPath("config.yaml");
     return profile;
 }
 
-bool ROSUtils::removeCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString profileName)
+bool ROSUtils::removeCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString &profileName)
 {
 
     QString activeProfile = getCatkinToolsActiveProfile(workspaceDir);
@@ -676,7 +690,7 @@ QString ROSUtils::getCatkinToolsActiveProfile(const Utils::FileName &workspaceDi
     return activeProfile;
 }
 
-bool ROSUtils::setCatkinToolsActiveProfile(const Utils::FileName &workspaceDir, const QString profileName)
+bool ROSUtils::setCatkinToolsActiveProfile(const Utils::FileName &workspaceDir, const QString &profileName)
 {
     YAML::Node config;
     Utils::FileName profiles = getCatkinToolsProfilesYamlFile(workspaceDir);
@@ -714,7 +728,7 @@ QStringList ROSUtils::getCatkinToolsProfileNames(const Utils::FileName &workspac
     return QStringList() << QLatin1String("default");
 }
 
-Utils::FileName ROSUtils::getCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString profileName)
+Utils::FileName ROSUtils::getCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString &profileName)
 {
     Utils::FileName profile = ROSUtils::getCatkinToolsProfileConfigFile(workspaceDir, profileName);
     if(!profile.exists())
@@ -737,7 +751,7 @@ QString ROSUtils::getCMakeBuildTypeArgument(ROSUtils::BuildType &buildType)
     }
 }
 
-Utils::FileName ROSUtils::getWorkspaceSourceSpace(const Utils::FileName &workspaceDir, const BuildSystem buildSystem)
+Utils::FileName ROSUtils::getWorkspaceSourceSpace(const Utils::FileName &workspaceDir, const BuildSystem &buildSystem)
 {
     Utils::FileName space(workspaceDir);
     switch(buildSystem) {
@@ -760,7 +774,7 @@ Utils::FileName ROSUtils::getWorkspaceSourceSpace(const Utils::FileName &workspa
     return space;
 }
 
-Utils::FileName ROSUtils::getWorkspaceBuildSpace(const Utils::FileName &workspaceDir, const BuildSystem buildSystem)
+Utils::FileName ROSUtils::getWorkspaceBuildSpace(const Utils::FileName &workspaceDir, const BuildSystem &buildSystem)
 {
     Utils::FileName space(workspaceDir);
     switch(buildSystem) {
@@ -783,7 +797,7 @@ Utils::FileName ROSUtils::getWorkspaceBuildSpace(const Utils::FileName &workspac
     return space;
 }
 
-Utils::FileName ROSUtils::getWorkspaceDevelSpace(const Utils::FileName &workspaceDir, const BuildSystem buildSystem)
+Utils::FileName ROSUtils::getWorkspaceDevelSpace(const Utils::FileName &workspaceDir, const BuildSystem &buildSystem)
 {
     Utils::FileName space(workspaceDir);
     switch(buildSystem) {
@@ -806,7 +820,7 @@ Utils::FileName ROSUtils::getWorkspaceDevelSpace(const Utils::FileName &workspac
     return space;
 }
 
-QProcessEnvironment ROSUtils::getWorkspaceEnvironment(const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem buildSystem)
+QProcessEnvironment ROSUtils::getWorkspaceEnvironment(const Utils::FileName &workspaceDir, const QString &rosDistribution, const BuildSystem &buildSystem)
 {
     QProcess process;
     sourceWorkspace(&process, workspaceDir, rosDistribution, buildSystem);
