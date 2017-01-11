@@ -194,6 +194,10 @@ void ROSProject::refresh()
 
 void ROSProject::refreshCppCodeModel()
 {
+    ToolChain *toolChain = ToolChainKitInformation::toolChain(activeTarget()->kit());
+    // For version 4.2 ToolChain *toolChain = ToolChainKitInformation::toolChain(activeTarget()->kit(), ToolChain::Language::Cxx);
+    const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(activeTarget()->kit());
+
     // TODO: Need to run this in its own thread
     m_wsPackageInfo = ROSUtils::getWorkspacePackageInfo(projectDirectory(), rosBuildConfiguration()->buildSystem(), &m_wsPackageInfo);
 
@@ -220,7 +224,18 @@ void ROSProject::refreshCppCodeModel()
         CppTools::ProjectPartBuilder ppBuilder(pInfo);
         ppBuilder.setDisplayName(package.name);
         ppBuilder.setQtVersion(activeQtVersion);
-        ppBuilder.setIncludePaths(package.includes);
+
+        QSet<QString> toolChainIncludes;
+        foreach (const HeaderPath &hp, toolChain->systemHeaderPaths(package.flags, sysRoot))
+            toolChainIncludes.insert(hp.path());
+
+        QStringList includePaths;
+        foreach (const QString &i, package.includes) {
+            if (!toolChainIncludes.contains(i))
+                includePaths.append(i);
+        }
+
+        ppBuilder.setIncludePaths(includePaths);
         ppBuilder.setCxxFlags(package.flags);
 
         QStringList packageFiles = workspaceFiles.filter(package.path + QDir::separator());
