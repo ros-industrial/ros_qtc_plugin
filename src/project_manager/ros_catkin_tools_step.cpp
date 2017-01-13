@@ -131,11 +131,12 @@ bool ROSCatkinToolsStep::init(QList<const BuildStep *> &earlierSteps)
 
     // Set Catkin Tools Active Profile
     ROSUtils::setCatkinToolsActiveProfile(bc->project()->projectDirectory(), activeProfile());
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
 
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
-    pp->setWorkingDirectory(ROSUtils::getWorkspaceBuildSpace(bc->project()->projectDirectory(), bc->buildSystem()).toString());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(bc->project()->projectDirectory(), bc->project()->distribution(), bc->buildSystem()).toStringList());
+    pp->setWorkingDirectory(workspaceInfo.buildPath.toString());
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
     qDebug() << env.toStringList();
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
@@ -377,11 +378,12 @@ void ROSCatkinToolsStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(bc->project()->projectDirectory(), bc->project()->distribution(), bc->buildSystem()).toStringList());
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
-    param.setWorkingDirectory(bc->buildDirectory().toString());
+    param.setWorkingDirectory(workspaceInfo.buildPath.toString());
     param.setEnvironment(env);
     param.setCommand(m_makeStep->makeCommand());
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));

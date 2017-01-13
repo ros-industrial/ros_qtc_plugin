@@ -199,7 +199,8 @@ void ROSProject::refreshCppCodeModel()
     const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(activeTarget()->kit());
 
     // TODO: Need to run this in its own thread
-    m_wsPackageInfo = ROSUtils::getWorkspacePackageInfo(projectDirectory(), rosBuildConfiguration()->buildSystem(), &m_wsPackageInfo);
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(projectDirectory(), rosBuildConfiguration()->buildSystem(), distribution());
+    m_wsPackageInfo = ROSUtils::getWorkspacePackageInfo(workspaceInfo, &m_wsPackageInfo);
 
     CppTools::CppModelManager *modelManager = CppTools::CppModelManager::instance();
 
@@ -218,30 +219,32 @@ void ROSProject::refreshCppCodeModel()
 
     QStringList workspaceFiles = m_workspaceWatcher->getWorkspaceFiles();
 
-
     foreach(ROSUtils::PackageInfo package, m_wsPackageInfo)
     {
-        CppTools::ProjectPartBuilder ppBuilder(pInfo);
-        ppBuilder.setDisplayName(package.name);
-        ppBuilder.setQtVersion(activeQtVersion);
-
-        QSet<QString> toolChainIncludes;
-        foreach (const HeaderPath &hp, toolChain->systemHeaderPaths(package.flags, sysRoot))
-            toolChainIncludes.insert(hp.path());
-
-        QStringList includePaths;
-        foreach (const QString &i, package.includes) {
-            if (!toolChainIncludes.contains(i))
-                includePaths.append(i);
-        }
-
-        ppBuilder.setIncludePaths(includePaths);
-        ppBuilder.setCxxFlags(package.flags);
-
         QStringList packageFiles = workspaceFiles.filter(package.path + QDir::separator());
-        const QList<Id> languages = ppBuilder.createProjectPartsForFiles(packageFiles);
-        foreach (Id language, languages)
-            setProjectLanguage(language, true);
+        foreach(ROSUtils::PackageTargetInfo targetInfo, package.buildInfo.targets)
+        {
+            CppTools::ProjectPartBuilder ppBuilder(pInfo);
+            ppBuilder.setDisplayName(targetInfo.name);
+            ppBuilder.setQtVersion(activeQtVersion);
+
+            QSet<QString> toolChainIncludes;
+            foreach (const HeaderPath &hp, toolChain->systemHeaderPaths(targetInfo.flags, sysRoot))
+                toolChainIncludes.insert(hp.path());
+
+            QStringList includePaths;
+            foreach (const QString &i, targetInfo.includes) {
+                if (!toolChainIncludes.contains(i))
+                    includePaths.append(i);
+            }
+
+            ppBuilder.setIncludePaths(includePaths);
+            ppBuilder.setCxxFlags(targetInfo.flags);
+
+            const QList<Id> languages = ppBuilder.createProjectPartsForFiles(packageFiles);
+            foreach (Id language, languages)
+                setProjectLanguage(language, true);
+        }
     }
     pInfo.finish();
     m_codeModelFuture = modelManager->updateProjectInfo(pInfo);
