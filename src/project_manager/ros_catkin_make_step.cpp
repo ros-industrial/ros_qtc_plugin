@@ -121,10 +121,12 @@ bool ROSCatkinMakeStep::init(QList<const BuildStep *> &earlierSteps)
     }
 
     // TODO: Need to get build data (build directory, environment, etc.) based on build System
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
     pp->setWorkingDirectory(bc->project()->projectDirectory().toString());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(bc->project()->projectDirectory(), bc->project()->distribution(), bc->buildSystem()).toStringList());
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
@@ -313,11 +315,12 @@ void ROSCatkinMakeStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(bc->project()->projectDirectory(), bc->project()->distribution(), bc->buildSystem()).toStringList());
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
-    param.setWorkingDirectory(bc->buildDirectory().toString());
+    param.setWorkingDirectory(workspaceInfo.buildPath.toString());
     param.setEnvironment(env);
     param.setCommand(m_makeStep->makeCommand());
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));

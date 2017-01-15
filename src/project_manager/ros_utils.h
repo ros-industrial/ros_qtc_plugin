@@ -24,10 +24,7 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QXmlStreamWriter>
-
-namespace Utils {
-class FileName;
-} // namespace Utils
+#include <utils/fileutils.h>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -45,34 +42,69 @@ public:
         BuildTypeMinSizeRel = 3
     };
 
+    enum TargetType {
+        ExecutableType = 0,
+        StaticLibraryType = 1,
+        DynamicLibraryType = 2,
+        UtilityType = 3
+    };
+
     /** @brief The FolderContent struct used to store file and folder information */
     struct FolderContent {
         QStringList files;       /**< @brief Directory Files */
         QStringList directories; /**< @brief Directory Subdirectories */
     };
 
+    /** @brief Contains relavent workspace information */
+    struct WorkspaceInfo {
+        Utils::FileName path;
+        Utils::FileName sourcePath;
+        Utils::FileName buildPath;
+        Utils::FileName develPath;
+        Utils::FileName installPath;
+        Utils::FileName logPath;
+
+        QString rosDistribution;
+        BuildSystem buildSystem;
+    };
+
+    struct PackageTargetInfo {
+        QString name;              /**< @brief Target name */
+        TargetType type;           /**< @brief Target type */
+        Utils::FileName flagsFile; /**< @brief Path to the Target's flags.cmake file */
+        QStringList includes;      /**< @brief Target's include directories */
+        QStringList flags;         /**< @brief Target's cxx build flags */
+        QStringList defines;       /**< @brief Target's defines build flags */
+    };
+    typedef QList<PackageTargetInfo> PackageTargetInfoList;
+
+    /** @brief Contains a packages relavent build informations */
+    struct PackageBuildInfo {
+        Utils::FileName cbpFile;       /**< @brief Path to the Package's CodeBlocks file */
+        PackageTargetInfoList targets; /**< @brief List of packages target's */
+
+        /**
+         * @brief Check if build information exists.
+         * @return True if exists, otherwise false.
+         */
+        bool exists();
+    };
+
     /** @brief Contains all relavent package information */
-    struct PackageInfo {
-        QString name;         /**< @brief Package Name */
-        QString path;         /**< @brief Package directory path */
-        QString filepath;     /**< @brief Package package.xml filepath */
-        QStringList includes; /**< @brief Package include directories */
-        QStringList flags;    /**< @brief Package cxx build flags */
-        QString cbpFile;      /**< @brief Path to the CodeBlocks file */
+    struct PackageInfo {      
+        QString name;               /**< @brief Package Name */
+        QString path;               /**< @brief Package directory path */
+        Utils::FileName filepath;   /**< @brief Package package.xml filepath */
+        PackageBuildInfo buildInfo; /**< @brief Package build information */
 
         /**
          * @brief Check if package exists.
          * @return True if exists, otherwise false.
          */
         bool exists();
-
-        /**
-         * @brief Check if CodeBlocks file exists
-         * @return True if exists, otherwise false.
-         */
-        bool cbpFileExists();
     };
 
+    typedef QMap<QString, PackageBuildInfo> PackageBuildInfoMap;
     typedef QMap<QString, PackageInfo> PackageInfoMap;
 
     /** @brief Contains project file information */
@@ -100,48 +132,36 @@ public:
     /**
      * @brief Source Workspace
      * @param process QProcess to execute the ROS bash command
-     * @param workspaceDir Workspace directory
-     * @param rosDistribution ROS distribution
-     * @param buildSystem Workspace build system
+     * @param workspaceInfo Workspace information
      * @return True if successful
      */
     static bool sourceWorkspace(QProcess *process,
-                                const Utils::FileName &workspaceDir,
-                                const QString &rosDistribution,
-                                const BuildSystem &buildSystem);
+                                const WorkspaceInfo &workspaceInfo);
 
     /**
      * @brief Check whether the provided workspace has been initialized
-     * @param workspaceDir Workspace directory
-     * @param buildSystem Workspace build system
+     * @param workspaceInfo Workspace information
      * @return True if workspace is initialized, otherwise false
      */
-    static bool isWorkspaceInitialized(const Utils::FileName &workspaceDir,
-                                       const BuildSystem &BuildSystem);
+    static bool isWorkspaceInitialized(const WorkspaceInfo &WorkspaceInfo);
 
     /**
      * @brief Initialize workspace
      * @param process QProcess to execute the ROS bash command
-     * @param workspaceDir Workspace directory
-     * @param rosDistribution ROS Distribution
-     * @param buildSystem Workspace build system
+     * @param workspaceInfo Workspace information
      * @return True if successfully executed, otherwise false
      */
     static bool initializeWorkspace(QProcess *process,
-                                    const Utils::FileName &workspaceDir,
-                                    const QString &rosDistribution,
-                                    const BuildSystem &buildSystem);
+                                    const WorkspaceInfo &workspaceInfo);
 
     /**
      * @brief Build workspace
      * @param process QProcess to execute the catkin_make
-     * @param workspaceDir Workspace Directory
-     * @param buildSystem Workspace build system
+     * @param workspaceInfo Workspace information
      * @return True if successfully executed, otherwise false
      */
     static bool buildWorkspace(QProcess *process,
-                               const Utils::FileName &workspaceDir,
-                               const ROSUtils::BuildSystem &buildSystem);
+                               const WorkspaceInfo &workspaceInfo);
 
     /**
      * @brief Gets a list of installed ROS Distributions
@@ -176,13 +196,21 @@ public:
                                                           QStringList &fileList);
 
     /**
-     * @brief Get all of the workspace packages and its neccessary information.
+     * @brief Get relevant workspace information
      * @param workspaceDir Path of the workspace
      * @param buildSystem Workspace build system
+     * @return Workspace information
+     */
+    static WorkspaceInfo getWorkspaceInfo(const Utils::FileName &workspaceDir,
+                                          const BuildSystem &buildSystem,
+                                          const QString &rosDistribution);
+
+    /**
+     * @brief Get all of the workspace packages and its neccessary information.
+     * @param workspaceInfo Workspace information
      * @return QMap(Package Name, PackageInfo)
      */
-    static PackageInfoMap getWorkspacePackageInfo(const Utils::FileName &workspaceDir,
-                                                  const BuildSystem &buildSystem,
+    static PackageInfoMap getWorkspacePackageInfo(const WorkspaceInfo &workspaceInfo,
                                                   const PackageInfoMap *cachedPackageInfo = NULL);
 
     /**
@@ -195,21 +223,10 @@ public:
 
     /**
      * @brief Get all of the ros packages within the provided workspace directory.
-     * @param workspaceDir Workspace directory path
-     * @param buildSystem Workspace build system
+     * @param workspaceInfo Workspace information
      * @return QMap(Package Name, Path to package)
      */
-    static QMap<QString, QString> getWorkspacePackages(const Utils::FileName &workspaceDir,
-                                                       const BuildSystem &buildSystem);
-
-    /**
-     * @brief Get all of the code block files within workspace build directory.
-     * @param workspaceDir Workspace directory path
-     * @param buildSystem Workspace build system
-     * @return QMap(CodeBlock File Name, CodeBlock File Path)
-     */
-    static QMap<QString, QString> getWorkspaceCodeBlockFiles(const Utils::FileName &workspaceDir,
-                                                             const BuildSystem &buildSystem);
+    static QMap<QString, QString> getWorkspacePackages(const WorkspaceInfo &workspaceInfo);
 
     /**
      * @brief Gets all launch files associated to a package
@@ -307,42 +324,12 @@ public:
     static QString getCMakeBuildTypeArgument(ROSUtils::BuildType &buildType);
 
     /**
-     * @brief Get workspace source directory path
-     * @param workspaceDir Workspace directory path
-     * @param buildSystem Build system
-     * @return Utils::FileName Path to source directory
-     */
-    static Utils::FileName getWorkspaceSourceSpace(const Utils::FileName &workspaceDir,
-                                                   const BuildSystem &buildSystem);
-
-    /**
-     * @brief Get workspace build directory path
-     * @param workspaceDir Workspace directory path
-     * @param buildSystem Build system
-     * @return Utils::FileName Path to build directory
-     */
-    static Utils::FileName getWorkspaceBuildSpace(const Utils::FileName &workspaceDir,
-                                                  const BuildSystem &buildSystem);
-
-    /**
-     * @brief Get workspace devel directory path
-     * @param workspaceDir Workspace directory path
-     * @param buildSystem Build system
-     * @return Utils::FileName Path to devel directory
-     */
-    static Utils::FileName getWorkspaceDevelSpace(const Utils::FileName &workspaceDir,
-                                                  const BuildSystem &buildSystem);
-
-    /**
      * @brief Get workspace environment
-     * @param workspaceDir Workspace directory path
+     * @param workspaceInfo Workspace information
      * @param rosDistribution ROS distribution (Hydro, Indigo, etc.)
-     * @param buildSystem Build system
      * @return QProcessEnvironment
      */
-    static QProcessEnvironment getWorkspaceEnvironment(const Utils::FileName &workspaceDir,
-                                                       const QString &rosDistribution,
-                                                       const BuildSystem &buildSystem);
+    static QProcessEnvironment getWorkspaceEnvironment(const WorkspaceInfo &workspaceInfo);
 
 private:
     /**
@@ -356,13 +343,11 @@ private:
     /**
      * @brief This will parse the CodeBlock file and get the build info (incudes, Cxx Flags, etc.)
      * @todo Need to figure out how to Cxx Flags.
-     * @param workspaceDir Workspace directory path
-     * @param buildSystem Workspace build system
+     * @param workspaceInfo Workspace information
      * @param package Package Info Objects
      * @return True if successful, otherwise false.
      */
-    static bool getPackageBuildInfo(const Utils::FileName &workspaceDir,
-                                    const BuildSystem &buildSystem,
+    static bool getPackageBuildInfo(const WorkspaceInfo &workspaceInfo,
                                     PackageInfo &package);
 
     /**

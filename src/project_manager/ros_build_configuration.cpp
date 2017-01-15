@@ -115,15 +115,13 @@ void ROSBuildConfiguration::sourceWorkspace()
   ROSProject *prj = qobject_cast<ROSProject *>(target()->project());
   QProcess process;
 
-  if (ROSUtils::sourceWorkspace(&process, prj->projectDirectory(), prj->distribution(), m_buildSystem))
-  {
-    Utils::Environment source_env = Utils::Environment(process.processEnvironment().toStringList());
-    source_env.set(QLatin1String("PWD"), prj->projectDirectory().toString());
+  ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(prj->projectDirectory(), m_buildSystem, prj->distribution());
+  Utils::Environment source_env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
+  QList<Utils::EnvironmentItem> diff = baseEnvironment().diff(source_env);
 
-    QList<Utils::EnvironmentItem> diff = baseEnvironment().diff(source_env);
-    if (!diff.isEmpty())
-      setUserEnvironmentChanges(diff);
-  }
+  if (!diff.isEmpty())
+    setUserEnvironmentChanges(diff);
+
 }
 
 NamedWidget *ROSBuildConfiguration::createConfigWidget()
