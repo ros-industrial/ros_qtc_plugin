@@ -339,10 +339,20 @@ ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const WorkspaceInfo &
         package.name = it.key();
         package.path = it.value();
         package.filepath = Utils::FileName::fromString(package.path).appendPath("package.xml");
-        package.buildInfo.cbpFile = Utils::FileName(workspaceInfo.buildPath).appendPath(package.name).appendPath(QString("%1.cbp").arg(package.name));
 
-        if (package.buildInfo.exists())
+        // Get packages build directory
+        QString pkgBuildPath = package.path;
+        pkgBuildPath.replace(workspaceInfo.sourcePath.toString(), workspaceInfo.buildPath.toString());
+        package.buildInfo.path = Utils::FileName::fromString(pkgBuildPath);
+
+        // Get package's code block file
+        QDir pkgBuildDir(pkgBuildPath);
+        QStringList cbpFilter("*.cbp");
+        QStringList pkgCbpFiles = pkgBuildDir.entryList(cbpFilter);
+
+        if (!pkgCbpFiles.isEmpty())
         {
+            package.buildInfo.cbpFile = Utils::FileName::fromString(pkgBuildPath).appendPath(pkgCbpFiles.first());
             if (ROSUtils::getPackageBuildInfo(workspaceInfo, package))
             {
                 wsPackageInfo.insert(package.name, package);
@@ -474,7 +484,7 @@ bool ROSUtils::getPackageBuildInfo(const WorkspaceInfo &workspaceInfo, ROSUtils:
             PackageTargetInfo targetInfo;
             targetInfo.name = targetName;
             targetInfo.type = targetType;
-            targetInfo.flagsFile = Utils::FileName(workspaceInfo.buildPath).appendPath(package.name).appendPath("CMakeFiles").appendPath(QString("%1.dir").arg(targetName)).appendPath("flags.make");
+            targetInfo.flagsFile = Utils::FileName(package.buildInfo.path).appendPath("CMakeFiles").appendPath(QString("%1.dir").arg(targetName)).appendPath("flags.make");
 
             // The order matters so it will order local first then system
             targetInfo.includes = targetLocalIncludes;

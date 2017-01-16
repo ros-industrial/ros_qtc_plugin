@@ -80,6 +80,7 @@ public:
 
     /** @brief Contains a packages relavent build informations */
     struct PackageBuildInfo {
+        Utils::FileName path;          /**< @brief Path to the Package's build directory */
         Utils::FileName cbpFile;       /**< @brief Path to the Package's CodeBlocks file */
         PackageTargetInfoList targets; /**< @brief List of packages target's */
 
