@@ -230,6 +230,13 @@ public:
     static QMap<QString, QString> getWorkspacePackages(const WorkspaceInfo &workspaceInfo);
 
     /**
+     * @brief Get workspace Code Block Project files
+     * @param workspaceInfo Workspace information
+     * @return QMap(Package Name, Path to file)
+     */
+    static QMap<QString, QString> getWorkspaceCodeBlockFiles(const WorkspaceInfo &workspaceInfo);
+
+    /**
      * @brief Gets all launch files associated to a package
      * @param packagePath ROS Package Name
      * @param OnlyNames Flag to determine if you only need the file name versus the path
