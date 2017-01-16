@@ -329,6 +329,7 @@ ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const WorkspaceInfo &
 {
     PackageInfoMap wsPackageInfo;
     QMap<QString, QString> packages =  ROSUtils::getWorkspacePackages(workspaceInfo);
+    QMap<QString, QString> cbp = ROSUtils::getWorkspaceCodeBlockFiles(workspaceInfo);
 
     QMapIterator<QString, QString> it(packages);
     while (it.hasNext())
@@ -340,19 +341,14 @@ ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const WorkspaceInfo &
         package.path = it.value();
         package.filepath = Utils::FileName::fromString(package.path).appendPath("package.xml");
 
-        // Get packages build directory
-        QString pkgBuildPath = package.path;
-        pkgBuildPath.replace(workspaceInfo.sourcePath.toString(), workspaceInfo.buildPath.toString());
-        package.buildInfo.path = Utils::FileName::fromString(pkgBuildPath);
-
-        // Get package's code block file
-        QDir pkgBuildDir(pkgBuildPath);
-        QStringList cbpFilter("*.cbp");
-        QStringList pkgCbpFiles = pkgBuildDir.entryList(cbpFilter);
-
-        if (!pkgCbpFiles.isEmpty())
+        if (cbp.contains(package.name))
         {
-            package.buildInfo.cbpFile = Utils::FileName::fromString(pkgBuildPath).appendPath(pkgCbpFiles.first());
+            // Get package's code block file
+            package.buildInfo.cbpFile = Utils::FileName::fromString(cbp[package.name]);
+
+            // Get packages build directory
+            package.buildInfo.path = package.buildInfo.cbpFile.parentDir();
+
             if (ROSUtils::getPackageBuildInfo(workspaceInfo, package))
             {
                 wsPackageInfo.insert(package.name, package);
@@ -419,7 +415,7 @@ bool ROSUtils::getPackageBuildInfo(const WorkspaceInfo &workspaceInfo, ROSUtils:
         if (cbpXml.attributes().hasAttribute("title"))
         {
           QString title =cbpXml.attributes().value("title").toString();
-          if (!title.endsWith(QLatin1String("/fast")) && !title.endsWith(QLatin1String("_automoc")))
+          if (!title.endsWith(QLatin1String("/fast")) && !title.endsWith(QLatin1String("_automoc")) && !title.startsWith(QLatin1String("gtest")))
           {
             targetName = title;
           }
@@ -477,7 +473,7 @@ bool ROSUtils::getPackageBuildInfo(const WorkspaceInfo &workspaceInfo, ROSUtils:
         }
 
         // Only need to add target types ExecutableType and StaticLibraryType to the code model
-        if (targetType == ExecutableType || targetType == StaticLibraryType)
+        if (targetType != UtilityType)
         {
             targetLocalIncludes.append(develInclude.toString());
 
@@ -593,6 +589,28 @@ QMap<QString, QString> ROSUtils::getWorkspacePackages(const WorkspaceInfo &works
     }
 
     return packageMap;
+}
+
+QMap<QString, QString> ROSUtils::getWorkspaceCodeBlockFiles(const WorkspaceInfo &workspaceInfo)
+{
+    QMap<QString, QString> cbpMap;
+
+    const QDir buildDir(workspaceInfo.buildPath.toString());
+    if(buildDir.exists())
+    {
+      QDirIterator it(buildDir.absolutePath(),QStringList() << QLatin1String("*.cbp"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+      while (it.hasNext())
+      {
+        QFileInfo cbpFile(it.next());
+        cbpMap.insert(cbpFile.absoluteDir().dirName(), cbpFile.absoluteFilePath());
+      }
+    }
+    else
+    {
+        qDebug() << QString("Directory does not exist: %1").arg(workspaceInfo.buildPath.toString());
+    }
+
+    return cbpMap;
 }
 
 QStringList ROSUtils::getROSPackageLaunchFiles(const QString &packagePath, bool OnlyNames)
