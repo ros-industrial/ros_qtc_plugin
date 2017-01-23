@@ -45,6 +45,7 @@
 #include <utils/winutils.h>
 #include <qmljstools/qmljstoolsconstants.h>
 #include <utils/detailswidget.h>
+#include <utils/utilsicons.h>
 
 #include <QLineEdit>
 #include <QComboBox>
@@ -327,7 +328,7 @@ ROSRunControl::ROSRunControl(RunConfiguration *rc, Id id):
     RunControl(rc, id),
     d(new ROSRunControlPrivate)
 {
-  setIcon(Core::Icons::RUN_SMALL);
+  setIcon(Utils::Icons::RUN_SMALL);
 
   m_rc = qobject_cast<ROSRunConfiguration *>(rc);
   d->running = false;
