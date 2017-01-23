@@ -1,0 +1,40 @@
+Source: qt57creator-plugin-ros
+Maintainer: Levi Armstrong <levi.armstrong@gmail.com>
+Uploaders: Levi Armstrong <levi.armstrong@gmail.com>
+Section: devel
+Priority: optional
+Build-Depends: debhelper (>= 9),
+               qt57creator (>= 4.2.0),
+               libqtermwidget57-0-dev (>= 0.6.0),
+               wget (>= 1.15),
+               libgl1-mesa-dev [!armel !armhf] | libgl-dev [!armel !armhf],
+               libgles2-mesa-dev [armel armhf] | libgles2-dev [armel armhf],
+               libglib2.0-dev,
+               libglu1-mesa-dev [!armel !armhf] | libglu-dev [!armel !armhf],
+               libyaml-cpp-dev,
+               libboost-all-dev 
+Standards-Version: 3.9.8
+Vcs-Browser: ps://github.com/Levi-Armstrong/ros_qtc_plugin/tree/debian/trusty
+Vcs-Git: ps://github.com/Levi-Armstrong/ros_qtc_plugin.git -b debian/trusty
+Homepage: https://github.com/Levi-Armstrong/ros_qtc_plugin.git
+
+Package: qt57creator-plugin-ros
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         qt57creator ( >= 4.2.0),
+         libqtermwidget57-0 ( >= 0.6.0)
+Pre-Depends: ${misc:Pre-Depends}
+Description: ROS plugin for Qt Creator IDE
+ This package contains the ROS plugin for Qt Creator, providing
+ support for compiling and running ROS projects.
+
+Package: qt57creator-plugin-ros-dev
+Architecture: any
+Depends: qt57creator-plugin-ros (= ${binary:Version}),
+         ${misc:Depends},
+         libqtermwidget57-0-dev ( >= 0.6.0)
+Pre-Depends: ${misc:Pre-Depends}
+Description: Qt Creator ros development fiels
+ This package contains the developer files for Qt
+ Creator ros plugin development
