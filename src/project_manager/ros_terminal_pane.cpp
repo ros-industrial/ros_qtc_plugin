@@ -34,6 +34,8 @@
 #include <coreplugin/coreicons.h>
 #include <coreplugin/icore.h>
 
+#include <utils/utilsicons.h>
+
 #include <aggregation/aggregate.h>
 #include <cstring>
 
@@ -62,13 +64,13 @@ ROSTerminalPane::ROSTerminalPane() :
     m_tabWidget->setTabsClosable(true);
 
     m_stopButton->setToolTip(tr("Kill active terminal's child process"));
-    m_stopButton->setIcon(Core::Icons::STOP_SMALL.icon());
+    m_stopButton->setIcon(Utils::Icons::STOP_SMALL.icon());
     m_zoomInButton->setToolTip(tr("Increase Font Size"));
-    m_zoomInButton->setIcon(Core::Icons::PLUS.icon());
+    m_zoomInButton->setIcon(Utils::Icons::PLUS.icon());
     m_zoomOutButton->setToolTip(tr("Decrease Font Size"));
-    m_zoomOutButton->setIcon(Core::Icons::MINUS.icon());
+    m_zoomOutButton->setIcon(Utils::Icons::MINUS.icon());
     m_newTerminalButton->setToolTip(tr("Add new terminal"));
-    m_newTerminalButton->setIcon(Core::Icons::NEWFILE.icon());
+    m_newTerminalButton->setIcon(Utils::Icons::NEWFILE.icon());
 
     updateToolBarButtonsEnabled();
 

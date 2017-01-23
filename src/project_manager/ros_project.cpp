@@ -194,8 +194,7 @@ void ROSProject::refresh()
 
 void ROSProject::refreshCppCodeModel()
 {
-    ToolChain *toolChain = ToolChainKitInformation::toolChain(activeTarget()->kit());
-    // For version 4.2 ToolChain *toolChain = ToolChainKitInformation::toolChain(activeTarget()->kit(), ToolChain::Language::Cxx);
+    ToolChain *toolChain = ToolChainKitInformation::toolChain(activeTarget()->kit(), ToolChain::Language::Cxx);
     const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(activeTarget()->kit());
 
     // TODO: Need to run this in its own thread
