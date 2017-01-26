@@ -109,19 +109,11 @@ ROSProject *ROSBuildConfiguration::project()
     return qobject_cast<ROSProject *>(target()->project());
 }
 
-void ROSBuildConfiguration::sourceWorkspace()
+void ROSBuildConfiguration::updateQtEnvironment(const Utils::Environment &env)
 {
-  // Need to source ros and devel directory to setup enviroment variables
-  ROSProject *prj = qobject_cast<ROSProject *>(target()->project());
-  QProcess process;
-
-  ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(prj->projectDirectory(), m_buildSystem, prj->distribution());
-  Utils::Environment source_env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
-  QList<Utils::EnvironmentItem> diff = baseEnvironment().diff(source_env);
-
-  if (!diff.isEmpty())
-    setUserEnvironmentChanges(diff);
-
+    QList<Utils::EnvironmentItem> diff = baseEnvironment().diff(env);
+    if (!diff.isEmpty())
+      setUserEnvironmentChanges(diff);
 }
 
 NamedWidget *ROSBuildConfiguration::createConfigWidget()

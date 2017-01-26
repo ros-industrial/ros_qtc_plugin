@@ -128,7 +128,8 @@ void ROSGenericRunStep::run(QFutureInterface<bool> &fi)
   terminal.startShellProgram();
 
   // source workspace (This is a hack because the setEnvironment is not working as I expected)
-  terminal.sendText(QLatin1String("source devel/setup.bash\n"));
+  ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(rp->projectDirectory(), rp->rosBuildConfiguration()->buildSystem(), rp->distribution());
+  terminal.sendText(QString("source %1\n").arg(workspaceInfo.develPath.appendPath("setup.bash").toString()));
 
   //send roslaunch command
   terminal.sendText(command);
