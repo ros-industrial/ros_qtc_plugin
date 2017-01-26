@@ -1,6 +1,6 @@
-qt57creator-plugin-ros (0.1.5-0xenial1) xenial; urgency=high
+qt57creator-plugin-ros (0.1.5-0xenial2) xenial; urgency=high
 
-  * Trusty Release for Qt Creator 4.2.0 
+  * Xenial Release for Qt Creator 4.2.0 
 
  -- Levi Armstrong <levi.armstrong@gmail.com>  Mon, 23 Jan 2016 15:20:00 -0500
 
