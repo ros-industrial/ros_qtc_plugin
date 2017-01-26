@@ -1,6 +1,6 @@
-qt57creator-plugin-ros (0.1.5-0trusty1) trusty; urgency=high
+qt57creator-plugin-ros (0.1.5-0trusty2) trusty; urgency=high
 
-  * Trusty Release for Qt Creator 4.2.0 
+  * Trusty Release for Qt Creator 4.2.1 
 
  -- Levi Armstrong <levi.armstrong@gmail.com>  Mon, 23 Jan 2016 15:20:00 -0500
 

@@ -16,8 +16,8 @@ PKG_CONFIG_PATH := $(QT_BASE_DIR)/lib/pkgconfig/:$(PKG_CONFIG_PATH) dh binary-ar
 LD_LIBRARY_PATH := $(QT_BASE_DIR)/lib:$(LD_LIBRARY_PATH) dh binary-arch
 
 BUILD_DIR=/tmp/builddir
-QTC_SOURCE_PKG = qt57creator=4.2.0
-QTC_SOURCE_DIR = $(BUILD_DIR)/qt57creator-4.2.0
+QTC_SOURCE_PKG = qt57creator=4.2.1
+QTC_SOURCE_DIR = $(BUILD_DIR)/qt57creator-4.2.1
 RQTC_BUILD_DIR = $(BUILD_DIR)/ros_qtc_plugin-build
 
 # -----------------------------------
@@ -27,10 +27,10 @@ RQTC_BUILD_DIR = $(BUILD_DIR)/ros_qtc_plugin-build
 
 override_dh_auto_configure:
 	mkdir -p $(BUILD_DIR)
-	cd $(BUILD_DIR) && wget https://launchpad.net/~beineri/+archive/ubuntu/opt-qt571-trusty/+files/qt57creator_4.2.0.orig.tar.xz
-	cd $(BUILD_DIR) && wget https://launchpad.net/~beineri/+archive/ubuntu/opt-qt571-trusty/+files/qt57creator_4.2.0-1basyskom1.debian.tar.xz
-	cd $(BUILD_DIR) && wget https://launchpad.net/~beineri/+archive/ubuntu/opt-qt571-trusty/+files/qt57creator_4.2.0-1basyskom1.dsc
-	cd $(BUILD_DIR) && dpkg-source -x qt57creator_4.2.0-1basyskom1.dsc
+	cd $(BUILD_DIR) && wget https://launchpad.net/~levi-armstrong/+archive/ubuntu/qt-libraries-trusty/+files/qt57creator_4.2.1.orig.tar.xz
+	cd $(BUILD_DIR) && wget https://launchpad.net/~levi-armstrong/+archive/ubuntu/qt-libraries-trusty/+files/qt57creator_4.2.1-1basyskom1.debian.tar.xz
+	cd $(BUILD_DIR) && wget https://launchpad.net/~levi-armstrong/+archive/ubuntu/qt-libraries-trusty/+files/qt57creator_4.2.1-1basyskom1.dsc
+	cd $(BUILD_DIR) && dpkg-source -x qt57creator_4.2.1-1basyskom1.dsc
 	mkdir -p $(RQTC_BUILD_DIR)
 	cd $(RQTC_BUILD_DIR) ; \
 		qmake -recursive QMAKE_CFLAGS_RELEASE="$(QMAKE_CFLAGS_RELEASE)" \
