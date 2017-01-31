@@ -26,6 +26,7 @@
 #include "ros_utils.h"
 
 #include <projectexplorer/project.h>
+#include <projectexplorer/buildmanager.h>
 #include <qtermwidget5/qtermwidget.h>
 
 namespace ROSProjectManager {
@@ -212,16 +213,16 @@ void ROSGenericRunStep::setArguments(const QString &arguments)
 //
 
 ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *genericStep)
-    : m_rosGenericStep(genericStep)
+    : m_rosGenericStep(genericStep),
+      m_packageNames(new QStringListModel())
 {
-    ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(genericStep->target()->activeBuildConfiguration());
-    m_availablePackages = ROSUtils::getROSPackages(bc->environment().toStringList());
+    updateAvailablePackages();
 
     m_ui = new Ui::ROSGenericStep();
     m_ui->setupUi(this);
     m_ui->packageComboBox->setStyleSheet(tr("combobox-popup: 0;"));
     m_ui->targetComboBox->setStyleSheet(tr("combobox-popup: 0;"));
-    m_ui->packageComboBox->addItems(m_availablePackages.keys());
+    m_ui->packageComboBox->setModel(m_packageNames);
 
     int idx;
     idx = m_ui->packageComboBox->findText(genericStep->getPackage(), Qt::MatchExactly);
@@ -241,11 +242,21 @@ ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *
 
     connect(m_ui->argumentsLineEdit, SIGNAL(textChanged(QString)),
             this, SLOT(argumentsLineEdit_textChanged(QString)));
+
+    connect(ProjectExplorer::BuildManager::instance(), &ProjectExplorer::BuildManager::buildQueueFinished,
+            this, &ROSGenericRunStepConfigWidget::updateAvailablePackages);
 }
 
 ROSGenericRunStepConfigWidget::~ROSGenericRunStepConfigWidget()
 {
     delete m_ui;
+}
+
+void ROSGenericRunStepConfigWidget::updateAvailablePackages()
+{
+    ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(m_rosGenericStep->target()->activeBuildConfiguration());
+    m_availablePackages = ROSUtils::getROSPackages(bc->environment().toStringList());
+    m_packageNames->setStringList(m_availablePackages.keys());
 }
 
 QString ROSGenericRunStepConfigWidget::displayName() const
@@ -292,7 +303,7 @@ QStringList ROSGenericRunStepConfigWidget::getAvailableTargets()
     else if (m_rosGenericStep->id() == ROS_RUN_ID)
     {
       ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(m_rosGenericStep->target()->activeBuildConfiguration());
-      return ROSUtils::getROSPackageExecutables(m_rosGenericStep->getPackage(),bc->environment().toStringList());
+      return ROSUtils::getROSPackageExecutables(m_rosGenericStep->getPackage(), bc->environment().toStringList());
     }
 
     return QStringList();
