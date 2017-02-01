@@ -24,6 +24,8 @@
 #include "ros_run_step.h"
 #include "ros_run_configuration.h"
 
+#include <QStringListModel>
+
 namespace ROSProjectManager {
 namespace Internal {
 
@@ -89,10 +91,12 @@ private slots:
 
 private:
     QStringList getAvailableTargets();
+    void updateAvailablePackages();
 
     Ui::ROSGenericStep *m_ui;
     ROSGenericRunStep *m_rosGenericStep;
     QMap<QString, QString> m_availablePackages;
+    QStringListModel *m_packageNames;
 };
 
 class ROSRunStep : public ROSGenericRunStep

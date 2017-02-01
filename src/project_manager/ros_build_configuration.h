@@ -71,7 +71,7 @@ public:
     ROSUtils::BuildType cmakeBuildType() const;
     void setCMakeBuildType(const ROSUtils::BuildType &buildType);
 
-    void sourceWorkspace();
+    void updateQtEnvironment(const Utils::Environment &env);
 
     ROSProject *project();
 

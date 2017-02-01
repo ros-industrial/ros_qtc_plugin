@@ -163,6 +163,14 @@ void ROSProject::refresh()
     parseProjectFile();
     QSet<QString> newWatchDirectories = m_projectFileContent.watchDirectories.toSet();
 
+    // Make sure the workspace is initialized on refresh.
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(this->projectDirectory(), m_projectFileContent.defaultBuildSystem, m_projectFileContent.distribution);
+    if(!ROSUtils::isWorkspaceInitialized(workspaceInfo))
+    {
+        QProcess process;
+        ROSUtils::initializeWorkspace(&process, workspaceInfo);
+    }
+
     QStringList addedDirectories = (newWatchDirectories - oldWatchDirectories).toList();
     QStringList removedDirectories = (oldWatchDirectories - newWatchDirectories).toList();
 
