@@ -1,3 +1,10 @@
+qt57creator-plugin-ros (0.1.5-0xenial3) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Fix several issues (Update Env, WS Init, and Run Config Pkg List) (#81)
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Wed, 01 Feb 2017 22:20:58 -0600
+
 qt57creator-plugin-ros (0.1.5-0xenial2) xenial; urgency=high
 
   * Xenial Release for Qt Creator 4.2.0 
