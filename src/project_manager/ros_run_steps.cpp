@@ -114,14 +114,14 @@ void ROSGenericRunStep::run(QFutureInterface<bool> &fi)
   ROSProject *rp = qobject_cast<ROSProject *>(target()->project());
 
   QString command;
-  command = QString::fromLatin1("%1 %2 %3 %4\n")
+  command = QString("%1 %2 %3 %4\n")
       .arg(m_command,
            m_package,
            m_target,
            m_arguments);
 
   //create terminal without starting shell
-  QTermWidget &terminal = ROSManager::instance()->startTerminal(0, QString::fromLatin1("%1 %2 %3").arg(m_command, m_package, m_target));
+  QTermWidget &terminal = ROSManager::instance()->startTerminal(0, command);
 
   terminal.setWorkingDirectory(rp->projectDirectory().toString());
 
@@ -216,13 +216,13 @@ ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *
     : m_rosGenericStep(genericStep),
       m_packageNames(new QStringListModel())
 {
-    updateAvailablePackages();
-
     m_ui = new Ui::ROSGenericStep();
     m_ui->setupUi(this);
     m_ui->packageComboBox->setStyleSheet(tr("combobox-popup: 0;"));
     m_ui->targetComboBox->setStyleSheet(tr("combobox-popup: 0;"));
     m_ui->packageComboBox->setModel(m_packageNames);
+
+    updateAvailablePackages();
 
     int idx;
     idx = m_ui->packageComboBox->findText(genericStep->getPackage(), Qt::MatchExactly);
@@ -254,9 +254,15 @@ ROSGenericRunStepConfigWidget::~ROSGenericRunStepConfigWidget()
 
 void ROSGenericRunStepConfigWidget::updateAvailablePackages()
 {
+    QString cachePkgName = m_ui->packageComboBox->currentText();
+    QString cachePkgTarget = m_ui->targetComboBox->currentText();
+
     ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(m_rosGenericStep->target()->activeBuildConfiguration());
     m_availablePackages = ROSUtils::getROSPackages(bc->environment().toStringList());
     m_packageNames->setStringList(m_availablePackages.keys());
+
+    m_ui->packageComboBox->setCurrentText(cachePkgName);
+    m_ui->targetComboBox->setCurrentText(cachePkgTarget);
 }
 
 QString ROSGenericRunStepConfigWidget::displayName() const
@@ -267,7 +273,7 @@ QString ROSGenericRunStepConfigWidget::displayName() const
 QString ROSGenericRunStepConfigWidget::summaryText() const
 {
   //this is causing a the plugin to crash
-  return QString::fromLatin1("<b>%1:</b> %2 %3 %4 %5")
+  return QString("<b>%1:</b> %2 %3 %4 %5")
           .arg(displayName(),
                m_rosGenericStep->getCommand(),
                m_rosGenericStep->getPackage(),
