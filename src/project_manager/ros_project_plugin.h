@@ -45,6 +45,13 @@ public:
 private slots:
 
     /**
+     * @brief This will parse the build directory and update the build info.
+     *
+     * This is only required when the project is built outside of Qt Creator.
+     */
+    void reloadProjectBuildInfo();
+
+    /**
      * @brief This will remove the selected FolderNode in the project tree.
      */
     void removeProjectDirectory();

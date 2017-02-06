@@ -39,6 +39,7 @@
 #include <coreplugin/actionmanager/actioncontainer.h>
 #include <coreplugin/actionmanager/command.h>
 #include <coreplugin/removefiledialog.h>
+#include <coreplugin/progressmanager/progressmanager.h>
 
 #include <cpptools/cppcodestylepreferences.h>
 #include <cpptools/cpptoolssettings.h>
@@ -92,6 +93,17 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     addAutoReleasedObject(new ROSRunStepFactory);
 
     IWizardFactory::registerFactoryCreator([]() { return QList<IWizardFactory *>() << new ROSProjectWizard << new ROSPackageWizard; });
+
+    ActionContainer *mproject = ActionManager::actionContainer(ProjectExplorer::Constants::M_PROJECTCONTEXT);
+
+     auto reloadProjectBuildInfoAction = new QAction(tr("Reload Project Build Info..."), this);
+     Command *reloadCommand = ActionManager::registerAction(reloadProjectBuildInfoAction,
+                                                            Constants::ROS_RELOAD_BUILD_INFO,
+                                                            Context(Constants::ROS_PROJECT_CONTEXT));
+
+     reloadCommand->setAttribute(Command::CA_Hide);
+     mproject->addAction(reloadCommand, ProjectExplorer::Constants::G_PROJECT_FILES);
+     connect(reloadProjectBuildInfoAction, &QAction::triggered, this, &ROSProjectPlugin::reloadProjectBuildInfo);
 
     // This will context menu action for deleting and renaming project folders from the ProjectTree.
     ActionContainer *mfolderContextMenu = ActionManager::actionContainer(ProjectExplorer::Constants::M_FOLDERCONTEXT);
@@ -157,6 +169,39 @@ void ROSProjectPlugin::createCppCodeStyle()
   QSettings *s = Core::ICore::settings();
   CppTools::CppCodeStylePreferences *originalCppCodeStylePreferences = CppTools::CppToolsSettings::instance()->cppCodeStyle();
   originalCppCodeStylePreferences->fromSettings(QLatin1String(CppTools::Constants::CPP_SETTINGS_ID), s);
+}
+
+void ROSProjectPlugin::reloadProjectBuildInfo()
+{
+    QFutureInterface<void> f;
+
+    f.setProgressRange(0, 100);
+    Core::ProgressManager::addTask(f.future(),
+                                   tr("Reloading Project Build Info"),
+                                   Constants::ROS_RELOADING_BUILD_INFO);
+
+    f.reportStarted();
+    ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectTree::currentProject());
+    if (rosProject) {
+        // Rebuild code model
+        rosProject->refreshCppCodeModel();
+        f.setProgressValue(50);
+
+        // Update environment
+        ROSBuildConfiguration *bc = rosProject->rosBuildConfiguration();
+        if (bc) {
+            ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+            Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
+            bc->updateQtEnvironment(env);
+
+            f.setProgressValue(100);
+            f.reportFinished();
+            return;
+        }
+    }
+    f.reportCanceled();
+    f.reportFinished();
+    return;
 }
 
 void ROSProjectPlugin::removeProjectDirectory()
