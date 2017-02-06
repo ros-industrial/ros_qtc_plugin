@@ -25,6 +25,7 @@
 #include "ros_workspace_watcher.h"
 #include "ros_project_manager.h"
 #include "ros_project_nodes.h"
+#include "ros_project_plugin.h"
 #include "ros_utils.h"
 
 #include <projectexplorer/project.h>
@@ -46,6 +47,7 @@ class ROSBuildConfiguration;
 class ROSProject : public ProjectExplorer::Project
 {
     Q_OBJECT
+    friend class ROSProjectPlugin;
 
 public:
     ROSProject(ROSManager *manager, const QString &filename);

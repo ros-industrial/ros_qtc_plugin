@@ -33,11 +33,14 @@ const char ROS_MIME_TYPE[]    = "application/ros.project";
 
 // Tasks
 const char ROS_READING_PROJECT[] = "ROSProjectManager.ReadingProject";
+const char ROS_RELOADING_BUILD_INFO[] = "ROSProjectManager.ReloadingBuildInfo";
+
 
 // ROS default install directory
 const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
 
 // Context menu actions
+const char ROS_RELOAD_BUILD_INFO[] = "ROSProjectManager.reloadProjectBuildInfo";
 const char ROS_REMOVE_DIR[] = "ROSProjectManager.removeDirectory";
 
 // ROS wizards constants
