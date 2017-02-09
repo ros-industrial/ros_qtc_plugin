@@ -183,22 +183,12 @@ void ROSProjectPlugin::reloadProjectBuildInfo()
     f.reportStarted();
     ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectTree::currentProject());
     if (rosProject) {
-        // Rebuild code model
         rosProject->refreshCppCodeModel();
-        f.setProgressValue(50);
-
-        // Update environment
-        ROSBuildConfiguration *bc = rosProject->rosBuildConfiguration();
-        if (bc) {
-            ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
-            Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
-            bc->updateQtEnvironment(env);
-
-            f.setProgressValue(100);
-            f.reportFinished();
-            return;
-        }
+        f.setProgressValue(100);
+        f.reportFinished();
+        return;
     }
+
     f.reportCanceled();
     f.reportFinished();
     return;

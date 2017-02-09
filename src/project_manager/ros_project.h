@@ -63,6 +63,9 @@ public:
     ROSUtils::BuildSystem defaultBuildSystem() const;
     ROSBuildConfiguration* rosBuildConfiguration() const;
 
+    ROSUtils::PackageInfoMap getPackageInfo() const;
+    ROSUtils::PackageBuildInfoMap getPackageBuildInfo() const;
+
 public slots:
     void buildQueueFinished(bool success);
 
@@ -72,6 +75,8 @@ protected:
 private:
     bool saveProjectFile();
     void parseProjectFile();
+
+    void update();
     void refreshCppCodeModel();
     void repositoryChanged(const QString &repository);
 
@@ -80,7 +85,9 @@ private:
     ROSWorkspaceWatcher *m_workspaceWatcher;
     QFuture<void> m_codeModelFuture;
     QFutureInterface<void> *m_projectFutureInterface = nullptr;
-    QMap<QString, ROSUtils::PackageInfo> m_wsPackageInfo;
+    ROSUtils::PackageInfoMap m_wsPackageInfo;
+    ROSUtils::PackageBuildInfoMap m_wsPackageBuildInfo;
+    Utils::Environment m_wsEnvironment;
 };
 
 class ROSProjectFile : public Core::IDocument

@@ -147,6 +147,33 @@ void ROSProject::parseProjectFile()
     ROSUtils::parseQtCreatorWorkspaceFile(projectFilePath(), m_projectFileContent);
 }
 
+void ROSProject::update()
+{
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(projectDirectory(), rosBuildConfiguration()->buildSystem(), distribution());
+    ROSBuildConfiguration *bc = rosBuildConfiguration();
+    m_wsPackageInfo = ROSUtils::getWorkspacePackageInfo(workspaceInfo, &m_wsPackageInfo);
+    m_wsPackageBuildInfo = ROSUtils::getWorkspacePackageBuildInfo(workspaceInfo, m_wsPackageInfo, &m_wsPackageBuildInfo);
+
+    if (m_wsPackageBuildInfo.isEmpty())
+        m_wsEnvironment = Utils::Environment(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
+    else
+        m_wsEnvironment = Utils::Environment(m_wsPackageBuildInfo.first().environment);
+
+    if (bc)
+        bc->updateQtEnvironment(m_wsEnvironment);
+
+}
+
+ROSUtils::PackageInfoMap ROSProject::getPackageInfo() const
+{
+    return m_wsPackageInfo;
+}
+
+ROSUtils::PackageBuildInfoMap ROSProject::getPackageBuildInfo() const
+{
+    return m_wsPackageBuildInfo;
+}
+
 void ROSProject::refresh()
 {
     m_projectFutureInterface = new QFutureInterface<void>();
@@ -202,12 +229,10 @@ void ROSProject::refresh()
 
 void ROSProject::refreshCppCodeModel()
 {
+    update();
+
     ToolChain *toolChain = ToolChainKitInformation::toolChain(activeTarget()->kit(), ToolChain::Language::Cxx);
     const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(activeTarget()->kit());
-
-    // TODO: Need to run this in its own thread
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(projectDirectory(), rosBuildConfiguration()->buildSystem(), distribution());
-    m_wsPackageInfo = ROSUtils::getWorkspacePackageInfo(workspaceInfo, &m_wsPackageInfo);
 
     CppTools::CppModelManager *modelManager = CppTools::CppModelManager::instance();
 
@@ -226,10 +251,11 @@ void ROSProject::refreshCppCodeModel()
 
     QStringList workspaceFiles = m_workspaceWatcher->getWorkspaceFiles();
 
-    foreach(ROSUtils::PackageInfo package, m_wsPackageInfo)
+    foreach(ROSUtils::PackageBuildInfo buildInfo, m_wsPackageBuildInfo)
     {
-        QStringList packageFiles = workspaceFiles.filter(package.path + QDir::separator());
-        foreach(ROSUtils::PackageTargetInfo targetInfo, package.buildInfo.targets)
+        QStringList packageFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
+
+        foreach(ROSUtils::PackageTargetInfo targetInfo, buildInfo.targets)
         {
             CppTools::ProjectPartBuilder ppBuilder(pInfo);
             ppBuilder.setDisplayName(targetInfo.name);
