@@ -1,3 +1,11 @@
+qt57creator-plugin-ros (0.1.5-0xenial4) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Fix run configuration update available packages (#85)
+  * Add reload build info button (#86)
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Wed, 08 Feb 2017 22:57:33 -0600
+
 qt57creator-plugin-ros (0.1.5-0xenial3) xenial; urgency=high
 
   [ Levi Armstrong ]
