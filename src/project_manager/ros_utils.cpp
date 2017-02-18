@@ -20,6 +20,7 @@
  */
 #include "ros_utils.h"
 #include "ros_project_constants.h"
+#include "ros_packagexml_parser.h"
 
 #include <utils/fileutils.h>
 #include <utils/environment.h>
@@ -163,7 +164,7 @@ bool ROSUtils::buildWorkspace(QProcess *process, const WorkspaceInfo &workspaceI
     if (process->exitStatus() != QProcess::CrashExit)
         return true;
 
-    qDebug() << "Failed ot build workspace: " << workspaceInfo.path.toString();
+    qDebug() << "Failed to build workspace: " << workspaceInfo.path.toString();
     return false;
 }
 
@@ -328,36 +329,58 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
 ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const WorkspaceInfo &workspaceInfo, const PackageInfoMap *cachedPackageInfo)
 {
     PackageInfoMap wsPackageInfo;
-    QMap<QString, QString> packages =  ROSUtils::getWorkspacePackages(workspaceInfo);
-    QMap<QString, QString> cbp = ROSUtils::getWorkspaceCodeBlockFiles(workspaceInfo);
+    QMap<QString, QString> packages =  ROSUtils::getWorkspacePackagePaths(workspaceInfo);
 
     QMapIterator<QString, QString> it(packages);
     while (it.hasNext())
     {
         it.next();
-        ROSUtils::PackageInfo package;
+        Utils::FileName pkgXml = Utils::FileName::fromString(it.value()).appendPath("package.xml");
+        ROSUtils::PackageInfo packageInfo;
+        ROSPackageXmlParser pkgParser;
+        if (pkgParser.parsePackageXml(pkgXml, packageInfo))
+        {
+            if (packageInfo.metapackage)
+                continue;
 
-        package.name = it.key();
-        package.path = it.value();
-        package.filepath = Utils::FileName::fromString(package.path).appendPath("package.xml");
+            wsPackageInfo.insert(packageInfo.name, packageInfo);
+            continue;
+        }
 
-        if (cbp.contains(package.name))
+        // Check if there is cached build info available
+        if (cachedPackageInfo)
+        {
+            auto packIt = cachedPackageInfo->find(packageInfo.name);
+            if (packIt != cachedPackageInfo->end())
+            {
+                qDebug() << QString("Using cached package information for package: %1").arg(packageInfo.name);
+                wsPackageInfo.insert(packIt.value().name, packIt.value());
+            }
+        }
+    }
+    return wsPackageInfo;
+}
+
+ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const WorkspaceInfo &workspaceInfo, const PackageInfoMap &packageInfo, const PackageBuildInfoMap *cachedPackageBuildInfo)
+{
+    PackageBuildInfoMap wsBuildInfo;
+    QStringList env = ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList();
+    foreach(PackageInfo package, packageInfo)
+    {
+        PackageBuildInfo buildInfo(package, env);
+        if (findPackageBuildDirectory(workspaceInfo, package, buildInfo.path))
         {
             // Get package's code block file
-            package.buildInfo.cbpFile = Utils::FileName::fromString(cbp[package.name]);
+            buildInfo.cbpFile = buildInfo.path;
+            buildInfo.cbpFile.appendPath(QString("%1.cbp").arg(package.name));
 
-            // Get packages build directory
-            package.buildInfo.path = package.buildInfo.cbpFile.parentDir();
-
-            if (ROSUtils::getPackageBuildInfo(workspaceInfo, package))
+            if (buildInfo.cbpFile.exists() && ROSUtils::parseCodeBlocksFile(workspaceInfo, buildInfo))
             {
-                wsPackageInfo.insert(package.name, package);
+                wsBuildInfo.insert(package.name, buildInfo);
                 continue;
             }
-            else
-            {
-                qDebug() << QString("Unable to parse build information for package: %1").arg(package.name);
-            }
+
+            qDebug() << QString("Unable to parse build information for package: %1").arg(package.name);
         }
         else
         {
@@ -365,28 +388,29 @@ ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const WorkspaceInfo &
         }
 
         // Check if there is cached build info available
-        if (cachedPackageInfo)
+        if (cachedPackageBuildInfo)
         {
-            auto packIt = cachedPackageInfo->find(package.name);
-            if (packIt != cachedPackageInfo->end())
+            auto packIt = cachedPackageBuildInfo->find(package.name);
+            if (packIt != cachedPackageBuildInfo->end())
             {
-                qDebug() << QString("Using cached build information for package: %1").arg(package.name);
-                package.buildInfo = packIt.value().buildInfo;
-                wsPackageInfo.insert(package.name, package);
+                qDebug() << QString("Using cached package build information for package: %1").arg(package.name);
+                wsBuildInfo.insert(package.name, packIt.value());
             }
         }
+
     }
-    return wsPackageInfo;
+
+    return wsBuildInfo;
 }
 
-bool ROSUtils::getPackageBuildInfo(const WorkspaceInfo &workspaceInfo, ROSUtils::PackageInfo &package)
+bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils::PackageBuildInfo &buildInfo)
 {
 
   // Parse CodeBlocks Project File
   // Need to search for all of the tags <Add directory="include path" />
   QXmlStreamReader cbpXml;
 
-  QFile cbpFile(package.buildInfo.cbpFile.toString());
+  QFile cbpFile(buildInfo.cbpFile.toString());
   if (!cbpFile.open(QFile::ReadOnly | QFile::Text))
   {
     qDebug() << "Error opening CodeBlocks Project File";
@@ -394,7 +418,7 @@ bool ROSUtils::getPackageBuildInfo(const WorkspaceInfo &workspaceInfo, ROSUtils:
   }
 
   // make sure targets are cleared
-  package.buildInfo.targets.clear();
+  buildInfo.targets.clear();
 
   // devel include directory
   Utils::FileName develInclude(workspaceInfo.develPath);
@@ -480,13 +504,13 @@ bool ROSUtils::getPackageBuildInfo(const WorkspaceInfo &workspaceInfo, ROSUtils:
             PackageTargetInfo targetInfo;
             targetInfo.name = targetName;
             targetInfo.type = targetType;
-            targetInfo.flagsFile = Utils::FileName(package.buildInfo.path).appendPath("CMakeFiles").appendPath(QString("%1.dir").arg(targetName)).appendPath("flags.make");
+            targetInfo.flagsFile = Utils::FileName(buildInfo.path).appendPath("CMakeFiles").appendPath(QString("%1.dir").arg(targetName)).appendPath("flags.make");
 
             // The order matters so it will order local first then system
             targetInfo.includes = targetLocalIncludes;
             targetInfo.includes.append(targetSystemIncludes);
 
-            package.buildInfo.targets.append(targetInfo);
+            buildInfo.targets.append(targetInfo);
         }
       }
     }
@@ -503,7 +527,7 @@ bool ROSUtils::getPackageBuildInfo(const WorkspaceInfo &workspaceInfo, ROSUtils:
 //      workspace_includes.append(includePath);
 //  }
 
-  for(auto it = package.buildInfo.targets.begin(); it != package.buildInfo.targets.end(); ++it)
+  for(auto it = buildInfo.targets.begin(); it != buildInfo.targets.end(); ++it)
   {
       // Next need to parse flags.cmake for flags and defines
       if (it->flagsFile.exists())
@@ -569,7 +593,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   return QMap<QString, QString>();
 }
 
-QMap<QString, QString> ROSUtils::getWorkspacePackages(const WorkspaceInfo &workspaceInfo)
+QMap<QString, QString> ROSUtils::getWorkspacePackagePaths(const WorkspaceInfo &workspaceInfo)
 {
     QMap<QString, QString> packageMap;
 
@@ -589,28 +613,6 @@ QMap<QString, QString> ROSUtils::getWorkspacePackages(const WorkspaceInfo &works
     }
 
     return packageMap;
-}
-
-QMap<QString, QString> ROSUtils::getWorkspaceCodeBlockFiles(const WorkspaceInfo &workspaceInfo)
-{
-    QMap<QString, QString> cbpMap;
-
-    const QDir buildDir(workspaceInfo.buildPath.toString());
-    if(buildDir.exists())
-    {
-      QDirIterator it(buildDir.absolutePath(),QStringList() << QLatin1String("*.cbp"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-      while (it.hasNext())
-      {
-        QFileInfo cbpFile(it.next());
-        cbpMap.insert(cbpFile.absoluteDir().dirName(), cbpFile.absoluteFilePath());
-      }
-    }
-    else
-    {
-        qDebug() << QString("Directory does not exist: %1").arg(workspaceInfo.buildPath.toString());
-    }
-
-    return cbpMap;
 }
 
 QStringList ROSUtils::getROSPackageLaunchFiles(const QString &packagePath, bool OnlyNames)
@@ -895,14 +897,48 @@ QProcessEnvironment ROSUtils::getWorkspaceEnvironment(const WorkspaceInfo &works
     return env;
 }
 
-bool ROSUtils::PackageInfo::exists()
+bool ROSUtils::findPackageBuildDirectory(const WorkspaceInfo &workspaceInfo, const PackageInfo &packageInfo, Utils::FileName &packageBuildPath)
 {
-    return QDir(path).exists();
+    const QDir buildDir(workspaceInfo.buildPath.toString());
+    QString packageBuildDirName;
+    switch(workspaceInfo.buildSystem) {
+    case CatkinMake:
+    {
+        packageBuildDirName = packageInfo.path.fileName();
+        break;
+    }
+    case CatkinTools:
+    {
+        packageBuildDirName = packageInfo.name;
+        break;
+    }
+    }
+
+    QDirIterator it(buildDir.absolutePath(), QStringList() << packageBuildDirName, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+    if (it.hasNext())
+        packageBuildPath = Utils::FileName::fromString(it.next());
+    else
+        return false;
+
+    while (it.hasNext())
+    {
+        Utils::FileName nextPath = Utils::FileName::fromString(it.next());
+        if (packageBuildPath.isChildOf(nextPath))
+            packageBuildPath = nextPath;
+    }
+
+    return true;
 }
 
-bool ROSUtils::PackageBuildInfo::exists()
+bool ROSUtils::PackageInfo::exists() const
 {
-    return cbpFile.exists();
+    return QDir(path.toString()).exists();
+}
+
+bool ROSUtils::PackageBuildInfo::exists() const
+{
+    return QDir(path.toString()).exists();
 }
 
 } //namespace Internal

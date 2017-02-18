@@ -78,31 +78,54 @@ public:
     };
     typedef QList<PackageTargetInfo> PackageTargetInfoList;
 
-    /** @brief Contains a packages relavent build informations */
-    struct PackageBuildInfo {
-        Utils::FileName path;          /**< @brief Path to the Package's build directory */
-        Utils::FileName cbpFile;       /**< @brief Path to the Package's CodeBlocks file */
-        PackageTargetInfoList targets; /**< @brief List of packages target's */
-
-        /**
-         * @brief Check if build information exists.
-         * @return True if exists, otherwise false.
-         */
-        bool exists();
-    };
-
     /** @brief Contains all relavent package information */
-    struct PackageInfo {      
-        QString name;               /**< @brief Package Name */
-        QString path;               /**< @brief Package directory path */
-        Utils::FileName filepath;   /**< @brief Package package.xml filepath */
-        PackageBuildInfo buildInfo; /**< @brief Package build information */
+    struct PackageInfo {
+        Utils::FileName path;           /**< @brief Package directory path */
+        Utils::FileName filepath;       /**< @brief Package package.xml filepath */
+        Utils::FileName buildFile;      /**< @brief Package CMakeLists.txt filepath */
+
+        QString name;                   /**< @brief Package Name */
+        QString version;                /**< @brief Package Version */
+        QString description;            /**< @brief Package Description */
+        QString maintainer;             /**< @brief Package Maintainer */
+        QString license;                /**< @brief Package License */
+        QString buildToolDepend;        /**< @brief Package Build Tool Dependency */
+        QStringList buildDepends;       /**< @brief Package Build Dependencies */
+        QStringList buildExportDepends; /**< @brief Package Build Export Dependencies */
+        QStringList execDepends;        /**< @brief Package Execution Dependencies */
+        QStringList testDepends;        /**< @brief Package Test Dependencies */
+        QStringList docDepends;         /**< @brief Package Documentation Dependencies */
+        bool metapackage;               /**< @brief Package is a metapackage if true */
+
+        // Constructor
+        PackageInfo() : metapackage(false) {}
 
         /**
          * @brief Check if package exists.
          * @return True if exists, otherwise false.
          */
-        bool exists();
+        bool exists() const;
+    };
+
+    /** @brief Contains a packages relavent build informations */
+    struct PackageBuildInfo {
+        PackageBuildInfo(const PackageInfo packageInfo, const QStringList env)
+        {
+            parent = packageInfo;
+            environment = env;
+        }
+
+        Utils::FileName path;          /**< @brief Path to the Package's build directory */
+        Utils::FileName cbpFile;       /**< @brief Path to the Package's CodeBlocks file */
+        QStringList environment;       /**< @brief Build Environment */
+        PackageTargetInfoList targets; /**< @brief List of packages target's */
+        PackageInfo parent;            /**< @brief Package information */
+
+        /**
+         * @brief Check if build information exists.
+         * @return True if exists, otherwise false.
+         */
+        bool exists() const;
     };
 
     typedef QMap<QString, PackageBuildInfo> PackageBuildInfoMap;
@@ -209,10 +232,22 @@ public:
     /**
      * @brief Get all of the workspace packages and its neccessary information.
      * @param workspaceInfo Workspace information
+     * @param cachedPackageInfo Cached Package information to use if it fails
      * @return QMap(Package Name, PackageInfo)
      */
     static PackageInfoMap getWorkspacePackageInfo(const WorkspaceInfo &workspaceInfo,
                                                   const PackageInfoMap *cachedPackageInfo = NULL);
+
+    /**
+     * @brief Get a packages build information
+     * @param workspaceInfo Workspace information
+     * @param packageInfo Package Information
+     * @param cachedPackageBuildInfo Cached Package build information if it fails
+     * @return PackageBuildInfo
+     */
+    static PackageBuildInfoMap getWorkspacePackageBuildInfo(const WorkspaceInfo &workspaceInfo,
+                                                            const PackageInfoMap &packageInfo,
+                                                            const PackageBuildInfoMap *cachedPackageBuildInfo = NULL);
 
     /**
      * @brief Executes the bash command "rospack list" and returns a map of QMap(Package Name, Path
@@ -223,18 +258,11 @@ public:
     static QMap<QString, QString> getROSPackages(const QStringList &env);
 
     /**
-     * @brief Get all of the ros packages within the provided workspace directory.
+     * @brief Get the path to every package in the workspace.
      * @param workspaceInfo Workspace information
      * @return QMap(Package Name, Path to package)
      */
-    static QMap<QString, QString> getWorkspacePackages(const WorkspaceInfo &workspaceInfo);
-
-    /**
-     * @brief Get workspace Code Block Project files
-     * @param workspaceInfo Workspace information
-     * @return QMap(Package Name, Path to file)
-     */
-    static QMap<QString, QString> getWorkspaceCodeBlockFiles(const WorkspaceInfo &workspaceInfo);
+    static QMap<QString, QString> getWorkspacePackagePaths(const WorkspaceInfo &workspaceInfo);
 
     /**
      * @brief Gets all launch files associated to a package
@@ -355,8 +383,8 @@ private:
      * @param package Package Info Objects
      * @return True if successful, otherwise false.
      */
-    static bool getPackageBuildInfo(const WorkspaceInfo &workspaceInfo,
-                                    PackageInfo &package);
+    static bool parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo,
+                                    PackageBuildInfo &package);
 
     /**
      * @brief Get path to the profiles directory
@@ -392,6 +420,16 @@ private:
      */
     static Utils::FileName getCatkinToolsProfileConfigFile(const Utils::FileName &workspaceDir,
                                                            const QString &profileName);
+
+    /**
+     * @brief Find a given packages build directory
+     * @param workspaceInfo Workspace information
+     * @param packageInfo Package Information
+     * @return Packages build directory
+     */
+    static bool findPackageBuildDirectory(const WorkspaceInfo &workspaceInfo,
+                                          const PackageInfo &packageInfo,
+                                          Utils::FileName &packageBuildPath);
 };
 } // namespace Internal
 } // namespace ROSProjectManager

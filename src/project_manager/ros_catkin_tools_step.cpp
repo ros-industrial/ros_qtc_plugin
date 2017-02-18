@@ -138,9 +138,6 @@ bool ROSCatkinToolsStep::init(QList<const BuildStep *> &earlierSteps)
     pp->setWorkingDirectory(workspaceInfo.buildPath.toString());
     Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
 
-    // Need to keep Qt Creators Environment up to date.
-    bc->updateQtEnvironment(env);
-
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
