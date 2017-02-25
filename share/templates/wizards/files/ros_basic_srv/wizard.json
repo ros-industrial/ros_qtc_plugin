@@ -1,19 +1,15 @@
 {
     "version": 1,
     "supportedProjectTypes": [ ],
-    "id": "SA.ROS",
+    "id": "ZD.ROS",
     "category": "A.ROS",
-    "trDescription": "Creates a basic ROS node.",
-    "trDisplayName": "Basic Node",
+    "trDescription": "Creates a basic ROS service file.",
+    "trDisplayName": "Basic srv file",
     "trDisplayCategory": "ROS",
     "icon": "../../global/genericfilewizard.png",
     "enabled": "%{JS: [ %{Plugins} ].indexOf('ROSProjectManager') >= 0}",
 
-    "options":
-    [
-        { "key": "FileName", "value": "%{JS: Util.fileName('%{TargetPath}', '.cpp')}" },
-        { "key": "BaseName", "value": "%{JS: Util.completeBaseName('%{FileName}')}" }
-    ],
+    "options": { "key": "FileName", "value": "%{JS: Util.fileName('%{TargetPath}', '.srv')}" },
 
     "pages" :
     [
@@ -34,9 +30,10 @@
             "typeId": "File",
             "data":
             {
-                "source": "file.cpp",
+                "source": "file.srv",
                 "target": "%{FileName}",
-                "openInEditor": true
+                "openInEditor": true,
+                "options": { "key": "Cpp:License:FileName", "value": "%{JS: Util.completeBaseName('%{FileName}')}" }
             }
         }
     ]
