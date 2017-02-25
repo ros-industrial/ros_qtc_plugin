@@ -303,7 +303,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
 
     // Get Directory data
     content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs);
-    content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files);
+    content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files | QDir::Hidden);
     workspaceFiles[folder] = content;
 
     foreach (QString file, content.files)
@@ -316,7 +316,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
     {
         folder = itSrc.next();
         content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs);
-        content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files);
+        content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files | QDir::Hidden);
         workspaceFiles[folder] = content;
 
         foreach (QString file, content.files)

@@ -122,9 +122,9 @@ void ROSWorkspaceWatcher::onFolderChanged(const QString &path)
   QStringList curFiles = m_workspaceContent[path].files;
   QStringList curDirectories = m_workspaceContent[path].directories;
 
-  QStringList newFiles = dir.entryList(QDir::NoDotAndDotDot  | QDir::Files);
+  QStringList newFiles = dir.entryList(QDir::NoDotAndDotDot  | QDir::Files | QDir::Hidden);
   QStringList newDirectories = dir.entryList(QDir::NoDotAndDotDot  | QDir::Dirs);
-  QStringList excludeFiles = dir.entryList(Constants::ROS_EXCLUDE_FILE_EXTENSION, QDir::NoDotAndDotDot  | QDir::Files);
+  QStringList excludeFiles = dir.entryList(Constants::ROS_EXCLUDE_FILE_EXTENSION, QDir::NoDotAndDotDot  | QDir::Files | QDir::Hidden);
 
   QSet<QString> curFileSet = curFiles.toSet();
   QSet<QString> newFileSet = newFiles.toSet() - excludeFiles.toSet();
