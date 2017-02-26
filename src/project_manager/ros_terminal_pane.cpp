@@ -139,7 +139,12 @@ void ROSTerminalPane::startTerminalButton()
 void ROSTerminalPane::closeTerminal(int index)
 {
   m_tabNames.removeAll(m_tabWidget->tabText(index));
-  m_terminals.removeAll(qobject_cast<QTermWidget*>(m_tabWidget->currentWidget()));
+
+  // Need to kill the shell process
+  QTermWidget* terminal = qobject_cast<QTermWidget*>(m_tabWidget->currentWidget());
+  QProcess::startDetached(QString("kill -9 %1").arg(terminal->getShellPID()));
+
+  m_terminals.removeAll(terminal);
   m_tabWidget->removeTab(index);
 
   updateToolBarButtonsEnabled();
@@ -221,6 +226,8 @@ QTermWidget &ROSTerminalPane::startTerminal(int startnow, const QString name)
 
   m_tabNames.append(tabName);
   int idx = m_tabWidget->addTab(widget, tabName);
+  // This is required so the tab is closed when the user enters "exit" in the terminal
+  connect(widget, &QTermWidget::finished, this, [this, idx]{closeTerminal(idx);});
   m_tabWidget->setCurrentIndex(idx);
 
   emit navigateStateUpdate();
