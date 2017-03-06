@@ -13,15 +13,13 @@ The ROS Qt Creator Plug-in provides the following capabilities:
  * Custom Run Configurations
    * roslaunch
    * rosrun
- * Automatic sourcing of the workspace
- 
-   Note: The Qt Creator Plug-in supports multiple configurations to enable quick switching between configurations, and everything is saved.
+ * Automatic sourcing of the workspace  
+ * Note: The Qt Creator Plug-in supports multiple configurations to enable quick switching between configurations, and everything is saved.
  * Integrated Tabbed Terminal
  * Templates
    * Industrial Robot Support Package
    * Basic Launch File
    * Basic URDF File
    * Basic Node File
-   
-     Note: Users may create custom templates.
+   * Note: Users may create custom templates.
 
