@@ -1,3 +1,13 @@
+qt57creator-plugin-ros (0.1.5-0trusty5) trusty; urgency=high
+
+  [ Levi Armstrong ]
+  * Improve how packages and build information is parsed (#88)
+  * Show hidden files (#93)
+  * Kill shell process when terminal is closed (#95)
+  * Update README.md
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Sun, 12 Mar 2017 21:35:15 -0500
+
 qt57creator-plugin-ros (0.1.5-0trusty4) trusty; urgency=high
 
   [ Levi Armstrong ]
