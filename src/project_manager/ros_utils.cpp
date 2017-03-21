@@ -374,17 +374,26 @@ ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const Works
             buildInfo.cbpFile = buildInfo.path;
             buildInfo.cbpFile.appendPath(QString("%1.cbp").arg(package.name));
 
-            if (buildInfo.cbpFile.exists() && ROSUtils::parseCodeBlocksFile(workspaceInfo, buildInfo))
+            if (buildInfo.cbpFile.exists())
             {
-                wsBuildInfo.insert(package.name, buildInfo);
-                continue;
+                if (ROSUtils::parseCodeBlocksFile(workspaceInfo, buildInfo))
+                {
+                    wsBuildInfo.insert(package.name, buildInfo);
+                    continue;
+                }
+                else
+                {
+                    qDebug() << QString("Unable to parse build information for package: %1").arg(package.name);
+                }
             }
-
-            qDebug() << QString("Unable to parse build information for package: %1").arg(package.name);
+            else
+            {
+                qDebug() << QString("Unable to locate package %1 build file: %2").arg(package.name, buildInfo.cbpFile.toString());
+            }
         }
         else
         {
-            qDebug() << QString("Unable to locate build information for package: %1").arg(package.name);
+            qDebug() << QString("Unable to locate build directory for package: %1").arg(package.name);
         }
 
         // Check if there is cached build info available
