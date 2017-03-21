@@ -1,3 +1,10 @@
+qt57creator-plugin-ros (0.1.5-0xenial6) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Add more detailed debug info to project build file parsing (#99)
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Tue, 21 Mar 2017 12:33:43 -0500
+
 qt57creator-plugin-ros (0.1.5-0xenial5) xenial; urgency=high
 
   [ Levi Armstrong ]
