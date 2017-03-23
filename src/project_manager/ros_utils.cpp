@@ -908,34 +908,25 @@ QProcessEnvironment ROSUtils::getWorkspaceEnvironment(const WorkspaceInfo &works
 
 bool ROSUtils::findPackageBuildDirectory(const WorkspaceInfo &workspaceInfo, const PackageInfo &packageInfo, Utils::FileName &packageBuildPath)
 {
-    const QDir buildDir(workspaceInfo.buildPath.toString());
-    QString packageBuildDirName;
+    packageBuildPath = workspaceInfo.buildPath;
     switch(workspaceInfo.buildSystem) {
     case CatkinMake:
     {
-        packageBuildDirName = packageInfo.path.fileName();
+        QString diff = packageInfo.path.toString();
+        diff.remove(workspaceInfo.sourcePath.toString());
+        packageBuildPath.appendString(diff);
         break;
     }
     case CatkinTools:
     {
-        packageBuildDirName = packageInfo.name;
+        packageBuildPath = workspaceInfo.buildPath;
+        packageBuildPath.appendPath(packageInfo.name);
         break;
     }
     }
 
-    QDirIterator it(buildDir.absolutePath(), QStringList() << packageBuildDirName, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-
-    if (it.hasNext())
-        packageBuildPath = Utils::FileName::fromString(it.next());
-    else
+    if (!QDir(packageBuildPath.toString()).exists())
         return false;
-
-    while (it.hasNext())
-    {
-        Utils::FileName nextPath = Utils::FileName::fromString(it.next());
-        if (packageBuildPath.isChildOf(nextPath))
-            packageBuildPath = nextPath;
-    }
 
     return true;
 }
