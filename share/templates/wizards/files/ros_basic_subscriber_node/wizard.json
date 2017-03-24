@@ -1,10 +1,10 @@
 {
     "version": 1,
     "supportedProjectTypes": [ ],
-    "id": "SA.ROS",
+    "id": "SC.ROS",
     "category": "A.ROS",
-    "trDescription": "Creates a basic ROS node.",
-    "trDisplayName": "Basic Node",
+    "trDescription": "Creates a basic ROS subscriber node.",
+    "trDisplayName": "Basic Subscriber Node",
     "trDisplayCategory": "ROS",
     "icon": "../../global/genericfilewizard.png",
     "enabled": "%{JS: [ %{Plugins} ].indexOf('ROSProjectManager') >= 0}",
