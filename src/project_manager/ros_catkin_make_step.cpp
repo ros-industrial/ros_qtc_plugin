@@ -179,7 +179,10 @@ QString ROSCatkinMakeStep::allArguments(ROSUtils::BuildType buildType, bool incl
     case BUILD:
         Utils::QtcProcess::addArgs(&args, m_catkinMakeArguments);
         if (includeDefault)
-            Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments));
+            if (buildType == ROSUtils::BuildTypeUserDefined)
+                Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(m_cmakeArguments));
+            else
+                Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments));
         else
             if (!m_cmakeArguments.isEmpty())
                 Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));

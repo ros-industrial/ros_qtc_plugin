@@ -88,6 +88,11 @@
        <string>Minimum Size Release</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>User Defined</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>

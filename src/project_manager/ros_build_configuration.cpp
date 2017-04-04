@@ -151,7 +151,7 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableBuilds(const Target *p
     // Need to create a ROS Setting widget where the user sets the default build system to use here.
     ROSUtils::BuildSystem buildSystem = static_cast<ROSProject *>(parent->project())->defaultBuildSystem();
 
-    for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeMinSizeRel; ++type)
+    for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeUserDefined; ++type)
     {
       ROSBuildInfo *info = createBuildInfo(parent->kit(), buildSystem, ROSUtils::BuildType(type));
       result << info;
@@ -176,7 +176,7 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableSetups(const Kit *k, c
     ROSUtils::ROSProjectFileContent projectFileContent;
     ROSUtils::parseQtCreatorWorkspaceFile(Utils::FileName::fromString(projectPath), projectFileContent);
 
-    for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeMinSizeRel; ++type) {
+    for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeUserDefined; ++type) {
       ROSBuildInfo *info = createBuildInfo(k, projectFileContent.defaultBuildSystem, ROSUtils::BuildType(type));
       result << info;
     }
@@ -292,8 +292,11 @@ ROSBuildInfo *ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const 
     case ROSUtils::BuildTypeRelWithDebInfo:
         info->buildType = BuildConfiguration::Profile;
         break;
-    default:
+    case ROSUtils::BuildTypeRelease:
         info->buildType = BuildConfiguration::Release;
+        break;
+    default:
+        info->buildType = BuildConfiguration::Unknown;
         break;
     }
 
@@ -307,8 +310,12 @@ BuildConfiguration::BuildType ROSBuildConfiguration::buildType() const
         return Debug;
     case ROSUtils::BuildTypeRelWithDebInfo:
         return Profile;
-    default:
+    case ROSUtils::BuildTypeMinSizeRel:
         return Release;
+    case ROSUtils::BuildTypeRelease:
+        return Release;
+    default:
+        return Unknown;
     }
 }
 

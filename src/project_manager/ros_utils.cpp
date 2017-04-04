@@ -52,7 +52,7 @@ QString ROSUtils::buildTypeName(const ROSUtils::BuildType &buildType)
     case ROSUtils::BuildTypeRelease:
         return QLatin1String("Release");
     default:
-        return QLatin1String("Release");
+        return QLatin1String("User Defined");
     }
 }
 
@@ -855,8 +855,10 @@ QString ROSUtils::getCMakeBuildTypeArgument(ROSUtils::BuildType &buildType)
         return QLatin1String("-DCMAKE_BUILD_TYPE=MinSizeRel");
     case ROSUtils::BuildTypeRelWithDebInfo:
         return QLatin1String("-DCMAKE_BUILD_TYPE=RelWithDebInfo");
-    default:
+    case ROSUtils::BuildTypeRelease:
         return QLatin1String("-DCMAKE_BUILD_TYPE=Release");
+    default:
+        return QLatin1String("");
     }
 }
 

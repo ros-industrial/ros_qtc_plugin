@@ -39,7 +39,8 @@ public:
         BuildTypeDebug = 0,
         BuildTypeRelease = 1,
         BuildTypeRelWithDebInfo = 2,
-        BuildTypeMinSizeRel = 3
+        BuildTypeMinSizeRel = 3,
+        BuildTypeUserDefined = 4
     };
 
     enum TargetType {
