@@ -88,7 +88,7 @@ bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
         Utils::FileName catkin_workspace(workspaceInfo.path);
         catkin_workspace.appendPath(QLatin1String(".catkin_workspace"));
 
-        if (topCMake.exists() || catkin_workspace.exists())
+        if (topCMake.exists() && catkin_workspace.exists())
           return true;
 
         return false;
@@ -97,7 +97,7 @@ bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
     {
         Utils::FileName catkin_tools(workspaceInfo.path);
         catkin_tools.appendPath(QLatin1String(".catkin_tools"));
-        if (catkin_tools.exists())
+        if (catkin_tools.exists() && workspaceInfo.sourcePath.exists())
           return true;
 
         return false;
@@ -112,12 +112,12 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
     if (sourceROS(process, workspaceInfo.rosDistribution))
         if (!isWorkspaceInitialized(workspaceInfo))
         {
+            if (!workspaceInfo.sourcePath.exists())
+                QDir().mkpath(workspaceInfo.sourcePath.toString());
+
             switch (workspaceInfo.buildSystem) {
             case CatkinMake:
             {
-                if (!workspaceInfo.sourcePath.exists())
-                    QDir().mkpath(workspaceInfo.sourcePath.toString());
-
                 process->setWorkingDirectory(workspaceInfo.sourcePath.toString());
                 process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin_init_workspace"));
                 process->waitForFinished();
@@ -135,7 +135,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
             if (process->exitStatus() != QProcess::CrashExit)
                 return buildWorkspace(process, workspaceInfo);
 
-            qDebug() << "Failed ot initialize workspace: " << workspaceInfo.path.toString();
+            qDebug() << "Failed to initialize workspace: " << workspaceInfo.path.toString();
             return false;
         }
 
