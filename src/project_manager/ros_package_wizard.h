@@ -119,6 +119,8 @@ protected:
     bool postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l,
                            QString *errorMessage) const override;
 
+    QDir getRootWorkspacePath(const QDir &path) const;
+
 private:
     mutable ROSPackageWizardDialog *m_wizard;
 };
