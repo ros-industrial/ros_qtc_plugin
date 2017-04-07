@@ -225,21 +225,6 @@ ROSPackageWizard::ROSPackageWizard()
     setFlags(Core::IWizardFactory::PlatformIndependent);
 }
 
-QDir ROSPackageWizard::getRootWorkspacePath(const QDir &path) const
-{
-    QFileInfoList list = QDir(path).entryInfoList(QStringList("*.workspace"));
-
-    if(list.count() == 0)
-    {
-        QDir parent(path);
-
-        if(parent.cdUp())
-            return getRootWorkspacePath(parent);
-    }
-
-    return path;
-}
-
 Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
                                                    const Core::WizardDialogParameters &parameters) const
 {
