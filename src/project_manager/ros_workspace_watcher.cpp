@@ -45,6 +45,9 @@ void ROSWorkspaceWatcher::watchFolder(const QString &parentPath, const QString &
   while (item.hasNext())
   {
     item.next();
+
+    qDebug() << "watchFolder: " << item.key();
+
     subDirectories.append(item.key());
 
     // Add directory node

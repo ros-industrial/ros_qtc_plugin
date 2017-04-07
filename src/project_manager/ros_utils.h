@@ -179,6 +179,13 @@ public:
                                     const WorkspaceInfo &workspaceInfo);
 
     /**
+     * @brief Initialize workspace folders
+     * @param workspaceInfo Workspace information
+     * @return True if successfully executed, otherwise false
+     */
+    static bool initializeWorkspaceFolders(const WorkspaceInfo &workspaceInfo);
+
+    /**
      * @brief Build workspace
      * @param process QProcess to execute the catkin_make
      * @param workspaceInfo Workspace information
@@ -328,6 +335,13 @@ public:
     static QString getCatkinToolsActiveProfile(const Utils::FileName &workspaceDir);
 
     /**
+     * @brief Set default catkin tools profile
+     * @param workspaceDir Workspace directory path
+     * @return True if successful, otherwise false
+     */
+    static QString setCatkinToolsDefaultProfile(const Utils::FileName &workspaceDir);
+
+    /**
      * @brief Set the catkin tools active profile
      * @param workspaceDir Workspace directory path
      * @param profileName Profile name
@@ -403,6 +417,15 @@ private:
      */
     static Utils::FileName getCatkinToolsProfilesYamlFile(const Utils::FileName &workspaceDir);
 
+    /**
+     * @brief Set curent profile for the catkin tools profiles yaml file
+     *
+     * @param workspaceDir Workspace directory path
+     * @param profileName Profile name
+     * @return True if successful, otherwise false.
+     */
+    static bool setCatkinToolsProfilesYamlFile(const Utils::FileName &workspaceDir,
+                                               const QString &profileName);
     /**
      * @brief Get the directory path to given profile
      * @param workspaceDir Workspace directory path
