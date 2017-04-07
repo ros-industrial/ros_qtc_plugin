@@ -224,12 +224,42 @@ ROSPackageWizard::ROSPackageWizard()
     setFlags(Core::IWizardFactory::PlatformIndependent);
 }
 
+QDir ROSPackageWizard::getRootWorkspacePath(const QDir &path) const
+{
+    QFileInfoList list = QDir(path).entryInfoList(QStringList("*.workspace"));
+
+    if(list.count() == 0)
+    {
+        QDir parent(path);
+
+        if(parent.cdUp())
+            return getRootWorkspacePath(parent);
+    }
+
+    return path;
+}
+
 Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
                                                    const Core::WizardDialogParameters &parameters) const
 {
     Q_UNUSED(parameters);
     m_wizard = new ROSPackageWizardDialog(this, parent);
-    m_wizard->setPath(parameters.defaultPath());
+
+    QString defaultPath = parameters.defaultPath();
+
+#ifdef CREATE_FOLDERS
+    QDir workspaceRootPath = getRootWorkspacePath(QDir(defaultPath));
+
+    if( QString::compare(defaultPath, workspaceRootPath.path(), Qt::CaseInsensitive) == 0 )
+    {
+        QString srcPath = QDir::separator() + QString("src");
+
+        if( ! defaultPath.endsWith(srcPath, Qt::CaseInsensitive) )
+            defaultPath = QDir::cleanPath(defaultPath + srcPath);
+    }
+#endif
+
+    m_wizard->setPath(defaultPath);
 
     foreach (QWizardPage *p, m_wizard->extensionPages())
         m_wizard->addPage(p);
