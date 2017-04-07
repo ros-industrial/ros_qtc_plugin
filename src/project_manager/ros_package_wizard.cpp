@@ -47,6 +47,7 @@
 #include <QXmlStreamReader>
 #include <QPlainTextEdit>
 #include <QMessageBox>
+#include <projectexplorer/projecttree.h>
 
 
 namespace ROSProjectManager {
@@ -224,21 +225,6 @@ ROSPackageWizard::ROSPackageWizard()
     setFlags(Core::IWizardFactory::PlatformIndependent);
 }
 
-QDir ROSPackageWizard::getRootWorkspacePath(const QDir &path) const
-{
-    QFileInfoList list = QDir(path).entryInfoList(QStringList("*.workspace"));
-
-    if(list.count() == 0)
-    {
-        QDir parent(path);
-
-        if(parent.cdUp())
-            return getRootWorkspacePath(parent);
-    }
-
-    return path;
-}
-
 Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
                                                    const Core::WizardDialogParameters &parameters) const
 {
@@ -248,14 +234,21 @@ Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
     QString defaultPath = parameters.defaultPath();
 
 #ifdef CREATE_FOLDERS
-    QDir workspaceRootPath = getRootWorkspacePath(QDir(defaultPath));
+    ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectExplorer::ProjectTree::currentProject());
 
-    if( QString::compare(defaultPath, workspaceRootPath.path(), Qt::CaseInsensitive) == 0 )
+    if( rosProject )
     {
-        QString srcPath = QDir::separator() + QString("src");
+        ROSBuildConfiguration *bc = rosProject->rosBuildConfiguration();
 
-        if( ! defaultPath.endsWith(srcPath, Qt::CaseInsensitive) )
-            defaultPath = QDir::cleanPath(defaultPath + srcPath);
+        if( bc )
+        {
+            ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(),
+                                                                               bc->buildSystem(),
+                                                                               bc->project()->distribution());
+
+            if( defaultPath ==  workspaceInfo.path.toString() )
+                defaultPath = workspaceInfo.sourcePath.toString();
+        }
     }
 #endif
 
