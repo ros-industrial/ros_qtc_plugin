@@ -1,22 +1,5 @@
 #!/bin/bash
 
-function printUsage {
-    echo "Usage: bash setup.sh argument"
-    echo "Arguments:"
-    echo "  -u       : run setup for users"
-    echo "  -d       : run setup for developers"
-    echo "  -ui      : run setup for users with debug info"
-    echo "  -di      : run setup for developers with debug info"
-    echo "  -qtb tag : build qt creator with branch/tag"
-    echo "             default tag: 4.1"
-    echo "  -qtc     : skip make clean. Just make"
-    echo "  -qtp path: Qt creator path. If provided -qtb is unused"
-    echo "  -qtm path: qmake path. If mising Qt will be build"
-    echo "             default path: /opt/qt57/bin/qmake"
-    echo "  -v       : verbose mode"
-    exit 85
-}
-
 # Verbosity level
 VERBOSE=0
 CPU_CORES=`grep -c ^processor /proc/cpuinfo`
@@ -28,7 +11,7 @@ QMAKE_PATH="/opt/qt57/bin/qmake"
 # ROS qtc plubin default branch
 QTP_BRANCH="master"
 # QT Creator default branch
-QTC_BRANCH="4.1"
+QTC_BRANCH="4.2"
 # By default clean all on rebuild
 QTC_SKIP_CLEAN=0
 QTC_PATH=""
@@ -38,6 +21,26 @@ LOG_FILE="setup.log"
 GIT_HASH=`git log --pretty=format:'%h' -n 1`
 
 GIT_QUIET="--quiet"
+
+function printUsage {
+    echo "Usage: bash setup.sh argument"
+    echo "Arguments:"
+    echo "  -u       : run setup for users"
+    echo "  -d       : run setup for developers"
+    echo "  -ui      : run setup for users with debug info"
+    echo "  -di      : run setup for developers with debug info"
+    echo "  -qtb tag : build qt creator with branch/tag"
+    echo "  -qtp path: qtcreator path. If provided -qtb is unused"
+    echo "  -qtm path: qmake path"
+    echo "  -qtc     : skip make clean. Default clean"
+    echo "  -v       : verbose mode"
+    echo "Defaults"
+    echo "  QTCreator : $QTC_BRANCH"
+    echo "  ROS Plugin: $QTP_BRANCH"
+    echo "  QMake     : $QMAKE_PATH"
+    echo "  Verbose   : $VERBOSE"
+    exit 85
+}
 
 function deleteLog {
     rm -rf "$LOG_FILE"
