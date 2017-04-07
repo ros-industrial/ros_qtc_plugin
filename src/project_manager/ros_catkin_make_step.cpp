@@ -202,7 +202,7 @@ QString ROSCatkinMakeStep::allArguments(ROSUtils::BuildType buildType, bool incl
 
 QString ROSCatkinMakeStep::makeCommand() const
 {
-    return QLatin1String("catkin_make");;
+    return QLatin1String("catkin_make");
 }
 
 void ROSCatkinMakeStep::run(QFutureInterface<bool> &fi)

@@ -32,7 +32,7 @@ DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-ros.desktop
 
 # Clone Qt Creator and build it from source
 if [ ! -d "$QTC_SOURCE" ]; then 
-    cd $BASE_PATH && git clone -b 4.1 https://github.com/qtproject/qt-creator.git
+    cd $BASE_PATH && git clone -b 4.2 https://github.com/qtproject/qt-creator.git
 else
     cd $BASE_PATH/qt-creator && git fetch && git pull
 fi 
