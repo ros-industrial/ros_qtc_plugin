@@ -1,196 +1,285 @@
 #!/bin/bash
 
 SECONDS=0
+LSB=/usr/bin/lsb_release
+
+RED=
+GREEN=
+YELLOW=
+NC=
+
+ncolors=$(tput colors)
+if test -n "$ncolors" && test $ncolors -ge 8; then
+    RED='\033[0;31m'
+    GREEN='\033[1;32m'
+    YELLOW='\033[1;93m'
+    NC='\033[0m' # No Color
+fi
 
 # Verbosity level
 VERBOSE=0
 CPU_CORES=`grep -c ^processor /proc/cpuinfo`
+
 # User option (-u | -d | -ud | -di)
 RUN_TYPE=""
+
+# Absolute path to this setup.sh script: /home/user/project/ros_qtc_plugin/setup.sh
+SCRIPT_FILE_PATH=$(readlink -f $0)
+# Absolute path to this setup.sh script: /home/user/project/ros_qtc_plugin
+QTR_DIR_PATH=`dirname $SCRIPT_FILE_PATH`
+# Script folder name:                     ros_qtc_plugin
+QTR_DIR_NAME=`basename ${QTR_DIR_PATH}`
+
+#Save initial path
+INIT_CWD=`pwd`
+
 # Space seletated missing packages to be installed
 PKG_MISSING=""
 QMAKE_PATH="/opt/qt57/bin/qmake"
+
 # ROS qtc plubin default branch
-QTP_BRANCH="master"
+QTR_BRANCH="master"
 # QT Creator default branch
 QTC_BRANCH="4.2"
+
 # By default clean all on rebuild
+#Qt Creator
 QTC_SKIP_CLEAN=0
+#ROS Plugin
+QTR_SKIP_CLEAN=0
+
 QTC_PATH=""
+
+QTC_BUILD=""
+QTC_SOURCE=""
+
+QTR_BUILD=""
+QTR_SOURCE=""
+
 # Log file of all actions
-LOG_FILE="setup.log"
+LOG_FILE="${QTR_DIR_PATH}/setup.log"
 # Get Git hash for logging purposes
 GIT_HASH=`git log --pretty=format:'%h' -n 1`
 
 GIT_QUIET="--quiet"
 
-function printUsage {
-    echo "Usage: bash setup.sh argument"
-    echo "Arguments:"
-    echo "  -u       : run setup for users"
-    echo "  -d       : run setup for developers"
-    echo "  -ui      : run setup for users with debug info"
-    echo "  -di      : run setup for developers with debug info"
-    echo "  -qtb tag : build qt creator with branch/tag"
-#   echo "  -qtp path: qtcreator path. If provided -qtb is unused"
-    echo "  -qtm path: qmake path"
-    echo "  -qtc     : skip make clean. Default clean"
-    echo "  -v       : verbose mode"
-    echo "Defaults"
-    echo "  QTCreator : $QTC_BRANCH"
-    echo "  ROS Plugin: $QTP_BRANCH"
-    echo "  QMake     : $QMAKE_PATH"
-    echo "  Verbose   : $VERBOSE"
-    exit 85
-}
-
 function deleteLog {
     rm -rf "$LOG_FILE"
 }
 
-function logE {
-    echo "$1" | tee -a "$LOG_FILE"
+function logV {
+    [[ $VERBOSE -eq 1 ]] && echo -e "$1"
+    echo -e "$1" >> "$LOG_FILE"
+}
+
+function logC {
+    [[ $VERBOSE -eq 1 ]] && echo -e "${YELLOW}$1${NC}"
+    echo -e "$1" >> "$LOG_FILE"
 }
 
 function logP {
-    printf "$1" | tee -a "$LOG_FILE"
+    echo -e "${GREEN}$1${NC}"   # Print color to screen
+    echo -e "$1" >> "$LOG_FILE" # No color to log file
+}
+
+function logE {
+    echo -e "${RED}$1${NC}"   # Print color to screen
+    echo -e "$1" >> "$LOG_FILE" # No color to log file
 }
 
 function logDuration {
     local duration=$SECONDS
-    logE "==  $(($duration / 3600)):$((($duration / 60) % 60)):$(($duration % 60)) elapsed"
+    logP "==  $(($duration / 3600)) hr, $((($duration / 60) % 60)) min, $(($duration % 60)) sec elapsed"
 }
 
-function logError {
-    logE $1
+function logErrorAndQuit {
     logDuration
-    exit $?
+    logE "$1"
+    # Go back to original location
+    cd $INIT_CWD &> /dev/null
+    exit -1
+}
+
+function testForError {
+    retval=$?
+
+    if [ $retval -ne 0 ]; then
+        logErrorAndQuit "==  ERROR Operation canceled. Check setup.log"
+    fi
+}
+
+function printNoTabs() {
+    logV "==  ${1//$'\t'/ }"
+}
+
+function printUsage {
+    logP "Usage: bash setup.sh argument"
+    logP "Arguments:"
+    logP "  -u            : run setup for users"
+    logP "  -d            : run setup for developers"
+    logP "  -ui           : run setup for users with debug info"
+    logP "  -di           : run setup for developers with debug info"
+    logP "  -qtb tag      : build qt creator with branch/tag"
+#   logP "  -qtp path: qtcreator path. If provided -qtb is unused"
+    logP "  -qtm path     : qmake path"
+    logP "  -no-qtc-clean : skip qt creator \"make clean\""
+    logP "  -no-qtr-clean : skip ros qt plugin \"make clean\""
+    logP "  -v            : verbose mode"
+    logP "Defaults"
+    logP "  QTCreator : $QTC_BRANCH"
+    logP "  ROS Plugin: $QTR_BRANCH"
+    logP "  QMake     : $QMAKE_PATH"
+    logP "  Verbose   : $VERBOSE"
+    # Go back to original location
+    cd $INIT_CWD &> /dev/null
+    exit 85
+}
+
+function logOSInfo() {
+    logC "=="
+        logC "== Operating system: $(uname)"
+    local osText
+
+        if [ -x $LSB ]; then
+        osText=`$LSB -i`; printNoTabs "${osText}"
+        osText=`$LSB -r`; printNoTabs "${osText}"
+        osText=`$LSB -c`; printNoTabs "${osText}"
+        osText=`uname -m`; printNoTabs "Hardware: ${osText}"
+        osText=`uname -v`; printNoTabs "Kernel: ${osText}"
+    fi
+}
+
+function loopEach() {
+  for path in $1; do
+      logV "==  $path"
+  done
+}
+
+function logEnvInfo() {
+    local envText
+
+    logC "=="
+    logC "== QT Enviroment Variables"
+    envText=`env | grep QT`; loopEach "${envText}"
+
+    logC "=="
+    logC "== ROS Enviroment Variables"
+    envText=`env | grep ROS`; loopEach "${envText}"
+
+    logC "=="
+    logC "== CMAKE Enviroment Variables"
+    envText=`env | grep -i cmake`; loopEach "${envText}"
 }
 
 function cloneQtCreator {
-    logE "==  Cloning QT Creator $QTC_BRANCH. Stand by..."
+    logP "==  Cloning QT Creator $QTC_BRANCH. Stand by..."
 
-    local CMD=" git clone $GIT_QUIET --depth 1 --single-branch --branch $QTC_BRANCH https://github.com/qtproject/qt-creator.git"
+    local CMD="git clone $GIT_QUIET --depth 1 --single-branch --branch $QTC_BRANCH https://github.com/qtproject/qt-creator.git $QTC_SOURCE"
 
-    [[ $VERBOSE -eq 1 ]] && logE "== $CMD"
+    [[ $VERBOSE -eq 1 ]] && logV "==  $CMD"
 
     $CMD &>> "$LOG_FILE"
 
-    if [ $? -gt 0 ]; then
-        logError "== ERROR Operation canceled"
-    fi
-
+    testForError
     logDuration
 }
 
 function pullQtCreator {
     QPATH=$(basename "$PWD")
-    logE "==  Fetching into $QPATH"
-    git fetch $GIT_QUIET &>> "$LOG_FILE"
+    logP "==  Fetching into $QPATH"
+    local CMD="git fetch $GIT_QUIET"
 
-    if [ $? -gt 0 ]; then
-        logError "== ERROR Operation canceled"
-    fi
+    [[ $VERBOSE -eq 1 ]] && logV "==  $CMD"
 
-    logDuration 
+    $CMD &>> "$LOG_FILE"
 
-    logE "==  Pulling into $QPATH"
-    git pull $GIT_QUIET &>> "$LOG_FILE"
+    testForError
+    logDuration
 
-    if [ $? -gt 0 ]; then
-        logError "== ERROR Operation canceled"
-    fi
+    logP "==  Pulling into $QPATH"
+    CMD="git pull $GIT_QUIET"
 
+    [[ $VERBOSE -eq 1 ]] && logV "==  $CMD"
+
+    $CMD &>> "$LOG_FILE"
+
+    testForError
     logDuration
 }
 
 function cloneROSQtPlugin {
     cd $BASE_PATH
-    logE "==  Cloning ROS QTC Plugin($QTP_BRANCH). Stand by..."
-    local CMD="git clone -b $QTP_BRANCH https://github.com/ros-industrial/ros_qtc_plugin.git"
+    logP "==  Cloning ROS QTC Plugin($QTR_BRANCH). Stand by..."
+    local CMD="git clone -depth 1 --single-branch --branch $QTR_BRANCH https://github.com/ros-industrial/ros_qtc_plugin.git"
 
-    [[ $VERBOSE -eq 1 ]] && logE "== $CMD"
+    [[ $VERBOSE -eq 1 ]] && logV "==  $CMD"
 
     $CMD &>> "$LOG_FILE"
 
-    if [ $? -gt 0 ]; then
-        logError "==  ERROR Operation canceled"
-    fi
-
+    testForError
     logDuration
 }
 
 function pullROSQtPlugin {
-    logE "== Entering $BASE_PATH/ros_qtc_plugin"
-    cd $BASE_PATH/ros_qtc_plugin
+    logP "== Entering $BASE_PATH/$QTR_DIR_NAME"
+    cd $BASE_PATH/$QTR_DIR_NAME
 
     QPATH=$(basename "$PWD")
-    logE "==  Fetching into $QPATH"
+    logP "==  Fetching into $QPATH"
 
     git $GIT_QUIET fetch &>> "$LOG_FILE"
 
-    if [ $? -gt 0 ]; then
-        logError "==  ERROR Operation canceled"
-    fi
+    testForError
 
-    logE "==  Pulling into $QPATH"
+    logP "==  Pulling into $QPATH"
     git $GIT_QUIET pull &>> "$LOG_FILE"
 
-    if [ $? -gt 0 ]; then
-        logError "==  ERROR Operation canceled"
-    fi
+    testForError
+    logDuration
 }
 
 function build {
     if [ "$2" == "clean" ]; then
-        logE "==  Cleaning project $1"
+        logP "==  Cleaning project $1"
 
         if [ -e "Makefile" ]; then
             make clean &>> "$LOG_FILE"
 
-            if [ $? -gt 0 ]; then
-               logError "== ERROR Operation canceled"
-            fi
-
+            testForError
             logDuration
         fi
     else
-        logE "==  Building project $1"
+        logP "==  Building project $1"
 
         if [ -e "Makefile" ]; then
             make -j$CPU_CORES &>> "$LOG_FILE"
 
-            if [ $? -gt 0 ]; then
-               logError "== ERROR Operation canceled"
-            fi
-
+            testForError
             logDuration
         fi
     fi
 }
 
 function logGitHash {
-    logE "== ROS Qt Plugin Git($GIT_HASH)"
+    logP "== ROS Qt Plugin Git($GIT_HASH)"
 }
 
 function setParameters {
     if (([ "$1" == "-u" ] || [ "$1" == "-ui" ]) &&
          [ $(basename "$PWD") != 'ros_qtc_plugin' ]); then
-        BASE_PATH=$PWD/qtc_plugins
+        BASE_PATH=$PWD/ros_qtc_plugin
         mkdir -p $BASE_PATH
     else
         BASE_PATH=$(dirname "$PWD")
     fi
 
-    QTC_BUILD=$BASE_PATH/qt-creator-build
-    QTC_SOURCE=$BASE_PATH/qt-creator
+    export QTC_SOURCE=$BASE_PATH/qt-creator-${QTC_BRANCH}
+    export QTC_BUILD=$BASE_PATH/qt-creator-${QTC_BRANCH}-build
 
-    ROS_BUILD=$BASE_PATH/ros_qtc_plugin-build
-    ROS_SOURCE=$BASE_PATH/ros_qtc_plugin
+    export QTR_SOURCE=$BASE_PATH/${QTR_DIR_NAME}
+    export QTR_BUILD=$BASE_PATH/${QTR_DIR_NAME}-${QTC_BRANCH}-build
 
-    DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-Ros.desktop
-
-    LOG_FILE="$ROS_SOURCE/$LOG_FILE"
+    DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-Ros-${QTC_BRANCH}.desktop
 }
 
 function checkParameters {
@@ -199,38 +288,40 @@ function checkParameters {
     fi
 
     if [ ! -e "$QMAKE_PATH" ]; then
-        logE "== $QMAKE_PATH is mising !!!"
-        exit -1
+        logErrorAndQuit "== $QMAKE_PATH is mising !!!"
     fi
 
     if [ ! -x "$QMAKE_PATH" ]; then
-        logE "== $QMAKE_PATH is not executable !!!"
-        exit -1
+        logErrorAndQuit "== $QMAKE_PATH is not executable !!!"
     fi
 }
 
-function logEnvironment {
+function logRQTEnvironment {
     if [[ $VERBOSE -eq 1 ]]; then
         GIT_QUIET=""
-        logE "== Enviroment Variables"
-        logE "== BASE_PATH      : $BASE_PATH"
-        logE "== LOG_FILE       : $LOG_FILE"
-        logE "== QMAKE_PATH     : $QMAKE_PATH"
-        logE "== QTC_SKIP_CLEAN : $QTC_SKIP_CLEAN"
-        logE "== QTC_BRANCH     : $QTC_BRANCH"
-        logE "== QTC_PATH       : $QTC_PATH"
-        logE "== QTC_BUILD      : $QTC_BUILD"
-        logE "== QTC_SOURCE     : $QTC_SOURCE"
-        logE "== QTP_BRANCH     : $QTP_BRANCH"
-        logE "== ROS_BUILD      : $ROS_BUILD"
-        logE "== ROS_SOURCE     : $ROS_SOURCE"
-        logE "== DESKTOP_FILE   : $DESKTOP_FILE"
+        logC "=="
+        logC "== RQT Enviroment Variables"
+        logV "== QMAKE_PATH      : $QMAKE_PATH"
+        logV "== LOG_FILE        : $LOG_FILE"
+        logV "== BASE_PATH       : $BASE_PATH"
+        logV "== QTC_SKIP_CLEAN  : $QTC_SKIP_CLEAN"
+        logV "==  QTC_BRANCH     : $QTC_BRANCH"
+        logV "==  QTC_PATH       : $QTC_PATH"
+        logV "==  QTC_SOURCE     : $QTC_SOURCE"
+        logV "==  QTC_BUILD      : $QTC_BUILD"
+        logV "==  DESKTOP_FILE   : $DESKTOP_FILE"
+        logV "== QTR_DIR_PATH    : $QTR_DIR_PATH"
+        logV "==  QTR_BRANCH     : $QTR_BRANCH"
+        logV "==  QTR_SOURCE     : $QTR_SOURCE"
+        logV "==  QTR_BUILD      : $QTR_BUILD"
+        logV "==  QTR_SKIP_CLEAN : $QTR_SKIP_CLEAN"
     fi
 }
 
 function checkPkgDependency {
     # Install build dependencies
-    logE "== Checking build dependencies"
+    logP "=="
+    logP "== Checking build dependencies"
 
     PKG_BLD_ESSENTIAL=$(dpkg-query -W --showformat='${Status}\n'\
                         build-essential 2>/dev/null | grep -c "ok installed")
@@ -244,73 +335,68 @@ function checkPkgDependency {
                         libyaml-cpp-dev 2>/dev/null | grep -c "ok installed")
 
     if [[ $PKG_BLD_ESSENTIAL -eq 0 ]]; then
-        logP "==  Missing        : "
+        logE "==  Missing        : build-essential"
         PKG_MISSING="$PKG_MISSING build-essential"
     else
-        logP "==  Installed      : "
+        logP "==  Installed      : build-essential"
     fi
-    logE "build-essential"
 
     if [[ $PKG_MESA_DEV -eq 0 ]]; then
-        logP "==  Missing        : "
+        logE "==  Missing        : libgl1-mesa-dev"
         PKG_MISSING="$PKG_MISSING libgl1-mesa-dev"
     else
-        logP "==  Installed      : "
+        logP "==  Installed      : libgl1-mesa-dev"
     fi
-    logE "libgl1-mesa-dev"
 
     if [[ $PKG_QT_TERM -eq 0 ]]; then
-        logP "==  Missing        : "
+        logE "==  Missing        : libqtermwidget57-0-dev"
         PKG_MISSING="$PKG_MISSING libqtermwidget57-0-dev"
     else
-        logP "==  Installed      : "
+        logP "==  Installed      : libqtermwidget57-0-dev"
     fi
-    logE "libqtermwidget57-0-dev"
 
     if [[ $PKG_CATKIN_TOOLS -eq 0 ]]; then
-        logP "==  Missing        : "
+        logE "==  Missing        : python-catkin-tools"
         PKG_MISSING="$PKG_MISSING python-catkin-tools"
     else
-        logP "==  Installed      : "
+        logP "==  Installed      : python-catkin-tools"
     fi
-    logE "python-catkin-tools"
 
     if [[ $PKG_YAML_CPP_DEV -eq 0 ]]; then
-        logP "==  Missing        : "
+        logE "==  Missing        : libyaml-cpp-dev"
         PKG_MISSING="$PKG_MISSING libyaml-cpp-dev"
     else
-        logP "==  Installed      : "
+        logP "==  Installed      : libyaml-cpp-dev"
     fi
-    logE "libyaml-cpp-dev"
 
     if [ ! -z "$PKG_MISSING" ]; then
-        logE "== Installing missing packages"
+        logP "== Installing missing packages"
         sudo apt-get install $PKG_MISSING
 
-        if [ $? -gt 0 ]; then
-            logError "== ERROR Operation canceled"
-        fi
+        testForError
     fi
 }
 
 function buildQtCreator {
+    logP "=="
+    logP "== Entering $QTC_SOURCE source path"
+
     # Clone Qt Creator and build it from source
     if [ ! -d "$QTC_SOURCE" ]; then
-        logE "== Connecting to github.com"
+        logP "==  Connecting to github.com"
         cd $BASE_PATH
         cloneQtCreator
     else
-        logE "== Entering $BASE_PATH/qt-creator source path"
-        logE "== Updating Qt Creator from github.com"
-        cd $BASE_PATH/qt-creator
+        logP "==  Updating Qt Creator from github.com"
+        cd $QTC_SOURCE
         pullQtCreator
     fi
 
     if [ ! -d $QTC_BUILD ]; then
-        logE "== Creating $QTC_BUILD build path"
+        logP "==  Creating $QTC_BUILD build path"
         mkdir -p $QTC_BUILD && cd $QTC_BUILD
     else
-        logE "== Entering $QTC_BUILD build path"
+        logP "==  Entering $QTC_BUILD build path"
         cd $QTC_BUILD
         if [[ $QTC_SKIP_CLEAN -eq 0 ]]; then
             build QtCreator clean
@@ -325,68 +411,68 @@ function buildQtCreator {
         CMD="$QMAKE_PATH $QTC_SOURCE/qtcreator.pro -r CONFIG+=qml_debug CONFIG+=force_debug_info CONFIG+=separate_debug_info"
     fi
 
-    [[ $VERBOSE -eq 1 ]] && logE "== $CMD"
+    [[ $VERBOSE -eq 1 ]] && logV "==  $CMD"
 
     $CMD &>> "$LOG_FILE"
 
-    if [ $? -gt 0 ]; then
-        logError "== ERROR Operation canceled"
-    fi
+    testForError
 
     # Build QT creator
     build QtCreator
 }
 
 function buildROSQtCreatorPlugin {
+    logP "=="
+    logP "== Entering $QTR_SOURCE"
+
     local CMD
     # Build ROS Qt Creator Plugin
     if ([ "$RUN_TYPE" == "-u" ] || [ "$RUN_TYPE" == "-ui" ]); then
-        if [ ! -d "$ROS_SOURCE" ]; then
+        if [ ! -d "$QTR_SOURCE" ]; then
             cloneROSQtPlugin
         else
             pullROSQtPlugin
         fi
     fi
 
-    logE "== Entering $BASE_PATH/ros_qtc_plugin"
-    logE "== Updating modules"
+    logP "==  Updating modules"
 
-    cd $BASE_PATH/ros_qtc_plugin
+    cd $BASE_PATH/$QTR_DIR_NAME
 
     CMD="git submodule update --init --recursive"
-    [[ $VERBOSE -eq 1 ]] && logE "== $CMD"
+    [[ $VERBOSE -eq 1 ]] && logV "==  $CMD"
     $CMD &>> "$LOG_FILE"
 
     CMD="git submodule foreach git fetch"
-    [[ $VERBOSE -eq 1 ]] && logE "== $CMD"
+    [[ $VERBOSE -eq 1 ]] && logV "==  $CMD"
     $CMD &>> "$LOG_FILE"
 
     CMD="git submodule foreach git pull"
-    [[ $VERBOSE -eq 1 ]] && logE "== $CMD"
+    [[ $VERBOSE -eq 1 ]] && logV "==  $CMD"
     $CMD &>> "$LOG_FILE"
 
-    [[ $VERBOSE -eq 1 ]] && logE "== Creating $ROS_BUILD"
-    mkdir -p $ROS_BUILD
-
-    cd $ROS_BUILD
-
-    if [[ $QTC_SKIP_CLEAN -eq 0 ]]; then
-        build ros_qtc_plugin clean
+    if [ ! -d $QTR_BUILD ]; then
+        logP "==  Creating $QTR_BUILD build path"
+        mkdir -p $QTR_BUILD && cd $QTR_BUILD
+    else
+        logP "==  Entering $QTR_BUILD build path"
+        cd $QTR_BUILD
+        if [[ $QTR_SKIP_CLEAN -eq 0 ]]; then
+            build ros_qtc_plugin clean
+        fi
     fi
 
     if ([ "$RUN_TYPE" == "-u" ] || [ "$RUN_TYPE" == "-d" ]); then
-        CMD="$QMAKE_PATH $ROS_SOURCE/ros_qtc_plugin.pro -r"
+        CMD="$QMAKE_PATH $QTR_SOURCE/ros_qtc_plugin.pro -r"
     else
-        CMD="$QMAKE_PATH $ROS_SOURCE/ros_qtc_plugin.pro -r CONFIG+=qml_debug CONFIG+=force_debug_info CONFIG+=separate_debug_info"
+        CMD="$QMAKE_PATH $QTR_SOURCE/ros_qtc_plugin.pro -r CONFIG+=qml_debug CONFIG+=force_debug_info CONFIG+=separate_debug_info"
     fi
 
-    [[ $VERBOSE -eq 1 ]] && logE "== $CMD"
+    [[ $VERBOSE -eq 1 ]] && logV "==  $CMD"
 
     $CMD &>> "$LOG_FILE"
 
-    if [ $? -gt 0 ]; then
-        logError "== ERROR Operation canceled"
-    fi
+    testForError
 
     # Build QT creator
     build ros_qtc_plugin
@@ -403,45 +489,50 @@ function finalStep {
     echo 'Encoding=UTF-8' >> $DESKTOP_FILE
     echo 'Type=Application' >> $DESKTOP_FILE
     echo 'Name=QtCreator' >> $DESKTOP_FILE
-    echo 'Comment=QtCreator' >> $DESKTOP_FILE
+    echo 'Comment=Qt-Creator-'${QTC_BRANCH}' ROS' >> $DESKTOP_FILE
     echo 'NoDisplay=true' >> $DESKTOP_FILE
     echo 'Exec='$QTC_BUILD/bin/qtcreator >> $DESKTOP_FILE
     echo 'Icon=QtProject-qtcreator' >> $DESKTOP_FILE
-    echo 'Name[en_US]=Qt-Creator' >> $DESKTOP_FILE
+    echo 'Name[en_US]=Qt-Creator-'${QTC_BRANCH}' ROS'  >> $DESKTOP_FILE
     chmod +x $DESKTOP_FILE
 
-    logE "== Add Qt Creator to desktop"
-    rm -f $HOME/Desktop/QtCreator.desktop
-    ln -s $DESKTOP_FILE $HOME/Desktop/QtCreator.desktop
+    logP "== Adding QtCreator-${QTC_BRANCH}.desktop to desktop"
+    rm -f $HOME/Desktop/QtCreator-${QTC_BRANCH}.desktop
+    ln -s $DESKTOP_FILE $HOME/Desktop/QtCreator-${QTC_BRANCH}.desktop
+
+    testForError
 
     # Create user command line launch
-    logE "== Add Qt Creator ROS command line launcher: /usr/local/bin/qtcreator"
-    sudo rm -f /usr/local/bin/qtcreator
+    logP "== Adding QtCreator-${QTC_BRANCH}-ROS command line launcher: /usr/local/bin/qtcreator-${QTC_BRANCH}-ROS"
+    sudo rm -f /usr/local/bin/qtcreator-${QTC_BRANCH}-ROS
 
-    if [ $? -gt 0 ]; then
-        logError "== ERROR Operation canceled"
-    fi
+    sudo ln -s $QTC_BUILD/bin/qtcreator /usr/local/bin/qtcreator-${QTC_BRANCH}-ROS
 
-    sudo ln -s $QTC_BUILD/bin/qtcreator /usr/local/bin/qtcreator
+    testForError
 }
 
+deleteLog
+
 if [ $# -eq 0 ]; then
+    logGitHash
     printUsage
 fi
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    -u)    RUN_TYPE="$1";   shift 1;;
-    -d)    RUN_TYPE="$1";   shift 1;;
-    -ui)   RUN_TYPE="$1";   shift 1;;
-    -di)   RUN_TYPE="$1";   shift 1;;
-    -qtm)  QMAKE_PATH="$2"; shift 2;;
-    -qtb)  QTC_BRANCH="$2"; shift 2;;
-    -qtc)  QTC_SKIP_CLEAN=1; shift 1;;
-    -qtp)  QTC_PATH="$2";   shift 2;;
-    -v)    VERBOSE=1;       shift 1;;
-    *)     logE "== Unknown $1 parameter!!!";
-       printUsage;;
+    -u)             RUN_TYPE="$1";   shift 1;;
+    -d)             RUN_TYPE="$1";   shift 1;;
+    -ui)            RUN_TYPE="$1";   shift 1;;
+    -di)            RUN_TYPE="$1";   shift 1;;
+    -qtm)           QMAKE_PATH="$2"; shift 2;;
+    -qtb)           QTC_BRANCH="$2"; shift 2;;
+    -no-qtc-clean)  QTC_SKIP_CLEAN=1; shift 1;;
+    -no-qtr-clean)  QTR_SKIP_CLEAN=1; shift 1;;
+    -qtp)           QTC_PATH="$2";   shift 2;;
+    -v)             VERBOSE=1;       shift 1;;
+    *)              logGitHash
+                    logE "== Unknown $1 parameter!!!";
+                    printUsage;;
 esac
 done
 
@@ -450,17 +541,20 @@ if ([ "$RUN_TYPE" != "-u" ] &&
     [ "$RUN_TYPE" != "-ui" ] &&
     [ "$RUN_TYPE" != "-d" ] &&
     [ "$RUN_TYPE" != "-di" ]); then
+    logGitHash
     printUsage
 fi
 
-logE "== Output redirected to setup.log" 
-logE "== "
+# Change to working folder where we did run setup.sh from
+cd $QTR_DIR_PATH
+logP "== Output redirected to setup.log"
 setParameters
-deleteLog
 logGitHash
 checkPkgDependency
 checkParameters
-logEnvironment
+logOSInfo
+logEnvInfo
+logRQTEnvironment
 
 if [ -z $QTC_PATH ]; then
     buildQtCreator
@@ -469,6 +563,8 @@ fi
 buildROSQtCreatorPlugin
 finalStep
 
-logE "=="
-logE "== Success!!!"
-logE "=="
+logP "=="
+logP "== Success!!! Happy ROSing"
+logP "=="
+# Go back to original location
+cd $INIT_CWD &> /dev/null
