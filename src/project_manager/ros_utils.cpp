@@ -115,7 +115,6 @@ bool ROSUtils::initializeWorkspaceFolders(const WorkspaceInfo &workspaceInfo)
             return false;
         }
 
-#ifdef CREATE_FOLDERS
     if (!workspaceInfo.logPath.exists())
         if( ! QDir().mkpath(workspaceInfo.logPath.toString()) ) {
             qDebug() << "Failed ot initialize workspace folder: " << workspaceInfo.logPath.toString();
@@ -139,8 +138,6 @@ bool ROSUtils::initializeWorkspaceFolders(const WorkspaceInfo &workspaceInfo)
             qDebug() << "Failed ot initialize workspace folder: " << workspaceInfo.installPath.toString();
             return false;
         }
-
-#endif // CREATE_FOLDERS
 
     return true;
 }
