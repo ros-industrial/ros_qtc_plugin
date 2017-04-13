@@ -233,7 +233,6 @@ Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
 
     QString defaultPath = parameters.defaultPath();
 
-#ifdef CREATE_FOLDERS
     ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectExplorer::ProjectTree::currentProject());
 
     if( rosProject )
@@ -250,7 +249,6 @@ Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
                 defaultPath = workspaceInfo.sourcePath.toString();
         }
     }
-#endif
 
     m_wizard->setPath(defaultPath);
 
