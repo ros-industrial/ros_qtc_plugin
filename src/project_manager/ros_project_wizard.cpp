@@ -67,7 +67,7 @@ ROSProjectWizardDialog::ROSProjectWizardDialog(const Core::BaseFileWizardFactory
                                                        QWidget *parent) :
     Core::BaseFileWizard(factory, QVariantMap(), parent)
 {
-    setWindowTitle(tr("Import Existing ROS Project"));
+    setWindowTitle(tr("Creates New ROS Project"));
 
     // first page
     m_firstPage = new ROSImportWizardPage;
@@ -233,11 +233,11 @@ ROSProjectWizard::ROSProjectWizard()
     rosIcon.addPixmap(activePixmap, QIcon::Selected);
 
     setIcon(rosIcon);
-    setDisplayName(tr("Import ROS Workspace"));
+    setDisplayName(tr("ROS Workspace"));
     setId("Z.ROSIndustrial");
-    setDescription(tr("Used to import ROS Workspace."));
-    setCategory(QLatin1String(ProjectExplorer::Constants::IMPORT_WIZARD_CATEGORY));
-    setDisplayCategory(QLatin1String(ProjectExplorer::Constants::IMPORT_WIZARD_CATEGORY_DISPLAY));
+    setDescription(tr("Create ROS Workspace"));
+    setCategory(QLatin1String(ProjectExplorer::Constants::QT_PROJECT_WIZARD_CATEGORY));
+    setDisplayCategory(QLatin1String(ProjectExplorer::Constants::QT_PROJECT_WIZARD_CATEGORY_DISPLAY));
     setFlags(Core::IWizardFactory::PlatformIndependent);
 }
 

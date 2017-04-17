@@ -297,6 +297,11 @@ function buildQtCreator {
 
     $CMD &>> "$LOG_FILE"
 
+    if [ $? -gt 0 ]; then
+        logE "== ERROR: Last operation returned $?"
+        exit $?
+    fi
+
     # Build QT creator
     build
 }
@@ -430,9 +435,9 @@ if [ -z $QTC_PATH ]; then
     buildQtCreator
 fi
 
-buildROSQtCreatorPlugin
-finalStep
+#buildROSQtCreatorPlugin
+#finalStep
 
-logE "=="
-logE "== Success!!!"
-logE "=="
+#logE "=="
+#logE "== Success!!!"
+#logE "=="
