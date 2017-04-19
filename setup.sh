@@ -64,8 +64,8 @@ function cloneQtCreator {
     $CMD &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "== Operation canceled"
-            exit $?
+        logE "== ERROR Operation canceled"
+        exit $?
     fi
 }
 
@@ -75,7 +75,7 @@ function pullQtCreator {
     git $GIT_QUIET fetch &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "== Operation canceled"
+        logE "== ERROR Operation canceled"
         exit $?
     fi
 
@@ -83,7 +83,7 @@ function pullQtCreator {
     git $GIT_QUIET pull &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "== Operation canceled"
+        logE "== ERROR Operation canceled"
         exit $?
     fi
 }
@@ -98,8 +98,8 @@ function cloneROSQtPlugin {
     $CMD &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "==  Operation canceled"
-            exit $?
+        logE "==  ERROR Operation canceled"
+        exit $?
     fi
 }
 
@@ -113,7 +113,7 @@ function pullROSQtPlugin {
     git $GIT_QUIET fetch &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "==  Operation canceled"
+        logE "==  ERROR Operation canceled"
         exit $?
     fi
 
@@ -121,7 +121,7 @@ function pullROSQtPlugin {
     git $GIT_QUIET pull &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "==  Operation canceled"
+        logE "==  ERROR Operation canceled"
         exit $?
     fi
 }
@@ -142,8 +142,8 @@ function build {
     fi
 
     if [ $? -gt 0 ]; then
-        logE "== ERROR: Build failed: $?"
-            exit $?
+        logE "== ERROR Operation canceled"
+        exit $?
     fi
 }
 
@@ -256,8 +256,8 @@ function checkPkgDependency {
         sudo apt-get install $PKG_MISSING
 
         if [ $? -gt 0 ]; then
-            logE "== Operation canceled"
-                exit $?
+            logE "== ERROR Operation canceled"
+            exit $?
         fi
     fi
 }
@@ -298,7 +298,7 @@ function buildQtCreator {
     $CMD &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "== ERROR: Last operation returned $?"
+        logE "== ERROR Operation canceled"
         exit $?
     fi
 
@@ -354,8 +354,8 @@ function buildROSQtCreatorPlugin {
     $CMD &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "== ERROR: Last operation returned $?"
-            exit $?
+        logE "== ERROR Operation canceled"
+        exit $?
     fi
 
     # Build QT creator
@@ -389,8 +389,8 @@ function finalStep {
     sudo rm -f /usr/local/bin/qtcreator
 
     if [ $? -gt 0 ]; then
-        logE "== Operation canceled"
-            exit $?
+        logE "== ERROR Operation canceled"
+        exit $?
     fi
 
     sudo ln -s $QTC_BUILD/bin/qtcreator /usr/local/bin/qtcreator
@@ -435,9 +435,9 @@ if [ -z $QTC_PATH ]; then
     buildQtCreator
 fi
 
-#buildROSQtCreatorPlugin
-#finalStep
+buildROSQtCreatorPlugin
+finalStep
 
-#logE "=="
-#logE "== Success!!!"
-#logE "=="
+logE "=="
+logE "== Success!!!"
+logE "=="
