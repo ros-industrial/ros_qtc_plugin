@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SECONDS=0
+
 # Verbosity level
 VERBOSE=0
 CPU_CORES=`grep -c ^processor /proc/cpuinfo`
@@ -30,7 +32,7 @@ function printUsage {
     echo "  -ui      : run setup for users with debug info"
     echo "  -di      : run setup for developers with debug info"
     echo "  -qtb tag : build qt creator with branch/tag"
-    echo "  -qtp path: qtcreator path. If provided -qtb is unused"
+#   echo "  -qtp path: qtcreator path. If provided -qtb is unused"
     echo "  -qtm path: qmake path"
     echo "  -qtc     : skip make clean. Default clean"
     echo "  -v       : verbose mode"
@@ -54,6 +56,17 @@ function logP {
     printf "$1" | tee -a "$LOG_FILE"
 }
 
+function logDuration {
+    local duration=$SECONDS
+    logE "==  $(($duration / 3600)):$((($duration / 60) % 60)):$(($duration % 60)) elapsed"
+}
+
+function logError {
+    logE $1
+    logDuration
+    exit $?
+}
+
 function cloneQtCreator {
     logE "==  Cloning QT Creator $QTC_BRANCH. Stand by..."
 
@@ -64,28 +77,31 @@ function cloneQtCreator {
     $CMD &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "== ERROR Operation canceled"
-        exit $?
+        logError "== ERROR Operation canceled"
     fi
+
+    logDuration
 }
 
 function pullQtCreator {
     QPATH=$(basename "$PWD")
     logE "==  Fetching into $QPATH"
-    git $GIT_QUIET fetch &>> "$LOG_FILE"
+    git fetch $GIT_QUIET &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "== ERROR Operation canceled"
-        exit $?
+        logError "== ERROR Operation canceled"
     fi
+
+    logDuration 
 
     logE "==  Pulling into $QPATH"
-    git $GIT_QUIET pull &>> "$LOG_FILE"
+    git pull $GIT_QUIET &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "== ERROR Operation canceled"
-        exit $?
+        logError "== ERROR Operation canceled"
     fi
+
+    logDuration
 }
 
 function cloneROSQtPlugin {
@@ -98,9 +114,10 @@ function cloneROSQtPlugin {
     $CMD &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "==  ERROR Operation canceled"
-        exit $?
+        logError "==  ERROR Operation canceled"
     fi
+
+    logDuration
 }
 
 function pullROSQtPlugin {
@@ -113,42 +130,47 @@ function pullROSQtPlugin {
     git $GIT_QUIET fetch &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "==  ERROR Operation canceled"
-        exit $?
+        logError "==  ERROR Operation canceled"
     fi
 
     logE "==  Pulling into $QPATH"
     git $GIT_QUIET pull &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "==  ERROR Operation canceled"
-        exit $?
+        logError "==  ERROR Operation canceled"
     fi
 }
 
 function build {
-    if [ "$1" == "clean" ]; then
-        logE "== Cleaning project"
+    if [ "$2" == "clean" ]; then
+        logE "==  Cleaning project $1"
 
         if [ -e "Makefile" ]; then
             make clean &>> "$LOG_FILE"
+
+            if [ $? -gt 0 ]; then
+               logError "== ERROR Operation canceled"
+            fi
+
+            logDuration
         fi
     else
-        logE "== Building project"
+        logE "==  Building project $1"
 
         if [ -e "Makefile" ]; then
             make -j$CPU_CORES &>> "$LOG_FILE"
-        fi
-    fi
 
-    if [ $? -gt 0 ]; then
-        logE "== ERROR Operation canceled"
-        exit $?
+            if [ $? -gt 0 ]; then
+               logError "== ERROR Operation canceled"
+            fi
+
+            logDuration
+        fi
     fi
 }
 
 function logGitHash {
-    logE "== ros_qtc_plugin git Hash $GIT_HASH"
+    logE "== ROS Qt Plugin Git($GIT_HASH)"
 }
 
 function setParameters {
@@ -166,7 +188,7 @@ function setParameters {
     ROS_BUILD=$BASE_PATH/ros_qtc_plugin-build
     ROS_SOURCE=$BASE_PATH/ros_qtc_plugin
 
-    DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-ros.desktop
+    DESKTOP_FILE=$HOME/.local/share/applications/Qt-Creator-Ros.desktop
 
     LOG_FILE="$ROS_SOURCE/$LOG_FILE"
 }
@@ -218,46 +240,55 @@ function checkPkgDependency {
                         libqtermwidget57-0-dev 2>/dev/null | grep -c "ok installed")
     PKG_CATKIN_TOOLS=$(dpkg-query -W --showformat='${Status}\n'\
                         python-catkin-tools 2>/dev/null | grep -c "ok installed")
+    PKG_YAML_CPP_DEV=$(dpkg-query -W --showformat='${Status}\n'\
+                        libyaml-cpp-dev 2>/dev/null | grep -c "ok installed")
 
     if [[ $PKG_BLD_ESSENTIAL -eq 0 ]]; then
-        logP "== Missing        : "
+        logP "==  Missing        : "
         PKG_MISSING="$PKG_MISSING build-essential"
     else
-        logP "== Installed      : "
+        logP "==  Installed      : "
     fi
     logE "build-essential"
 
     if [[ $PKG_MESA_DEV -eq 0 ]]; then
-        logP "== Missing        : "
+        logP "==  Missing        : "
         PKG_MISSING="$PKG_MISSING libgl1-mesa-dev"
     else
-        logP "== Installed      : "
+        logP "==  Installed      : "
     fi
     logE "libgl1-mesa-dev"
 
     if [[ $PKG_QT_TERM -eq 0 ]]; then
-        logP "== Missing        : "
+        logP "==  Missing        : "
         PKG_MISSING="$PKG_MISSING libqtermwidget57-0-dev"
     else
-        logP "== Installed      : "
+        logP "==  Installed      : "
     fi
     logE "libqtermwidget57-0-dev"
 
     if [[ $PKG_CATKIN_TOOLS -eq 0 ]]; then
-        logP "== Missing        : "
+        logP "==  Missing        : "
         PKG_MISSING="$PKG_MISSING python-catkin-tools"
     else
-        logP "== Installed      : "
+        logP "==  Installed      : "
     fi
     logE "python-catkin-tools"
+
+    if [[ $PKG_YAML_CPP_DEV -eq 0 ]]; then
+        logP "==  Missing        : "
+        PKG_MISSING="$PKG_MISSING libyaml-cpp-dev"
+    else
+        logP "==  Installed      : "
+    fi
+    logE "libyaml-cpp-dev"
 
     if [ ! -z "$PKG_MISSING" ]; then
         logE "== Installing missing packages"
         sudo apt-get install $PKG_MISSING
 
         if [ $? -gt 0 ]; then
-            logE "== ERROR Operation canceled"
-            exit $?
+            logError "== ERROR Operation canceled"
         fi
     fi
 }
@@ -265,11 +296,12 @@ function checkPkgDependency {
 function buildQtCreator {
     # Clone Qt Creator and build it from source
     if [ ! -d "$QTC_SOURCE" ]; then
-        logE "== Cloning Qt Creator($QTC_BRANCH) from github.com"
+        logE "== Connecting to github.com"
         cd $BASE_PATH
         cloneQtCreator
     else
-        logE "== Fetching/Pulling Qt Creator from github.com"
+        logE "== Entering $BASE_PATH/qt-creator source path"
+        logE "== Updating Qt Creator from github.com"
         cd $BASE_PATH/qt-creator
         pullQtCreator
     fi
@@ -281,7 +313,7 @@ function buildQtCreator {
         logE "== Entering $QTC_BUILD build path"
         cd $QTC_BUILD
         if [[ $QTC_SKIP_CLEAN -eq 0 ]]; then
-            build clean
+            build QtCreator clean
         fi
     fi
 
@@ -298,12 +330,11 @@ function buildQtCreator {
     $CMD &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "== ERROR Operation canceled"
-        exit $?
+        logError "== ERROR Operation canceled"
     fi
 
     # Build QT creator
-    build
+    build QtCreator
 }
 
 function buildROSQtCreatorPlugin {
@@ -340,7 +371,7 @@ function buildROSQtCreatorPlugin {
     cd $ROS_BUILD
 
     if [[ $QTC_SKIP_CLEAN -eq 0 ]]; then
-        build clean
+        build ros_qtc_plugin clean
     fi
 
     if ([ "$RUN_TYPE" == "-u" ] || [ "$RUN_TYPE" == "-d" ]); then
@@ -354,12 +385,11 @@ function buildROSQtCreatorPlugin {
     $CMD &>> "$LOG_FILE"
 
     if [ $? -gt 0 ]; then
-        logE "== ERROR Operation canceled"
-        exit $?
+        logError "== ERROR Operation canceled"
     fi
 
     # Build QT creator
-    build
+    build ros_qtc_plugin
 }
 
 function finalStep {
@@ -389,8 +419,7 @@ function finalStep {
     sudo rm -f /usr/local/bin/qtcreator
 
     if [ $? -gt 0 ]; then
-        logE "== ERROR Operation canceled"
-        exit $?
+        logError "== ERROR Operation canceled"
     fi
 
     sudo ln -s $QTC_BUILD/bin/qtcreator /usr/local/bin/qtcreator
@@ -424,6 +453,8 @@ if ([ "$RUN_TYPE" != "-u" ] &&
     printUsage
 fi
 
+logE "== Output redirected to setup.log" 
+logE "== "
 setParameters
 deleteLog
 logGitHash
