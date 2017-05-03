@@ -1,3 +1,10 @@
+qt57creator-plugin-ros (0.1.5-0xenial10) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * ARM64 Release
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Wed, 3 May 2017 07:07:09 -0500
+
 qt57creator-plugin-ros (0.1.5-0xenial7) xenial; urgency=high
 
   [ Levi Armstrong ]
