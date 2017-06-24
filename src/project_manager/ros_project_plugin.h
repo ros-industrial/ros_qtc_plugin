@@ -56,6 +56,11 @@ private slots:
      */
     void removeProjectDirectory();
 
+    /**
+     * @brief This will rename file in the project tree.
+     */
+    void renameFile();
+
 private:
 
     /**

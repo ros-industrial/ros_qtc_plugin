@@ -25,6 +25,7 @@
 #include <QProcessEnvironment>
 #include <QXmlStreamWriter>
 #include <utils/fileutils.h>
+#include "ros_project_constants.h"
 
 namespace ROSProjectManager {
 namespace Internal {

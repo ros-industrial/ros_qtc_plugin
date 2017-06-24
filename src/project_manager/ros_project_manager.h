@@ -21,7 +21,13 @@
 #ifndef ROSPROJECTMANAGER_H
 #define ROSPROJECTMANAGER_H
 
-#include <projectexplorer/iprojectmanager.h>
+#include "ros_project_constants.h"
+
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
+    #include <projectexplorer/iprojectmanager.h>
+#else
+    #include <projectexplorer/project.h>
+#endif
 #include <projectexplorer/processparameters.h>
 #include <qtermwidget5/qtermwidget.h>
 #include "ros_terminal_pane.h"
@@ -31,7 +37,11 @@ namespace Internal {
 
 class ROSProject;
 
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
 class ROSManager : public ProjectExplorer::IProjectManager
+#else
+class ROSManager : public ProjectExplorer::Project
+#endif
 {
     Q_OBJECT
 
