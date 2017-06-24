@@ -33,7 +33,6 @@
 #include <cpptools/cpptoolsconstants.h>
 #include <cpptools/cppmodelmanager.h>
 #include <cpptools/projectinfo.h>
-#include <cpptools/projectpartbuilder.h>
 #include <cpptools/projectpartheaderpath.h>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/abi.h>
@@ -53,6 +52,13 @@
 #include <QProcessEnvironment>
 #include <QtXml/QDomDocument>
 
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
+    #include <cpptools/projectpartbuilder.h>
+#else
+    #include <cpptools/cpprawprojectpart.h>
+    #include <cpptools/cppprojectupdater.h>
+#endif
+
 using namespace Core;
 using namespace ProjectExplorer;
 
@@ -65,21 +71,28 @@ namespace Internal {
 //
 ////////////////////////////////////////////////////////////////////////////////////
 
-ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
-  : m_workspaceWatcher(new ROSWorkspaceWatcher(this))
+ROSProject::ROSProject(const Utils::FileName &fileName) :
+#if QT_CREATOR_VER >= QT_CREATOR_VER_CHECK(4,3,0)
+    ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName),
+    m_cppCodeModelUpdater(new CppTools::CppProjectUpdater(this)),
+#endif
+    m_workspaceWatcher(new ROSWorkspaceWatcher(this))
 {
     setId(Constants::ROS_PROJECT_ID);
-    setProjectManager(manager);
 
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
     setDocument(new ROSProjectFile(this, fileName));
+#endif
+
     DocumentManager::addDocument(document(), true);
 
     ROSProjectNode *project_node = new ROSProjectNode(this->projectFilePath());
     setRootProjectNode(project_node);
 
     setProjectContext(Context(Constants::ROS_PROJECT_CONTEXT));
-    setProjectLanguages(Context(ProjectExplorer::Constants::LANG_CXX));
 
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
+    setProjectLanguages(Context(ProjectExplorer::Constants::LANG_CXX));
     m_projectName = projectFilePath().toFileInfo().completeBaseName();
 
     FileNode *projectWorkspaceNode = new FileNode(projectFilePath(),
@@ -87,8 +100,16 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
                                                    /* generated = */ false);
 
     rootProjectNode()->addFileNodes(QList<FileNode *>() << projectWorkspaceNode);
+#else
+    setProjectLanguages(Context(ProjectExplorer::Constants::CXX_LANGUAGE_ID));
+    setDisplayName(projectFilePath().toFileInfo().completeBaseName());
 
-    projectManager()->registerProject(this);
+    FileNode *projectWorkspaceNode = new FileNode(projectFilePath(),
+                                                  FileType::Project,
+                                                   /* generated = */ false);
+
+    rootProjectNode()->addNode(projectWorkspaceNode);
+#endif
 
     refresh();
 
@@ -105,9 +126,28 @@ ROSProject::ROSProject(ROSManager *manager, const QString &fileName)
 
 ROSProject::~ROSProject()
 {
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
     m_codeModelFuture.cancel();
+#else
+    delete m_cppCodeModelUpdater;
+    m_cppCodeModelUpdater = nullptr;
+#endif
+
     m_projectFutureInterface->cancel();
     projectManager()->unregisterProject(this);
+}
+
+void ROSProject::setProjectManager(ROSManager* manager)
+{
+#if QT_CREATOR_VER >= QT_CREATOR_VER_CHECK(4,3,0)
+    m_manager = manager;
+#else
+    setProjectManager(manager);
+#endif
+
+    projectManager()->registerProject(this);
+
+    refresh();
 }
 
 bool ROSProject::saveProjectFile()
@@ -231,14 +271,22 @@ void ROSProject::refreshCppCodeModel()
 {
     update();
 
-    ToolChain *toolChain = ToolChainKitInformation::toolChain(activeTarget()->kit(), ToolChain::Language::Cxx);
-    const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(activeTarget()->kit());
+    const Kit *k = nullptr;
 
-    CppTools::CppModelManager *modelManager = CppTools::CppModelManager::instance();
+    if (Target *target = activeTarget())
+        k = target->kit();
+    else
+        k = KitManager::defaultKit();
 
+    QTC_ASSERT(k, return);
+
+    const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(k);
+
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
     m_codeModelFuture.cancel(); // This may need to be removed
-
-    CppTools::ProjectInfo pInfo(this);
+#else
+    m_cppCodeModelUpdater->cancel();
+#endif
 
     CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
     if (QtSupport::BaseQtVersion *qtVersion =
@@ -249,7 +297,13 @@ void ROSProject::refreshCppCodeModel()
             activeQtVersion = CppTools::ProjectPart::Qt5;
     }
 
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
+    CppTools::CppModelManager *modelManager = CppTools::CppModelManager::instance();
+
+    CppTools::ProjectInfo pInfo(this);
+
     QStringList workspaceFiles = m_workspaceWatcher->getWorkspaceFiles();
+    ToolChain *toolChain = ToolChainKitInformation::toolChain(activeTarget()->kit(), ToolChain::Language::Cxx);
 
     foreach(ROSUtils::PackageBuildInfo buildInfo, m_wsPackageBuildInfo)
     {
@@ -279,13 +333,56 @@ void ROSProject::refreshCppCodeModel()
                 setProjectLanguage(language, true);
         }
     }
+
     pInfo.finish();
     m_codeModelFuture = modelManager->updateProjectInfo(pInfo);
-}
+#else
+    CppTools::RawProjectParts rpps;
 
-QString ROSProject::displayName() const
-{
-    return m_projectName;
+    QStringList workspaceFiles = m_workspaceWatcher->getWorkspaceFiles();
+
+    ToolChain *cToolChain = ToolChainKitInformation::toolChain(k,
+                                                               ProjectExplorer::Constants::C_LANGUAGE_ID);
+    ToolChain *cxxToolChain = ToolChainKitInformation::toolChain(k,
+                                                               ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+
+    foreach(ROSUtils::PackageBuildInfo buildInfo, m_wsPackageBuildInfo)
+    {
+        QStringList packageFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
+
+        foreach(ROSUtils::PackageTargetInfo targetInfo, buildInfo.targets)
+        {
+            CppTools::RawProjectPart rpp;
+
+            rpp.setDisplayName(targetInfo.name);
+            rpp.setQtVersion(activeQtVersion);
+
+            QSet<QString> toolChainIncludes;
+            foreach (const HeaderPath &hp, cxxToolChain->systemHeaderPaths(targetInfo.flags, sysRoot))
+                toolChainIncludes.insert(hp.path());
+
+            QStringList includePaths;
+            foreach (const QString &i, targetInfo.includes) {
+                if (!toolChainIncludes.contains(i))
+                    includePaths.append(i);
+            }
+
+            rpp.setIncludePaths(includePaths);
+            rpp.setFlagsForCxx({cxxToolChain, targetInfo.flags});
+
+            //const QList<Id> languages = ppBuilder.createProjectPartsForFiles(packageFiles);
+            //foreach (Id language, languages)
+            //    setProjectLanguage(language, true);
+
+            setProjectLanguage( ProjectExplorer::Constants::CXX_LANGUAGE_ID, true);
+
+            rpps.append(rpp);
+        }
+    }
+
+    //CppTools::GeneratedCodeModelSupport::update(generators);
+    m_cppCodeModelUpdater->update({this, cToolChain, cxxToolChain, k, rpps});
+#endif
 }
 
 QStringList ROSProject::files(FilesMode fileMode) const
@@ -296,7 +393,11 @@ QStringList ROSProject::files(FilesMode fileMode) const
 
 ROSManager *ROSProject::projectManager() const
 {
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
   return static_cast<ROSManager *>(Project::projectManager());
+#else
+  return m_manager;
+#endif
 }
 
 Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *errorMessage)
@@ -344,13 +445,13 @@ void ROSProject::buildQueueFinished(bool success)
 //
 ////////////////////////////////////////////////////////////////////////////////////
 
-ROSProjectFile::ROSProjectFile(ROSProject *parent, QString fileName)
+ROSProjectFile::ROSProjectFile(ROSProject *parent, const Utils::FileName& fileName)
     : IDocument(parent),
       m_project(parent)
 {
     setId(Constants::ROS_PROJECT_FILE_ID);
     setMimeType(QLatin1String(Constants::ROS_MIME_TYPE));
-    setFilePath(Utils::FileName::fromString(fileName));
+    setFilePath(fileName);
 }
 
 bool ROSProjectFile::save(QString *, const QString &, bool)

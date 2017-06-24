@@ -38,7 +38,7 @@
 #include <qtsupport/qtkitinformation.h>
 #include <qtsupport/qtoutputformatter.h>
 #include <qtsupport/qtsupportconstants.h>
-
+ 
 #include <utils/fileutils.h>
 #include <utils/mimetypes/mimedatabase.h>
 #include <utils/qtcprocess.h>
@@ -306,11 +306,17 @@ RunControl *ROSRunControlFactory::create(RunConfiguration *rc, Core::Id mode,
   \class ROSRunControl https://github.com/qtproject/qt-creator/blob/66bdd60947b946b8aa30141e3871f33226f0cc37/src/plugins/remotelinux/remotelinuxruncontrol.cpp
 */
 
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
+    typedef DeviceApplicationRunner APP_RUNNER;
+#else
+    typedef ApplicationLauncher APP_RUNNER;
+#endif
+
 class ROSRunControl::ROSRunControlPrivate
 {
 public:
     bool running;
-    DeviceApplicationRunner runner;
+    APP_RUNNER runner;
     IDevice::ConstPtr device;
     QString remoteExecutable;
     QString arguments;
@@ -391,7 +397,12 @@ void ROSRunControl::handleRunnerFinished()
 {
     d->runner.disconnect(this);
     d->running = false;
+
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
     emit finished();
+#else
+    reportApplicationStop();
+#endif
 }
 
 void ROSRunControl::handleRemoteOutput(const QByteArray &output)
@@ -409,10 +420,12 @@ void ROSRunControl::handleProgressReport(const QString &progressString)
     appendMessage(progressString + QLatin1Char('\n'), Utils::NormalMessageFormat);
 }
 
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
 bool ROSRunControl::isRunning() const
 {
   return d->running;
 }
+#endif
 
 
 } // namespace Internal

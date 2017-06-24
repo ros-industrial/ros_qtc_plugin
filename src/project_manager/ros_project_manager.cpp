@@ -38,6 +38,9 @@ namespace Internal {
 static ROSManager *m_instance = 0;
 
 ROSManager::ROSManager()
+#if QT_CREATOR_VER >= QT_CREATOR_VER_CHECK(4,3,0)
+    : ProjectExplorer::Project(Constants::ROS_MIME_TYPE, Utils::FileName::fromString(""))
+#endif
 {
   m_instance = this;
   m_terminalPane = new ROSTerminalPane();
@@ -70,7 +73,9 @@ ProjectExplorer::Project *ROSManager::openProject(const QString &fileName, QStri
         return 0;
     }
 
-    return new ROSProject(this, fileName);
+    ROSProject *rosProject = new ROSProject(Utils::FileName::fromString(fileName));
+    rosProject->setProjectManager(this);
+    return rosProject;
 }
 
 void ROSManager::registerProject(ROSProject *project)

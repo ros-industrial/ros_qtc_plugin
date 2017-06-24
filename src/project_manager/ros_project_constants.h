@@ -21,6 +21,14 @@
 #ifndef ROSPROJECTCONSTANTS_H
 #define ROSPROJECTCONSTANTS_H
 #include <QStringList>
+// Import Qt Creator Versions
+#include <app/app_version.h>
+
+#define APP_VERSION ((IDE_VERSION_MAJOR << 16)|(IDE_VERSION_MINOR << 8)|(IDE_VERSION_RELEASE))
+#define APP_VERSION_CHECK(_major, _minor, _patch) ((_major << 16)|(_minor << 8)|(_patch))
+
+#define QT_CREATOR_VER ((IDE_VERSION_MAJOR << 16)|(IDE_VERSION_MINOR << 8)|(IDE_VERSION_RELEASE))
+#define QT_CREATOR_VER_CHECK(major, minor, patch) ((major << 16)|(minor << 8)|(patch))
 
 namespace ROSProjectManager {
 namespace Constants {
@@ -42,6 +50,7 @@ const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
 // Context menu actions
 const char ROS_RELOAD_BUILD_INFO[] = "ROSProjectManager.reloadProjectBuildInfo";
 const char ROS_REMOVE_DIR[] = "ROSProjectManager.removeDirectory";
+const char ROS_RENAME_FILE[] = "ROSProjectManager.renameFile";
 
 // ROS wizards constants
 const char ROS_WIZARD_CATEGORY[] = "A.ROS";

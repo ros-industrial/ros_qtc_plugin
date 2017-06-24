@@ -38,6 +38,10 @@
 #include <QFuture>
 #include <QFutureInterface>
 
+namespace CppTools {
+    class CppProjectUpdater;
+}
+
 namespace ROSProjectManager {
 namespace Internal {
 
@@ -50,12 +54,20 @@ class ROSProject : public ProjectExplorer::Project
     friend class ROSProjectPlugin;
 
 public:
-    ROSProject(ROSManager *manager, const QString &filename);
+    //ROSProject(ROSManager *manager, const QString &filename);
+    ROSProject(const Utils::FileName &filename);
     ~ROSProject() override;
 
-    QString displayName() const override;
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
+    QString displayName() const override { return m_projectName; }
     ROSManager *projectManager() const override;
     QStringList files(FilesMode fileMode) const override;
+#else
+    ROSManager *projectManager() const;
+    QStringList files(FilesMode fileMode) const;
+#endif
+
+    void setProjectManager(ROSManager* manager);
 
     void refresh();
 
@@ -70,7 +82,7 @@ public slots:
     void buildQueueFinished(bool success);
 
 protected:
-    Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage);
+    Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage) override;
 
 private:
     bool saveProjectFile();
@@ -80,14 +92,24 @@ private:
     void refreshCppCodeModel();
     void repositoryChanged(const QString &repository);
 
-    QString m_projectName;
     ROSUtils::ROSProjectFileContent m_projectFileContent;
-    ROSWorkspaceWatcher *m_workspaceWatcher;
-    QFuture<void> m_codeModelFuture;
-    QFutureInterface<void> *m_projectFutureInterface = nullptr;
-    ROSUtils::PackageInfoMap m_wsPackageInfo;
+    QFutureInterface<void>     *m_projectFutureInterface = nullptr;
+    ROSUtils::PackageInfoMap    m_wsPackageInfo;
     ROSUtils::PackageBuildInfoMap m_wsPackageBuildInfo;
-    Utils::Environment m_wsEnvironment;
+    Utils::Environment          m_wsEnvironment;
+
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
+    QFuture<void>               m_codeModelFuture;
+    QString                     m_projectName;
+#else
+    CppTools::CppProjectUpdater *m_cppCodeModelUpdater;
+    /// RJG TODO: Check who will release it
+    ROSManager                  *m_manager;
+#endif
+
+    // Moved here so ctor init order is correct
+    // else on >= 4.3.0 you will see compilation warrning -Wreorder
+    ROSWorkspaceWatcher         *m_workspaceWatcher;
 };
 
 class ROSProjectFile : public Core::IDocument
@@ -95,7 +117,7 @@ class ROSProjectFile : public Core::IDocument
     Q_OBJECT
 
 public:
-    ROSProjectFile(ROSProject *parent, QString fileName);
+    ROSProjectFile(ROSProject *parent, const Utils::FileName& fileName);
 
     bool save(QString *errorString, const QString &fileName, bool autoSave) override;
 
@@ -108,8 +130,6 @@ public:
 private:
     ROSProject *m_project;
 };
-
-
 
 } // namespace Internal
 } // namespace ROSProjectManager
