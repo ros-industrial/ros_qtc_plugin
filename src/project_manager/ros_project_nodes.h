@@ -42,7 +42,11 @@ public:
 
     bool showInSimpleTree() const override;
 
+#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
     QList<ProjectExplorer::ProjectAction> supportedActions(Node *node) const override;
+#else
+    bool supportsAction(ProjectExplorer::ProjectAction action, Node *node) const override;
+#endif
 
     //These are now handled by the ROSProject manager.
     bool addFiles(const QStringList &filePaths, QStringList *notAdded = 0) override {Q_UNUSED(filePaths); Q_UNUSED(notAdded); return true;}
