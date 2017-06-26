@@ -67,7 +67,7 @@ public:
     QStringList files(FilesMode fileMode) const;
 #endif
 
-    void setProjectManager(ROSManager* manager);
+    void settManager(ROSManager* manager);
 
     void refresh();
 
