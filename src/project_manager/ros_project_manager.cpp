@@ -74,7 +74,7 @@ ProjectExplorer::Project *ROSManager::openProject(const QString &fileName, QStri
     }
 
     ROSProject *rosProject = new ROSProject(Utils::FileName::fromString(fileName));
-    rosProject->setProjectManager(this);
+    rosProject->settManager(this);
     return rosProject;
 }
 

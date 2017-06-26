@@ -137,7 +137,7 @@ ROSProject::~ROSProject()
     projectManager()->unregisterProject(this);
 }
 
-void ROSProject::setProjectManager(ROSManager* manager)
+void ROSProject::settManager(ROSManager* manager)
 {
 #if QT_CREATOR_VER >= QT_CREATOR_VER_CHECK(4,3,0)
     m_manager = manager;
