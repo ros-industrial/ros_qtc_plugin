@@ -58,16 +58,8 @@ public:
     ROSProject(const Utils::FileName &filename);
     ~ROSProject() override;
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    QString displayName() const override { return m_projectName; }
-    ROSManager *projectManager() const override;
-    QStringList files(FilesMode fileMode) const override;
-#else
     ROSManager *projectManager() const;
     QStringList files(FilesMode fileMode) const;
-#endif
-
-    void settManager(ROSManager* manager);
 
     void refresh();
 
@@ -93,42 +85,13 @@ private:
     void repositoryChanged(const QString &repository);
 
     ROSUtils::ROSProjectFileContent m_projectFileContent;
-    QFutureInterface<void>     *m_projectFutureInterface = nullptr;
-    ROSUtils::PackageInfoMap    m_wsPackageInfo;
-    ROSUtils::PackageBuildInfoMap m_wsPackageBuildInfo;
-    Utils::Environment          m_wsEnvironment;
+    QFutureInterface<void>         *m_projectFutureInterface = nullptr;
+    ROSUtils::PackageInfoMap        m_wsPackageInfo;
+    ROSUtils::PackageBuildInfoMap   m_wsPackageBuildInfo;
+    Utils::Environment              m_wsEnvironment;
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    QFuture<void>               m_codeModelFuture;
-    QString                     m_projectName;
-#else
     CppTools::CppProjectUpdater *m_cppCodeModelUpdater;
-    /// RJG TODO: Check who will release it
-    ROSManager                  *m_manager;
-#endif
-
-    // Moved here so ctor init order is correct
-    // else on >= 4.3.0 you will see compilation warrning -Wreorder
     ROSWorkspaceWatcher         *m_workspaceWatcher;
-};
-
-class ROSProjectFile : public Core::IDocument
-{
-    Q_OBJECT
-
-public:
-    ROSProjectFile(ROSProject *parent, const Utils::FileName& fileName);
-
-    bool save(QString *errorString, const QString &fileName, bool autoSave) override;
-
-    bool isModified() const override;
-    bool isSaveAsAllowed() const override;
-
-    ReloadBehavior reloadBehavior(ChangeTrigger state, ChangeType type) const override;
-    bool reload(QString *errorString, ReloadFlag flag, ChangeType type) override;
-
-private:
-    ROSProject *m_project;
 };
 
 } // namespace Internal

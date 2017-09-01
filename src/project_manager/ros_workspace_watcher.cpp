@@ -22,6 +22,8 @@
 #include "ros_project_constants.h"
 #include "ros_project.h"
 
+#include <projectexplorer/projecttree.h>
+
 #include <QDebug>
 
 namespace ROSProjectManager {
@@ -62,6 +64,7 @@ void ROSWorkspaceWatcher::watchFolder(const QString &parentPath, const QString &
   m_watcher.addPaths(subDirectories);
   m_workspaceContent.unite(newDirContent);
   m_workspaceFiles.append(files);
+  ProjectExplorer::ProjectTree::emitSubtreeChanged(m_project->rootProjectNode());
   emit fileListChanged();
 }
 
@@ -83,6 +86,7 @@ void ROSWorkspaceWatcher::unwatchFolder(const QString &parentPath, const QString
       m_workspaceContent.remove(item.key());
     }
   }
+  ProjectExplorer::ProjectTree::emitSubtreeChanged(m_project->rootProjectNode());
   emit fileListChanged();
 }
 
@@ -180,6 +184,7 @@ void ROSWorkspaceWatcher::onFolderChanged(const QString &path)
         }
       }
     }
+    ProjectExplorer::ProjectTree::emitSubtreeChanged(m_project->rootProjectNode());
     emit fileListChanged();
   }
 

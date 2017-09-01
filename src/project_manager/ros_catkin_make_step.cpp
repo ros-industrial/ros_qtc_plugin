@@ -111,11 +111,8 @@ bool ROSCatkinMakeStep::init(QList<const BuildStep *> &earlierSteps)
     if (!bc)
         emit addTask(Task::buildConfigurationMissingTask());
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    ToolChain *tc = ToolChainKitInformation::toolChain(target()->kit(), ToolChain::Language::Cxx);
-#else
+
     ToolChain *tc = ToolChainKitInformation::toolChain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
-#endif
 
     if (!tc)
         emit addTask(Task::compilerMissingTask());
