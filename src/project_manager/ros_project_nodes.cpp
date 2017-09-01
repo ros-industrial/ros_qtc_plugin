@@ -48,11 +48,7 @@ bool ROSProjectNode::removeFile(const QString &parentPath, const QString &fileNa
   {
       if (fn->filePath().fileName() == fileName)
       {
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-          folder->removeFileNodes(QList<FileNode *>() << fn);
-#else
           folder->removeNode(fn);
-#endif
           return true;
       }
   }
@@ -67,30 +63,17 @@ bool ROSProjectNode::addFile(const QString &parentPath, const QString &fileName)
 
   QFileInfo fileInfo(QDir(parentPath), fileName);
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-  FileType fileType = ResourceType;
-
-  if (Constants::SOURCE_FILE_EXTENSIONS.contains(fileInfo.suffix()))
-    fileType = HeaderType;
-  else if(Constants::HEADER_FILE_EXTENSIONS.contains(fileInfo.suffix()))
-    fileType = SourceType;
-#else
   FileType fileType = FileType::Resource;
 
   if (Constants::SOURCE_FILE_EXTENSIONS.contains(fileInfo.suffix()))
     fileType = FileType::Header;
   else if(Constants::HEADER_FILE_EXTENSIONS.contains(fileInfo.suffix()))
     fileType = FileType::Source;
-#endif
 
   FileNode *fileNode = new FileNode(Utils::FileName::fromString(fileInfo.absoluteFilePath()),
                                     fileType, /*generated = */ false);
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-  folder->addFileNodes(QList<FileNode *>() << fileNode);
-#else
   folder->addNode(fileNode);
-#endif
   return true;
 }
 
@@ -112,20 +95,11 @@ bool ROSProjectNode::renameFile(const QString &parentPath, const QString &oldFil
 bool ROSProjectNode::removeDirectory(const QString &parentPath, const QString &dirName)
 {
   FolderNode *folder = findFolderbyAbsolutePath(parentPath);
-
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-  foreach (FolderNode *fn, folder->subFolderNodes())
-#else
   foreach (FolderNode *fn, folder->folderNodes())
-#endif
   {
       if (getFolderName(fn) == dirName)
       {
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-        folder->removeFolderNodes(QList<FolderNode *>() << fn);
-#else
         folder->removeNode(fn);
-#endif
         return true;
       }
   }
@@ -170,21 +144,17 @@ void ROSProjectNode::renameDirectoryHelper(FolderNode * &folder)
   }
 
   // Update subFolders
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-  foreach(FolderNode *fn, folder->subFolderNodes())
-#else
-  foreach(FolderNode *fn, folder->folderNodes())
-#endif
-  {
+  foreach(FolderNode *fn, folder->folderNodes()) {
     QString newFilePath = folder->filePath().toString() + getFolderName(fn) + QLatin1Char('/');
     fn->setAbsoluteFilePathAndLine(Utils::FileName::fromString(newFilePath), -1);
     renameDirectoryHelper(fn);
   }
 }
 
-FolderNode *ROSProjectNode::findFolderbyAbsolutePath(const QString &absolutePath) const
+FolderNode *ROSProjectNode::findFolderbyAbsolutePath(const QString &absolutePath)
 {
-  if (filePath().parentDir().toString() != absolutePath)
+  Utils::FileName temp = filePath().parentDir();
+  if (temp.toString() != absolutePath)
   {
     Utils::FileName folder = Utils::FileName::fromString(absolutePath);
     FolderNode *parent = findFolderbyAbsolutePath(folder.parentDir().toString());
@@ -192,12 +162,7 @@ FolderNode *ROSProjectNode::findFolderbyAbsolutePath(const QString &absolutePath
     if (!parent)
         return 0;
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    foreach (FolderNode *fn, parent->subFolderNodes())
-#else
-    foreach (FolderNode *fn, parent->folderNodes())
-#endif
-    {
+    foreach (FolderNode *fn, parent->folderNodes()) {
         if (fn->filePath().toString() == (absolutePath + QLatin1Char('/')))
             return fn;
     }
@@ -206,11 +171,7 @@ FolderNode *ROSProjectNode::findFolderbyAbsolutePath(const QString &absolutePath
   }
   else
   {
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    return projectNode()->asFolderNode();
-#else
-    return projectNode(Utils::FileName::fromString(absolutePath))->asFolderNode();
-#endif
+    return asFolderNode();
   }
 }
 
@@ -225,12 +186,7 @@ FolderNode *ROSProjectNode::createFolderbyAbsolutePath(const QString &absolutePa
   if (!parent)
       parent = createFolderbyAbsolutePath(folder.parentDir().toString());
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-  parent->addFolderNodes(QList<FolderNode*>() << folderNode);
-#else
   parent->addNode(folderNode);
-#endif
-
   return folderNode;
 }
 
@@ -239,18 +195,6 @@ bool ROSProjectNode::showInSimpleTree() const
     return true;
 }
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-QList<ProjectAction> ROSProjectNode::supportedActions(Node *node) const
-{
-    Q_UNUSED(node);
-    return QList<ProjectAction>()
-        << AddNewFile
-        << AddExistingFile
-        << AddExistingDirectory
-        << RemoveFile
-        << Rename;
-}
-#else
 bool ROSProjectNode::supportsAction(ProjectExplorer::ProjectAction action, Node *node) const
 {
     switch (node->nodeType())
@@ -268,8 +212,6 @@ bool ROSProjectNode::supportsAction(ProjectExplorer::ProjectAction action, Node 
     }
 }
 
-#endif
-
 bool ROSProjectNode::hasVersionControl(const QString &absolutePath, QString &vcsTopic) const
 {
   if (Core::IVersionControl *vc = Core::VcsManager::findVersionControlForDirectory(absolutePath))
@@ -283,12 +225,12 @@ bool ROSProjectNode::hasVersionControl(const QString &absolutePath, QString &vcs
   return false;
 }
 
-void ROSProjectNode::updateVersionControlInfo(const QString &absolutePath) const
+void ROSProjectNode::updateVersionControlInfo(const QString &absolutePath)
 {
   updateVersionControlInfoHelper(findFolderbyAbsolutePath(absolutePath));
 }
 
-void ROSProjectNode::updateVersionControlInfoHelper(FolderNode *folderNode) const
+void ROSProjectNode::updateVersionControlInfoHelper(FolderNode *folderNode)
 {
   QString branch;
   if (hasVersionControl(getFolderPath(folderNode), branch))

@@ -42,11 +42,7 @@ public:
 
     bool showInSimpleTree() const override;
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    QList<ProjectExplorer::ProjectAction> supportedActions(Node *node) const override;
-#else
     bool supportsAction(ProjectExplorer::ProjectAction action, Node *node) const override;
-#endif
 
     //These are now handled by the ROSProject manager.
     bool addFiles(const QStringList &filePaths, QStringList *notAdded = 0) override {Q_UNUSED(filePaths); Q_UNUSED(notAdded); return true;}
@@ -62,15 +58,14 @@ public:
     bool addDirectory(const QString &parentPath, const QString &dirName);
     bool addDirectory(const QString &dirPath);
     bool renameDirectory(const QString &parentPath, const QString &oldDirName, const QString &newDirName); 
-    void updateVersionControlInfo(const QString &absolutePath) const;
-
+    void updateVersionControlInfo(const QString &absolutePath);
 
 private:
     void renameDirectoryHelper(FolderNode *&folder);
-    FolderNode *findFolderbyAbsolutePath(const QString &absolutePath) const;
+    FolderNode *findFolderbyAbsolutePath(const QString &absolutePath);
     FolderNode *createFolderbyAbsolutePath(const QString &absolutePath);
     bool hasVersionControl(const QString &absolutePath, QString &vcsTopic) const;
-    void updateVersionControlInfoHelper(FolderNode *folderNode) const;
+    void updateVersionControlInfoHelper(FolderNode *folderNode);
     QString getFolderName(FolderNode *folderNode) const;
     QString getFolderPath(FolderNode *folderNode) const;
 };

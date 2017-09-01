@@ -162,15 +162,10 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableBuilds(const Target *p
 
 int ROSBuildConfigurationFactory::priority(const Kit *k, const QString &projectPath) const
 {
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    Utils::MimeDatabase mdb;
 
-    if (k && mdb.mimeTypeForFile(projectPath).matchesName(QLatin1String(Constants::ROS_MIME_TYPE)))
+    if (k && Utils::mimeTypeForFile(projectPath).matchesName(QLatin1String(Constants::ROS_MIME_TYPE)))
         return 0;
-#else
-    if (k && Utils::mimeTypeForFile(projectPath).matchesName(QLatin1String(Constants::ROS_MIME_TYPE) ))
-        return 0;
-#endif
+
 
     return -1;
 }

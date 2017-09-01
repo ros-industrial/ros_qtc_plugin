@@ -38,9 +38,6 @@ namespace Internal {
 static ROSManager *m_instance = 0;
 
 ROSManager::ROSManager()
-#if QT_CREATOR_VER >= QT_CREATOR_VER_CHECK(4,3,0)
-    : ProjectExplorer::Project(Constants::ROS_MIME_TYPE, Utils::FileName::fromString(""))
-#endif
 {
   m_instance = this;
   m_terminalPane = new ROSTerminalPane();
@@ -57,35 +54,6 @@ ROSManager::~ROSManager()
 ROSManager *ROSManager::instance()
 {
   return m_instance;
-}
-
-QString ROSManager::mimeType() const
-{
-    return QLatin1String(Constants::ROS_MIME_TYPE);
-}
-
-ProjectExplorer::Project *ROSManager::openProject(const QString &fileName, QString *errorString)
-{
-    if (!QFileInfo(fileName).isFile()) {
-        if (errorString)
-            *errorString = tr("Failed opening project \"%1\": Project is not a file.")
-                .arg(fileName);
-        return 0;
-    }
-
-    ROSProject *rosProject = new ROSProject(Utils::FileName::fromString(fileName));
-    rosProject->settManager(this);
-    return rosProject;
-}
-
-void ROSManager::registerProject(ROSProject *project)
-{
-    m_projects.append(project);
-}
-
-void ROSManager::unregisterProject(ROSProject *project)
-{
-    m_projects.removeAll(project);
 }
 
 QTermWidget &ROSManager::startTerminal(int startnow, const QString name)
