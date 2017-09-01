@@ -49,6 +49,7 @@
 #include <texteditor/tabsettings.h>
 #include <texteditor/texteditorsettings.h>
 
+#include <projectexplorer/projectmanager.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/projecttree.h>
 #include <projectexplorer/selectablefilesmodel.h>
@@ -60,10 +61,6 @@
 #include <projectexplorer/compileoutputwindow.h>
 #include <projectexplorer/appoutputpane.h>
 #include <projectexplorer/projecttreewidget.h>
-
-#if QT_CREATOR_VER >= QT_CREATOR_VER_CHECK(4,3,0)
-    #include <projectexplorer/projectmanager.h>
-#endif
 
 #include <extensionsystem/pluginmanager.h>
 #include <extensionsystem/invoker.h>
@@ -87,9 +84,6 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
 {
     Q_UNUSED(errorMessage);
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    Utils::MimeDatabase::addMimeTypes(QLatin1String(":rosproject/ROSProjectManager.mimetypes.xml"));
-#else
     QFile mimeFilePath(":rosproject/ROSProjectManager.mimetypes.xml");
 
     if (mimeFilePath.open(QIODevice::ReadOnly)) {
@@ -100,9 +94,6 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
         else { Q_ASSERT(false); }
     }
 
-    ProjectManager::registerProjectType<ROSProject>(Constants::ROS_MIME_TYPE);
-#endif
-
     addAutoReleasedObject(new ROSManager);
     addAutoReleasedObject(new ROSCatkinMakeStepFactory);
     addAutoReleasedObject(new ROSCatkinToolsStepFactory);
@@ -110,6 +101,8 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     addAutoReleasedObject(new ROSRunConfigurationFactory);
     addAutoReleasedObject(new ROSRunControlFactory);
     addAutoReleasedObject(new ROSRunStepFactory);
+
+    ProjectManager::registerProjectType<ROSProject>(Constants::ROS_MIME_TYPE);
 
     IWizardFactory::registerFactoryCreator([]() { return QList<IWizardFactory *>() << new ROSProjectWizard << new ROSPackageWizard; });
 
@@ -134,10 +127,6 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     mfolderContextMenu->addAction(removeCommand, ProjectExplorer::Constants::G_FOLDER_FILES);
     connect(removeProjectDirectoryAction, &QAction::triggered, this, &ROSProjectPlugin::removeProjectDirectory);
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    Command *renameCommand = ActionManager::command(ProjectExplorer::Constants::RENAMEFILE);
-    mfolderContextMenu->addAction(renameCommand, ProjectExplorer::Constants::G_FOLDER_FILES);
-#else
     auto renameFileAction = new QAction(tr("Rename File..."), this);
     Command *renameCommand = ActionManager::registerAction(renameFileAction,
         Constants::ROS_RENAME_FILE, Context(Constants::ROS_PROJECT_CONTEXT));
@@ -145,8 +134,7 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     renameCommand->setAttribute(Command::CA_Hide);
 
     mfolderContextMenu->addAction(renameCommand, ProjectExplorer::Constants::G_FOLDER_FILES);
-    connect(renameFileAction, &QAction::triggered, this, &ROSProjectPlugin::renameFile);
-#endif
+
     createCppCodeStyle();
 
     return true;
@@ -227,11 +215,7 @@ void ROSProjectPlugin::removeProjectDirectory()
 {
   ProjectExplorer::Node *currentNode = ProjectExplorer::ProjectTree::currentNode();
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-  QTC_ASSERT(currentNode && currentNode->nodeType() == ProjectExplorer::FolderNodeType, return);
-#else
   QTC_ASSERT(currentNode && currentNode->nodeType() == ProjectExplorer::NodeType::Folder, return);
-#endif
 
   QString filePath = currentNode->filePath().toString();
   RemoveDirectoryDialog removeDirectoryDialog(filePath, ICore::mainWindow());

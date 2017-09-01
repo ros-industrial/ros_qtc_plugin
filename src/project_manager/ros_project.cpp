@@ -47,17 +47,14 @@
 #include <qtsupport/qtkitinformation.h>
 #include <utils/fileutils.h>
 #include <utils/qtcassert.h>
+#include <utils/algorithm.h>
 
 #include <QDir>
 #include <QProcessEnvironment>
 #include <QtXml/QDomDocument>
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    #include <cpptools/projectpartbuilder.h>
-#else
-    #include <cpptools/cpprawprojectpart.h>
-    #include <cpptools/cppprojectupdater.h>
-#endif
+#include <cpptools/cpprawprojectpart.h>
+#include <cpptools/cppprojectupdater.h>
 
 using namespace Core;
 using namespace ProjectExplorer;
@@ -72,44 +69,18 @@ namespace Internal {
 ////////////////////////////////////////////////////////////////////////////////////
 
 ROSProject::ROSProject(const Utils::FileName &fileName) :
-#if QT_CREATOR_VER >= QT_CREATOR_VER_CHECK(4,3,0)
-    ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName),
+    ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName, [this]() { refresh(); }),
     m_cppCodeModelUpdater(new CppTools::CppProjectUpdater(this)),
-#endif
     m_workspaceWatcher(new ROSWorkspaceWatcher(this))
 {
     setId(Constants::ROS_PROJECT_ID);
-
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    setDocument(new ROSProjectFile(this, fileName));
-#endif
-
-    DocumentManager::addDocument(document(), true);
-
-    ROSProjectNode *project_node = new ROSProjectNode(this->projectFilePath());
-    setRootProjectNode(project_node);
-
     setProjectContext(Context(Constants::ROS_PROJECT_CONTEXT));
-
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    setProjectLanguages(Context(ProjectExplorer::Constants::LANG_CXX));
-    m_projectName = projectFilePath().toFileInfo().completeBaseName();
-
-    FileNode *projectWorkspaceNode = new FileNode(projectFilePath(),
-                                                   ProjectFileType,
-                                                   /* generated = */ false);
-
-    rootProjectNode()->addFileNodes(QList<FileNode *>() << projectWorkspaceNode);
-#else
     setProjectLanguages(Context(ProjectExplorer::Constants::CXX_LANGUAGE_ID));
     setDisplayName(projectFilePath().toFileInfo().completeBaseName());
 
-    FileNode *projectWorkspaceNode = new FileNode(projectFilePath(),
-                                                  FileType::Project,
-                                                   /* generated = */ false);
-
-    rootProjectNode()->addNode(projectWorkspaceNode);
-#endif
+    ROSProjectNode *project_node = new ROSProjectNode(this->projectFilePath());
+    project_node->addNode(new FileNode(projectFilePath(), FileType::Project, false));
+    setRootProjectNode(project_node);
 
     refresh();
 
@@ -126,28 +97,10 @@ ROSProject::ROSProject(const Utils::FileName &fileName) :
 
 ROSProject::~ROSProject()
 {
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    m_codeModelFuture.cancel();
-#else
     delete m_cppCodeModelUpdater;
     m_cppCodeModelUpdater = nullptr;
-#endif
 
     m_projectFutureInterface->cancel();
-    projectManager()->unregisterProject(this);
-}
-
-void ROSProject::settManager(ROSManager* manager)
-{
-#if QT_CREATOR_VER >= QT_CREATOR_VER_CHECK(4,3,0)
-    m_manager = manager;
-#else
-    setProjectManager(manager);
-#endif
-
-    projectManager()->registerProject(this);
-
-    refresh();
 }
 
 bool ROSProject::saveProjectFile()
@@ -261,6 +214,7 @@ void ROSProject::refresh()
 
       m_projectFutureInterface->setProgressValue(floor(100.0 * (float)cnt / (float)max));
     }
+
     m_projectFutureInterface->setProgressValue(100);
     m_projectFutureInterface->reportFinished();
 
@@ -282,11 +236,7 @@ void ROSProject::refreshCppCodeModel()
 
     const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(k);
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    m_codeModelFuture.cancel(); // This may need to be removed
-#else
     m_cppCodeModelUpdater->cancel();
-#endif
 
     CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
     if (QtSupport::BaseQtVersion *qtVersion =
@@ -297,65 +247,33 @@ void ROSProject::refreshCppCodeModel()
             activeQtVersion = CppTools::ProjectPart::Qt5;
     }
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    CppTools::CppModelManager *modelManager = CppTools::CppModelManager::instance();
-
-    CppTools::ProjectInfo pInfo(this);
-
-    QStringList workspaceFiles = m_workspaceWatcher->getWorkspaceFiles();
-    ToolChain *toolChain = ToolChainKitInformation::toolChain(activeTarget()->kit(), ToolChain::Language::Cxx);
-
-    foreach(ROSUtils::PackageBuildInfo buildInfo, m_wsPackageBuildInfo)
-    {
-        QStringList packageFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
-
-        foreach(ROSUtils::PackageTargetInfo targetInfo, buildInfo.targets)
-        {
-            CppTools::ProjectPartBuilder ppBuilder(pInfo);
-            ppBuilder.setDisplayName(targetInfo.name);
-            ppBuilder.setQtVersion(activeQtVersion);
-
-            QSet<QString> toolChainIncludes;
-            foreach (const HeaderPath &hp, toolChain->systemHeaderPaths(targetInfo.flags, sysRoot))
-                toolChainIncludes.insert(hp.path());
-
-            QStringList includePaths;
-            foreach (const QString &i, targetInfo.includes) {
-                if (!toolChainIncludes.contains(i))
-                    includePaths.append(i);
-            }
-
-            ppBuilder.setIncludePaths(includePaths);
-            ppBuilder.setCxxFlags(targetInfo.flags);
-
-            const QList<Id> languages = ppBuilder.createProjectPartsForFiles(packageFiles);
-            foreach (Id language, languages)
-                setProjectLanguage(language, true);
-        }
-    }
-
-    pInfo.finish();
-    m_codeModelFuture = modelManager->updateProjectInfo(pInfo);
-#else
     CppTools::RawProjectParts rpps;
 
     QStringList workspaceFiles = m_workspaceWatcher->getWorkspaceFiles();
 
-    ToolChain *cToolChain = ToolChainKitInformation::toolChain(k,
-                                                               ProjectExplorer::Constants::C_LANGUAGE_ID);
-    ToolChain *cxxToolChain = ToolChainKitInformation::toolChain(k,
-                                                               ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+    ToolChain *cxxToolChain = ToolChainKitInformation::toolChain(k, ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
     foreach(ROSUtils::PackageBuildInfo buildInfo, m_wsPackageBuildInfo)
     {
-        QStringList packageFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
+        QStringList packgeFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
 
         foreach(ROSUtils::PackageTargetInfo targetInfo, buildInfo.targets)
         {
             CppTools::RawProjectPart rpp;
+            const QString defineArg
+                    = Utils::transform(targetInfo.defines, [](const QString &s) -> QString {
+                        QString result = QString::fromLatin1("#define ") + s;
+                        int assignIndex = result.indexOf('=');
+                        if (assignIndex != -1)
+                            result[assignIndex] = ' ';
+                        return result;
+                    }).join('\n');
 
-            rpp.setDisplayName(targetInfo.name);
+            rpp.setProjectFileLocation(projectFilePath().toString());
+            rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo.name + '|' + projectFilePath().toString());
+            rpp.setDisplayName(buildInfo.parent.name + '|' + targetInfo.name);
             rpp.setQtVersion(activeQtVersion);
+            rpp.setDefines(defineArg.toUtf8());
 
             QSet<QString> toolChainIncludes;
             foreach (const HeaderPath &hp, cxxToolChain->systemHeaderPaths(targetInfo.flags, sysRoot))
@@ -369,35 +287,18 @@ void ROSProject::refreshCppCodeModel()
 
             rpp.setIncludePaths(includePaths);
             rpp.setFlagsForCxx({cxxToolChain, targetInfo.flags});
-
-            //const QList<Id> languages = ppBuilder.createProjectPartsForFiles(packageFiles);
-            //foreach (Id language, languages)
-            //    setProjectLanguage(language, true);
-
-            setProjectLanguage( ProjectExplorer::Constants::CXX_LANGUAGE_ID, true);
-
+            rpp.setFiles(packgeFiles);
             rpps.append(rpp);
         }
     }
 
-    //CppTools::GeneratedCodeModelSupport::update(generators);
-    m_cppCodeModelUpdater->update({this, cToolChain, cxxToolChain, k, rpps});
-#endif
+    m_cppCodeModelUpdater->update({this, nullptr, cxxToolChain, k, rpps});
 }
 
 QStringList ROSProject::files(FilesMode fileMode) const
 {
     Q_UNUSED(fileMode);
     return m_workspaceWatcher->getWorkspaceFiles();
-}
-
-ROSManager *ROSProject::projectManager() const
-{
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-  return static_cast<ROSManager *>(Project::projectManager());
-#else
-  return m_manager;
-#endif
 }
 
 Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *errorMessage)
@@ -437,54 +338,6 @@ void ROSProject::buildQueueFinished(bool success)
 {
     Q_UNUSED(success);
     refreshCppCodeModel();
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-//
-// ROSProjectFile
-//
-////////////////////////////////////////////////////////////////////////////////////
-
-ROSProjectFile::ROSProjectFile(ROSProject *parent, const Utils::FileName& fileName)
-    : IDocument(parent),
-      m_project(parent)
-{
-    setId(Constants::ROS_PROJECT_FILE_ID);
-    setMimeType(QLatin1String(Constants::ROS_MIME_TYPE));
-    setFilePath(fileName);
-}
-
-bool ROSProjectFile::save(QString *, const QString &, bool)
-{
-    return false;
-}
-
-bool ROSProjectFile::isModified() const
-{
-    return false;
-}
-
-bool ROSProjectFile::isSaveAsAllowed() const
-{
-    return false;
-}
-
-IDocument::ReloadBehavior ROSProjectFile::reloadBehavior(ChangeTrigger state, ChangeType type) const
-{
-    Q_UNUSED(state);
-    Q_UNUSED(type);
-    return BehaviorSilent;
-}
-
-bool ROSProjectFile::reload(QString *errorString, ReloadFlag flag, ChangeType type)
-{
-    Q_UNUSED(errorString);
-    Q_UNUSED(flag);
-    if (type == TypePermissions)
-        return true;
-
-    m_project->refresh();
-    return true;
 }
 
 } // namespace Internal

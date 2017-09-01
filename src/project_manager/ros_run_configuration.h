@@ -26,10 +26,6 @@
 #include <projectexplorer/runconfiguration.h>
 #include <projectexplorer/buildstep.h>
 
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-    #include <projectexplorer/devicesupport/deviceapplicationrunner.h>
-#endif
-
 #include <QPointer>
 #include <QMenu>
 #include <QFutureInterface>
@@ -121,10 +117,6 @@ public:
 
   void start() override;
   StopResult stop() override;
-
-#if QT_CREATOR_VER < QT_CREATOR_VER_CHECK(4,3,0)
-  bool isRunning() const override;
-#endif
 
 protected:
   ROSRunControl(ProjectExplorer::RunConfiguration *rc, Core::Id id);
