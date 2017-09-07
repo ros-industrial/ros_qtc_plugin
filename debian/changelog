@@ -1,0 +1,120 @@
+qt57creator-plugin-ros (0.1.6-0xenial1) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Add more ros templates (#94)
+
+  [ Robert J. Gebis ]
+  * Added src, devel, install, etc. Else fixed profiles.yaml creation in catkin tools. Also added optional CREATE_FOLDERS in project_manager.pro file to enable/disable file creation
+  * Forced check to point into src folder when creating package by clicking on just root node
+  * Reworked check when clicking on root node trying to add package and force it to src/ using ProjectTree::instance()
+  * Fixed Bug #116
+  * Removed CREATE_FOLDERS ifdefs
+
+  [ Levi Armstrong ]
+  * Add user defined build type and configuration
+
+  [ Robert J. Gebis ]
+  * Added src, devel, install, etc. Else fixed profiles.yaml creation in catkin tools. Also added optional CREATE_FOLDERS in project_manager.pro file to enable/disable file creation
+  * Forced check to point into src folder when creating package by clicking on just root node
+  * Updated setup script to add logging and optional qmake path vs static path
+  * Reworked check when clicking on root node trying to add package and force it to src/ using ProjectTree::instance()
+  * Added setul.log to git ignore
+  * Little cleanup
+  * Removed CREATE_FOLDERS ifdefs
+  * Added Qt build check
+  * Fixed some formating
+  * Added logging to to setup.sh
+  * Added src, devel, install, etc. Else fixed profiles.yaml creation in catkin tools. Also added optional CREATE_FOLDERS in project_manager.pro file to enable/disable file creation
+  * Forced check to point into src folder when creating package by clicking on just root node
+  * Reworked check when clicking on root node trying to add package and force it to src/ using ProjectTree::instance()
+  * Fixed setup.sh not detecting failed build. Added color printing to screen. Some refactoring Added OS and QT, CMAKE and ROS env variables to setup.log for diagnostics Replace -qtc parameter to -noclean Fixed build issues with Qt5.9 Added *.autosave to .gitignore
+  * Fixed infinite recursive call
+  * Added -no-qtr-clean Fixed ros_qtc_plugin.pri to read env variables Fixed setup.sh to export QTC_SOURCE and QTC_BUILD Added options to clone and build qt-creator-$branch to experiment and run multiple Qt creators Updated Desktop Icon to point to proper Qt creator Some small refactoring
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Wed, 06 Sep 2017 21:24:50 -0500
+
+qt57creator-plugin-ros (0.1.5-0xenial11) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Improve Debian Build
+  * ARM64 Release
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Wed, 18 May 2017 07:07:09 -0500
+
+qt57creator-plugin-ros (0.1.5-0xenial7) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Fix findPackageBuildDirectory method (#101)
+  * Add more ros templates (#94)
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Fri, 24 Mar 2017 07:07:09 -0500
+
+qt57creator-plugin-ros (0.1.5-0xenial6) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Add more detailed debug info to project build file parsing (#99)
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Tue, 21 Mar 2017 12:33:43 -0500
+
+qt57creator-plugin-ros (0.1.5-0xenial5) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Improve how package and build information is parsed (#88)
+  * Show hidden files (#93)
+  * Kill shell process when terminal is closed (#95)
+  * Update README.md
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Sun, 12 Mar 2017 21:46:18 -0500
+
+qt57creator-plugin-ros (0.1.5-0xenial4) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Fix run configuration update available packages (#85)
+  * Add reload build info button (#86)
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Wed, 08 Feb 2017 22:57:33 -0600
+
+qt57creator-plugin-ros (0.1.5-0xenial3) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Fix several issues (Update Env, WS Init, and Run Config Pkg List) (#81)
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Wed, 01 Feb 2017 22:20:58 -0600
+
+qt57creator-plugin-ros (0.1.5-0xenial2) xenial; urgency=high
+
+  * Xenial Release for Qt Creator 4.2.0 
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Mon, 23 Jan 2016 15:20:00 -0500
+
+qt57creator-plugin-ros (0.1.4-0xenial3) xenial; urgency=high
+
+  * Version 0.1.4 Ubuntu Xenial Release
+
+  [ Levi Armstrong ]
+  * Improve method for getting project targets (#75)
+  * Fix code blocks file locator (#74)
+  * Add catkin tools build system (#67)
+  * Improve ROS Icon for different themes. (#68)
+  * Update code model to use cached data if build fails (#70)
+  * Remove tool chain include directories from package code model (#71)
+  * Get Cxx Flags from flags.make file (#72)
+  * Add task progress for reading project
+  * Add build task percentage output
+
+  [ Jonathan Meyer ]
+  * Fixed basic urdf file typo and added a simple example of a joint.
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Sun, 16 Jan 2017 13:09:08 -0600
+
+qt57creator-plugin-ros (0.1.3-0xenial1) xenial; urgency=high
+
+  * Xenial Release for Qt Creator 4.1.0 
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Tue, 2 Sep 2016 15:20:00 -0500
+
+qt57creator-plugin-ros (0.1.2-0xenial2) xenial; urgency=high
+
+  * Initial Ubuntu Xenial Release
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Tue, 13 Aug 2016 15:20:00 -0500
