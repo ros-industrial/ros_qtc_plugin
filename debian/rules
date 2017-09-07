@@ -3,59 +3,27 @@
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
 
-DPKG_EXPORT_BUILDFLAGS    = yes
-DEB_LDFLAGS_MAINT_APPEND  = -Wl,--as-needed
-include /usr/share/dpkg/default.mk
-export QTC_PLUGIN_DIRS := $(CURDIR)/src
-
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 QT_BASE_DIR = /opt/qt57
+export QTC_PLUGIN_DIRS := $(CURDIR)/src
 export PATH := $(QT_BASE_DIR)/bin:$(PATH)
 export PKG_CONFIG_PATH := $(QT_BASE_DIR)/lib/pkgconfig/:$(PKG_CONFIG_PATH) dh binary-arch
-export LD_LIBRARY_PATH := $(QT_BASE_DIR)/lib:$(QT_BASE_DIR)/lib/$(shell dpkg-architecture -qDEB_BUILD_MULTIARCH):$(LD_LIBRARY_PATH)
+export LD_LIBRARY_PATH := $(QT_BASE_DIR)/lib:$(QT_BASE_DIR)/lib/$(DEB_HOST_MULTIARCH):$(LD_LIBRARY_PATH)
 export QBS_INSTALL_DIR := $(QT_BASE_DIR)
-
-export CFLAGS := $(shell dpkg-buildflags --get CFLAGS) $(shell dpkg-buildflags --get CPPFLAGS)
-export CXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS) $(shell dpkg-buildflags --get CPPFLAGS)
-export LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
-export QMAKE_CFLAGS_RELEASE := $(CFLAGS)
-export QMAKE_CFLAGS_DEBUG := $(CFLAGS)
-export QMAKE_CXXFLAGS_RELEASE := $(CXXFLAGS)
-export QMAKE_CXXFLAGS_DEBUG := $(CXXFLAGS)
-export QMAKE_LFLAGS_RELEASE := $(LDFLAGS)
-export QMAKE_LFLAGS_DEBUG := $(LDFLAGS)
-
-BUILD_DIR=/tmp/builddir
-QTC_SOURCE_DIR = $(QT_BASE_DIR)/src/qtcreator
-
-# -----------------------------------
+export QTC_SOURCE := $(QT_BASE_DIR)/src/qtcreator
 
 %:
-	dh $@ --fail-missing --buildsystem=qmake --builddirectory=$(BUILD_DIR)
+	dh $@ --parallel --fail-missing --buildsystem=qmake 
 
 override_dh_auto_configure:
-	mkdir -p $(BUILD_DIR)
-	cd $(BUILD_DIR) ; \
-		qmake -recursive QMAKE_CFLAGS_RELEASE="$(QMAKE_CFLAGS_RELEASE)" \
-		QMAKE_CFLAGS_DEBUG="$(QMAKE_CFLAGS_DEBUG)" \
-		QMAKE_CXXFLAGS_RELEASE="$(QMAKE_CXXFLAGS_RELEASE)" \
-		QMAKE_CXXFLAGS_DEBUG="$(QMAKE_CXXFLAGS_DEBUG)" \
-		QMAKE_LFLAGS_RELEASE="$(QMAKE_LFLAGS_RELEASE)" \
-		QMAKE_LFLAGS_DEBUG="$(QMAKE_LFLAGS_DEBUG)" \
-		QMAKE_STRIP=: \
-		QTC_SOURCE=$(QTC_SOURCE_DIR) \
-		QTC_PREFIX=$(QT_BASE_DIR) \
+	dh_auto_configure -- $(CURDIR) IDE_LIBRARY_BASENAME=lib/$(DEB_HOST_MULTIARCH) IDE_PACKAGE_MODE=1 USE_SYSTEM_BOTAN=1 $(extra_configure_opts) \
 		LIBS+=-L$(QT_BASE_DIR)/lib/$(DEB_HOST_MULTIARCH)/qtcreator \
-		LIBS+=-L$(QT_BASE_DIR)/lib/$(DEB_HOST_MULTIARCH)/qtcreator/plugins \
-		$(CURDIR) $(GCC47) IDE_LIBRARY_BASENAME=lib/$(DEB_HOST_MULTIARCH) IDE_PACKAGE_MODE=1 USE_SYSTEM_BOTAN=1 $(extra_configure_opts)
-
-
-
+		LIBS+=-L$(QT_BASE_DIR)/lib/$(DEB_HOST_MULTIARCH)/qtcreator/plugins
 
 override_dh_auto_install:
-	dh_auto_install --destdir=debian/tmp
-	mkdir -p debian/tmp/opt/qt57/src/qtcreator/
+	dh_auto_install --destdir=debian/tmp/opt/qt57
+	mkdir -p debian/tmp/opt/qt57/src/qtcreator
 	find | egrep -v '^\.\/builddir|^\.\/doc|^\.\/share|^\.\/\.pc|^\.\/debian|^\.\/tests|^\.\/share'|grep "project_manager" | grep "\.pri\$$\|\.h\$$\|\.xsl\$$" | xargs -I{} cp --parents -r "{}" debian/tmp/opt/qt57/src/qtcreator
 	mkdir -p debian/tmp/opt/qt57/src/qtcreator/src/plugins
 	mv  debian/tmp/opt/qt57/src/qtcreator/src/project_manager debian/tmp/opt/qt57/src/qtcreator/src/plugins/project_manager

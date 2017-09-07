@@ -1,3 +1,38 @@
+qt57creator-plugin-ros (0.1.6-0xenial1) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Add more ros templates (#94)
+
+  [ Robert J. Gebis ]
+  * Added src, devel, install, etc. Else fixed profiles.yaml creation in catkin tools. Also added optional CREATE_FOLDERS in project_manager.pro file to enable/disable file creation
+  * Forced check to point into src folder when creating package by clicking on just root node
+  * Reworked check when clicking on root node trying to add package and force it to src/ using ProjectTree::instance()
+  * Fixed Bug #116
+  * Removed CREATE_FOLDERS ifdefs
+
+  [ Levi Armstrong ]
+  * Add user defined build type and configuration
+
+  [ Robert J. Gebis ]
+  * Added src, devel, install, etc. Else fixed profiles.yaml creation in catkin tools. Also added optional CREATE_FOLDERS in project_manager.pro file to enable/disable file creation
+  * Forced check to point into src folder when creating package by clicking on just root node
+  * Updated setup script to add logging and optional qmake path vs static path
+  * Reworked check when clicking on root node trying to add package and force it to src/ using ProjectTree::instance()
+  * Added setul.log to git ignore
+  * Little cleanup
+  * Removed CREATE_FOLDERS ifdefs
+  * Added Qt build check
+  * Fixed some formating
+  * Added logging to to setup.sh
+  * Added src, devel, install, etc. Else fixed profiles.yaml creation in catkin tools. Also added optional CREATE_FOLDERS in project_manager.pro file to enable/disable file creation
+  * Forced check to point into src folder when creating package by clicking on just root node
+  * Reworked check when clicking on root node trying to add package and force it to src/ using ProjectTree::instance()
+  * Fixed setup.sh not detecting failed build. Added color printing to screen. Some refactoring Added OS and QT, CMAKE and ROS env variables to setup.log for diagnostics Replace -qtc parameter to -noclean Fixed build issues with Qt5.9 Added *.autosave to .gitignore
+  * Fixed infinite recursive call
+  * Added -no-qtr-clean Fixed ros_qtc_plugin.pri to read env variables Fixed setup.sh to export QTC_SOURCE and QTC_BUILD Added options to clone and build qt-creator-$branch to experiment and run multiple Qt creators Updated Desktop Icon to point to proper Qt creator Some small refactoring
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Wed, 06 Sep 2017 21:24:50 -0500
+
 qt57creator-plugin-ros (0.1.5-0xenial11) xenial; urgency=high
 
   [ Levi Armstrong ]
