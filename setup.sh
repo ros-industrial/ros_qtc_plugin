@@ -38,9 +38,9 @@ PKG_MISSING=""
 QMAKE_PATH="/opt/qt57/bin/qmake"
 
 # ROS qtc plubin default branch
-QTR_BRANCH="master"
+QTR_BRANCH="4.3"
 # QT Creator default branch
-QTC_BRANCH="4.2"
+QTC_BRANCH="4.3"
 
 # By default clean all on rebuild
 #Qt Creator
