@@ -95,6 +95,7 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     }
 
     RunControl::registerWorker<ROSRunConfiguration, ROSRunWorker>(ProjectExplorer::Constants::NORMAL_RUN_MODE);
+    RunControl::registerWorker<ROSRunConfiguration, ROSRunWorker>(ProjectExplorer::Constants::DEBUG_RUN_MODE);
 
     addAutoReleasedObject(new ROSManager);
     addAutoReleasedObject(new ROSCatkinMakeStepFactory);

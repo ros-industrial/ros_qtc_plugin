@@ -54,6 +54,7 @@
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 #include <QDebug>
+#include <QMessageBox>
 
 using namespace Core;
 using namespace ProjectExplorer;
@@ -278,13 +279,31 @@ ROSRunWorker::ROSRunWorker(RunControl *runControl) : RunWorker(runControl)
 
 void ROSRunWorker::start()
 {
-    foreach(RunStep *rs, qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
+    if (runControl()->runMode() == ProjectExplorer::Constants::NORMAL_RUN_MODE)
     {
-        if (rs->enabled() == true)
+        foreach(RunStep *rs, qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
         {
-            rs->run();
+            if (rs->enabled() == true)
+            {
+                rs->run();
+            }
         }
     }
+    else
+    {
+        QMessageBox msg;
+        msg.setWindowTitle("Debugging Catkin Workspace");
+        msg.setTextFormat(Qt::RichText);
+        msg.setWindowFlags(Qt::WindowStaysOnTopHint);
+        msg.setText("Debug is only supported using the following methods:"
+                    "<ul>"
+                    "  <li>Attach to a Running Process</li>"
+                    "  <li>Attach to a Unstarted Process</li>"
+                    "</ul>"
+                    "Note: See <a href=https://github.com/ros-industrial/ros_qtc_plugin/wiki/4.-Debugging-Catkin-Workspace>GitHub wiki</a> for help.");
+        msg.exec();
+    }
+
 }
 
 } // namespace Internal
