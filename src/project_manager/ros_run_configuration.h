@@ -45,6 +45,7 @@ namespace Ui { class ROSRunConfiguration; class ROSLaunchConfiguration;}
 class ROSRunnable
 {
 public:
+    QString displayName() const { return QString("ROSRunnable"); }
     static void *staticTypeId;
 };
 bool operator==(const ROSRunnable &r1, const ROSRunnable &r2);
@@ -109,42 +110,13 @@ private:
                                                  const QVariantMap &map) override;
 };
 
-class ROSRunControl : public ProjectExplorer::RunControl
+class ROSRunWorker : public ProjectExplorer::RunWorker
 {
-  Q_OBJECT
+    Q_OBJECT
+
 public:
-  explicit ROSRunControl(ProjectExplorer::RunConfiguration *rc);
-
-  void start() override;
-  StopResult stop() override;
-
-protected:
-  ROSRunControl(ProjectExplorer::RunConfiguration *rc, Core::Id id);
-
-private slots:
-  void handleErrorMessage(const QString &error);
-  void handleRunnerFinished();
-  void handleRemoteOutput(const QByteArray &output);
-  void handleRemoteErrorOutput(const QByteArray &output);
-  void handleProgressReport(const QString &progressString);
-
-private:
-
-  class ROSRunControlPrivate;
-  ROSRunControlPrivate * const d;
-  ROSRunConfiguration *m_rc;
-  QFutureWatcher<bool> m_watcher;
-  QFutureInterface<bool> m_futureInterfaceForAysnc;
-};
-
-class ROSRunControlFactory : public ProjectExplorer::IRunControlFactory
-{
-  Q_OBJECT
-public:
-  explicit ROSRunControlFactory(QObject * parent = 0);
-
-  bool canRun(ProjectExplorer::RunConfiguration *rc, Core::Id mode) const override;
-  ProjectExplorer::RunControl *create(ProjectExplorer::RunConfiguration *rc, Core::Id mode, QString *errorMessage) override;
+    explicit ROSRunWorker(ProjectExplorer::RunControl *runControl);
+    void start() override;
 };
 
 } // namespace Internal

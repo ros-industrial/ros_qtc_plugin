@@ -43,7 +43,7 @@ public:
 
   bool init(QList<const RunStep *> &earlierSteps) override;
 
-  void run(QFutureInterface<bool> &fi) override;
+  void run() override;
 
   RunStepConfigWidget *createConfigWidget() override;
 

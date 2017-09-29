@@ -268,146 +268,23 @@ bool ROSRunConfigurationFactory::canHandle(ProjectExplorer::Target *parent) cons
     return deviceType == ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE;
 }
 
-/*!
-  \class ROSRunControlFactory https://github.com/qtproject/qt-creator/blob/66bdd60947b946b8aa30141e3871f33226f0cc37/src/plugins/remotelinux/remotelinuxruncontrol.cpp
-*/
-ROSRunControlFactory::ROSRunControlFactory(QObject *parent)
-    : IRunControlFactory(parent)
+////////////////////////////////////
+/// ROSRunWorker
+////////////////////////////////////
+ROSRunWorker::ROSRunWorker(RunControl *runControl) : RunWorker(runControl)
 {
+    setDisplayName("RosRunWorker");
 }
 
-bool ROSRunControlFactory::canRun(RunConfiguration *rc, Core::Id mode) const
+void ROSRunWorker::start()
 {
-    if (mode != ProjectExplorer::Constants::NORMAL_RUN_MODE
-            && mode != ProjectExplorer::Constants::DEBUG_RUN_MODE
-            && mode != ProjectExplorer::Constants::DEBUG_RUN_MODE_WITH_BREAK_ON_MAIN
-            && mode != ProjectExplorer::Constants::QML_PROFILER_RUN_MODE) {
-        return false;
-    }
-
-    return rc->isEnabled() && (rc->id() == ROS_RC_ID);
-}
-
-RunControl *ROSRunControlFactory::create(RunConfiguration *rc, Core::Id mode,
-                                                 QString *errorMessage)
-{
-    Q_UNUSED(errorMessage);
-    QTC_ASSERT(canRun(rc, mode), return 0);
-
-    if (mode == ProjectExplorer::Constants::NORMAL_RUN_MODE)
-        return new ROSRunControl(rc);
-
-    QTC_CHECK(false);
-    return 0;
-}
-
-
-/*!
-  \class ROSRunControl https://github.com/qtproject/qt-creator/blob/66bdd60947b946b8aa30141e3871f33226f0cc37/src/plugins/remotelinux/remotelinuxruncontrol.cpp
-*/
-typedef ApplicationLauncher APP_RUNNER;
-class ROSRunControl::ROSRunControlPrivate
-{
-public:
-    bool running;
-    APP_RUNNER runner;
-    IDevice::ConstPtr device;
-    QString remoteExecutable;
-    QString arguments;
-    Utils::Environment environment;
-    QString workingDir;
-};
-
-
-ROSRunControl::ROSRunControl(ProjectExplorer::RunConfiguration *rc) :
-  ROSRunControl(rc, ProjectExplorer::Constants::NORMAL_RUN_MODE)
-{
-}
-
-ROSRunControl::ROSRunControl(RunConfiguration *rc, Id id):
-    RunControl(rc, id),
-    d(new ROSRunControlPrivate)
-{
-  setIcon(Utils::Icons::RUN_SMALL);
-
-  m_rc = qobject_cast<ROSRunConfiguration *>(rc);
-  d->running = false;
-  d->device = DeviceKitInformation::device(m_rc->target()->kit());
-
-  //d->arguments = lrc->arguments();
-  d->environment = m_rc->target()->activeBuildConfiguration()->environment();
-  d->workingDir = m_rc->target()->activeBuildConfiguration()->buildDirectory().toString();
-
-}
-
-
-void ROSRunControl::start()
-{
-    foreach(RunStep *rs, m_rc->stepList()->steps())
+    foreach(RunStep *rs, qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
     {
         if (rs->enabled() == true)
         {
-            rs->run(m_futureInterfaceForAysnc);
+            rs->run();
         }
     }
-
-//  d->running = true;
-//  emit started();
-//  d->runner.disconnect(this);
-//  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::reportError,
-//          this, &ROSRunControl::handleErrorMessage);
-//  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::remoteStderr,
-//          this, &ROSRunControl::handleRemoteErrorOutput);
-//  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::remoteStdout,
-//          this, &ROSRunControl::handleRemoteOutput);
-//  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::finished,
-//          this, &ROSRunControl::handleRunnerFinished);
-//  connect(&d->runner, &ProjectExplorer::DeviceApplicationRunner::reportProgress,
-//          this, &ROSRunControl::handleProgressReport);
-
-//  d->runner.setEnvironment(d->environment);
-//  d->runner.setWorkingDirectory(d->workingDir);
-
-
-
-//  d->runner.start(d->device, d->remoteExecutable,
-//                  Utils::QtcProcess::splitArgs(d->arguments, Utils::OsTypeLinux));
-
-}
-
-
-RunControl::StopResult ROSRunControl::stop()
-{
-  d->runner.stop();
-  return RunControl::AsynchronousStop;
-}
-
-void ROSRunControl::handleErrorMessage(const QString &error)
-{
-    appendMessage(error, Utils::ErrorMessageFormat);
-}
-
-void ROSRunControl::handleRunnerFinished()
-{
-    d->runner.disconnect(this);
-    d->running = false;
-
-    reportApplicationStop();
-}
-
-void ROSRunControl::handleRemoteOutput(const QByteArray &output)
-{
-    appendMessage(QString::fromUtf8(output), Utils::StdOutFormatSameLine);
-}
-
-void ROSRunControl::handleRemoteErrorOutput(const QByteArray &output)
-{
-    appendMessage(QString::fromUtf8(output), Utils::StdErrFormatSameLine);
-}
-
-void ROSRunControl::handleProgressReport(const QString &progressString)
-{
-    appendMessage(progressString + QLatin1Char('\n'), Utils::NormalMessageFormat);
 }
 
 } // namespace Internal

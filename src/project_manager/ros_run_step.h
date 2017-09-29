@@ -47,7 +47,7 @@ protected:
 public:
     virtual bool init(QList<const RunStep *> &earlierSteps) = 0;
 
-    virtual void run(QFutureInterface<bool> &fi) = 0;
+    virtual void run() = 0;
 
     virtual RunStepConfigWidget *createConfigWidget() = 0;
 

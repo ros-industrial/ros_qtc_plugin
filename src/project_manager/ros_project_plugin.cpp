@@ -94,12 +94,13 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
         else { Q_ASSERT(false); }
     }
 
+    RunControl::registerWorker<ROSRunConfiguration, ROSRunWorker>(ProjectExplorer::Constants::NORMAL_RUN_MODE);
+
     addAutoReleasedObject(new ROSManager);
     addAutoReleasedObject(new ROSCatkinMakeStepFactory);
     addAutoReleasedObject(new ROSCatkinToolsStepFactory);
     addAutoReleasedObject(new ROSBuildConfigurationFactory);
     addAutoReleasedObject(new ROSRunConfigurationFactory);
-    addAutoReleasedObject(new ROSRunControlFactory);
     addAutoReleasedObject(new ROSRunStepFactory);
 
     ProjectManager::registerProjectType<ROSProject>(Constants::ROS_MIME_TYPE);
