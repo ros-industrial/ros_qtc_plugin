@@ -107,10 +107,8 @@ bool ROSGenericRunStep::init(QList<const RunStep *> &earlierSteps)
 
     return true;
 }
-void ROSGenericRunStep::run(QFutureInterface<bool> &fi)
+void ROSGenericRunStep::run()
 {
-  Q_UNUSED(fi);
-
   ROSProject *rp = qobject_cast<ROSProject *>(target()->project());
 
   QString command;
