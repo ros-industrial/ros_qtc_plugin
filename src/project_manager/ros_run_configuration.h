@@ -25,11 +25,14 @@
 #include "ros_project_constants.h"
 #include <projectexplorer/runconfiguration.h>
 #include <projectexplorer/buildstep.h>
+#include <projectexplorer/devicesupport/deviceprocesslist.h>
+#include <debugger/debuggerruncontrol.h>
 
 #include <QPointer>
 #include <QMenu>
 #include <QFutureInterface>
 #include <QFutureWatcher>
+#include <QTimer>
 
 QT_FORWARD_DECLARE_CLASS(QStringListModel)
 
@@ -38,7 +41,6 @@ namespace ROSProjectManager {
 namespace Internal {
 
 class ROSRunConfigurationFactory;
-class ROSRunControlFactory;
 
 namespace Ui { class ROSRunConfiguration; class ROSLaunchConfiguration;}
 
@@ -117,6 +119,22 @@ class ROSRunWorker : public ProjectExplorer::RunWorker
 public:
     explicit ROSRunWorker(ProjectExplorer::RunControl *runControl);
     void start() override;
+};
+
+class ROSDebugRunWorker : public Debugger::DebuggerRunTool
+{
+    Q_OBJECT
+
+public:
+    explicit ROSDebugRunWorker(ProjectExplorer::RunControl *runControl);
+    void start() override;
+
+private:
+    void findProcess();
+    void pidFound(ProjectExplorer::DeviceProcessItem process);
+    QTimer m_timer;
+    QString m_debugTargetPath;
+    bool m_debugContinueOnAttach;
 };
 
 } // namespace Internal

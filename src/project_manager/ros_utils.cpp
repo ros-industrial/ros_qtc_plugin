@@ -676,9 +676,9 @@ QMap<QString, QString> ROSUtils::getWorkspacePackagePaths(const WorkspaceInfo &w
     return packageMap;
 }
 
-QStringList ROSUtils::getROSPackageLaunchFiles(const QString &packagePath, bool OnlyNames)
+QMap<QString, QString> ROSUtils::getROSPackageLaunchFiles(const QString &packagePath)
 {
-  QStringList launchFiles;
+  QMap<QString, QString> launchFiles;
   if(!packagePath.isEmpty())
   {
     const QDir srcDir(packagePath);
@@ -687,21 +687,18 @@ QStringList ROSUtils::getROSPackageLaunchFiles(const QString &packagePath, bool 
     while (it.hasNext())
     {
       QFileInfo launchFile(it.next());
-      if(OnlyNames)
-        launchFiles.append(launchFile.fileName());
-      else
-        launchFiles.append(launchFile.absoluteFilePath());
+      launchFiles.insert(launchFile.fileName(), launchFile.absoluteFilePath());
     }
   }
 
   return launchFiles;
 }
 
-QStringList ROSUtils::getROSPackageExecutables(const QString &packageName, const QStringList &env)
+QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &packageName, const QStringList &env)
 {
 
   QProcess process;
-  QStringList package_executables;
+  QMap<QString, QString> package_executables;
   QString package_executables_location;
 
   process.setEnvironment(env);
@@ -732,7 +729,7 @@ QStringList ROSUtils::getROSPackageExecutables(const QString &packageName, const
         while (it.hasNext())
         {
           QFileInfo executableFile(it.next());
-          package_executables.append(executableFile.fileName());
+          package_executables.insert(executableFile.fileName(), executableFile.absoluteFilePath());
         }
 
         return package_executables;
@@ -740,7 +737,7 @@ QStringList ROSUtils::getROSPackageExecutables(const QString &packageName, const
     }
   }
 
-  return QStringList();
+  return QMap<QString, QString>();
 }
 
 Utils::FileName ROSUtils::getCatkinToolsProfilesPath(const Utils::FileName &workspaceDir)

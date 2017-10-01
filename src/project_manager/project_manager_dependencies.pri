@@ -7,6 +7,7 @@ QTC_PLUGIN_DEPENDS += \
     projectexplorer \
     cpptools \
     texteditor \
+    debugger \
     qtsupport
 QTC_TEST_DEPENDS += \
     cppeditor

@@ -55,11 +55,15 @@ public:
   QString getCommand() const;
   QString getPackage() const;
   QString getTarget() const;
+  QString getTargetPath() const;
   QString getArguments() const;
+  bool getDebugContinueOnAttach() const;
 
   void setPackage(const QString &package);
   void setTarget(const QString &target);
+  void setTargetPath(const QString &target);
   void setArguments(const QString &arguments);
+  void setDebugContinueOnAttach(const bool &contOnAttach);
 
 protected:
   ROSGenericRunStep(RunStepList *rsl, RunStep *rs);
@@ -70,7 +74,10 @@ private:
   QString m_command;
   QString m_package;
   QString m_target;
+  QString m_targetPath;
   QString m_arguments;
+
+  bool m_debugContinueOnAttach;
 };
 
 class ROSGenericRunStepConfigWidget : public RunStepConfigWidget
@@ -83,6 +90,8 @@ public:
   QString displayName() const override;
 
 private slots:
+  void debugCheckBox_toggled(const bool &arg1);
+
   void packageComboBox_currentIndexChanged(const QString &arg1);
 
   void targetComboBox_currentIndexChanged(const QString &arg1);
@@ -90,13 +99,15 @@ private slots:
   void argumentsLineEdit_textChanged(const QString &arg1);
 
 private:
-    QStringList getAvailableTargets();
+    void updateAvailableTargets();
     void updateAvailablePackages();
 
     Ui::ROSGenericStep *m_ui;
     ROSGenericRunStep *m_rosGenericStep;
     QMap<QString, QString> m_availablePackages;
+    QMap<QString, QString> m_availableTargets;
     QStringListModel *m_packageNames;
+    QStringListModel *m_targetNames;
 };
 
 class ROSRunStep : public ROSGenericRunStep
@@ -125,6 +136,20 @@ private:
   ROSLaunchStep(RunStepList *rsl, RunStep *rs);
 };
 
+class ROSAttachToNodeStep : public ROSGenericRunStep
+{
+  Q_OBJECT
+  friend class ROSRunStepFactory;
+
+public:
+  ROSAttachToNodeStep(RunStepList *rsl);
+
+  void run() override;
+
+private:
+  ROSAttachToNodeStep(RunStepList *rsl, Core::Id id);
+  ROSAttachToNodeStep(RunStepList *rsl, RunStep *rs);
+};
 
 class ROSRunStepFactory : public IRunStepFactory
 {

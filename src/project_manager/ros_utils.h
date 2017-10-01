@@ -276,10 +276,9 @@ public:
     /**
      * @brief Gets all launch files associated to a package
      * @param packagePath ROS Package Name
-     * @param OnlyNames Flag to determine if you only need the file name versus the path
-     * @return QStringList of launch files
+     * @return QMap<FileName, FilePath> of launch files
      */
-    static QStringList getROSPackageLaunchFiles(const QString &packagePath, bool OnlyNames = true);
+    static QMap<QString, QString> getROSPackageLaunchFiles(const QString &packagePath);
 
     /**
      * @brief Gets all of the executables associated to a package
@@ -287,7 +286,7 @@ public:
      * @param env ROS Workspace Environment
      * @return QStringList of executables
      */
-    static QStringList getROSPackageExecutables(const QString &packageName, const QStringList &env);
+    static QMap<QString, QString> getROSPackageExecutables(const QString &packageName, const QStringList &env);
 
     /**
      * @brief Remove catkin tools profile

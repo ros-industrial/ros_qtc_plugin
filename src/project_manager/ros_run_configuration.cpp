@@ -34,6 +34,7 @@
 #include <projectexplorer/projectexplorericons.h>
 #include <projectexplorer/buildstepspage.h>
 #include <projectexplorer/runnables.h>
+#include <debugger/debuggerengine.h>
 
 #include <qtsupport/qtkitinformation.h>
 #include <qtsupport/qtoutputformatter.h>
@@ -111,21 +112,7 @@ QString ROSRunConfiguration::disabledReason() const
 
 void ROSRunConfiguration::ctor()
 {
-//    // reset default settings in constructor
-//    connect(EditorManager::instance(), SIGNAL(currentEditorChanged(Core::IEditor*)),
-//            this, SLOT(changeCurrentFile(Core::IEditor*)));
-//    connect(EditorManager::instance(), SIGNAL(currentDocumentStateChanged()),
-//            this, SLOT(changeCurrentFile()));
-
-//    connect(target(), SIGNAL(kitChanged()),
-//            this, SLOT(updateEnabled()));
-setDisplayName(tr("ROS Run Configuration", "ROS run configuration display name."));
-
-//    if (id() == Constants::QML_SCENE_RC_ID)
-//        setDisplayName(tr("QML Scene", "QMLRunConfiguration display name."));
-//    else
-//        setDisplayName(tr("QML Viewer", "QMLRunConfiguration display name."));
-//    updateEnabled();
+    setDisplayName(tr("ROS Run Configuration", "ROS run configuration display name."));
 }
 
 QWidget *ROSRunConfiguration::createConfigurationWidget()
@@ -161,19 +148,20 @@ QVariantMap ROSRunConfiguration::toMap() const
 
 bool ROSRunConfiguration::fromMap(const QVariantMap &map)
 {
-  QVariantMap data = map.value(QLatin1String(ROS_RUN_STEP_LIST_ID)).toMap();
-          if (data.isEmpty()) {
-              qWarning() << "No data for ROS run step list found!";
-              return false;
-          }
-          RunStepList *list = new RunStepList(this, data);
-          if (list->isNull()) {
-              qWarning() << "Failed to restore ROS run step list!";
-              delete list;
-              return false;
-          }
-          list->setDefaultDisplayName(tr("Run"));
-          m_stepList = list;
+    QVariantMap data = map.value(QLatin1String(ROS_RUN_STEP_LIST_ID)).toMap();
+    if (data.isEmpty()) {
+        qWarning() << "No data for ROS run step list found!";
+        return false;
+    }
+    RunStepList *list = new RunStepList(this, data);
+    if (list->isNull()) {
+        qWarning() << "Failed to restore ROS run step list!";
+        delete list;
+        return false;
+    }
+    list->setDefaultDisplayName(tr("Run"));
+    m_stepList = list;
+
     return RunConfiguration::fromMap(map);
 }
 
@@ -279,11 +267,64 @@ ROSRunWorker::ROSRunWorker(RunControl *runControl) : RunWorker(runControl)
 
 void ROSRunWorker::start()
 {
-    if (runControl()->runMode() == ProjectExplorer::Constants::NORMAL_RUN_MODE)
+    foreach(RunStep *rs, qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
     {
+        if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
+        {
+            rs->run();
+        }
+    }
+}
+
+////////////////////////////////////
+/// ROSDebugRunWorker
+////////////////////////////////////
+
+ROSDebugRunWorker::ROSDebugRunWorker(RunControl *runControl) : Debugger::DebuggerRunTool(runControl)
+{
+    setDisplayName("RosDebugRunWorker");
+
+    connect(&m_timer, &QTimer::timeout,
+    this, &ROSDebugRunWorker::findProcess);
+
+    connect(this, &ROSDebugRunWorker::stopped,
+            &m_timer, &QTimer::stop);
+}
+
+void ROSDebugRunWorker::start()
+{
+    bool found = false;
+    foreach(RunStep *rs,  qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
+    {
+        if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID)
+        {
+            found = true;
+            m_debugContinueOnAttach = qobject_cast<ROSGenericRunStep *>(rs)->getDebugContinueOnAttach();
+            m_debugTargetPath = qobject_cast<ROSGenericRunStep *>(rs)->getTargetPath();
+            if (QFileInfo(m_debugTargetPath).exists())
+            {
+                m_timer.start(10);
+            }
+            else
+            {
+                QMessageBox msg;
+                msg.setWindowTitle("Debugging Catkin Workspace");
+                msg.setTextFormat(Qt::RichText);
+                msg.setWindowFlags(Qt::WindowStaysOnTopHint);
+                msg.setText("The <b><i>ROS Attach to Node</b></i> Run Step is not complete! Please verify information and try again.");
+                msg.exec();
+                return;
+            }
+
+        }
+    }
+
+    if (found)
+    {
+        // Now that the watcher is started run all of the other steps
         foreach(RunStep *rs, qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
         {
-            if (rs->enabled() == true)
+            if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
             {
                 rs->run();
             }
@@ -295,15 +336,41 @@ void ROSRunWorker::start()
         msg.setWindowTitle("Debugging Catkin Workspace");
         msg.setTextFormat(Qt::RichText);
         msg.setWindowFlags(Qt::WindowStaysOnTopHint);
-        msg.setText("Debug is only supported using the following methods:"
-                    "<ul>"
-                    "  <li>Attach to a Running Process</li>"
-                    "  <li>Attach to a Unstarted Process</li>"
-                    "</ul>"
-                    "Note: See <a href=https://github.com/ros-industrial/ros_qtc_plugin/wiki/4.-Debugging-Catkin-Workspace>GitHub wiki</a> for help.");
+        msg.setText("In order to debug a ROS Node the <b><i>ROS Attach to Node</b></i> Run Step must be added and enabled!");
         msg.exec();
+        return;
     }
+}
 
+void ROSDebugRunWorker::pidFound(ProjectExplorer::DeviceProcessItem process)
+{
+    m_timer.stop();
+    Debugger::Internal::DebuggerRunParameters rp;
+    rp.attachPID = Utils::ProcessHandle(process.pid);
+    rp.displayName = tr("Process %1").arg(process.pid);
+    rp.inferior.executable = process.exe;
+    rp.startMode = Debugger::AttachExternal;
+    rp.closeMode = Debugger::DetachAtClose;
+    rp.continueAfterAttach = m_debugContinueOnAttach;
+
+    setRunParameters(rp);
+    DebuggerRunTool::start();
+}
+
+void ROSDebugRunWorker::findProcess()
+{
+    const QString &appName = Utils::FileUtils::normalizePathName(m_debugTargetPath);
+    ProjectExplorer::DeviceProcessItem fallback;
+    foreach (const ProjectExplorer::DeviceProcessItem &p, ProjectExplorer::DeviceProcessList::localProcesses()) {
+        if (Utils::FileUtils::normalizePathName(p.exe) == appName) {
+            pidFound(p);
+            return;
+        }
+        if (p.cmdLine.startsWith(appName))
+            fallback = p;
+    }
+    if (fallback.pid != 0)
+        pidFound(fallback);
 }
 
 } // namespace Internal
