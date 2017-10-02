@@ -303,6 +303,7 @@ void ROSDebugRunWorker::start()
             m_debugTargetPath = qobject_cast<ROSGenericRunStep *>(rs)->getTargetPath();
             if (QFileInfo(m_debugTargetPath).exists())
             {
+                m_timeElapsed = 0;
                 m_timer.start(10);
             }
             else
@@ -359,6 +360,7 @@ void ROSDebugRunWorker::pidFound(ProjectExplorer::DeviceProcessItem process)
 
 void ROSDebugRunWorker::findProcess()
 {
+    m_timeElapsed += 10;
     const QString &appName = Utils::FileUtils::normalizePathName(m_debugTargetPath);
     ProjectExplorer::DeviceProcessItem fallback;
     foreach (const ProjectExplorer::DeviceProcessItem &p, ProjectExplorer::DeviceProcessList::localProcesses()) {
@@ -371,6 +373,10 @@ void ROSDebugRunWorker::findProcess()
     }
     if (fallback.pid != 0)
         pidFound(fallback);
+
+    // Make sure this does not run indefinitely. Allow 30sec to start the process.
+    if (m_timeElapsed >= 30000)
+        m_timer.stop();
 }
 
 } // namespace Internal
