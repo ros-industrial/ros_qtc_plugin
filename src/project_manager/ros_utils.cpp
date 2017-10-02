@@ -661,7 +661,7 @@ QMap<QString, QString> ROSUtils::getWorkspacePackagePaths(const WorkspaceInfo &w
     const QDir srcDir(workspaceInfo.sourcePath.toString());
     if(srcDir.exists())
     {
-      QDirIterator it(srcDir.absolutePath(),QStringList() << QLatin1String("package.xml"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+      QDirIterator it(srcDir.absolutePath(),QStringList() << QLatin1String("package.xml"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
       while (it.hasNext())
       {
         QFileInfo packageFile(it.next());
@@ -682,7 +682,7 @@ QMap<QString, QString> ROSUtils::getROSPackageLaunchFiles(const QString &package
   if(!packagePath.isEmpty())
   {
     const QDir srcDir(packagePath);
-    QDirIterator it(srcDir.absolutePath(),QStringList() << QLatin1String("*.launch"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    QDirIterator it(srcDir.absolutePath(),QStringList() << QLatin1String("*.launch"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
 
     while (it.hasNext())
     {
@@ -724,7 +724,7 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
       if(!package_executables_location.isEmpty())
       {
         const QDir srcDir(package_executables_location);
-        QDirIterator it(srcDir.absolutePath(), QDir::Files | QDir::Executable | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        QDirIterator it(srcDir.absolutePath(), QDir::Files | QDir::Executable | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
 
         while (it.hasNext())
         {
