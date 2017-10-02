@@ -128,6 +128,9 @@ signals:
     void stepRemoved(int position);
     void stepMoved(int from, int to);
 
+private slots:
+    void runStep_enabledChanged(RunStep *step);
+
 protected:
     virtual bool fromMap(const QVariantMap &map) override;
 
