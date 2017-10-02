@@ -934,7 +934,7 @@ BuildStep *ROSCatkinToolsStepFactory::restore(BuildStepList *parent, const QVari
 
 QList<ProjectExplorer::BuildStepInfo> ROSCatkinToolsStepFactory::availableSteps(BuildStepList *parent) const
 {
-    if (parent->target()->project()->id() != Constants::ROS_PROJECT_ID)
+    if (parent->target()->project()->id() != Constants::ROS_PROJECT_ID || (parent->id() != ProjectExplorer::Constants::BUILDSTEPS_CLEAN && parent->id() != ProjectExplorer::Constants::BUILDSTEPS_BUILD))
         return {};
 
     return {{ROS_CTS_ID,  QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinToolsConfigStep", ROS_CTS_DISPLAY_NAME)}};
