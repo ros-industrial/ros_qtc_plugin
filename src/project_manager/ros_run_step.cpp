@@ -19,6 +19,7 @@
  * limitations under the License.
  */
 #include "ros_run_step.h"
+#include "ros_project_constants.h"
 
 #include <extensionsystem/pluginmanager.h>
 #include <utils/algorithm.h>
@@ -260,6 +261,20 @@ bool RunStepList::fromMap(const QVariantMap &map)
     return true;
 }
 
+void RunStepList::runStep_enabledChanged(RunStep *step)
+{
+    if (step->enabled() == true)
+    {
+        foreach(RunStep *rs, m_steps)
+        {
+            if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID && rs != step)
+            {
+                rs->setEnabled(false);
+            }
+        }
+    }
+}
+
 QList<RunStep *> RunStepList::steps() const
 {
     return m_steps;
@@ -267,6 +282,21 @@ QList<RunStep *> RunStepList::steps() const
 
 void RunStepList::insertStep(int position, RunStep *step)
 {
+    if (step->id() == Constants::ROS_ATTACH_TO_NODE_ID)
+    {
+        if (step->enabled() == true)
+        {
+            foreach(RunStep *rs, m_steps)
+            {
+                if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID)
+                {
+                    rs->setEnabled(false);
+                }
+            }
+        }
+        connect(step, &RunStep::enabledChanged,
+                this, [this, step] () {runStep_enabledChanged(step);});
+    }
     m_steps.insert(position, step);
     emit stepInserted(position);
 }
