@@ -133,6 +133,7 @@ private:
     void findProcess();
     void pidFound(ProjectExplorer::DeviceProcessItem process);
     QTimer m_timer;
+    int m_timeElapsed;
     QString m_debugTargetPath;
     bool m_debugContinueOnAttach;
 };
