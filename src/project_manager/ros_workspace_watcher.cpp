@@ -23,6 +23,8 @@
 #include "ros_project.h"
 
 #include <projectexplorer/projecttree.h>
+#include <coreplugin/vcsmanager.h>
+#include <coreplugin/iversioncontrol.h>
 
 #include <QDebug>
 
@@ -124,6 +126,23 @@ void ROSWorkspaceWatcher::renameFolder(const QString &parentPath, const QString 
 
 void ROSWorkspaceWatcher::onFolderChanged(const QString &path)
 {
+  // Update version control
+  foreach (Core::IVersionControl *vc, Core::VcsManager::instance()->versionControls())
+  {
+    Utils::FileName vcsPath = Utils::FileName::fromString(path);
+    if (vc->isVcsFileOrDirectory(vcsPath))
+    {
+        foreach(QString rep, Core::VcsManager::instance()->repositories(vc))
+        {
+            if (vcsPath.isChildOf(QDir(rep)))
+            {
+                emit Core::VcsManager::instance()->repositoryChanged(rep);
+            }
+        }
+
+    }
+  }
+
   // Compare the latest contents to saved contents for the dir updated to find out the difference(change)
   const QDir dir(path);
   QStringList curFiles = m_workspaceContent[path].files;

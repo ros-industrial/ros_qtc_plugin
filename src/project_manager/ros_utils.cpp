@@ -354,7 +354,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
   QString folder = folderPath.toString();
 
     // Get Directory data
-    content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs);
+    content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs | QDir::Hidden);
     content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files | QDir::Hidden);
     workspaceFiles[folder] = content;
 
@@ -363,11 +363,11 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
 
     // Get SubDirectory Information
     const QDir subDir(folder);
-    QDirIterator itSrc(subDir.absolutePath(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
+    QDirIterator itSrc(subDir.absolutePath(), QDir::NoDotAndDotDot | QDir::Dirs | QDir::Hidden, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
     while (itSrc.hasNext())
     {
         folder = itSrc.next();
-        content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs);
+        content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs | QDir::Hidden);
         content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files | QDir::Hidden);
         workspaceFiles[folder] = content;
 
