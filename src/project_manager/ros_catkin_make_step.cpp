@@ -388,7 +388,7 @@ BuildStep *ROSCatkinMakeStepFactory::restore(BuildStepList *parent, const QVaria
 
 QList<ProjectExplorer::BuildStepInfo> ROSCatkinMakeStepFactory::availableSteps(BuildStepList *parent) const
 {
-    if (parent->target()->project()->id() != Constants::ROS_PROJECT_ID)
+    if (parent->target()->project()->id() != Constants::ROS_PROJECT_ID || (parent->id() != ProjectExplorer::Constants::BUILDSTEPS_CLEAN && parent->id() != ProjectExplorer::Constants::BUILDSTEPS_BUILD))
         return {};
 
     return {{ROS_CMS_ID,  QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep", ROS_CMS_DISPLAY_NAME)}};
