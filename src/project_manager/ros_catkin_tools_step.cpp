@@ -38,8 +38,9 @@
 #include <utils/stringutils.h>
 #include <utils/qtcassert.h>
 #include <utils/qtcprocess.h>
-#include <fstream>
+#include <cmakeprojectmanager/cmakeparser.h>
 
+#include <fstream>
 #include <QDir>
 #include <QInputDialog>
 
@@ -153,9 +154,12 @@ bool ROSCatkinToolsStep::init(QList<const BuildStep *> &earlierSteps)
     setIgnoreReturnValue(m_target == CLEAN);
 
     setOutputParser(new GnuMakeParser());
+    setOutputParser(new CMakeProjectManager::CMakeParser());
+
     IOutputParser *parser = target()->kit()->createOutputParser();
     if (parser)
         appendOutputParser(parser);
+
     outputParser()->setWorkingDirectory(pp->effectiveWorkingDirectory());
 
     return AbstractProcessStep::init(earlierSteps);
