@@ -8,6 +8,7 @@ QTC_PLUGIN_DEPENDS += \
     cpptools \
     texteditor \
     debugger \
+    cmakeprojectmanager \
     qtsupport
 QTC_TEST_DEPENDS += \
     cppeditor
