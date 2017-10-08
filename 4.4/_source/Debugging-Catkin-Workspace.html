@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Debugging Catkin Workspace &mdash; ROS Qt Creator Plug-in  documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/override.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="ROS Qt Creator Plug-in  documentation" href="../index.html"/>
+        <link rel="next" title="Where to find Qt Creator Plug-in Support" href="Where-to-find-Qt-Creator-Plug-in-Support.html"/>
+        <link rel="prev" title="Setup Qt Creator for ROS" href="Setup-Qt-Creator-for-ROS.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+  
+  <script src="../_static/js/clipboard.min.js"></script>
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home">
+        
+
+          ROS Qt Creator Plug-in<br/>4.4
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="How-to-Install-Users.html">How to Install (Users)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="How-to-Install-Users.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="How-to-Install-Users.html#installation-procedure-for-ubuntu-14-04">Installation Procedure for Ubuntu 14.04</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="How-to-Install-Users.html#may-need-to-remove-old-ppa">May need to remove old PPA:</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="How-to-Install-Users.html#installation-procedure-for-ubuntu-16-04">Installation Procedure for Ubuntu 16.04</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="How-to-Install-Users.html#id1">May need to remove old PPA:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="How-to-Install-Users.html#installation-issues-and-conflicts">Installation Issues and Conflicts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="How-to-Install-Users.html#testing-plugin">Testing Plugin.</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Improve-ROS-Qt-Creator-Plugin-Developers-ONLY.html">Improve ROS Qt Creator Plugin (Developers ONLY)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Improve-ROS-Qt-Creator-Plugin-Developers-ONLY.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Improve-ROS-Qt-Creator-Plugin-Developers-ONLY.html#installation-procedure-for-ubuntu-14-04">Installation Procedure for Ubuntu 14.04</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Improve-ROS-Qt-Creator-Plugin-Developers-ONLY.html#installation-procedure-for-ubuntu-16-04">Installation Procedure for Ubuntu 16.04</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Improve-ROS-Qt-Creator-Plugin-Developers-ONLY.html#configure-system-to-use-the-new-version-of-qt">Configure system to use the new version of Qt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Improve-ROS-Qt-Creator-Plugin-Developers-ONLY.html#run-ros-qt-creator-setup-script">Run ROS Qt Creator setup script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Improve-ROS-Qt-Creator-Plugin-Developers-ONLY.html#testing-plugin">Testing Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Improve-ROS-Qt-Creator-Plugin-Developers-ONLY.html#debug-issues-with-plugin">Debug issues with Plugin</a></li>
+</ul>
+</li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html">Setup Qt Creator for ROS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#setup-ubuntu-to-allow-debugging-ptrace">Setup Ubuntu to allow debugging/ptrace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#set-theme">Set Theme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#set-syntax-color-schemes">Set Syntax Color Schemes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#set-ros-code-format">Set ROS Code Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#setup-clang-formatting">Setup Clang Formatting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#preventing-qt-creator-form-stepping-into-boost-eigen-etc">Preventing Qt Creator form stepping into Boost, Eigen, etc.</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Debugging Catkin Workspace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisite">Prerequisite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#attach-to-a-unstarted-process">Attach to a unstarted process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#attach-to-a-running-process">Attach to a running process</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Where-to-find-Qt-Creator-Plug-in-Support.html">Qt Creator Plug-in Support</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">ROS Qt Creator Plug-in</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+
+        <div class="header-override">
+          <a href="http://rosindustrial.org">
+            <img src="../_static/logo.jpg"/>
+          </a>
+          <p>
+            <a href="http://rosindustrial.org">ROS-Industrial Website</a>|<a href="http://rosindustrial.org/news">Blog</a>
+          </p>
+        </div>
+
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="https://github.com/ros-industrial/ros_qtc_plugin/blob/4.4/gh_pages/_source/Debugging-Catkin-Workspace.rst" class="fa fa-github"> Edit on GitHub</a>
+        
+      
+    </li>
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>Debugging Catkin Workspace</li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             <div class="admonition note">
+               <p class="first admonition-title">The code used in this tutorial is available!</p>
+               <p class="last">Code can be found at <a href = "https://github.com/ros-industrial/industrial_training">industrial_training repository</a> in gh_pages folder. Use 4.4 branch.</p>
+             </div>
+
+            
+  
+
+
+
+
+
+<div class="section" id="debugging-catkin-workspace">
+<h1>Debugging Catkin Workspace<a class="headerlink" href="#debugging-catkin-workspace" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="prerequisite">
+<h2>Prerequisite<a class="headerlink" href="#prerequisite" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Allow ptrace by following these <a class="reference external" href="_source/Setup-Qt-Creator-for-ROS#31-setup-ubuntu-to-allow-debuggingptrace">instructions</a></li>
+</ol>
+</div>
+<div class="section" id="attach-to-a-unstarted-process">
+<h2>Attach to a unstarted process<a class="headerlink" href="#attach-to-a-unstarted-process" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Next in Qt Creator browse to the file you wish to debug and insert break points.</li>
+<li><code class="kbd docutils literal"><span class="pre">Menu</span> <span class="pre">Bar</span></code> &gt; <code class="kbd docutils literal"><span class="pre">Debug</span></code> &gt; <code class="kbd docutils literal"><span class="pre">Start</span> <span class="pre">Debugging</span></code> &gt; <code class="kbd docutils literal"><span class="pre">Attach</span> <span class="pre">to</span> <span class="pre">Unstarted</span> <span class="pre">Application...</span></code></li>
+<li>Browse to the executable then select <code class="kbd docutils literal"><span class="pre">Start</span> <span class="pre">Watching</span></code>.</li>
+<li>Now run your project. <code class="kbd docutils literal"><span class="pre">Ctrl</span></code> + <code class="kbd docutils literal"><span class="pre">R</span></code></li>
+<li>Now depending on where the breakpoints were placed in qt, it should be stopped at a break point when it reaches one.</li>
+</ol>
+</div>
+<div class="section" id="attach-to-a-running-process">
+<h2>Attach to a running process<a class="headerlink" href="#attach-to-a-running-process" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Next in Qt Creator browse to the file you wish to debug and insert break points.</li>
+<li>Now run your project. <code class="kbd docutils literal"><span class="pre">Ctrl</span></code> + <code class="kbd docutils literal"><span class="pre">R</span></code></li>
+<li><code class="kbd docutils literal"><span class="pre">Menu</span> <span class="pre">Bar</span></code> &gt; <code class="kbd docutils literal"><span class="pre">Debug</span></code> &gt; <code class="kbd docutils literal"><span class="pre">Start</span> <span class="pre">Debugging</span></code> &gt; <code class="kbd docutils literal"><span class="pre">Attach</span> <span class="pre">to</span> <span class="pre">Running</span> <span class="pre">Application...</span></code></li>
+<li>Now select the Process ID and then click the button <code class="kbd docutils literal"><span class="pre">Attach</span> <span class="pre">to</span> <span class="pre">Process</span></code>.</li>
+<li>Now depending on where the breakpoints were placed in qt, it should be stopped at a break point when it reaches one.</li>
+</ol>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ol class="last arabic simple">
+<li>Sometime it will be paused at a ros::spin, so check after it has attached and if it is passed and not at a inserted breakpoint click the continue button in the debugger.</li>
+<li>Some nodes can execute fast enough to where the debugger is not fully attach to the process before it reaches the first breakpoint, resulting in it never stopping at the breakpoint. To solve this add a <cite>sleep(NumberOfSeconds)</cite> command at the start of the node to allow enough time for the debugger to attach. Usually 3 seconds is enough but varies depending on the size of the node.</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+            
+            <div class="admonition note">
+              <p class="first admonition-title">Open Source Feedback</p>
+              <p class="last">See something that needs improvement? Please open a pull request on this <a href="https://github.com/ros-industrial/ros_qtc_plugin/blob/4.4/gh_pages/_source/Debugging-Catkin-Workspace.rst" class="fa fa-github"> GitHub page</a></p>
+            </div>
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Where-to-find-Qt-Creator-Plug-in-Support.html" class="btn btn-neutral float-right" title="Where to find Qt Creator Plug-in Support" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Setup-Qt-Creator-for-ROS.html" class="btn btn-neutral" title="Setup Qt Creator for ROS" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  <script>
+  var pre = document.getElementsByTagName('pre');
+  for (var i = 0; i < pre.length; i++) {
+    var button = document.createElement('button');
+    button.className = 'btn-copyboard fa fa-copy btn';
+    pre[i].before(button);
+  }
+
+  var clipboard = new Clipboard('.btn-copyboard', {
+    target: function(trigger) {return trigger.nextElementSibling;}
+  });
+
+  function showSuccess(elem){elem.setAttribute('class','btn-copyboard fa fa-check btn');}
+  function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+  }
+  clipboard.on('success',function(e){
+    showSuccess(e.trigger);
+    sleep(350).then(() => {e.clearSelection();
+      e.trigger.setAttribute('class','btn-copyboard fa fa-copy btn');})
+  });
+  </script>
+
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: 4.4
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="Debugging-Catkin-Workspace.html">4.4</a></dd>
+            <dd><a href="../../4.3/_source/Debugging-Catkin-Workspace.html">4.3</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
