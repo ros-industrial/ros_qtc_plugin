@@ -1,6 +1,0 @@
-<?xml version="1.0" ?>
-
-<robot name="%{RobotName}" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find %{PackageName})/urdf/%{Model}_macro.xacro"/>
-  <xacro:%{RobotName} prefix=""/>
-</robot>
