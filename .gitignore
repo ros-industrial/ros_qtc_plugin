@@ -2,3 +2,4 @@
 *.swp
 *.autosave
 setup.log
+_build
