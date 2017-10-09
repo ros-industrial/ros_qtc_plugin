@@ -1,3 +1,20 @@
+qt57creator-plugin-ros (0.1.7-0xenial1) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Upgrade to Qt Creator 4.4
+  * Add messagebox when the debug run button is clicked.
+  * Add new Attach to ROS Node run step
+  * Only allow one debug step to be enabled
+  * Remove build steps from deploy steps
+  * Show hidden folders and fix version control
+  * Follow packages that are symlink
+  * Make sure attach step does not watch indefinitely
+  * Fix GenericRunStep toMap and fromMap
+  * Add CMake Output Parser
+  * Add Sphinx Documentation
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Mon, 09 Oct 2017 09:06:15 -0500
+
 qt57creator-plugin-ros (0.1.6-0xenial1) xenial; urgency=high
 
   [ Levi Armstrong ]

@@ -4,7 +4,7 @@ Uploaders: Levi Armstrong <levi.armstrong@gmail.com>
 Section: devel
 Priority: optional
 Build-Depends: debhelper (>= 9),
-               qt57creator (>= 4.3.1),
+               qt57creator (>= 4.4.1),
                libqtermwidget57-0-dev (>= 0.6.0),
                wget (>= 1.15),
                libgl1-mesa-dev [!armel !armhf] | libgl-dev [!armel !armhf],
@@ -22,7 +22,7 @@ Package: qt57creator-plugin-ros
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         qt57creator ( >= 4.3.1),
+         qt57creator ( >= 4.4.1),
          libqtermwidget57-0 ( >= 0.6.0)
 Pre-Depends: ${misc:Pre-Depends}
 Description: ROS plugin for Qt Creator IDE
