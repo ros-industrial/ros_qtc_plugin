@@ -6,7 +6,7 @@
     "trDescription": "Creates a basic ROS publisher node.",
     "trDisplayName": "Basic Publisher Node",
     "trDisplayCategory": "ROS",
-    "icon": "../../global/genericfilewizard.png",
+    "iconText": "node",
     "enabled": "%{JS: [ %{Plugins} ].indexOf('ROSProjectManager') >= 0}",
 
     "options":

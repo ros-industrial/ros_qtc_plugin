@@ -6,7 +6,7 @@
     "trDescription": "Creates a basic ROS message file.",
     "trDisplayName": "Basic msg file",
     "trDisplayCategory": "ROS",
-    "icon": "../../global/genericfilewizard.png",
+    "iconText": "msg",
     "enabled": "%{JS: [ %{Plugins} ].indexOf('ROSProjectManager') >= 0}",
 
     "options": { "key": "FileName", "value": "%{JS: Util.fileName('%{TargetPath}', '.msg')}" },

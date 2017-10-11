@@ -6,7 +6,7 @@
     "trDescription": "Creates a basic ROS launch file.",
     "trDisplayName": "Basic launch file",
     "trDisplayCategory": "ROS",
-    "icon": "../../global/genericfilewizard.png",
+    "iconText": "launch",
     "enabled": "%{JS: [ %{Plugins} ].indexOf('ROSProjectManager') >= 0}",
 
     "options": { "key": "FileName", "value": "%{JS: Util.fileName('%{TargetPath}', '.launch')}" },
