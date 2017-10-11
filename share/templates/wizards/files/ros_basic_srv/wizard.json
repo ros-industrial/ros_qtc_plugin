@@ -6,7 +6,7 @@
     "trDescription": "Creates a basic ROS service file.",
     "trDisplayName": "Basic srv file",
     "trDisplayCategory": "ROS",
-    "icon": "../../global/genericfilewizard.png",
+    "iconText": "srv",
     "enabled": "%{JS: [ %{Plugins} ].indexOf('ROSProjectManager') >= 0}",
 
     "options": { "key": "FileName", "value": "%{JS: Util.fileName('%{TargetPath}', '.srv')}" },
