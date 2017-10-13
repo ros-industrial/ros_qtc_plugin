@@ -24,7 +24,7 @@ Set Syntax Color Schemes
 #. There is a drop down box in the "Color Scheme" group where you select different syntax color schemes.
 #. Addition schemes can be added as explained in the below links.
 
-   #. https://github.com/procedural/qtcreator-themes
+   #. https://github.com/welkineins/qtcreator-themes
    #. https://github.com/alexpana/qt-creator-wombat-theme
 
 Set ROS Code Format
