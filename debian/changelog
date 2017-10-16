@@ -1,3 +1,18 @@
+qt57creator-plugin-ros (0.1.8-0xenial2) xenial; urgency=high
+
+  [ Levi Armstrong ]
+  * Update README.md
+  * Update sphinx theme with ros-i colors
+  * Add sourcelink_suffix to theme layout.html
+  * Add footer banner and ros-i color to copy button (#168)
+  * Change footer image link
+  * Fix templates icon
+  * Upgrade to Qt 5.9.1
+
+  [ ros-industrial ]
+
+ -- Levi Armstrong <levi.armstrong@gmail.com>  Mon, 16 Oct 2017 11:25:51 -0500
+
 qt57creator-plugin-ros (0.1.7-0xenial1) xenial; urgency=high
 
   [ Levi Armstrong ]

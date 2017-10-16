@@ -5,7 +5,7 @@ export DH_VERBOSE=1
 
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
-QT_BASE_DIR = /opt/qt57
+QT_BASE_DIR = /opt/qt59
 export QTC_PLUGIN_DIRS := $(CURDIR)/src
 export PATH := $(QT_BASE_DIR)/bin:$(PATH)
 export PKG_CONFIG_PATH := $(QT_BASE_DIR)/lib/pkgconfig/:$(PKG_CONFIG_PATH) dh binary-arch
@@ -22,9 +22,9 @@ override_dh_auto_configure:
 		LIBS+=-L$(QT_BASE_DIR)/lib/$(DEB_HOST_MULTIARCH)/qtcreator/plugins
 
 override_dh_auto_install:
-	dh_auto_install --destdir=debian/tmp/opt/qt57
-	mkdir -p debian/tmp/opt/qt57/src/qtcreator
-	find | egrep -v '^\.\/builddir|^\.\/doc|^\.\/share|^\.\/\.pc|^\.\/debian|^\.\/tests|^\.\/share'|grep "project_manager" | grep "\.pri\$$\|\.h\$$\|\.xsl\$$" | xargs -I{} cp --parents -r "{}" debian/tmp/opt/qt57/src/qtcreator
-	mkdir -p debian/tmp/opt/qt57/src/qtcreator/src/plugins
-	mv  debian/tmp/opt/qt57/src/qtcreator/src/project_manager debian/tmp/opt/qt57/src/qtcreator/src/plugins/project_manager
+	dh_auto_install --destdir=debian/tmp$(QT_BASE_DIR)
+	mkdir -p debian/tmp$(QT_BASE_DIR)/src/qtcreator
+	find | egrep -v '^\.\/builddir|^\.\/doc|^\.\/share|^\.\/\.pc|^\.\/debian|^\.\/tests|^\.\/share'|grep "project_manager" | grep "\.pri\$$\|\.h\$$\|\.xsl\$$" | xargs -I{} cp --parents -r "{}" debian/tmp$(QT_BASE_DIR)/src/qtcreator
+	mkdir -p debian/tmp$(QT_BASE_DIR)/src/qtcreator/src/plugins
+	mv  debian/tmp$(QT_BASE_DIR)/src/qtcreator/src/project_manager debian/tmp$(QT_BASE_DIR)/src/qtcreator/src/plugins/project_manager
 

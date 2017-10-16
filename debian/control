@@ -4,8 +4,8 @@ Uploaders: Levi Armstrong <levi.armstrong@gmail.com>
 Section: devel
 Priority: optional
 Build-Depends: debhelper (>= 9),
-               qt57creator (>= 4.4.1),
-               libqtermwidget57-0-dev (>= 0.6.0),
+               qt59creator (>= 4.4.1),
+               libqtermwidget59-0-dev (>= 0.6.1),
                wget (>= 1.15),
                libgl1-mesa-dev [!armel !armhf] | libgl-dev [!armel !armhf],
                libgles2-mesa-dev [armel armhf] | libgles2-dev [armel armhf],
@@ -22,8 +22,8 @@ Package: qt57creator-plugin-ros
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         qt57creator ( >= 4.4.1),
-         libqtermwidget57-0 ( >= 0.6.0)
+         qt59creator ( >= 4.4.1),
+         libqtermwidget59-0 ( >= 0.6.1)
 Pre-Depends: ${misc:Pre-Depends}
 Description: ROS plugin for Qt Creator IDE
  This package contains the ROS plugin for Qt Creator, providing
@@ -31,9 +31,9 @@ Description: ROS plugin for Qt Creator IDE
 
 Package: qt57creator-plugin-ros-dev
 Architecture: any
-Depends: qt57creator-plugin-ros (= ${binary:Version}),
+Depends: qt59creator-plugin-ros (= ${binary:Version}),
          ${misc:Depends},
-         libqtermwidget57-0-dev ( >= 0.6.0)
+         libqtermwidget59-0-dev ( >= 0.6.1)
 Pre-Depends: ${misc:Pre-Depends}
 Description: Qt Creator ros development fiels
  This package contains the developer files for Qt
