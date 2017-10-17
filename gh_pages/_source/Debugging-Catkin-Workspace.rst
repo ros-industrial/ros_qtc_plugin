@@ -4,7 +4,7 @@ Debugging Catkin Workspace
 Prerequisite
 ------------
 
-#. Allow ptrace by following these `instructions <_source/Setup-Qt-Creator-for-ROS#31-setup-ubuntu-to-allow-debuggingptrace>`_
+#. Allow ptrace by following these `instructions <Setup-Qt-Creator-for-ROS.html#setup-ubuntu-to-allow-debugging-ptrace>`_
 
 Attach to a unstarted process
 -----------------------------
