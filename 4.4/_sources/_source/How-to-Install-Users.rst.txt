@@ -6,6 +6,31 @@ This wiki explains the procedure for installing the ROS Qt Creator Plug-in.
 
 Installation
 ------------
+Installation Procedure for Ubuntu 16.04
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   sudo add-apt-repository ppa:levi-armstrong/qt-libraries-xenial
+   sudo add-apt-repository ppa:levi-armstrong/ppa
+   sudo apt update && sudo apt install qt59creator
+   sudo apt install qt57creator-plugin-ros
+
+May need to remove old PPA:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: bash
+
+   sudo add-apt-repository --remove ppa:beineri/opt-qt57-xenial
+   sudo add-apt-repository --remove ppa:beineri/opt-qt571-xenial
+
+*If you receive an error, then manually remove it.*
+
+.. code-block:: bash
+
+   sudo rm /etc/apt/sources.list.d/beineri-opt-qt57-xenial-xenial.list
+   sudo rm /etc/apt/sources.list.d/beineri-opt-qt571-xenial-xenial.list
+
 
 Installation Procedure for Ubuntu 14.04
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,31 +55,6 @@ May need to remove old PPA:
 
    sudo rm /etc/apt/sources.list.d/beineri-opt-qt57-trusty-trusty.list
    sudo rm /etc/apt/sources.list.d/beineri-opt-qt571-trusty-trusty.list
-
-Installation Procedure for Ubuntu 16.04
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-   sudo add-apt-repository ppa:levi-armstrong/qt-libraries-xenial
-   sudo add-apt-repository ppa:levi-armstrong/ppa
-   sudo apt update && sudo apt install qt57creator
-   sudo apt install qt57creator-plugin-ros
-
-May need to remove old PPA:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: bash
-
-   sudo add-apt-repository --remove ppa:beineri/opt-qt57-xenial
-   sudo add-apt-repository --remove ppa:beineri/opt-qt571-xenial
-
-*If you receive an error, then manually remove it.*
-
-.. code-block:: bash
-
-   sudo rm /etc/apt/sources.list.d/beineri-opt-qt57-xenial-xenial.list
-   sudo rm /etc/apt/sources.list.d/beineri-opt-qt571-xenial-xenial.list
 
 Installation Issues and Conflicts
 ---------------------------------
