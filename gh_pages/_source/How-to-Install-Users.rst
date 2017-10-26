@@ -16,20 +16,18 @@ Installation Procedure for Ubuntu 16.04
    sudo apt update && sudo apt install qt59creator
    sudo apt install qt57creator-plugin-ros
 
-May need to remove old PPA:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. Note:: 
 
-.. code-block:: bash
+   Occasionally the Qt dependency is upgraded and when this occures the following procedure is recommended.
+ 
+   .. code-block:: bash
+    
+      sudo apt remove --purge '^qtXX.*'
+      sudo apt update && sudo apt install qtYYcreator
+      sudo apt install qt57creator-plugin-ros
 
-   sudo add-apt-repository --remove ppa:beineri/opt-qt57-xenial
-   sudo add-apt-repository --remove ppa:beineri/opt-qt571-xenial
+   *Remember to replace XX with the current version installed and replace YY with the new version.*
 
-*If you receive an error, then manually remove it.*
-
-.. code-block:: bash
-
-   sudo rm /etc/apt/sources.list.d/beineri-opt-qt57-xenial-xenial.list
-   sudo rm /etc/apt/sources.list.d/beineri-opt-qt571-xenial-xenial.list
 
 
 Installation Procedure for Ubuntu 14.04
@@ -39,22 +37,20 @@ Installation Procedure for Ubuntu 14.04
 
    sudo add-apt-repository ppa:levi-armstrong/qt-libraries-trusty
    sudo add-apt-repository ppa:levi-armstrong/ppa
-   sudo apt-get update && sudo apt-get install qt57creator
+   sudo apt-get update && sudo apt-get install qt59creator
    sudo apt-get install qt57creator-plugin-ros
 
-May need to remove old PPA:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. Note:: 
 
-.. code-block:: bash
+   Occasionally the Qt dependency is upgraded and when this occures the following procedure is recommended.
+ 
+   .. code-block:: bash
+    
+      sudo apt remove --purge '^qtXX.*'
+      sudo apt update && sudo apt install qtYYcreator
+      sudo apt install qt57creator-plugin-ros
 
-   sudo add-apt-repository --remove ppa:beineri/opt-qt57-trusty
-
-*If you receive an error, then manually remove it.*
-
-.. code-block:: bash
-
-   sudo rm /etc/apt/sources.list.d/beineri-opt-qt57-trusty-trusty.list
-   sudo rm /etc/apt/sources.list.d/beineri-opt-qt571-trusty-trusty.list
+   *Remember to replace XX with the current version installed and replace YY with the new version.*
 
 Installation Issues and Conflicts
 ---------------------------------
@@ -67,9 +63,8 @@ Testing Plugin.
 #. Start Qt Creator
 
    * Option 1: Launch using the desktop icon.
-   * Option 2: Launch from terminal. Before you can launch from the terminal perform one of the action below.
+   * Option 2: Launch from terminal. Before you can launch from the terminal perform the action below.
 
-     * Add "source /opt/qt57/bin/qt57-env.sh" to the users .bashrc file.
-     * Create a symbolic link file in you /usr/local/bin called qtcreator which points to /opt/qt57/bin/qtcreator-wrapper
+     * Create a symbolic link file in you /usr/local/bin called qtcreator which points to /opt/qt57/bin/qtcreator
 
 #. To verify that the plugin exist, goto File>New File or Project>Projects>Other Project>ROS Workspace. If the ROS Workspace is present then everything built correctly and is ready for development and testing.
