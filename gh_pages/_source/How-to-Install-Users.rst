@@ -63,8 +63,10 @@ Testing Plugin.
 #. Start Qt Creator
 
    * Option 1: Launch using the desktop icon.
-   * Option 2: Launch from terminal. Before you can launch from the terminal perform the action below.
+   * Option 2: Launch from terminal. 
 
-     * Create a symbolic link file in you /usr/local/bin called qtcreator which points to /opt/qt57/bin/qtcreator
+     .. code-block:: bash
+        
+        qtcreator-ros
 
 #. To verify that the plugin exist, goto File>New File or Project>Projects>Other Project>ROS Workspace. If the ROS Workspace is present then everything built correctly and is ready for development and testing.
