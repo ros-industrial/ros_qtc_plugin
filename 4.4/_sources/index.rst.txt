@@ -16,6 +16,13 @@ Installation
    How to Install (Users) <_source/How-to-Install-Users.rst>
    Improve ROS Qt Creator Plugin (Developers ONLY) <_source/Improve-ROS-Qt-Creator-Plugin-Developers-ONLY>
 
+FAQ
+---
+.. toctree::
+   :maxdepth: 2
+
+   Questions?<_source/FAQ.rst>
+
 Users Help
 ----------
 
@@ -23,6 +30,7 @@ Users Help
    :maxdepth: 1
 
    Setup Qt Creator for ROS <_source/Setup-Qt-Creator-for-ROS.rst>
+   Import ROS Workspace <_source/Import-ROS-Workspace.rst>
    Debugging Catkin Workspace <_source/Debugging-Catkin-Workspace.rst>
 
 Developers Help
@@ -33,8 +41,11 @@ Developers Help
 
    Qt Creator Plug-in Support <_source/Where-to-find-Qt-Creator-Plug-in-Support.rst>
 
-Tutorials
----------
+Video Tutorials
+---------------
 
 1. `How to create a catkin workspace. <https://www.youtube.com/watch?v=GqBzI7O9h8A>`_
 2. `How to configure the run and build settings. <https://www.youtube.com/watch?v=5Y9Bz3nh0g0>`_
+
+   .. Note:: Videos may not always be up-to-date so if you are not sure about something please refer to the *User Help* section.
+   

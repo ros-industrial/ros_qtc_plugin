@@ -107,6 +107,14 @@
 </li>
 </ul>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">Questions?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html#how-to-show-empty-folders">How to show empty folders?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html#are-new-files-automaticly-added-to-the-cmakelists-txt-file">Are new files automaticly added to the CMakeLists.txt file?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html#warning-this-file-is-not-part-of-any-project">Warning: This file is not part of any project.?</a></li>
+</ul>
+</li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html">Setup Qt Creator for ROS</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#setup-ubuntu-to-allow-debugging-ptrace">Setup Ubuntu to allow debugging/ptrace</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#set-theme">Set Theme</a></li>
@@ -114,6 +122,18 @@
 <li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#set-ros-code-format">Set ROS Code Format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#setup-clang-formatting">Setup Clang Formatting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#preventing-qt-creator-form-stepping-into-boost-eigen-etc">Preventing Qt Creator form stepping into Boost, Eigen, etc.</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Import-ROS-Workspace.html">Import ROS Workspace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Import-ROS-Workspace.html#user-guide">User Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-1">Step 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-2">Step 2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-3">Step 3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-4">Step 4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-5">Step 5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-6-optional">Step 6 (Optional)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Debugging-Catkin-Workspace.html">Debugging Catkin Workspace</a><ul>
@@ -197,7 +217,7 @@
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="installation-procedure-for-ubuntu-16-04">
 <h3>Installation Procedure for Ubuntu 16.04<a class="headerlink" href="#installation-procedure-for-ubuntu-16-04" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo add-apt-repository ppa:levi-armstrong/qt-libraries-xenial
+<div class="highlight-bash"><div class="highlight"><pre>sudo add-apt-repository ppa:levi-armstrong/qt-libraries-xenial
 sudo add-apt-repository ppa:levi-armstrong/ppa
 sudo apt update <span class="o">&amp;&amp;</span> sudo apt install qt59creator
 sudo apt install qt57creator-plugin-ros
@@ -206,7 +226,7 @@ sudo apt install qt57creator-plugin-ros
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p>Occasionally the Qt dependency is upgraded and when this occures the following procedure is recommended.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt remove --purge <span class="s1">&#39;^qtXX.*&#39;</span>
+<div class="highlight-bash"><div class="highlight"><pre>sudo apt remove --purge <span class="s1">&#39;^qtXX.*&#39;</span>
 sudo apt update <span class="o">&amp;&amp;</span> sudo apt install qtYYcreator
 sudo apt install qt57creator-plugin-ros
 </pre></div>
@@ -216,7 +236,7 @@ sudo apt install qt57creator-plugin-ros
 </div>
 <div class="section" id="installation-procedure-for-ubuntu-14-04">
 <h3>Installation Procedure for Ubuntu 14.04<a class="headerlink" href="#installation-procedure-for-ubuntu-14-04" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo add-apt-repository ppa:levi-armstrong/qt-libraries-trusty
+<div class="highlight-bash"><div class="highlight"><pre>sudo add-apt-repository ppa:levi-armstrong/qt-libraries-trusty
 sudo add-apt-repository ppa:levi-armstrong/ppa
 sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install qt59creator
 sudo apt-get install qt57creator-plugin-ros
@@ -225,7 +245,7 @@ sudo apt-get install qt57creator-plugin-ros
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p>Occasionally the Qt dependency is upgraded and when this occures the following procedure is recommended.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt remove --purge <span class="s1">&#39;^qtXX.*&#39;</span>
+<div class="highlight-bash"><div class="highlight"><pre>sudo apt remove --purge <span class="s1">&#39;^qtXX.*&#39;</span>
 sudo apt update <span class="o">&amp;&amp;</span> sudo apt install qtYYcreator
 sudo apt install qt57creator-plugin-ros
 </pre></div>
@@ -248,7 +268,7 @@ sudo apt install qt57creator-plugin-ros
 <li><p class="first">Option 1: Launch using the desktop icon.</p>
 </li>
 <li><p class="first">Option 2: Launch from terminal.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>qtcreator-ros
+<div class="highlight-bash"><div class="highlight"><pre>qtcreator-ros
 </pre></div>
 </div>
 </li>

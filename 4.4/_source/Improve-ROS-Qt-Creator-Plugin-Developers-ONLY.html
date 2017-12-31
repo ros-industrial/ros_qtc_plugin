@@ -38,7 +38,7 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="ROS Qt Creator Plug-in  documentation" href="../index.html"/>
-        <link rel="next" title="Setup Qt Creator for ROS" href="Setup-Qt-Creator-for-ROS.html"/>
+        <link rel="next" title="Frequently Asked Questions" href="FAQ.html"/>
         <link rel="prev" title="How to Install (Users)" href="How-to-Install-Users.html"/> 
 
   
@@ -107,6 +107,14 @@
 </li>
 </ul>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">Questions?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html#how-to-show-empty-folders">How to show empty folders?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html#are-new-files-automaticly-added-to-the-cmakelists-txt-file">Are new files automaticly added to the CMakeLists.txt file?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html#warning-this-file-is-not-part-of-any-project">Warning: This file is not part of any project.?</a></li>
+</ul>
+</li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html">Setup Qt Creator for ROS</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#setup-ubuntu-to-allow-debugging-ptrace">Setup Ubuntu to allow debugging/ptrace</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#set-theme">Set Theme</a></li>
@@ -114,6 +122,18 @@
 <li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#set-ros-code-format">Set ROS Code Format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#setup-clang-formatting">Setup Clang Formatting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Setup-Qt-Creator-for-ROS.html#preventing-qt-creator-form-stepping-into-boost-eigen-etc">Preventing Qt Creator form stepping into Boost, Eigen, etc.</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Import-ROS-Workspace.html">Import ROS Workspace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Import-ROS-Workspace.html#user-guide">User Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-1">Step 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-2">Step 2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-3">Step 3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-4">Step 4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-5">Step 5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-6-optional">Step 6 (Optional)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Debugging-Catkin-Workspace.html">Debugging Catkin Workspace</a><ul>
@@ -193,7 +213,8 @@
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="installation-procedure-for-ubuntu-14-04">
 <h3>Installation Procedure for Ubuntu 14.04<a class="headerlink" href="#installation-procedure-for-ubuntu-14-04" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo add-apt-repository ppa:levi-armstrong/qt-libraries-trusty
+<div class="highlight-bash"><div class="highlight"><pre>sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo add-apt-repository ppa:levi-armstrong/qt-libraries-trusty
 sudo add-apt-repository ppa:levi-armstrong/ppa
 sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install qt57creator-plugin-ros libqtermwidget57-0-dev
 </pre></div>
@@ -201,7 +222,7 @@ sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install qt57c
 </div>
 <div class="section" id="installation-procedure-for-ubuntu-16-04">
 <h3>Installation Procedure for Ubuntu 16.04<a class="headerlink" href="#installation-procedure-for-ubuntu-16-04" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo add-apt-repository ppa:levi-armstrong/qt-libraries-xenial
+<div class="highlight-bash"><div class="highlight"><pre>sudo add-apt-repository ppa:levi-armstrong/qt-libraries-xenial
 sudo add-apt-repository ppa:levi-armstrong/ppa
 sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install qt57creator-plugin-ros libqtermwidget57-0-dev
 </pre></div>
@@ -212,11 +233,11 @@ sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install qt57c
 <h2>Configure system to use the new version of Qt<a class="headerlink" href="#configure-system-to-use-the-new-version-of-qt" title="Permalink to this headline">¶</a></h2>
 <p>After installation you need to tell qtchooser where to find this install. Replace the two lines in the file below with the location to the local version shown below. Make sure to change <em>username</em> and <em>version</em> in the file path to match your system.</p>
 <p>File:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo gedit /usr/lib/x86_64-linux-gnu/qt-default/qtchooser/default.conf
+<div class="highlight-bash"><div class="highlight"><pre>sudo gedit /usr/lib/x86_64-linux-gnu/qt-default/qtchooser/default.conf
 </pre></div>
 </div>
 <p>File content:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>/opt/qt57/bin
+<div class="highlight-bash"><div class="highlight"><pre>/opt/qt57/bin
 /opt/qt57/lib
 </pre></div>
 </div>
@@ -225,12 +246,12 @@ sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install qt57c
 <h2>Run ROS Qt Creator setup script<a class="headerlink" href="#run-ros-qt-creator-setup-script" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
 <li><p class="first">Clone your fork of the repository.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone -b master https://github.com/&lt;username&gt;/ros_qtc_plugins.git
+<div class="highlight-bash"><div class="highlight"><pre>git clone -b master https://github.com/&lt;username&gt;/ros_qtc_plugins.git
 </pre></div>
 </div>
 </li>
 <li><p class="first">Next in a terminal, navigate into the repository directory and execute the command below.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>bash setup.sh -d
+<div class="highlight-bash"><div class="highlight"><pre>bash setup.sh -d
 </pre></div>
 </div>
 </li>
@@ -244,7 +265,7 @@ sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install qt57c
 <h2>Testing Plugin<a class="headerlink" href="#testing-plugin" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
 <li><p class="first">Execute the command below or launch using the desktop launcher.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>qtcreator
+<div class="highlight-bash"><div class="highlight"><pre>qtcreator
 </pre></div>
 </div>
 </li>
@@ -256,17 +277,17 @@ sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install qt57c
 <h2>Debug issues with Plugin<a class="headerlink" href="#debug-issues-with-plugin" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
 <li><p class="first">Next in a terminal, navigate to the repository ros_qtc_plugin and execute the command below.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>bash setup.sh -di
+<div class="highlight-bash"><div class="highlight"><pre>bash setup.sh -di
 </pre></div>
 </div>
 </li>
 <li><p class="first">Now launch qtcreator using gdb as shown below and after the plugin segfaults post the trace back in the active/new issue.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>gdb &lt;local&gt;/qt-creator-build/bin/qtcreator
+<div class="highlight-bash"><div class="highlight"><pre>gdb &lt;local&gt;/qt-creator-build/bin/qtcreator
 <span class="o">(</span>gdb<span class="o">)</span> run
 </pre></div>
 </div>
 <p>After error:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="o">(</span>gdb<span class="o">)</span> bt
+<div class="highlight-bash"><div class="highlight"><pre><span class="o">(</span>gdb<span class="o">)</span> bt
 </pre></div>
 </div>
 </li>
@@ -287,7 +308,7 @@ sudo apt-get update <span class="o">&amp;&amp;</span> sudo apt-get install qt57c
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Setup-Qt-Creator-for-ROS.html" class="btn btn-neutral float-right" title="Setup Qt Creator for ROS" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="FAQ.html" class="btn btn-neutral float-right" title="Frequently Asked Questions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="How-to-Install-Users.html" class="btn btn-neutral" title="How to Install (Users)" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

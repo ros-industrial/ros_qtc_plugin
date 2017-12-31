@@ -38,8 +38,8 @@
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="ROS Qt Creator Plug-in  documentation" href="../index.html"/>
-        <link rel="next" title="Debugging Catkin Workspace" href="Debugging-Catkin-Workspace.html"/>
-        <link rel="prev" title="How to Install (Developers)" href="Improve-ROS-Qt-Creator-Plugin-Developers-ONLY.html"/> 
+        <link rel="next" title="How to Import a ROS Workspace" href="Import-ROS-Workspace.html"/>
+        <link rel="prev" title="Frequently Asked Questions" href="FAQ.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -106,6 +106,14 @@
 </ul>
 </li>
 </ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">Questions?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html#how-to-show-empty-folders">How to show empty folders?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html#are-new-files-automaticly-added-to-the-cmakelists-txt-file">Are new files automaticly added to the CMakeLists.txt file?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FAQ.html#warning-this-file-is-not-part-of-any-project">Warning: This file is not part of any project.?</a></li>
+</ul>
+</li>
+</ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Setup Qt Creator for ROS</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#setup-ubuntu-to-allow-debugging-ptrace">Setup Ubuntu to allow debugging/ptrace</a></li>
@@ -114,6 +122,18 @@
 <li class="toctree-l2"><a class="reference internal" href="#set-ros-code-format">Set ROS Code Format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setup-clang-formatting">Setup Clang Formatting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#preventing-qt-creator-form-stepping-into-boost-eigen-etc">Preventing Qt Creator form stepping into Boost, Eigen, etc.</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Import-ROS-Workspace.html">Import ROS Workspace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Import-ROS-Workspace.html#user-guide">User Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-1">Step 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-2">Step 2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-3">Step 3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-4">Step 4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-5">Step 5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Import-ROS-Workspace.html#step-6-optional">Step 6 (Optional)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Debugging-Catkin-Workspace.html">Debugging Catkin Workspace</a><ul>
@@ -244,7 +264,7 @@
 <li><p class="first">Executable: /usr/bin/clang-format-3.6</p>
 </li>
 <li><p class="first">Arguments:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;{Language: Cpp, AccessModifierOffset: -2, AlignAfterOpenBracket: true, AlignEscapedNewlinesLeft: false, AlignOperands:   true, AlignTrailingComments: true, AllowAllParametersOfDeclarationOnNextLine: true, AllowShortBlocksOnASingleLine: false, AllowShortCaseLabelsOnASingleLine: false, AllowShortIfStatementsOnASingleLine: false, AllowShortLoopsOnASingleLine: false, AllowShortFunctionsOnASingleLine: All, AlwaysBreakAfterDefinitionReturnType: false, AlwaysBreakTemplateDeclarations: false, AlwaysBreakBeforeMultilineStrings: false, BreakBeforeBinaryOperators: None, BreakBeforeTernaryOperators: true, BreakConstructorInitializersBeforeComma: false, BinPackParameters: true, BinPackArguments: true, ColumnLimit:     80, ConstructorInitializerAllOnOneLineOrOnePerLine: false, ConstructorInitializerIndentWidth: 4, DerivePointerAlignment: false, ExperimentalAutoDetectBinPacking: false, IndentCaseLabels: false, IndentWrappedFunctionNames: false, IndentFunctionDeclarationAfterType: false, MaxEmptyLinesToKeep: 1, KeepEmptyLinesAtTheStartOfBlocks: true, NamespaceIndentation: None, ObjCBlockIndentWidth: 2, ObjCSpaceAfterProperty: false, ObjCSpaceBeforeProtocolList: true, PenaltyBreakBeforeFirstCallParameter: 19, PenaltyBreakComment: 300, PenaltyBreakString: 1000, PenaltyBreakFirstLessLess: 120, PenaltyExcessCharacter: 1000000, PenaltyReturnTypeOnItsOwnLine: 60, PointerAlignment: Left , SpacesBeforeTrailingComments: 1, Cpp11BracedListStyle: true, Standard: Cpp11, IndentWidth: 2, TabWidth: 8, UseTab: Never, BreakBeforeBraces: Allman, SpacesInParentheses: false, SpacesInSquareBrackets: false, SpacesInAngles:  false, SpaceInEmptyParentheses: false, SpacesInCStyleCastParentheses: false, SpaceAfterCStyleCast: false, SpacesInContainerLiterals: true, SpaceBeforeAssignmentOperators: true, ContinuationIndentWidth: 4, CommentPragmas:  &#39;^ IWYU pragma:&#39;, ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ], SpaceBeforeParens: ControlStatements, DisableFormat:   false}&quot;</span> <span class="o">-</span><span class="n">i</span> <span class="o">%</span><span class="p">{</span><span class="n">CurrentDocument</span><span class="p">:</span><span class="n">FilePath</span><span class="p">}</span>
+<div class="highlight-default"><div class="highlight"><pre><span class="o">-</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;{Language: Cpp, AccessModifierOffset: -2, AlignAfterOpenBracket: true, AlignEscapedNewlinesLeft: false, AlignOperands:   true, AlignTrailingComments: true, AllowAllParametersOfDeclarationOnNextLine: true, AllowShortBlocksOnASingleLine: false, AllowShortCaseLabelsOnASingleLine: false, AllowShortIfStatementsOnASingleLine: false, AllowShortLoopsOnASingleLine: false, AllowShortFunctionsOnASingleLine: All, AlwaysBreakAfterDefinitionReturnType: false, AlwaysBreakTemplateDeclarations: false, AlwaysBreakBeforeMultilineStrings: false, BreakBeforeBinaryOperators: None, BreakBeforeTernaryOperators: true, BreakConstructorInitializersBeforeComma: false, BinPackParameters: true, BinPackArguments: true, ColumnLimit:     80, ConstructorInitializerAllOnOneLineOrOnePerLine: false, ConstructorInitializerIndentWidth: 4, DerivePointerAlignment: false, ExperimentalAutoDetectBinPacking: false, IndentCaseLabels: false, IndentWrappedFunctionNames: false, IndentFunctionDeclarationAfterType: false, MaxEmptyLinesToKeep: 1, KeepEmptyLinesAtTheStartOfBlocks: true, NamespaceIndentation: None, ObjCBlockIndentWidth: 2, ObjCSpaceAfterProperty: false, ObjCSpaceBeforeProtocolList: true, PenaltyBreakBeforeFirstCallParameter: 19, PenaltyBreakComment: 300, PenaltyBreakString: 1000, PenaltyBreakFirstLessLess: 120, PenaltyExcessCharacter: 1000000, PenaltyReturnTypeOnItsOwnLine: 60, PointerAlignment: Left , SpacesBeforeTrailingComments: 1, Cpp11BracedListStyle: true, Standard: Cpp11, IndentWidth: 2, TabWidth: 8, UseTab: Never, BreakBeforeBraces: Allman, SpacesInParentheses: false, SpacesInSquareBrackets: false, SpacesInAngles:  false, SpaceInEmptyParentheses: false, SpacesInCStyleCastParentheses: false, SpaceAfterCStyleCast: false, SpacesInContainerLiterals: true, SpaceBeforeAssignmentOperators: true, ContinuationIndentWidth: 4, CommentPragmas:  &#39;^ IWYU pragma:&#39;, ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ], SpaceBeforeParens: ControlStatements, DisableFormat:   false}&quot;</span> <span class="o">-</span><span class="n">i</span> <span class="o">%</span><span class="p">{</span><span class="n">CurrentDocument</span><span class="p">:</span><span class="n">FilePath</span><span class="p">}</span>
 </pre></div>
 </div>
 </li>
@@ -289,7 +309,7 @@
 <li><p class="first">Goto: <code class="kbd docutils literal"><span class="pre">Tools</span></code> &gt; <code class="kbd docutils literal"><span class="pre">Options</span></code> &gt; <code class="kbd docutils literal"><span class="pre">Debugger</span></code> &gt; <code class="kbd docutils literal"><span class="pre">GDB</span></code></p>
 </li>
 <li><p class="first">Add the following code below to the “Additional Startup Commands”</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">skip</span> <span class="n">pending</span> <span class="n">on</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">skip</span> <span class="n">pending</span> <span class="n">on</span>
 <span class="n">python</span>
 <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="s2">&quot;/usr/include/boost/&quot;</span><span class="p">):</span>
   <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
@@ -328,10 +348,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="Debugging-Catkin-Workspace.html" class="btn btn-neutral float-right" title="Debugging Catkin Workspace" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Import-ROS-Workspace.html" class="btn btn-neutral float-right" title="How to Import a ROS Workspace" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="Improve-ROS-Qt-Creator-Plugin-Developers-ONLY.html" class="btn btn-neutral" title="How to Install (Developers)" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="FAQ.html" class="btn btn-neutral" title="Frequently Asked Questions" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
