@@ -11,6 +11,7 @@ Installation Procedure for Ubuntu 16.04
 
 .. code-block:: bash
 
+   sudo add-apt-repository ppa:ubuntu-toolchain-r/test
    sudo add-apt-repository ppa:levi-armstrong/qt-libraries-xenial
    sudo add-apt-repository ppa:levi-armstrong/ppa
    sudo apt update && sudo apt install qt59creator
