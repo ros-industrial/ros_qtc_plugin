@@ -195,7 +195,7 @@ bool ROSProjectNode::showInSimpleTree() const
     return true;
 }
 
-bool ROSProjectNode::supportsAction(ProjectExplorer::ProjectAction action, Node *node) const
+bool ROSProjectNode::supportsAction(ProjectExplorer::ProjectAction action, const Node *node) const
 {
     switch (node->nodeType())
     {

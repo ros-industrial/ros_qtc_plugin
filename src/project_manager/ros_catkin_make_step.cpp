@@ -300,8 +300,7 @@ ROSCatkinMakeStepWidget::ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep)
     connect(bc, &ROSBuildConfiguration::cmakeBuildTypeChanged,
             this, &ROSCatkinMakeStepWidget::updateDetails);
 
-    ROSProject *pro = static_cast<ROSProject *>(m_makeStep->target()->project());
-    connect(pro, &ROSProject::environmentChanged,
+    connect(bc, &ROSBuildConfiguration::environmentChanged,
             this, &ROSCatkinMakeStepWidget::updateDetails);
 
     connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
