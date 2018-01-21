@@ -22,6 +22,9 @@
 #define ROSPROJECTNODE_H
 
 #include <projectexplorer/projectnodes.h>
+#include <coreplugin/vcsmanager.h>
+#include <coreplugin/iversioncontrol.h>
+
 #include "ros_utils.h"
 
 #include <QStringList>
@@ -58,16 +61,48 @@ public:
     bool addDirectory(const QString &parentPath, const QString &dirName);
     bool addDirectory(const QString &dirPath);
     bool renameDirectory(const QString &parentPath, const QString &oldDirName, const QString &newDirName); 
-    void updateVersionControlInfo(const QString &absolutePath);
 
 private:
     void renameDirectoryHelper(FolderNode *&folder);
     FolderNode *findFolderbyAbsolutePath(const QString &absolutePath);
     FolderNode *createFolderbyAbsolutePath(const QString &absolutePath);
-    bool hasVersionControl(const QString &absolutePath, QString &vcsTopic) const;
-    void updateVersionControlInfoHelper(FolderNode *folderNode);
     QString getFolderName(FolderNode *folderNode) const;
     QString getFolderPath(FolderNode *folderNode) const;
+};
+
+class ROSFolderNode: public ProjectExplorer::FolderNode
+{
+public:
+    explicit ROSFolderNode(const Utils::FileName &folderPath, const QString  &displayName) : FolderNode(folderPath, ProjectExplorer::NodeType::Folder, displayName), m_repository(nullptr)
+    {
+        QString path = this->filePath().toString();
+        path.chop(1);
+
+        if (Core::IVersionControl *vc = Core::VcsManager::findVersionControlForDirectory(path))
+        {
+            if (path == Core::VcsManager::findTopLevelForDirectory(path))
+            {
+                m_repository = vc;
+            }
+        }
+    }
+    QString displayName() const override
+    {
+        if (m_repository)
+        {
+            QString path = this->filePath().toString();
+            path.chop(1);
+            QString name = Utils::FileName::fromString(path).fileName();
+            return QString::fromLatin1("%1 [%2]").arg(name, m_repository->vcsTopic(path));
+        }
+        else
+        {
+            return this->FolderNode::displayName();
+        }
+    }
+private:
+
+    Core::IVersionControl *m_repository;
 };
 
 } // namespace Internal

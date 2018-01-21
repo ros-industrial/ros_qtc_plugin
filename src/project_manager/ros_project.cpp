@@ -85,9 +85,6 @@ ROSProject::ROSProject(const Utils::FileName &fileName) :
     refresh();
 
     // Setup signal/slot connections
-    connect(Core::VcsManager::instance(), &Core::VcsManager::repositoryChanged,
-            this, &ROSProject::repositoryChanged);
-
     connect(ProjectExplorer::BuildManager::instance(), SIGNAL(buildQueueFinished(bool)),
             this, SLOT(buildQueueFinished(bool)));
 
@@ -333,11 +330,6 @@ Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *erro
 
       refreshCppCodeModel(true);
       return RestoreResult::Ok;
-}
-
-void ROSProject::repositoryChanged(const QString &repository)
-{
-  static_cast<ROSProjectNode *>(rootProjectNode())->updateVersionControlInfo(repository);
 }
 
 void ROSProject::buildQueueFinished(bool success)

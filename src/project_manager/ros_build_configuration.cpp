@@ -378,8 +378,8 @@ ROSBuildEnvironmentWidget::ROSBuildEnvironmentWidget(BuildConfiguration *bc)
 
     m_buildConfiguration = bc;
 
-    connect(m_buildConfiguration->target(), SIGNAL(environmentChanged()),
-            this, SLOT(environmentChanged()));
+    connect(m_buildConfiguration, &BuildConfiguration::environmentChanged,
+            this, &ROSBuildEnvironmentWidget::environmentChanged);
 
     m_clearSystemEnvironmentCheckBox->setChecked(!m_buildConfiguration->useSystemEnvironment());
     m_buildEnvironmentWidget->setBaseEnvironment(m_buildConfiguration->baseEnvironment());
