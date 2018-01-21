@@ -24,8 +24,6 @@
 
 #include <utils/fileutils.h>
 #include <coreplugin/idocument.h>
-#include <coreplugin/vcsmanager.h>
-#include <coreplugin/iversioncontrol.h>
 #include <projectexplorer/projectexplorer.h>
 
 #include <QFileInfo>
@@ -128,7 +126,6 @@ bool ROSProjectNode::renameDirectory(const QString &parentPath, const QString &o
   Utils::FileName folderPath =  Utils::FileName::fromString(newFilePath + QLatin1Char('/'));
   folder->setAbsoluteFilePathAndLine(folderPath, -1);
   folder->setDisplayName(newDirName);
-  updateVersionControlInfoHelper(folder);
   renameDirectoryHelper(folder);
 
   return true;
@@ -178,9 +175,7 @@ FolderNode *ROSProjectNode::findFolderbyAbsolutePath(const QString &absolutePath
 FolderNode *ROSProjectNode::createFolderbyAbsolutePath(const QString &absolutePath)
 {
   Utils::FileName folder = Utils::FileName::fromString(absolutePath);
-  FolderNode *folderNode = new FolderNode(Utils::FileName::fromString(absolutePath + QLatin1Char('/')));
-  updateVersionControlInfoHelper(folderNode);
-
+  FolderNode *folderNode = new ROSFolderNode(Utils::FileName::fromString(absolutePath + QLatin1Char('/')), folder.fileName());
   FolderNode *parent = findFolderbyAbsolutePath(folder.parentDir().toString());
 
   if (!parent)
@@ -210,33 +205,6 @@ bool ROSProjectNode::supportsAction(ProjectExplorer::ProjectAction action, const
         default:
             return ProjectNode::supportsAction(action, node);
     }
-}
-
-bool ROSProjectNode::hasVersionControl(const QString &absolutePath, QString &vcsTopic) const
-{
-  if (Core::IVersionControl *vc = Core::VcsManager::findVersionControlForDirectory(absolutePath))
-  {
-    if (absolutePath == Core::VcsManager::findTopLevelForDirectory(absolutePath))
-    {
-      vcsTopic = vc->vcsTopic(absolutePath);
-      return true;
-    }
-  }
-  return false;
-}
-
-void ROSProjectNode::updateVersionControlInfo(const QString &absolutePath)
-{
-  updateVersionControlInfoHelper(findFolderbyAbsolutePath(absolutePath));
-}
-
-void ROSProjectNode::updateVersionControlInfoHelper(FolderNode *folderNode)
-{
-  QString branch;
-  if (hasVersionControl(getFolderPath(folderNode), branch))
-      folderNode->setDisplayName(QString::fromLatin1("%1 [%2]").arg(getFolderName(folderNode), branch));
-  else
-      folderNode->setDisplayName(getFolderName(folderNode));
 }
 
 QString ROSProjectNode::getFolderName(FolderNode *folderNode) const

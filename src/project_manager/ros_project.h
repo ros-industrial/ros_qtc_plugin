@@ -82,7 +82,6 @@ private:
 
     void update();
     void refreshCppCodeModel(bool success);
-    void repositoryChanged(const QString &repository);
 
     ROSUtils::ROSProjectFileContent m_projectFileContent;
     QFutureInterface<void>         *m_projectFutureInterface = nullptr;
