@@ -202,7 +202,7 @@ void ROSProjectPlugin::reloadProjectBuildInfo()
     f.reportStarted();
     ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectTree::currentProject());
     if (rosProject) {
-        rosProject->refreshCppCodeModel();
+        rosProject->refreshCppCodeModel(true);
         f.setProgressValue(100);
         f.reportFinished();
         return;
@@ -215,7 +215,7 @@ void ROSProjectPlugin::reloadProjectBuildInfo()
 
 void ROSProjectPlugin::removeProjectDirectory()
 {
-  ProjectExplorer::Node *currentNode = ProjectExplorer::ProjectTree::currentNode();
+  ProjectExplorer::Node *currentNode = ProjectExplorer::ProjectTree::findCurrentNode();
 
   QTC_ASSERT(currentNode && currentNode->nodeType() == ProjectExplorer::NodeType::Folder, return);
 

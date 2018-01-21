@@ -81,7 +81,7 @@ private:
     void parseProjectFile();
 
     void update();
-    void refreshCppCodeModel();
+    void refreshCppCodeModel(bool success);
     void repositoryChanged(const QString &repository);
 
     ROSUtils::ROSProjectFileContent m_projectFileContent;

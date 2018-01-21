@@ -221,79 +221,84 @@ void ROSProject::refresh()
 //    m_workspaceWatcher->print();
 }
 
-void ROSProject::refreshCppCodeModel()
+void ROSProject::refreshCppCodeModel(bool success)
 {
-    update();
-
-    const Kit *k = nullptr;
-
-    if (Target *target = activeTarget())
-        k = target->kit();
-    else
-        k = KitManager::defaultKit();
-
-    QTC_ASSERT(k, return);
-
-    const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(k);
-
-    m_cppCodeModelUpdater->cancel();
-
-    CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
-    if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(k)) {
-        if (qtVersion->qtVersion() <= QtSupport::QtVersionNumber(4,8,6))
-            activeQtVersion = CppTools::ProjectPart::Qt4_8_6AndOlder;
-        else if (qtVersion->qtVersion() < QtSupport::QtVersionNumber(5,0,0))
-            activeQtVersion = CppTools::ProjectPart::Qt4Latest;
-        else
-            activeQtVersion = CppTools::ProjectPart::Qt5;
-    }
-
-    CppTools::RawProjectParts rpps;
-
-    QStringList workspaceFiles = m_workspaceWatcher->getWorkspaceFiles();
-
-    ToolChain *cxxToolChain = ToolChainKitInformation::toolChain(k, ProjectExplorer::Constants::CXX_LANGUAGE_ID);
-
-    foreach(ROSUtils::PackageBuildInfo buildInfo, m_wsPackageBuildInfo)
+    emitParsingStarted();
+    if (success)
     {
-        QStringList packgeFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
+        update();
 
-        foreach(ROSUtils::PackageTargetInfo targetInfo, buildInfo.targets)
-        {
-            CppTools::RawProjectPart rpp;
-            const QString defineArg
-                    = Utils::transform(targetInfo.defines, [](const QString &s) -> QString {
-                        QString result = QString::fromLatin1("#define ") + s;
-                        int assignIndex = result.indexOf('=');
-                        if (assignIndex != -1)
-                            result[assignIndex] = ' ';
-                        return result;
-                    }).join('\n');
+        const Kit *k = nullptr;
 
-            rpp.setProjectFileLocation(projectFilePath().toString());
-            rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo.name + '|' + projectFilePath().toString());
-            rpp.setDisplayName(buildInfo.parent.name + '|' + targetInfo.name);
-            rpp.setQtVersion(activeQtVersion);
-            rpp.setDefines(defineArg.toUtf8());
+        if (Target *target = activeTarget())
+            k = target->kit();
+        else
+            k = KitManager::defaultKit();
 
-            QSet<QString> toolChainIncludes;
-            foreach (const HeaderPath &hp, cxxToolChain->systemHeaderPaths(targetInfo.flags, sysRoot))
-                toolChainIncludes.insert(hp.path());
+        QTC_ASSERT(k, return);
 
-            QStringList includePaths;
-            foreach (const QString &i, targetInfo.includes) {
-                if (!toolChainIncludes.contains(i))
-                    includePaths.append(i);
-            }
+        const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(k);
 
-            rpp.setIncludePaths(includePaths);
-            rpp.setFlagsForCxx({cxxToolChain, targetInfo.flags});
-            rpp.setFiles(packgeFiles);
-            rpps.append(rpp);
+        m_cppCodeModelUpdater->cancel();
+
+        CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
+        if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(k)) {
+            if (qtVersion->qtVersion() <= QtSupport::QtVersionNumber(4,8,6))
+                activeQtVersion = CppTools::ProjectPart::Qt4_8_6AndOlder;
+            else if (qtVersion->qtVersion() < QtSupport::QtVersionNumber(5,0,0))
+                activeQtVersion = CppTools::ProjectPart::Qt4Latest;
+            else
+                activeQtVersion = CppTools::ProjectPart::Qt5;
         }
-    }
 
-    m_cppCodeModelUpdater->update({this, nullptr, cxxToolChain, k, rpps});
+        CppTools::RawProjectParts rpps;
+
+        QStringList workspaceFiles = m_workspaceWatcher->getWorkspaceFiles();
+
+        ToolChain *cxxToolChain = ToolChainKitInformation::toolChain(k, ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+
+        foreach(ROSUtils::PackageBuildInfo buildInfo, m_wsPackageBuildInfo)
+        {
+            QStringList packgeFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
+
+            foreach(ROSUtils::PackageTargetInfo targetInfo, buildInfo.targets)
+            {
+                CppTools::RawProjectPart rpp;
+                const QString defineArg
+                        = Utils::transform(targetInfo.defines, [](const QString &s) -> QString {
+                            QString result = QString::fromLatin1("#define ") + s;
+                            int assignIndex = result.indexOf('=');
+                            if (assignIndex != -1)
+                                result[assignIndex] = ' ';
+                            return result;
+                        }).join('\n');
+
+                rpp.setProjectFileLocation(projectFilePath().toString());
+                rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo.name + '|' + projectFilePath().toString());
+                rpp.setDisplayName(buildInfo.parent.name + '|' + targetInfo.name);
+                rpp.setQtVersion(activeQtVersion);
+                rpp.setMacros(ProjectExplorer::Macro::toMacros(defineArg.toUtf8()));
+
+                QSet<QString> toolChainIncludes;
+                foreach (const HeaderPath &hp, cxxToolChain->systemHeaderPaths(targetInfo.flags, sysRoot))
+                    toolChainIncludes.insert(hp.path());
+
+                QStringList includePaths;
+                foreach (const QString &i, targetInfo.includes) {
+                    if (!toolChainIncludes.contains(i))
+                        includePaths.append(i);
+                }
+
+                rpp.setIncludePaths(includePaths);
+                rpp.setFlagsForCxx({cxxToolChain, targetInfo.flags});
+                rpp.setFiles(packgeFiles);
+                rpps.append(rpp);
+            }
+        }
+
+        m_cppCodeModelUpdater->update({this, nullptr, cxxToolChain, k, rpps});
+    }
+    emitParsingFinished(success);
 }
 
 QStringList ROSProject::files(FilesMode fileMode) const
@@ -326,7 +331,7 @@ Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *erro
               t->addRunConfiguration(new ProjectExplorer::CustomExecutableRunConfiguration(t));
       }
 
-      refreshCppCodeModel();
+      refreshCppCodeModel(true);
       return RestoreResult::Ok;
 }
 
@@ -337,8 +342,7 @@ void ROSProject::repositoryChanged(const QString &repository)
 
 void ROSProject::buildQueueFinished(bool success)
 {
-    Q_UNUSED(success);
-    refreshCppCodeModel();
+    refreshCppCodeModel(success);
 }
 
 } // namespace Internal

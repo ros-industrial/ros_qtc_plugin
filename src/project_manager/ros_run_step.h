@@ -66,6 +66,8 @@ public:
     ProjectExplorer::Target *target() const;
     ProjectExplorer::Project *project() const;
 
+    bool isActive() const override;
+
 signals:
     void finished();
     void enabledChanged();
@@ -101,11 +103,10 @@ class RunStepList : public ProjectExplorer::ProjectConfiguration
 public:
     RunStepList(QObject *parent, Core::Id id);
     RunStepList(QObject *parent, RunStepList *source);
-    RunStepList(QObject *parent, const QVariantMap &data);
     ~RunStepList() override;
 
     QList<RunStep *> steps() const;
-    bool isNull() const;
+
     int count() const;
     bool isEmpty() const;
     bool contains(Core::Id id) const;
@@ -118,9 +119,13 @@ public:
     RunStep *at(int position);
 
     ProjectExplorer::Target *target() const;
+    ProjectExplorer::Project *project() const override;
 
     virtual QVariantMap toMap() const override;
+    bool fromMap(const QVariantMap &map) override;
     void cloneSteps(RunStepList *source);
+
+    bool isActive() const override;
 
 signals:
     void stepInserted(int position);
@@ -130,9 +135,6 @@ signals:
 
 private slots:
     void runStep_enabledChanged(RunStep *step);
-
-protected:
-    virtual bool fromMap(const QVariantMap &map) override;
 
 private:
     QList<RunStep *> m_steps;

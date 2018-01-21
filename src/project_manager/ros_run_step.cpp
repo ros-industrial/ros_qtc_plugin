@@ -57,14 +57,17 @@ const char STEPS_PREFIX[] = "ProjectExplorer.RunStepList.Step.";
 
 
 RunStep::RunStep(RunStepList *rsl, Core::Id id) :
-    ProjectConfiguration(rsl, id), m_enabled(true)
+    ProjectConfiguration(rsl), m_enabled(true)
 {
+    initialize(id);
     Q_ASSERT(rsl);
+
 }
 
 RunStep::RunStep(RunStepList *rsl, RunStep *rs) :
-    ProjectConfiguration(rsl, rs), m_enabled(rs->m_enabled)
+    ProjectConfiguration(rsl), m_enabled(rs->m_enabled)
 {
+    copyFrom(rs);
     Q_ASSERT(rsl);
     setDisplayName(rs->displayName());
 }
@@ -100,6 +103,11 @@ ProjectExplorer::Target *RunStep::target() const
 ProjectExplorer::Project *RunStep::project() const
 {
     return target()->project();
+}
+
+bool RunStep::isActive() const
+{
+    return projectConfiguration()->isActive();
 }
 
 /*!
@@ -148,28 +156,21 @@ IRunStepFactory::IRunStepFactory(QObject *parent) :
 
 
 RunStepList::RunStepList(QObject *parent, Core::Id id) :
-    ProjectConfiguration(parent, id),
-    m_isNull(false)
+    ProjectConfiguration(parent)
 {
     Q_ASSERT(parent);
+    initialize(id);
 }
 
 RunStepList::RunStepList(QObject *parent, RunStepList *source) :
-    ProjectConfiguration(parent, source),
-    m_isNull(source->m_isNull)
+    ProjectConfiguration(parent)
 {
+    copyFrom(source);
     setDisplayName(source->displayName());
     Q_ASSERT(parent);
     // do not clone the steps here:
     // The BC is not fully set up yet and thus some of the buildstepfactories
     // will fail to clone the buildsteps!
-}
-
-RunStepList::RunStepList(QObject *parent, const QVariantMap &data) :
-    ProjectConfiguration(parent, Core::Id())
-{
-    Q_ASSERT(parent);
-    m_isNull = !fromMap(data);
 }
 
 RunStepList::~RunStepList()
@@ -186,11 +187,6 @@ QVariantMap RunStepList::toMap() const
         map.insert(QString::fromLatin1(STEPS_PREFIX) + QString::number(i), m_steps.at(i)->toMap());
 
     return map;
-}
-
-bool RunStepList::isNull() const
-{
-    return m_isNull;
 }
 
 int RunStepList::count() const
@@ -231,6 +227,11 @@ void RunStepList::cloneSteps(RunStepList *source)
         if (clonebs)
             m_steps.append(clonebs);
     }
+}
+
+bool RunStepList::isActive() const
+{
+    return qobject_cast<ProjectConfiguration *>(parent())->isActive();
 }
 
 bool RunStepList::fromMap(const QVariantMap &map)
@@ -333,6 +334,10 @@ ProjectExplorer::Target *RunStepList::target() const
     return 0;
 }
 
+ProjectExplorer::Project *RunStepList::project() const
+{
+    return target()->project();
+}
 
 } // namespace Internal
 } // namespace ROSProjectManager

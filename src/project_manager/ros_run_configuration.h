@@ -63,7 +63,6 @@ public:
     explicit ROSRunConfiguration(ProjectExplorer::Target *parent);
 
     // RunConfiguration
-    bool isEnabled() const override;
     QString disabledReason() const override;
     virtual QWidget *createConfigurationWidget() override;
     Utils::OutputFormatter *createOutputFormatter() const override;
@@ -85,7 +84,6 @@ private:
     void ctor();
 
     RunStepList *m_stepList;
-    bool m_isEnabled;
 };
 
 class ROSRunConfigurationFactory : public ProjectExplorer::IRunConfigurationFactory

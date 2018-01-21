@@ -82,30 +82,26 @@ ROSRunConfiguration::ROSRunConfiguration(Target *parent):
 }
 
 ROSRunConfiguration::ROSRunConfiguration(Target *parent, Id id) :
-    RunConfiguration(parent, id),
-    m_stepList(new RunStepList(this, Core::Id(ROS_RUN_STEP_LIST_ID))),
-    m_isEnabled(false)
+    RunConfiguration(parent),
+    m_stepList(new RunStepList(this, Core::Id(ROS_RUN_STEP_LIST_ID)))
 {
+    initialize(id);
     m_stepList->setDefaultDisplayName(tr("Run"));   
     ctor();
 }
 
 ROSRunConfiguration::ROSRunConfiguration(Target *parent, ROSRunConfiguration *source) :
-    RunConfiguration(parent, source),
-    m_stepList(source->m_stepList),
-    m_isEnabled(source->m_isEnabled)
+    RunConfiguration(parent),
+    m_stepList(source->m_stepList)
 {
+    copyFrom(source);
     ctor();
 }
 
-bool ROSRunConfiguration::isEnabled() const
-{
-    return m_stepList->enabled();
-}
 
 QString ROSRunConfiguration::disabledReason() const
 {
-    if (!m_isEnabled)
+    if (!isEnabled())
         return tr("No ROS run step for active project.");
     return QString();
 }
@@ -153,8 +149,8 @@ bool ROSRunConfiguration::fromMap(const QVariantMap &map)
         qWarning() << "No data for ROS run step list found!";
         return false;
     }
-    RunStepList *list = new RunStepList(this, data);
-    if (list->isNull()) {
+    RunStepList *list = new RunStepList(this, Core::Id());
+    if (!list->fromMap(data)) {
         qWarning() << "Failed to restore ROS run step list!";
         delete list;
         return false;
@@ -346,16 +342,13 @@ void ROSDebugRunWorker::start()
 void ROSDebugRunWorker::pidFound(ProjectExplorer::DeviceProcessItem process)
 {
     m_timer.stop();
-    Debugger::Internal::DebuggerRunParameters rp;
-    rp.attachPID = Utils::ProcessHandle(process.pid);
-    rp.displayName = tr("Process %1").arg(process.pid);
-    rp.inferior.executable = process.exe;
-    rp.startMode = Debugger::AttachExternal;
-    rp.closeMode = Debugger::DetachAtClose;
-    rp.continueAfterAttach = m_debugContinueOnAttach;
-
-    setRunParameters(rp);
-    DebuggerRunTool::start();
+    setAttachPid(Utils::ProcessHandle(process.pid));
+    setDisplayName(tr("Process %1").arg(process.pid));
+    setInferiorExecutable(process.exe);
+    setStartMode(Debugger::AttachExternal);
+    setCloseMode(Debugger::DetachAtClose);
+    setContinueAfterAttach(m_debugContinueOnAttach);
+    startRunControl();
 }
 
 void ROSDebugRunWorker::findProcess()

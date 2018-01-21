@@ -357,8 +357,7 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     connect(bc, &ROSBuildConfiguration::cmakeBuildTypeChanged,
             this, &ROSCatkinToolsStepWidget::updateDetails);
 
-    ROSProject *pro = static_cast<ROSProject *>(m_makeStep->target()->project());
-    connect(pro, &ROSProject::environmentChanged,
+    connect(bc, &ROSBuildConfiguration::environmentChanged,
             this, &ROSCatkinToolsStepWidget::updateDetails);
 
     connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
