@@ -55,6 +55,18 @@ public:
     struct FolderContent {
         QStringList files;       /**< @brief Directory Files */
         QStringList directories; /**< @brief Directory Subdirectories */
+
+        void removeDirectories(const QStringList &filters)
+        {
+            foreach (QString filter, filters)
+                directories.removeAll(filter);
+        }
+
+        void removeFiles(const QStringList &filters)
+        {
+            foreach (QString filter, filters)
+                files.removeAll(filter);
+        }
     };
 
     /** @brief Contains relavent workspace information */
