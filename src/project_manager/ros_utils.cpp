@@ -349,13 +349,21 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FileName &filePath, ROSP
 
 QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::FileName &folderPath, QStringList &fileList)
 {
-  QHash<QString, ROSUtils::FolderContent> workspaceFiles;
-  ROSUtils::FolderContent content;
-  QString folder = folderPath.toString();
+    QHash<QString, ROSUtils::FolderContent> workspaceFiles;
+    ROSUtils::FolderContent content;
+    QString folder = folderPath.toString();
+
+    // Need to remove unwanted directories
+    QStringList folderNameFilters, fileNameFilters;
+    folderNameFilters.push_back(".git");
 
     // Get Directory data
     content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs | QDir::Hidden);
+    content.removeDirectories(folderNameFilters);
+
     content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files | QDir::Hidden);
+    content.removeFiles(fileNameFilters);
+
     workspaceFiles[folder] = content;
 
     foreach (QString file, content.files)
@@ -364,11 +372,35 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
     // Get SubDirectory Information
     const QDir subDir(folder);
     QDirIterator itSrc(subDir.absolutePath(), QDir::NoDotAndDotDot | QDir::Dirs | QDir::Hidden, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
+    QList<QString> excludeDir;
     while (itSrc.hasNext())
     {
         folder = itSrc.next();
+
+        if (folderNameFilters.contains(Utils::FileName::fromString(folder).fileName()))
+        {
+            excludeDir.push_back(folder + QLatin1Char('/'));
+            continue;
+        }
+
+        bool skip = false;
+        foreach (QString exclude, excludeDir)
+        {
+            if (folder.startsWith(exclude))
+            {
+                skip = true;
+                break;
+            }
+        }
+
+        if (skip) continue;
+
         content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs | QDir::Hidden);
+        content.removeDirectories(folderNameFilters);
+
         content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files | QDir::Hidden);
+        content.removeFiles(fileNameFilters);
+
         workspaceFiles[folder] = content;
 
         foreach (QString file, content.files)
