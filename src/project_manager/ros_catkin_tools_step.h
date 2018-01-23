@@ -73,8 +73,6 @@ public:
 
     QVariantMap toMap() const;
 
-
-
 protected:
     ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, ROSCatkinToolsStep *bs);
     ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
@@ -95,6 +93,7 @@ private:
     QString m_catkinMakeArguments;
     QString m_cmakeArguments;
     QString m_makeArguments;
+    QString m_catkinToolsWorkingDir;
     QRegExp m_percentProgress;
 };
 

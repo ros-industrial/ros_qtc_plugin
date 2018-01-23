@@ -30,6 +30,7 @@ const char ROS_PROJECT_ID[]  = "ROSProjectManager.ROSProject";
 const char ROS_PROJECT_CONTEXT[] = "ROSProject.ProjectContext";
 const char ROS_PROJECT_FILE_ID[] = "ROSProject.ProjectFile";
 const char ROS_MIME_TYPE[]    = "application/ros.project";
+const char ROS_DEFAULT_WORKING_DIR[] = "%{CurrentProject:Path}";
 
 // Tasks
 const char ROS_READING_PROJECT[] = "ROSProjectManager.ReadingProject";
