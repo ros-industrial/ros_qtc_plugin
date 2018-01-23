@@ -39,6 +39,7 @@
 #include <utils/qtcassert.h>
 #include <utils/qtcprocess.h>
 #include <cmakeprojectmanager/cmakeparser.h>
+#include <coreplugin/variablechooser.h>
 
 #include <fstream>
 #include <QDir>
@@ -56,6 +57,7 @@ const char ROS_CTS_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("ROSProjectManager::Intern
 const char ROS_CTS_TARGET_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.Target";
 const char ROS_CTS_ACTIVE_PROFILE_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.ActiveProfile";
 const char ROS_CTS_CATKIN_TOOLS_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.CatkinToolsArguments";
+const char ROS_CTS_CATKIN_TOOLS_WORKING_DIR_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.CatkinToolsWorkingDir";
 const char ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.CatkinMakeArguments";
 const char ROS_CTS_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.CMakeArguments";
 const char ROS_CTS_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.MakeArguments";
@@ -63,12 +65,14 @@ const char ROS_CTS_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.
 ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent) :
     AbstractProcessStep(parent, Id(ROS_CTS_ID))
 {
+   m_catkinToolsWorkingDir = Constants::ROS_DEFAULT_WORKING_DIR;
    ctor();
 }
 
 ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, const Id id) :
     AbstractProcessStep(parent, id)
 {
+    m_catkinToolsWorkingDir = Constants::ROS_DEFAULT_WORKING_DIR;
     ctor();
 }
 
@@ -79,7 +83,8 @@ ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, ROSCatkinToolsStep
     m_catkinToolsArguments(bs->m_catkinToolsArguments),
     m_catkinMakeArguments(bs->m_catkinMakeArguments),
     m_cmakeArguments(bs->m_cmakeArguments),
-    m_makeArguments(bs->m_makeArguments)
+    m_makeArguments(bs->m_makeArguments),
+    m_catkinToolsWorkingDir(bs->m_catkinToolsWorkingDir)
 {
     ctor();
 }
@@ -134,11 +139,11 @@ bool ROSCatkinToolsStep::init(QList<const BuildStep *> &earlierSteps)
     // Set Catkin Tools Active Profile
     ROSUtils::setCatkinToolsActiveProfile(bc->project()->projectDirectory(), activeProfile());
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
 
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
-    pp->setWorkingDirectory(workspaceInfo.buildPath.toString());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
+    pp->setWorkingDirectory(m_catkinToolsWorkingDir);
 
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
@@ -175,6 +180,7 @@ QVariantMap ROSCatkinToolsStep::toMap() const
     map.insert(QLatin1String(ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY), m_catkinMakeArguments);
     map.insert(QLatin1String(ROS_CTS_CMAKE_ARGUMENTS_KEY), m_cmakeArguments);
     map.insert(QLatin1String(ROS_CTS_MAKE_ARGUMENTS_KEY), m_makeArguments);
+    map.insert(QLatin1String(ROS_CTS_CATKIN_TOOLS_WORKING_DIR_KEY), m_catkinToolsWorkingDir);
     return map;
 }
 
@@ -186,6 +192,11 @@ bool ROSCatkinToolsStep::fromMap(const QVariantMap &map)
     m_catkinMakeArguments = map.value(QLatin1String(ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY)).toString();
     m_cmakeArguments = map.value(QLatin1String(ROS_CTS_CMAKE_ARGUMENTS_KEY)).toString();
     m_makeArguments = map.value(QLatin1String(ROS_CTS_MAKE_ARGUMENTS_KEY)).toString();
+    m_catkinToolsWorkingDir = map.value(QLatin1String(ROS_CTS_CATKIN_TOOLS_WORKING_DIR_KEY)).toString();
+
+    if (m_catkinToolsWorkingDir.isEmpty())
+        m_catkinToolsWorkingDir = Constants::ROS_DEFAULT_WORKING_DIR;
+
     return BuildStep::fromMap(map);
 }
 
@@ -305,6 +316,12 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     m_ui->catkinMakeArgumentsLineEdit->setText(m_makeStep->m_catkinMakeArguments);
     m_ui->cmakeArgumentsLineEdit->setText(m_makeStep->m_cmakeArguments);
     m_ui->makeArgumentsLineEdit->setText(m_makeStep->m_makeArguments);
+
+    m_ui->catkinToolsWorkingDirWidget->setPath(m_makeStep->m_catkinToolsWorkingDir);
+    m_ui->catkinToolsWorkingDirWidget->setHistoryCompleter(QLatin1String("Qt.WorkingDir.History"));
+    m_ui->catkinToolsWorkingDirWidget->setExpectedKind(Utils::PathChooser::Directory);
+    m_ui->catkinToolsWorkingDirWidget->setBaseFileName(makeStep->rosBuildConfiguration()->project()->projectDirectory());
+
     setProfile(m_makeStep->m_activeProfile);
 
     m_addButtonMenu = new QMenu(this);
@@ -347,6 +364,9 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     connect(m_ui->makeArgumentsLineEdit, &QLineEdit::textEdited,
             this, &ROSCatkinToolsStepWidget::updateDetails);
 
+    connect(m_ui->catkinToolsWorkingDirWidget, &Utils::PathChooser::rawPathChanged,
+            this, &ROSCatkinToolsStepWidget::updateDetails);
+
     connect(m_makeStep, SIGNAL(enabledChanged()),
             this, SLOT(enabledChanged()));
 
@@ -362,6 +382,8 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
 
     connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
             this, SLOT(updateDetails()));
+
+    Core::VariableChooser::addSupportForChildWidgets(this, makeStep->rosBuildConfiguration()->macroExpander());
 }
 
 ROSCatkinToolsStepWidget::~ROSCatkinToolsStepWidget()
@@ -380,15 +402,18 @@ void ROSCatkinToolsStepWidget::updateDetails()
     m_makeStep->m_catkinMakeArguments = m_ui->catkinMakeArgumentsLineEdit->text();
     m_makeStep->m_cmakeArguments = m_ui->cmakeArgumentsLineEdit->text();
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
+    m_makeStep->m_catkinToolsWorkingDir = m_ui->catkinToolsWorkingDirWidget->rawPath();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
     Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
 
+    m_ui->catkinToolsWorkingDirWidget->setEnvironment(env);
+
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
-    param.setWorkingDirectory(workspaceInfo.buildPath.toString());
     param.setEnvironment(env);
+    param.setWorkingDirectory(m_makeStep->m_catkinToolsWorkingDir);
     param.setCommand(m_makeStep->makeCommand());
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));
     m_summaryText = param.summary(displayName());
