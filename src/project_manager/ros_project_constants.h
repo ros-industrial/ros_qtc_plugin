@@ -55,7 +55,7 @@ const char ROS_RUN_ID[] = "ROSProjectManager.ROSRunStep";
 const char ROS_ATTACH_TO_NODE_ID[] = "ROSProjectManager.ROSAttachToNode";
 
 // Project Exclude Extension
-const QStringList ROS_EXCLUDE_FILE_EXTENSION = QStringList() << QLatin1Literal("*.autosave");
+const QStringList ROS_EXCLUDE_FILE_EXTENSION = QStringList() << QLatin1Literal("*.autosave") << QLatin1Literal("*.workspace");
 
 // ROS Cpp Code Style ID
 const char ROS_CPP_CODE_STYLE_ID[] = "ROSProject.CppCodeStyle";
