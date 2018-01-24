@@ -88,7 +88,7 @@ bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
         Utils::FileName catkin_workspace(workspaceInfo.path);
         catkin_workspace.appendPath(QLatin1String(".catkin_workspace"));
 
-        if (topCMake.exists() || catkin_workspace.exists())
+        if (topCMake.exists() && catkin_workspace.exists() && workspaceInfo.sourcePath.exists())
           return true;
 
         return false;
@@ -97,7 +97,7 @@ bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
     {
         Utils::FileName catkin_tools(workspaceInfo.path);
         catkin_tools.appendPath(QLatin1String(".catkin_tools"));
-        if (catkin_tools.exists())
+        if (catkin_tools.exists() && workspaceInfo.sourcePath.exists())
           return true;
 
         return false;
@@ -152,7 +152,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
             switch (workspaceInfo.buildSystem) {
             case CatkinMake:
             {
-                if( ! initializeWorkspaceFolders(workspaceInfo) )
+                if( !initializeWorkspaceFolders(workspaceInfo) )
                     return false;
 
                 process->setWorkingDirectory(workspaceInfo.sourcePath.toString());
@@ -171,7 +171,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
                                                        workspace.buildSystem,
                                                        workspace.rosDistribution);
 
-                if( ! initializeWorkspaceFolders(workspace) )
+                if( !initializeWorkspaceFolders(workspace) )
                     return false;
 
                 process->setWorkingDirectory(workspace.path.toString());
