@@ -340,6 +340,11 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FileName &filePath, ROSP
                         content.watchDirectories.append(workspaceXml.readElementText());
             }
         }
+
+        // If there is not a directory tag it will watch the workspace directory.
+        if (content.watchDirectories.size() == 0)
+            content.watchDirectories.append("");
+
         return true;
     }
 

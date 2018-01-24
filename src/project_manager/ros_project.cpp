@@ -195,21 +195,22 @@ void ROSProject::refresh()
     int max = removedDirectories.size() + addedDirectories.size();
 
     foreach (QString dir, removedDirectories) {
-      cnt += 1;
-      Utils::FileName removedDir = projectDirectory().appendPath(dir);
-      if (removedDir.isChildOf(projectDirectory()))
-        m_workspaceWatcher->unwatchFolder(removedDir.parentDir().toString(), dir);
+        cnt += 1;
+        Utils::FileName removedDir = projectDirectory().appendPath(dir);
+        if (removedDir == projectDirectory() || removedDir.isChildOf(projectDirectory()))
+            m_workspaceWatcher->unwatchFolder(removedDir.parentDir().toString(), removedDir.fileName());
 
-      m_projectFutureInterface->setProgressValue(floor(100.0 * (float)cnt / (float)max));
+        m_projectFutureInterface->setProgressValue(floor(100.0 * (float)cnt / (float)max));
     }
 
     foreach (QString dir, addedDirectories) {
-      cnt += 1;
-      Utils::FileName addedDir = projectDirectory().appendPath(dir);
-      if (addedDir.isChildOf(projectDirectory()) && addedDir.exists())
-        m_workspaceWatcher->watchFolder(addedDir.parentDir().toString(), dir);
+        cnt += 1;
+        Utils::FileName addedDir = projectDirectory().appendPath(dir);
+        if (addedDir.exists())
+            if (addedDir == projectDirectory() || addedDir.isChildOf(projectDirectory()))
+                m_workspaceWatcher->watchFolder(addedDir.parentDir().toString(), addedDir.fileName());
 
-      m_projectFutureInterface->setProgressValue(floor(100.0 * (float)cnt / (float)max));
+        m_projectFutureInterface->setProgressValue(floor(100.0 * (float)cnt / (float)max));
     }
 
     m_projectFutureInterface->setProgressValue(100);

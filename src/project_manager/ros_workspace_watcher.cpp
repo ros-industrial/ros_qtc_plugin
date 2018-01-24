@@ -39,10 +39,18 @@ ROSWorkspaceWatcher::ROSWorkspaceWatcher(ROSProject *parent)
 void ROSWorkspaceWatcher::watchFolder(const QString &parentPath, const QString &dirName)
 {
 
-  Utils::FileName directory = Utils::FileName::fromString(QString::fromLatin1("%1/%2").arg(parentPath, dirName));
+  Utils::FileName directory = Utils::FileName::fromString(parentPath).appendPath(dirName);
   QStringList files;
   QStringList subDirectories;
   QHash<QString, ROSUtils::FolderContent> newDirContent = ROSUtils::getFolderContent(directory, files);
+
+  // This to handle when watching workspace directory
+  if (directory == m_project->projectDirectory())
+  {
+      files.removeAll(m_project->projectFilePath().toString());
+      newDirContent[directory.toString()].removeFiles(QStringList() << m_project->projectFilePath().fileName());
+  }
+
   QHashIterator<QString, ROSUtils::FolderContent> item(newDirContent);
   while (item.hasNext())
   {
@@ -68,9 +76,21 @@ void ROSWorkspaceWatcher::watchFolder(const QString &parentPath, const QString &
 
 void ROSWorkspaceWatcher::unwatchFolder(const QString &parentPath, const QString &dirName)
 {
-  static_cast<ROSProjectNode *>(m_project->rootProjectNode())->removeDirectory(parentPath, dirName);
+  Utils::FileName directory = Utils::FileName::fromString(parentPath).appendPath(dirName);
 
-  Utils::FileName directory = Utils::FileName::fromString(QString::fromLatin1("%1/%2").arg(parentPath, dirName));
+  // This is to handle when watching workspace directory.
+  if (!(directory == m_project->projectDirectory()))
+  {
+        static_cast<ROSProjectNode *>(m_project->rootProjectNode())->removeDirectory(parentPath, dirName);
+  }
+  else
+  {
+      ROSProjectNode *folder = static_cast<ROSProjectNode *>(m_project->rootProjectNode());
+      foreach (ProjectExplorer::Node *n, folder->nodes())
+          if (m_project->projectFilePath() != n->filePath())
+            folder->removeNode(n);
+  }
+
   QHashIterator<QString, ROSUtils::FolderContent> item(m_workspaceContent);
   while (item.hasNext())
   {
