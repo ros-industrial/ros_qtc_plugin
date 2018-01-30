@@ -141,6 +141,20 @@ void ROSGenericRunStep::run()
            m_target,
            m_arguments);
 
+  ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(rp->projectDirectory(), rp->rosBuildConfiguration()->buildSystem(), rp->distribution());
+  ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
+  Utils::Environment env = bc->environment();
+  Utils::FileName shell = Utils::FileName::fromString(env.value("SHELL"));
+  QString source_cmd;
+  if (shell.fileName() == "bash")
+      source_cmd = QString("source %1\n").arg(workspaceInfo.develPath.appendPath("setup.bash").toString());
+  else if (shell.fileName() == "sh")
+      source_cmd = QString("source %1\n").arg(workspaceInfo.develPath.appendPath("setup.sh").toString());
+  else if (shell.fileName() == "zsh")
+       source_cmd = QString("source %1\n").arg(workspaceInfo.develPath.appendPath("setup.zsh").toString());
+  else
+       qDebug() << QString("The shell: %1 is currently not supported (Use bash, sh, or zsh)!").arg(shell.toString());
+
   //create terminal without starting shell
   QTermWidget &terminal = ROSManager::instance()->startTerminal(0, command);
 
@@ -150,8 +164,7 @@ void ROSGenericRunStep::run()
   terminal.startShellProgram();
 
   // source workspace (This is a hack because the setEnvironment is not working as I expected)
-  ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(rp->projectDirectory(), rp->rosBuildConfiguration()->buildSystem(), rp->distribution());
-  terminal.sendText(QString("source %1\n").arg(workspaceInfo.develPath.appendPath("setup.bash").toString()));
+  terminal.sendText(source_cmd);
 
   //send roslaunch command
   terminal.sendText(command);
