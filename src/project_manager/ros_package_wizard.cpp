@@ -49,6 +49,7 @@
 #include <QMessageBox>
 #include <projectexplorer/projecttree.h>
 
+#include <functional>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -74,6 +75,8 @@ ROSPackageWizardDialog::ROSPackageWizardDialog(const Core::BaseFileWizardFactory
 }
 
 void ROSPackageWizardDialog::setPath(const QString &path) {m_detailsPage->setPath(path);}
+
+void ROSPackageWizardDialog::setProjectDirectory(const QString &path) {m_detailsPage->setProjectDirectory(path);}
 
 QString ROSPackageWizardDialog::packageName() const {return m_detailsPage->packageName();}
 
@@ -125,13 +128,13 @@ ROSPackageWizardDetailsPage::ROSPackageWizardDetailsPage(QWidget *parent) :
 {
     d->m_ui.setupUi(this);
 
+    std::function<bool(Utils::FancyLineEdit *, QString *)> fn = std::bind( &ROSPackageWizardDetailsPage::validateWithValidator, this, std::placeholders::_1, std::placeholders::_2);
+    d->m_ui.pathChooser->setValidationFunction(fn);
+
     connect(d->m_ui.pathChooser, &Utils::PathChooser::validChanged,
             this, &ROSPackageWizardDetailsPage::slotPackagePathValidChanged);
     connect(d->m_ui.packageNameLineEdit, &Utils::FancyLineEdit::validChanged,
             this, &ROSPackageWizardDetailsPage::slotPackageNameValidChanged);
-
-    connect(d->m_ui.pathChooser, &Utils::PathChooser::pathChanged,
-            this, &ROSPackageWizardDetailsPage::slotPackagePathChanged);
 
     connect(d->m_ui.pathChooser, &Utils::PathChooser::returnPressed,
             this, &ROSPackageWizardDetailsPage::slotActivated);
@@ -143,6 +146,12 @@ ROSPackageWizardDetailsPage::ROSPackageWizardDetailsPage(QWidget *parent) :
 ROSPackageWizardDetailsPage::~ROSPackageWizardDetailsPage() {delete d;}
 
 void ROSPackageWizardDetailsPage::setPath(const QString &path) {d->m_ui.pathChooser->setPath(path);}
+
+void ROSPackageWizardDetailsPage::setProjectDirectory(const QString &path)
+{
+    d->m_ui.pathChooser->setInitialBrowsePathBackup(path);
+    d->m_ui.pathChooser->lineEdit()->setInitialText(path);
+}
 
 QString ROSPackageWizardDetailsPage::packageName() const {return d->m_ui.packageNameLineEdit->text();}
 
@@ -170,18 +179,6 @@ void ROSPackageWizardDetailsPage::slotPackageNameValidChanged() {validChangedHel
 
 void ROSPackageWizardDetailsPage::slotPackagePathValidChanged() {validChangedHelper();}
 
-void ROSPackageWizardDetailsPage::slotPackagePathChanged(const QString &path)
-{
-  Q_UNUSED(path);
-
-  if (!d->m_ui.pathChooser->isValid())
-  {
-      d->m_ui.pathChooser->setPath(QLatin1String(""));
-  }
-
-  validChangedHelper();
-}
-
 void ROSPackageWizardDetailsPage::validChangedHelper()
 {
     const bool newComplete = d->m_ui.pathChooser->isValid() && d->m_ui.packageNameLineEdit->isValid();
@@ -205,6 +202,28 @@ QStringList ROSPackageWizardDetailsPage::processList(const QString &text) const
         newList.append(QString::fromLatin1("\"%1\"").arg(str.trimmed()));
     }
     return newList;
+}
+
+bool ROSPackageWizardDetailsPage::validateWithValidator(Utils::FancyLineEdit *edit, QString *errorMessage)
+{
+    const QString path = edit->text();
+    if (path.isEmpty()) {
+        if (errorMessage)
+            *errorMessage = tr("The path \"%1\" expanded to an empty string.").arg(QDir::toNativeSeparators(path));
+        return false;
+    }
+
+    const QFileInfo fi(path);
+
+    if (!path.startsWith(edit->initialText()))
+    {
+        if (errorMessage)
+            *errorMessage = tr("The path \"%1\" is not in the workspace.").arg(QDir::toNativeSeparators(path));
+
+        return false;
+    }
+
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -250,6 +269,7 @@ Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
         }
     }
 
+    m_wizard->setProjectDirectory(rosProject->projectDirectory().toString() + QDir::separator());
     m_wizard->setPath(defaultPath);
 
     foreach (QWizardPage *p, m_wizard->extensionPages())

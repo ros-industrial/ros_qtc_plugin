@@ -26,6 +26,8 @@
 #include <utils/wizard.h>
 #include <utils/wizardpage.h>
 #include <utils/fileutils.h>
+#include <utils/fancylineedit.h>
+
 #include <QProcess>
 
 namespace Utils {
@@ -48,6 +50,7 @@ public:
     explicit ROSPackageWizardDialog(const Core::BaseFileWizardFactory *factory, QWidget *parent = 0);
 
     void setPath(const QString &path);
+    void setProjectDirectory(const QString &path);
 
     QString packageName() const;
     QString packagePath() const;
@@ -75,6 +78,7 @@ public:
     bool isComplete() const override;
 
     void setPath(const QString &path);
+    void setProjectDirectory(const QString &path);
 
     QString packageName() const;
     QString packagePath() const;
@@ -93,10 +97,11 @@ signals:
 private slots:
     void slotPackageNameValidChanged();
     void slotPackagePathValidChanged();
-    void slotPackagePathChanged(const QString &path);
     void slotActivated();
 
 private:
+    bool validateWithValidator(Utils::FancyLineEdit *edit, QString *errorMessage);
+
     QStringList processList(const QString &text) const;
     ROSPackageWizardDetailsPagePrivate *d;
     void validChangedHelper();
