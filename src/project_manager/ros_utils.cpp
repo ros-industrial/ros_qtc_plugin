@@ -71,8 +71,17 @@ bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspace
         return false;
 
     Utils::FileName bash(workspaceInfo.develPath);
-    if (sourceWorkspaceHelper(process, bash.appendPath(QLatin1String("setup.bash")).toString()))
+    bash.appendPath(QLatin1String("setup.bash"));
+    if (bash.exists())
+    {
+        if (sourceWorkspaceHelper(process, bash.toString()))
+            return true;
+    }
+    else
+    {
+        qDebug() << "Warning: Failed to source workspace because this file does not exist: " << workspaceInfo.path.toString();
         return true;
+    }
 
     qDebug() << "Failed to source workspace: " << workspaceInfo.path.toString();
     return false;
@@ -158,7 +167,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
                 process->setWorkingDirectory(workspaceInfo.sourcePath.toString());
                 process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin_init_workspace"));
 
-                if( ! process->waitForFinished() )
+                if( !process->waitForFinished() )
                     return false;
 
                 break;
@@ -177,7 +186,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
                 process->setWorkingDirectory(workspace.path.toString());
                 process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin init"));
 
-                if( ! process->waitForFinished() )
+                if( !process->waitForFinished() )
                     return false;
 
                 break;
@@ -238,26 +247,20 @@ bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
 
   process->start(QLatin1String("bash"));
   process->waitForStarted();
-  QString cmd = QLatin1String("source ") + path + QLatin1String(" && env > /tmp/rosqtenv.txt");
+  QString cmd = QLatin1String("source ") + path + QLatin1String(" && env");
   process->write(cmd.toLatin1());
   process->closeWriteChannel();
   process->waitForFinished();
 
+
   if (process->exitStatus() != QProcess::CrashExit)
   {
-    QFile env_file(QLatin1String("/tmp/rosqtenv.txt"));
-    if (env_file.open(QIODevice::ReadOnly))
-    {
-      QTextStream env_stream(&env_file);
-      while (!env_stream.atEnd())
-      {
-        env_list << env_stream.readLine();
-      }
-      env_file.close();
-      Utils::Environment env(env_list);
-      process->setProcessEnvironment(env.toProcessEnvironment());
-      return true;
-    }
+    QString output = QString::fromStdString(process->readAllStandardOutput().toStdString());
+    env_list = output.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+
+    Utils::Environment env(env_list);
+    process->setProcessEnvironment(env.toProcessEnvironment());
+    return true;
   }
   return false;
 }
@@ -668,25 +671,23 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   process.setEnvironment(env);
   process.start(QLatin1String("bash"));
   process.waitForStarted();
-  QString cmd = QLatin1String("rospack list > /tmp/rosqtpackages.txt");
+  QString cmd = QLatin1String("rospack list");
   process.write(cmd.toLatin1());
   process.closeWriteChannel();
   process.waitForFinished();
 
   if (process.exitStatus() != QProcess::CrashExit)
   {
-    QFile package_file(QLatin1String("/tmp/rosqtpackages.txt"));
-    if (package_file.open(QIODevice::ReadOnly))
+    QString output = QString::fromStdString(process.readAllStandardOutput().toStdString());
+    QStringList package_list = output.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+
+    foreach (QString str, package_list)
     {
-      QTextStream package_stream(&package_file);
-      while (!package_stream.atEnd())
-      {
-        tmp = package_stream.readLine().split(QLatin1String(" "));
+        tmp = str.split(QLatin1String(" "));
         package_map.insert(tmp[0],tmp[1]);
-      }
-      package_file.close();
-      return package_map;
     }
+
+    return package_map;
   }
   return QMap<QString, QString>();
 }
@@ -736,41 +737,32 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
 
   QProcess process;
   QMap<QString, QString> package_executables;
-  QString package_executables_location;
 
   process.setEnvironment(env);
   process.start(QLatin1String("bash"));
   process.waitForStarted();
-  QString cmd = QLatin1String("catkin_find --without-underlays --libexec ") + packageName + QLatin1String(" > /tmp/rosqtexecutables.txt");
+  QString cmd = QLatin1String("catkin_find --without-underlays --libexec ") + packageName;
   process.write(cmd.toLatin1());
   process.closeWriteChannel();
   process.waitForFinished();
 
   if (process.exitStatus() != QProcess::CrashExit)
   {
-    QFile executable_file(QLatin1String("/tmp/rosqtexecutables.txt"));
-    if (executable_file.open(QIODevice::ReadOnly))
+    QString output = QString::fromStdString(process.readAllStandardOutput().toStdString());
+    QStringList loc_list = output.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+
+    if (loc_list.size() > 0)
     {
-      QTextStream executable_stream(&executable_file);
-      if (!executable_stream.atEnd())
+      const QDir srcDir(loc_list[0]);
+      QDirIterator it(srcDir.absolutePath(), QDir::Files | QDir::Executable | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
+
+      while (it.hasNext())
       {
-        package_executables_location = executable_stream.readLine();
+        QFileInfo executableFile(it.next());
+        package_executables.insert(executableFile.fileName(), executableFile.absoluteFilePath());
       }
-      executable_file.close();
 
-      if(!package_executables_location.isEmpty())
-      {
-        const QDir srcDir(package_executables_location);
-        QDirIterator it(srcDir.absolutePath(), QDir::Files | QDir::Executable | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
-
-        while (it.hasNext())
-        {
-          QFileInfo executableFile(it.next());
-          package_executables.insert(executableFile.fileName(), executableFile.absoluteFilePath());
-        }
-
-        return package_executables;
-      }
+      return package_executables;
     }
   }
 
@@ -1027,6 +1019,7 @@ QProcessEnvironment ROSUtils::getWorkspaceEnvironment(const WorkspaceInfo &works
 {
     QProcess process;
     sourceWorkspace(&process, workspaceInfo);
+
     QProcessEnvironment env = process.processEnvironment();
     env.insert("PWD", workspaceInfo.path.toString());
     env.insert("TERM", "xterm");
