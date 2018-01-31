@@ -141,6 +141,8 @@ bool ROSCatkinToolsStep::init(QList<const BuildStep *> &earlierSteps)
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
     Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
 
+    bc->updateQtEnvironment(env); // TODO: Not sure if this is required here
+
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
     pp->setWorkingDirectory(m_catkinToolsWorkingDir);
