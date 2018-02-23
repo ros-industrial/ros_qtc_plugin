@@ -29,11 +29,9 @@ Installation Procedure for Ubuntu 16.04
 
    .. code-block:: bash
 
-      sudo apt remove --purge '^qtXX.*'
-      sudo add-apt-repository --remove ppa:levi-armstrong/qt-libraries-xenial
-      sudo add-apt-repository --remove ppa:levi-armstrong/ppa
-
-   *Remember to replace XX with the current version installed and replace YY with the new version.*
+      sudo apt install ppa-purge
+      sudo ppa-purge levi-armstrong/qt-libraries-xenial
+      sudo ppa-purge levi-armstrong/ppa
 
 
 Installation Procedure for Ubuntu 14.04
@@ -55,11 +53,8 @@ Installation Procedure for Ubuntu 14.04
 
    .. code-block:: bash
 
-      sudo apt remove --purge '^qtXX.*'
-      sudo add-apt-repository --remove ppa:levi-armstrong/qt-libraries-xenial
-      sudo add-apt-repository --remove ppa:levi-armstrong/ppa
-
-   *Remember to replace XX with the current version installed and replace YY with the new version.*
+      sudo apt install ppa-purge
+      sudo ppa-purge levi-armstrong/qt-libraries-xenial
 
 
 Archived Versions
