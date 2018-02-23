@@ -30,6 +30,7 @@ Installation Procedure for Ubuntu 16.04
    .. code-block:: bash
 
       sudo apt install ppa-purge
+      sudo ppa-purge -o beineri
       sudo ppa-purge levi-armstrong/qt-libraries-xenial
       sudo ppa-purge levi-armstrong/ppa
 
@@ -54,6 +55,7 @@ Installation Procedure for Ubuntu 14.04
    .. code-block:: bash
 
       sudo apt install ppa-purge
+      sudo ppa-purge -o beineri
       sudo ppa-purge levi-armstrong/qt-libraries-xenial
 
 
