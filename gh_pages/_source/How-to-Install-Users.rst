@@ -16,11 +16,12 @@ Installation Procedure for Ubuntu 16.04
 
 #. Install Prerequsites:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-   sudo apt install libqtermwidget5-0
+      sudo apt install libqtermwidget5-0
 
 #. Next proceed to `Qt Installer Procedure`_
+
 
 .. Important::
 
@@ -40,12 +41,13 @@ Installation Procedure for Ubuntu 14.04
 
 #. Install Prerequsites:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-   sudo add-apt-repository ppa:levi-armstrong/ppa
-   sudo apt install libqtermwidget5-0
+      sudo add-apt-repository ppa:levi-armstrong/ppa
+      sudo apt install libqtermwidget5-0
 
 #. Next proceed to `Qt Installer Procedure`_
+
 
 .. Important::
 
@@ -112,7 +114,7 @@ Qt Installer Procedure
 
 |
 
-#. How to get future updates open Qt Creator and under Help select **"Check for Updates"**.
+#. How to get future updates, open Qt Creator and on the menubar under Help select **"Check for Updates"**.
 
    .. image:: ../_static/get_updates.png
 
@@ -128,7 +130,7 @@ Testing Plugin.
 #. Start Qt Creator
 
    * Option 1: Launch using the desktop icon.
-   * Option 2: Launch from terminal. 
+   * Option 2: Launch from terminal.
 
      .. code-block:: bash
 
