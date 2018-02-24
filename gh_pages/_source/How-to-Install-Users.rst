@@ -34,6 +34,10 @@ Installation Procedure for Ubuntu 16.04
       sudo ppa-purge levi-armstrong/qt-libraries-xenial
       sudo ppa-purge levi-armstrong/ppa
 
+   .. Warning::
+
+      The ppa-purge removes everything installed from the ppa, so if the ppa is used for other development do not purge.
+
 
 Installation Procedure for Ubuntu 14.04
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,6 +62,9 @@ Installation Procedure for Ubuntu 14.04
       sudo ppa-purge -o beineri
       sudo ppa-purge levi-armstrong/qt-libraries-xenial
 
+   .. Warning::
+
+      The ppa-purge removes everything installed from the ppa, so if the ppa is used for other development do not purge.
 
 Archived Versions
 ~~~~~~~~~~~~~~~~~
