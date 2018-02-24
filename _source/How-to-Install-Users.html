@@ -232,12 +232,16 @@
 <div class="admonition important">
 <p class="first admonition-title">Important</p>
 <p>If previously installed using the ppa please follow the procedure below to remove old version.</p>
-<div class="highlight-bash"><div class="highlight"><pre>sudo apt remove --purge <span class="s1">&#39;^qtXX.*&#39;</span>
-sudo add-apt-repository --remove ppa:levi-armstrong/qt-libraries-xenial
-sudo add-apt-repository --remove ppa:levi-armstrong/ppa
+<div class="highlight-bash"><div class="highlight"><pre>sudo apt install ppa-purge
+sudo ppa-purge -o beineri
+sudo ppa-purge levi-armstrong/qt-libraries-xenial
+sudo ppa-purge levi-armstrong/ppa
 </pre></div>
 </div>
-<p class="last"><em>Remember to replace XX with the current version installed and replace YY with the new version.</em></p>
+<div class="last admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The ppa-purge removes everything installed from the ppa, so if the ppa is used for other development do not purge.</p>
+</div>
 </div>
 </div>
 <div class="section" id="installation-procedure-for-ubuntu-14-04">
@@ -255,12 +259,15 @@ sudo apt install libqtermwidget5-0
 <div class="admonition important">
 <p class="first admonition-title">Important</p>
 <p>If previously installed using the ppa please follow the procedure below to remove old version.</p>
-<div class="highlight-bash"><div class="highlight"><pre>sudo apt remove --purge <span class="s1">&#39;^qtXX.*&#39;</span>
-sudo add-apt-repository --remove ppa:levi-armstrong/qt-libraries-xenial
-sudo add-apt-repository --remove ppa:levi-armstrong/ppa
+<div class="highlight-bash"><div class="highlight"><pre>sudo apt install ppa-purge
+sudo ppa-purge -o beineri
+sudo ppa-purge levi-armstrong/qt-libraries-xenial
 </pre></div>
 </div>
-<p class="last"><em>Remember to replace XX with the current version installed and replace YY with the new version.</em></p>
+<div class="last admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The ppa-purge removes everything installed from the ppa, so if the ppa is used for other development do not purge.</p>
+</div>
 </div>
 </div>
 <div class="section" id="archived-versions">
