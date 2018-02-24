@@ -83,7 +83,7 @@ Qt Installer Procedure
 
    .. Note::
 
-      The Offline Installer is to be used on machiens that do not have internet access.
+      The Offline Installer is to be used on machines that do not have internet access.
 
 #. Then right click on the installer file, select properties and enable execution under permissions.
 
