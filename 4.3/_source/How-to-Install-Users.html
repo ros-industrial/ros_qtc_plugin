@@ -231,8 +231,9 @@ sudo ppa-purge levi-armstrong/ppa
 <h3>Installation Procedure for Ubuntu 14.04<a class="headerlink" href="#installation-procedure-for-ubuntu-14-04" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic">
 <li><p class="first">Install Prerequsites:</p>
-<div class="highlight-bash"><div class="highlight"><pre>sudo add-apt-repository ppa:levi-armstrong/ppa
-sudo apt install libqtermwidget5-0
+<div class="highlight-bash"><div class="highlight"><pre>sudo add-apt-repository ppa:levi-armstrong/qt-libraries-trusty
+sudo add-apt-repository ppa:levi-armstrong/ppa
+sudo apt install libqtermwidget59-0
 </pre></div>
 </div>
 </li>
@@ -244,7 +245,6 @@ sudo apt install libqtermwidget5-0
 <p>If previously installed using the ppa please follow the procedure below to remove old version.</p>
 <div class="highlight-bash"><div class="highlight"><pre>sudo apt install ppa-purge
 sudo ppa-purge -o beineri
-sudo ppa-purge levi-armstrong/qt-libraries-xenial
 </pre></div>
 </div>
 <div class="last admonition warning">
