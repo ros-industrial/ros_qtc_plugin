@@ -46,8 +46,9 @@ Installation Procedure for Ubuntu 14.04
 
    .. code-block:: bash
 
+      sudo add-apt-repository ppa:levi-armstrong/qt-libraries-trusty
       sudo add-apt-repository ppa:levi-armstrong/ppa
-      sudo apt install libqtermwidget5-0
+      sudo apt install libqtermwidget59-0
 
 #. Next proceed to `Qt Installer Procedure`_
 
@@ -60,7 +61,6 @@ Installation Procedure for Ubuntu 14.04
 
       sudo apt install ppa-purge
       sudo ppa-purge -o beineri
-      sudo ppa-purge levi-armstrong/qt-libraries-xenial
 
    .. Warning::
 
