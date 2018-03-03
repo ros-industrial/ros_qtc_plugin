@@ -13,11 +13,15 @@ INSTALLER_VERSION=1.0.1
 INSTALLER_RELEASE_DATE=2018-11-27
 
 QTC_LATEST=0
-QTC_MINOR_VERSION=4.4.1
+QTC_VERSION=4.4.1.1
 QTC_RELEASE_DATE=2017-10-04
-RQTC_MINOR_VERSION=0.1.8
+RQTC_VERSION=0.1.8.1
 RQTC_RELEASE_DATE=2018-11-22
-SortingPriority=51
-QMAKE_PATH="/home/larmstrong/Qt5.9.2/5.9.2/gcc_64/bin/qmake" # This must be the same version used for qtcreator.7z and qtcreator_dev.7z
+SortingPriority=200
+
+CLANG_FILENAME=libclang-release_39-linux-Rhel6.6-gcc4.9-x86_64.7z # Name must be located here https://download.qt.io/development_releases/prebuilt/libclang/
+YAML_CPP_TAG=yaml-cpp-0.6.2
+QT_PATH=/home/Qt5.10.0/5.10.0/gcc_64 # This must be the same version used for qtcreator.7z and qtcreator_dev.7z
+QIFW_PATH=/home/QtIFW-3.0.2/bin/binarycreator
 
 createInstaller

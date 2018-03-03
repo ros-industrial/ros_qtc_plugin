@@ -29,9 +29,17 @@ INSTALLER_DIR_PATH=`dirname $SCRIPT_FILE_PATH`
 BASE_PACKAGE_NAME=org.rosindustrial.qtros
 
 function init {
-    # Get Major Version
-	PVersion=(`echo $QTC_MINOR_VERSION | tr '.' ' '`)
+    # Get Qt Creator Major and Minor Version
+	PVersion=(`echo $QTC_VERSION | tr '.' ' '`)
 	QTC_MAJOR_VERSION=${PVersion[0]}.${PVersion[1]}
+    QTC_MINOR_VERSION=${PVersion[0]}.${PVersion[1]}.${PVersion[2]}
+
+    # Get ROS Plugin Major and Minor Version
+    RVersion=(`echo $RQTC_VERSION | tr '.' ' '`)
+    RQTC_MAJOR_VERSION=${RVersion[0]}.${RVersion[1]}
+    RQTC_MINOR_VERSION=${RVersion[0]}.${RVersion[1]}.${RVersion[2]}
+
+    DISTRO=(`lsb_release -cs`)
 
     if [ $QTC_LATEST -eq 1 ]; then
         PACKAGE_NAME=latest
@@ -53,17 +61,20 @@ function init {
     rm -rf /tmp/$INSTALL_DIR
     rm -rf /tmp/ros_qtc_plugin
     rm -rf /tmp/ros_qtc_plugin-build
-    rm -rf /tmp/qtcreator
-    rm -rf /tmp/qtcreator_dev
+    rm -rf /tmp/qt-creator
+    rm -rf /tmp/qt-creator-build
     rm -rf /tmp/qtcreator_ros_plugin
+    rm -rf /tmp/qtermwidget
+    rm -rf /tmp/qtermwidget-build
+    rm -rf /tmp/libclang
 }
 
 function createConfig {
-    mkdir -p $INSTALLER_DIR_PATH/$INSTALL_DIR/config/
-    cp $INSTALLER_DIR_PATH/logo.png $INSTALLER_DIR_PATH/$INSTALL_DIR/config/logo.png
-    cp $INSTALLER_DIR_PATH/watermark.png $INSTALLER_DIR_PATH/$INSTALL_DIR/config/watermark.png
+    mkdir -p $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/config/
+    cp $INSTALLER_DIR_PATH/logo.png $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/config/logo.png
+    cp $INSTALLER_DIR_PATH/watermark.png $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/config/watermark.png
 
-cat > $INSTALLER_DIR_PATH/$INSTALL_DIR/config/config.xml << EOF
+cat > $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/config/config.xml << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
     <Name>Qt Creator with ROS Plug-in</Name>
@@ -78,7 +89,7 @@ cat > $INSTALLER_DIR_PATH/$INSTALL_DIR/config/config.xml << EOF
     <TargetDir>@HomeDir@/QtCreator</TargetDir>
     <RemoteRepositories>
          <Repository>
-                 <Url>https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/repositories/$INSTALL_DIR</Url>
+                 <Url>https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/repositories/$DISTRO/$INSTALL_DIR</Url>
                  <Enabled>1</Enabled>
                  <DisplayName>Qt Creator with ROS Plug-in</DisplayName>
          </Repository>
@@ -88,12 +99,12 @@ EOF
 }
 
 function createRootPackage {
-    mkdir -p $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME/meta
-    cp $INSTALLER_DIR_PATH/LICENSE.GPL3-EXCEPT $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME/meta/LICENSE.GPL3-EXCEPT
-    cp $INSTALLER_DIR_PATH/LICENSE.APACHE $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME/meta/LICENSE.APACHE
-    cp $INSTALLER_DIR_PATH/page.ui $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME/meta/page.ui
+    mkdir -p $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME/meta
+    cp $INSTALLER_DIR_PATH/LICENSE.GPL3-EXCEPT $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME/meta/LICENSE.GPL3-EXCEPT
+    cp $INSTALLER_DIR_PATH/LICENSE.APACHE $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME/meta/LICENSE.APACHE
+    cp $INSTALLER_DIR_PATH/page.ui $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME/meta/page.ui
  
-cat > $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME/meta/package.xml << EOF
+cat > $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME/meta/package.xml << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <Package>
     <DisplayName>Qt Creator for ROS</DisplayName>
@@ -113,15 +124,15 @@ EOF
 }
 
 function createQtCreatorPackage {
-    mkdir -p $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/meta
-    mkdir -p $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/data
+    mkdir -p $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/meta
+    mkdir -p $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/data
 
-cat > $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/meta/package.xml << EOF
+cat > $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/meta/package.xml << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <Package>
     <DisplayName>$QTC_DISPLAY_NAME</DisplayName>
     <Description>Installs the Qt Creator IDE</Description>
-    <Version>$QTC_MINOR_VERSION</Version>
+    <Version>$QTC_VERSION</Version>
     <ReleaseDate>$QTC_RELEASE_DATE</ReleaseDate>
     <Name>$BASE_PACKAGE_NAME.$PACKAGE_NAME</Name>
     <Dependencies>$BASE_PACKAGE_NAME</Dependencies>
@@ -133,15 +144,15 @@ EOF
 }
 
 function createROSQtCreatorPluginPackage {
-    mkdir -p $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/meta
-    mkdir -p $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/data
+    mkdir -p $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/meta
+    mkdir -p $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/data
 
-cat > $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/meta/package.xml << EOF
+cat > $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/meta/package.xml << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <Package>
     <DisplayName>ROS Plug-in ($RQTC_MINOR_VERSION)</DisplayName>
     <Description>Installs the ROS Qt Creator Plug-in</Description>
-    <Version>$RQTC_MINOR_VERSION</Version>
+    <Version>$RQTC_VERSION</Version>
     <ReleaseDate>$RQTC_RELEASE_DATE</ReleaseDate>
     <Name>$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc</Name>
     <Dependencies>$BASE_PACKAGE_NAME.$PACKAGE_NAME</Dependencies>
@@ -151,7 +162,7 @@ EOF
 }
 
 function createInstallScript {
-cat > $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/meta/installscript.qs << EOF
+cat > $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/meta/installscript.qs << EOF
 function Component()
 {
 }
@@ -191,57 +202,116 @@ EOF
 }
 
 function createInstallerData {
-	export QTC_SOURCE=/tmp/$INSTALL_DIR
+    export QTDIR=$QT_PATH # where you downloaded and compiled qt
+    export PATH=$QTDIR/bin:$PATH
+    export MANPATH=$QTDIR/doc/man:$MANPATH
+    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+	export QTC_SOURCE=/tmp/qt-creator
 	export QTC_BUILD=/tmp/$INSTALL_DIR
+    export LLVM_INSTALL_DIR=/tmp/libclang
+    export INSTALL_ROOT=/tmp/$INSTALL_DIR
 
-	mkdir -p /tmp/$INSTALL_DIR
-	cd /tmp/$INSTALL_DIR
+    # Download the correct version of clang
+    cd /tmp
+    wget https://download.qt.io/development_releases/prebuilt/libclang/$CLANG_FILENAME
+    7zr x -bd $CLANG_FILENAME
 
-    # Download the version of Qt Creator from Qt
-	wget https://download.qt.io/official_releases/qtcreator/$QTC_MAJOR_VERSION/$QTC_MINOR_VERSION/installer_source/linux_gcc_64_rhel72/qtcreator.7z
-	
-    # Extract Qt Creator Data
-	7zr x -bd qtcreator.7z
-    rm qtcreator.7z 
-
-    # May need to create a symbolic link with version of qtcreator binary to allow multiple versions.
+    ## Download Qt Creator from Qt and build it
+    mkdir -p /tmp/$INSTALL_DIR
+    cd /tmp 
+    git clone https://github.com/qt-creator/qt-creator.git -b v$QTC_MINOR_VERSION
+    cd /tmp/qt-creator
+    git submodule update --init # This is to pull in qbs and build it.
+    mkdir -p /tmp/qt-creator-build
+    cd /tmp/qt-creator-build
+    qmake ../qt-creator/qtcreator.pro -r 
+    make -j8
+    make deployqt
 
     # Package Qt Creator
-    rm $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/data/qtcreator.7z
-	cd /tmp
-	7zr a -r qtcreator.7z $INSTALL_DIR
-	mv qtcreator.7z $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/data
+    rm $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/data/qtcreator.7z
+    cd /tmp
+    7zr a -r qtcreator.7z $INSTALL_DIR
+    mv qtcreator.7z $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/data
 
-    cd /tmp/$INSTALL_DIR
-    wget https://download.qt.io/official_releases/qtcreator/$QTC_MAJOR_VERSION/$QTC_MINOR_VERSION/installer_source/linux_gcc_64_rhel72/qtcreator_dev.7z
-	7zr x -y -bd qtcreator_dev.7z
-    rm qtcreator_dev.7z
-	 
-	# Clone the ROS Qt Creator Plugin
-	cd /tmp
-	git clone --depth 1 --single-branch --branch $QTC_MAJOR_VERSION https://github.com/ros-industrial/ros_qtc_plugin.git
+    # Clone the qtermwidget
+    cd /tmp
+    git clone --depth 1 --single-branch --branch debian/$DISTRO https://github.com/Levi-Armstrong/qtermwidget.git
+    
+    # Build the qtermwidget
+    cd /tmp 
+    mkdir qtermwidget-build
+    cd /tmp/qtermwidget-build
+    cmake -DCMAKE_CXX_FLAGS=-std=c++11 ../qtermwidget/
+    make -j8
+    make install
+    
+    # Transfer qtermwedget file to correct location
+    mv /tmp/qtermwidget-build/libqtermwidget5.so* /tmp/$INSTALL_DIR/lib/qtcreator
+    
+    # Next change the rpath to use local Qt Libraries copied into the Qt Creator Directory
+    chrpath -r \$\ORIGIN/../Qt/lib /tmp/$INSTALL_DIR/lib/qtcreator/libqtermwidget5.so
+
+    if [[ $YAML_CPP_TAG ]]; then
+        # Clone the yaml-cpp
+        cd /tmp
+        git clone --depth 1 --single-branch --branch $YAML_CPP_TAG https://github.com/jbeder/yaml-cpp.git
+
+        # Build yaml-cpp
+        cd /tmp
+        mkdir yaml-cpp-build
+        cd /tmp/yaml-cpp-build
+        cmake -DBUILD_SHARED_LIBS=ON ../yaml-cpp/
+        make -j8
+        make install
+
+        # Transfer yaml-cpp file to correct location
+        mv /tmp/yaml-cpp-build/libyaml-cpp.so* /tmp/$INSTALL_DIR/lib/qtcreator
+    fi
+
+    # Clone the ROS Qt Creator Plugin
+    cd /tmp
+    git clone --depth 1 --single-branch --branch $QTC_MAJOR_VERSION https://github.com/ros-industrial/ros_qtc_plugin.git
     
     # Build the ROS Qt Creator Plugin
-	mkdir ros_qtc_plugin-build
-	cd /tmp/ros_qtc_plugin-build
-	$QMAKE_PATH ../ros_qtc_plugin/ros_qtc_plugin.pro -r 
-	make -j8
+    mkdir ros_qtc_plugin-build
+    cd /tmp/ros_qtc_plugin-build
+    qmake ../ros_qtc_plugin/ros_qtc_plugin.pro -r 
+    make -j8
 
-	# Next we must change the rpath to use the local Qt Libraries that get copied into the Qt Creator Directory
-	chrpath -r \$\ORIGIN:\$\ORIGIN/..:\$\ORIGIN/../lib/qtcreator:\$\ORIGIN/../../Qt/lib /tmp/$INSTALL_DIR/lib/qtcreator/plugins/libROSProjectManager.so  
+    # Next change the rpath to use the local Qt Libraries copied into the Qt Creator Directory
+    chrpath -r \$\ORIGIN:\$\ORIGIN/..:\$\ORIGIN/../lib/qtcreator:\$\ORIGIN/../../Qt/lib /tmp/$INSTALL_DIR/lib/qtcreator/plugins/libROSProjectManager.so  
 
     # Package ROS Qt Creator Plugin
-    rm $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/data/qtcreator_ros_plugin.7z
-	mkdir -p /tmp/qtcreator_ros_plugin/$INSTALL_DIR/lib/qtcreator/plugins
-	cd /tmp/qtcreator_ros_plugin/$INSTALL_DIR/lib/qtcreator/plugins
-	cp /tmp/$INSTALL_DIR/lib/qtcreator/plugins/libROSProjectManager.so .
-	mkdir -p /tmp/qtcreator_ros_plugin/$INSTALL_DIR/share/qtcreator
-	cd /tmp/qtcreator_ros_plugin/$INSTALL_DIR/share/qtcreator
-	cp -r /tmp/ros_qtc_plugin/share/styles .
-	cp -r /tmp/ros_qtc_plugin/share/templates .
-	cd /tmp/qtcreator_ros_plugin
-	7zr a -r qtcreator_ros_plugin.7z $INSTALL_DIR
-	mv qtcreator_ros_plugin.7z $INSTALLER_DIR_PATH/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/data
+    ## Add ROS plugin files
+    rm $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/data/qtcreator_ros_plugin.7z
+    mkdir -p /tmp/qtcreator_ros_plugin/$INSTALL_DIR/lib/qtcreator/plugins
+    cd /tmp/qtcreator_ros_plugin/$INSTALL_DIR/lib/qtcreator/plugins
+    cp /tmp/$INSTALL_DIR/lib/qtcreator/plugins/libROSProjectManager.so .
+    mkdir -p /tmp/qtcreator_ros_plugin/$INSTALL_DIR/share/qtcreator
+    cd /tmp/qtcreator_ros_plugin/$INSTALL_DIR/share/qtcreator
+    cp -r /tmp/ros_qtc_plugin/share/styles .
+    cp -r /tmp/ros_qtc_plugin/share/templates .
+    
+    ## Add qtermwidget files
+    cd /tmp/qtcreator_ros_plugin/$INSTALL_DIR/lib/qtcreator
+    mv /tmp/$INSTALL_DIR/lib/qtcreator/libqtermwidget5.so* .
+    ## qtermwidget looks for the color-schemes and kb-layouts directory in the same path as the executable
+    mkdir -p /tmp/qtcreator_ros_plugin/$INSTALL_DIR/bin
+    cd /tmp/qtcreator_ros_plugin/$INSTALL_DIR/bin
+    cp -R /tmp/qtermwidget/lib/color-schemes .
+    cp -R /tmp/qtermwidget/lib/kb-layouts .
+
+    if [[ $YAML_CPP_TAG ]]; then
+        ## Add yaml-cpp files
+        cd /tmp/qtcreator_ros_plugin/$INSTALL_DIR/lib/qtcreator
+        mv /tmp/$INSTALL_DIR/lib/qtcreator/libyaml-cpp.so* .
+    fi
+
+    # Creat install package
+    cd /tmp/qtcreator_ros_plugin
+    7zr a -r qtcreator_ros_plugin.7z $INSTALL_DIR
+    mv qtcreator_ros_plugin.7z $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/data
 }
 
 function createInstaller {
@@ -259,9 +329,9 @@ function createInstaller {
     createInstallerData
 
     # Create binary 
-    cd $INSTALLER_DIR_PATH/$INSTALL_DIR
-    /home/larmstrong/QtIFW-3.0.2/bin/binarycreator -f -c config/config.xml -p packages qtcreator-ros-$PACKAGE_NAME-offline-installer.run
-    /home/larmstrong/QtIFW-3.0.2/bin/binarycreator -n -c config/config.xml -p packages qtcreator-ros-$PACKAGE_NAME-online-installer.run
+    cd $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR
+    $QIFW_PATH -f -c config/config.xml -p packages qtcreator-ros-$DISTRO-$PACKAGE_NAME-offline-installer.run
+    $QIFW_PATH -n -c config/config.xml -p packages qtcreator-ros-$DISTRO-$PACKAGE_NAME-online-installer.run
 
     logP "Finished Creating Installer data for version $QTC_MINOR_VERSION"
 }
