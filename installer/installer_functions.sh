@@ -67,6 +67,10 @@ function init {
     rm -rf /tmp/qtermwidget
     rm -rf /tmp/qtermwidget-build
     rm -rf /tmp/libclang
+    rm -rf /tmp/yaml-cpp-build
+    rm -rf /tmp/yaml-cpp
+    rm -rf /tmp/patchelf
+    rm /tmp/$CLANG_FILENAME
 }
 
 function createConfig {
@@ -201,21 +205,38 @@ Component.prototype.createOperations = function()
 EOF
 }
 
-function createInstallerData {
-    export QTDIR=$QT_PATH # where you downloaded and compiled qt
-    export PATH=$QTDIR/bin:$PATH
-    export MANPATH=$QTDIR/doc/man:$MANPATH
-    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-	export QTC_SOURCE=/tmp/qt-creator
-	export QTC_BUILD=/tmp/$INSTALL_DIR
-    export LLVM_INSTALL_DIR=/tmp/libclang
-    export INSTALL_ROOT=/tmp/$INSTALL_DIR
+function installDepends {
 
-    # Download the correct version of clang
-    cd /tmp
-    wget https://download.qt.io/development_releases/prebuilt/libclang/$CLANG_FILENAME
-    7zr x -bd $CLANG_FILENAME
+    if [[ $DISTRO -eq "trusty" ]]; then
+        # Install patchelf
+        cd /tmp
+        git clone https://github.com/NixOS/patchelf.git -b 0.9
+        cd /tmp/patchelf
+        ./bootstrap.sh
+        ./configure
+        make
+        make install
+    fi
 
+}
+
+function packageSystemLibraries {
+
+    if [[ $DISTRO -eq "trusty" ]]; then
+        mkdir -p /tmp/$INSTALL_DIR/lib/qtcreator
+        cd /tmp/$INSTALL_DIR/lib/qtcreator
+        
+        cp /usr/lib/x86_64-linux-gnu/libm.so .
+        cp /usr/lib/x86_64-linux-gnu/libc.so .
+        cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 .
+        cp /usr/lib/gcc/x86_64-linux-gnu/4.9/libgcc_s.so .
+        patchelf --force-rpath --set-rpath \$\ORIGIN:\$\ORIGIN/..:\$\ORIGIN/../lib/qtcreator:\$\ORIGIN/../../Qt/lib libstdc++.so.6
+        patchelf --force-rpath --set-rpath \$\ORIGIN:\$\ORIGIN/..:\$\ORIGIN/../lib/qtcreator:\$\ORIGIN/../../Qt/lib libgcc_s.so
+    fi
+
+}
+
+function processQtCreator {
     ## Download Qt Creator from Qt and build it
     mkdir -p /tmp/$INSTALL_DIR
     cd /tmp 
@@ -227,13 +248,19 @@ function createInstallerData {
     qmake ../qt-creator/qtcreator.pro -r 
     make -j8
     make deployqt
+}
 
+function packageQtCreator {
     # Package Qt Creator
     rm $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/data/qtcreator.7z
+
+    # Package QtCreator
     cd /tmp
     7zr a -r qtcreator.7z $INSTALL_DIR
     mv qtcreator.7z $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME/data
+}
 
+function processQtermwidget {
     # Clone the qtermwidget
     cd /tmp
     git clone --depth 1 --single-branch --branch debian/$DISTRO https://github.com/Levi-Armstrong/qtermwidget.git
@@ -251,7 +278,9 @@ function createInstallerData {
     
     # Next change the rpath to use local Qt Libraries copied into the Qt Creator Directory
     chrpath -r \$\ORIGIN/../Qt/lib /tmp/$INSTALL_DIR/lib/qtcreator/libqtermwidget5.so
+}
 
+function processYamlCpp {
     if [[ $YAML_CPP_TAG ]]; then
         # Clone the yaml-cpp
         cd /tmp
@@ -268,6 +297,11 @@ function createInstallerData {
         # Transfer yaml-cpp file to correct location
         mv /tmp/yaml-cpp-build/libyaml-cpp.so* /tmp/$INSTALL_DIR/lib/qtcreator
     fi
+}
+
+function processROSPlugin {
+    processQtermwidget
+    processYamlCpp
 
     # Clone the ROS Qt Creator Plugin
     cd /tmp
@@ -281,7 +315,9 @@ function createInstallerData {
 
     # Next change the rpath to use the local Qt Libraries copied into the Qt Creator Directory
     chrpath -r \$\ORIGIN:\$\ORIGIN/..:\$\ORIGIN/../lib/qtcreator:\$\ORIGIN/../../Qt/lib /tmp/$INSTALL_DIR/lib/qtcreator/plugins/libROSProjectManager.so  
+}
 
+function packageROSPlugin {
     # Package ROS Qt Creator Plugin
     ## Add ROS plugin files
     rm $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/data/qtcreator_ros_plugin.7z
@@ -314,10 +350,37 @@ function createInstallerData {
     mv qtcreator_ros_plugin.7z $INSTALLER_DIR_PATH/$DISTRO/$INSTALL_DIR/packages/$BASE_PACKAGE_NAME.$PACKAGE_NAME.rqtc/data
 }
 
+function createInstallerData {
+    export QTDIR=$QT_PATH # where you downloaded and compiled qt
+    export PATH=$QTDIR/bin:$PATH
+    export MANPATH=$QTDIR/doc/man:$MANPATH
+    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+	export QTC_SOURCE=/tmp/qt-creator
+	export QTC_BUILD=/tmp/$INSTALL_DIR
+    export LLVM_INSTALL_DIR=/tmp/libclang
+    export INSTALL_ROOT=/tmp/$INSTALL_DIR
+
+    # Download the correct version of clang
+    cd /tmp
+    wget https://download.qt.io/development_releases/prebuilt/libclang/$CLANG_FILENAME
+    7zr x -bd $CLANG_FILENAME
+
+    processQtCreator
+    packageQtCreator
+
+    processROSPlugin
+    packageROSPlugin
+}
+
 function createInstaller {
     logP "Create Installer data for version $QTC_MINOR_VERSION"
 
     init
+
+    installDepends
+
+    # Need to package system libraries if needed like libstdc++
+    packageSystemLibraries
 
     createConfig
     createRootPackage
