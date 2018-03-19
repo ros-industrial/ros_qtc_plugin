@@ -11,7 +11,7 @@
 
 ## Build Docker image for version (Optional if already done)
 
-   `docker build -t rqtc_<distro>:latest -f <distro>.dockerfile --no-cache --network host .`
+   `docker build -t rqtc_<distro>:latest -f dockerfiles/<distro>.dockerfile --no-cache --network host .`
 
 ## Next you will need to run the following docker command (replace <distro> with trusty, xenial, etc.).
 
