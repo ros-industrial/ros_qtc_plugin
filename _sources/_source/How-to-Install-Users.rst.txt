@@ -14,11 +14,15 @@ Installation
 Installation Procedure for Ubuntu 16.04
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#. Install Prerequsites:
+#. Download Installer:
 
-   .. code-block:: bash
+   #. `Xenial Online Installer <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/xenial/qtcreator-ros-xenial-latest-online-installer.run>`_ (Recommended)
 
-      sudo apt install libqtermwidget5-0
+   #. `Xenial Offline Installer <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/xenial/qtcreator-ros-xenial-latest-offline-installer.run>`_
+
+   .. Note::
+
+      The Offline Installer is to be used on machines that do not have internet access.
 
 #. Next proceed to `Qt Installer Procedure`_
 
@@ -42,16 +46,17 @@ Installation Procedure for Ubuntu 16.04
 Installation Procedure for Ubuntu 14.04
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#. Install Prerequsites:
+#. Download Installer:
 
-   .. code-block:: bash
+   #. `Trusty Online Installer <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/trusty/qtcreator-ros-trusty-latest-online-installer.run>`_ (Recommended)
 
-      sudo add-apt-repository ppa:levi-armstrong/qt-libraries-trusty
-      sudo add-apt-repository ppa:levi-armstrong/ppa
-      sudo apt install libqtermwidget59-0
+   #. `Trusty Offline Installer <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/trusty/qtcreator-ros-trusty-latest-offline-installer.run>`_
+
+   .. Note::
+
+      The Offline Installer is to be used on machines that do not have internet access.
 
 #. Next proceed to `Qt Installer Procedure`_
-
 
 .. Important::
 
@@ -61,6 +66,8 @@ Installation Procedure for Ubuntu 14.04
 
       sudo apt install ppa-purge
       sudo ppa-purge -o beineri
+      sudo ppa-purge levi-armstrong/qt-libraries-xenial
+      sudo ppa-purge levi-armstrong/ppa
 
    .. Warning::
 
@@ -74,16 +81,6 @@ If for some reason you need a version other than the latest, all installers may 
 
 Qt Installer Procedure
 ~~~~~~~~~~~~~~~~~~~~~~
-
-#. Download Installer
-
-   #. `Online Installer <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/latest/qtcreator-ros-latest-online-installer.run>`_ (Recommended)
-
-   #. `Offline Installer <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/latest/qtcreator-ros-latest-offline-installer.run>`_
-
-   .. Note::
-
-      The Offline Installer is to be used on machines that do not have internet access.
 
 #. Then right click on the installer file, select properties and enable execution under permissions.
 
