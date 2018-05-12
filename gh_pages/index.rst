@@ -13,7 +13,7 @@ Installation
 .. toctree::
    :maxdepth: 1
 
-   Installation Video
+   Installation Video (Users) <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/tutorials/videos/introduction/>
    Installation Instructions (Users) <_source/How-to-Install-Users.rst>
    Installation Instructions (Developers) <_source/Improve-ROS-Qt-Creator-Plugin-Developers-ONLY>
 
