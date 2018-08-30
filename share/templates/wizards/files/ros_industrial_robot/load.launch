@@ -1,3 +1,3 @@
 <launch>
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find %{PackageName})/urdf/%{Model}.xacro'" />
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find %{PackageName})/urdf/%{Model}.xacro'" />
 </launch>
