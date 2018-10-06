@@ -1,5 +1,5 @@
 # ros_qtc_plugin
-This repository contains simple to install and use ROS-related plugins for the Qt Creator (4.4) IDE. See the repository [wiki](http://ros-industrial.github.io/ros_qtc_plugin/) for additional information.
+This repository contains simple to install and use ROS-related plugins for the Qt Creator (4.4) IDE. See the repository [wiki](https://ros-qtc-plugin.readthedocs.io) for additional information.
 
 ### Getting Started
 
