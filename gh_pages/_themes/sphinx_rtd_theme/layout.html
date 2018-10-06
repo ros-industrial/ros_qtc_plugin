@@ -157,6 +157,7 @@
 
 
       <div class="wy-nav-content">
+      {% block extracontent %} {% endblock %}
       {%- block content %}
         {% if theme_style_external_links|tobool %}
         <div class="rst-content style-external-links">
