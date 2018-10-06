@@ -4,6 +4,17 @@
   <script src="{{ pathto('_static/clipboard.min.js', 1) }}"></script>
 {% endblock %}
 
+{% block extracontent %}
+  <div class="header-override">
+    <a href="http://rosindustrial.org">
+      <img src="{{ pathto('_static/logo.jpg', 1) }}"/>
+    </a>
+    <p>
+      <a href="http://rosindustrial.org">ROS-Industrial Website</a>|<a href="http://rosindustrial.org/news">Blog</a>
+    </p>
+  </div>
+{% endblock %}
+
 {% block footer %}
   <script>
   var pre = document.getElementsByTagName('pre');
