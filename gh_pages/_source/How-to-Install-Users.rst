@@ -16,9 +16,9 @@ Installation Procedure for Ubuntu 16.04
 
 #. Download Installer:
 
-   #. `Xenial Online Installer <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/xenial/qtcreator-ros-xenial-latest-online-installer.run>`_ (Recommended)
+   #. `Xenial Online Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/xenial/qtcreator-ros-xenial-latest-online-installer.run>`_ (Recommended)
 
-   #. `Xenial Offline Installer <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/xenial/qtcreator-ros-xenial-latest-offline-installer.run>`_
+   #. `Xenial Offline Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/xenial/qtcreator-ros-xenial-latest-offline-installer.run>`_
 
    .. Note::
 
