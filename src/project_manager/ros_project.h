@@ -21,9 +21,7 @@
 #ifndef ROSPROJECT_H
 #define ROSPROJECT_H
 
-
 #include "ros_workspace_watcher.h"
-#include "ros_project_manager.h"
 #include "ros_project_nodes.h"
 #include "ros_project_plugin.h"
 #include "ros_utils.h"
@@ -54,12 +52,8 @@ class ROSProject : public ProjectExplorer::Project
     friend class ROSProjectPlugin;
 
 public:
-    //ROSProject(ROSManager *manager, const QString &filename);
     ROSProject(const Utils::FileName &filename);
     ~ROSProject() override;
-
-    ROSManager *projectManager() const;
-    QStringList files(FilesMode fileMode) const;
 
     void refresh();
 

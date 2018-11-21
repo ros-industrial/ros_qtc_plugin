@@ -18,47 +18,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ros_project_manager.h"
-#include "ros_project_constants.h"
-#include "ros_project.h"
 
-#include <coreplugin/icore.h>
-
-#include <projectexplorer/projectexplorer.h>
-#include <projectexplorer/projectexplorerconstants.h>
-#include <projectexplorer/session.h>
-
-#include <extensionsystem/pluginmanager.h>
-
-#include <QDebug>
+#include "ros_rosrun_step.h"
+#include "ros_utils.h"
+#include "ros_build_configuration.h"
 
 namespace ROSProjectManager {
 namespace Internal {
 
-static ROSManager *m_instance = 0;
-
-ROSManager::ROSManager()
+ROSRunStep::ROSRunStep(RunStepList *rsl) : ROSGenericRunStep(rsl, Constants::ROS_RUN_ID)
 {
-  m_instance = this;
-  m_terminalPane = new ROSTerminalPane();
-  ExtensionSystem::PluginManager::addObject(m_terminalPane);
+  ctor();
 }
 
-ROSManager::~ROSManager()
+ROSRunStep::ROSRunStep(RunStepList *rsl, Core::Id id) : ROSGenericRunStep(rsl, id)
 {
-  m_instance = 0;
-  ExtensionSystem::PluginManager::removeObject(m_terminalPane);
-  delete m_terminalPane;
+  ctor();
 }
 
-ROSManager *ROSManager::instance()
+void ROSRunStep::ctor()
 {
-  return m_instance;
+  setCommand("rosrun");
 }
 
-QTermWidget &ROSManager::startTerminal(int startnow, const QString name)
+QMap<QString, QString> ROSRunStep::getAvailableTargets()
 {
-  return m_terminalPane->startTerminal(startnow, name);
+  ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
+  return ROSUtils::getROSPackageExecutables(getPackage(), bc->environment().toStringList());
+}
+
+ROSRunStepFactory::ROSRunStepFactory() :
+    RunStepFactory()
+{
+  registerStep<ROSRunStep>(Constants::ROS_RUN_ID);
+  setDisplayName("ROS Run Step");
+  setSupportedProjectType(Constants::ROS_PROJECT_ID);
+  setSupportedStepList(Constants::ROS_RUN_STEP_LIST_ID);
 }
 
 } // namespace Internal

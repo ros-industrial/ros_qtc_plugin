@@ -21,9 +21,9 @@
 #ifndef ROSPROJECTPLUGIN_H
 #define ROSPROJECTPLUGIN_H
 #include <extensionsystem/iplugin.h>
-
 #include <QObject>
 #include <QAction>
+#include <qtermwidget5/qtermwidget.h>
 
 namespace ProjectExplorer {
 class Project;
@@ -39,8 +39,14 @@ class ROSProjectPlugin : public ExtensionSystem::IPlugin
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QtCreatorPlugin" FILE "ROSProjectManager.json")
 
 public:
+    ROSProjectPlugin();
+    ~ROSProjectPlugin() override;
     bool initialize(const QStringList &arguments, QString *errorString) override;
     void extensionsInitialized() override {}
+
+    static ROSProjectPlugin *instance();
+
+    QTermWidget &startTerminal(int startnow = 1, const QString name = QString());
 
 private slots:
 
@@ -67,6 +73,8 @@ private:
      * @brief This creates a built-in ROS Cpp code style.
      */
     void createCppCodeStyle();
+
+    class ROSProjectPluginPrivate *d = nullptr;
 
 };
 

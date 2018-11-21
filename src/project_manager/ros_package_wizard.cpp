@@ -150,7 +150,7 @@ void ROSPackageWizardDetailsPage::setPath(const QString &path) {d->m_ui.pathChoo
 void ROSPackageWizardDetailsPage::setProjectDirectory(const QString &path)
 {
     d->m_ui.pathChooser->setInitialBrowsePathBackup(path);
-    d->m_ui.pathChooser->lineEdit()->setInitialText(path);
+    d->m_ui.pathChooser->lineEdit()->setPlaceholderText(path);
 }
 
 QString ROSPackageWizardDetailsPage::packageName() const {return d->m_ui.packageNameLineEdit->text();}
@@ -197,7 +197,7 @@ void ROSPackageWizardDetailsPage::slotActivated()
 QStringList ROSPackageWizardDetailsPage::processList(const QString &text) const
 {
     QStringList newList;
-    foreach(QString str, text.split(QRegExp(QLatin1String("[,;]")), QString::SkipEmptyParts))
+    for (const QString& str : text.split(QRegExp(QLatin1String("[,;]")), QString::SkipEmptyParts))
     {
         newList.append(QString::fromLatin1("\"%1\"").arg(str.trimmed()));
     }
@@ -215,7 +215,7 @@ bool ROSPackageWizardDetailsPage::validateWithValidator(Utils::FancyLineEdit *ed
 
     const QFileInfo fi(path);
 
-    if (!path.startsWith(edit->initialText()))
+    if (!path.startsWith(edit->placeholderText()))
     {
         if (errorMessage)
             *errorMessage = tr("The path \"%1\" is not in the workspace.").arg(QDir::toNativeSeparators(path));
@@ -272,7 +272,7 @@ Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
     m_wizard->setProjectDirectory(rosProject->projectDirectory().toString() + QDir::separator());
     m_wizard->setPath(defaultPath);
 
-    foreach (QWizardPage *p, m_wizard->extensionPages())
+    for (QWizardPage *p : m_wizard->extensionPages())
         m_wizard->addPage(p);
 
     return m_wizard;

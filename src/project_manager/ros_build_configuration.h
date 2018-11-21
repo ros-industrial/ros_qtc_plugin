@@ -56,7 +56,9 @@ class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
     friend class ROSBuildConfigurationFactory;
 
 public:
-    explicit ROSBuildConfiguration(ProjectExplorer::Target *parent);
+    ROSBuildConfiguration(ProjectExplorer::Target *parent, Core::Id id);
+
+    void initialize(const ProjectExplorer::BuildInfo *info) override;
 
     ProjectExplorer::NamedWidget *createConfigWidget() override;
     QList<ProjectExplorer::NamedWidget *> createSubConfigWidgets() override;
@@ -80,9 +82,6 @@ signals:
     void cmakeBuildTypeChanged(const ROSUtils::BuildType &buildType);
 
 protected:
-    ROSBuildConfiguration(ProjectExplorer::Target *parent, ROSBuildConfiguration *source);
-    ROSBuildConfiguration(ProjectExplorer::Target *parent, Core::Id id);
-
     bool fromMap(const QVariantMap &map) override;
 
     friend class ROSBuildSettingsWidget;
@@ -99,24 +98,14 @@ class ROSBuildConfigurationFactory : public ProjectExplorer::IBuildConfiguration
     Q_OBJECT
 
 public:
-    explicit ROSBuildConfigurationFactory(QObject *parent = 0);
+    explicit ROSBuildConfigurationFactory();
     ~ROSBuildConfigurationFactory();
 
-    int priority(const ProjectExplorer::Target *parent) const;
-    QList<ProjectExplorer::BuildInfo *> availableBuilds(const ProjectExplorer::Target *parent) const;
-    int priority(const ProjectExplorer::Kit *k, const QString &projectPath) const;
+    QList<ProjectExplorer::BuildInfo *> availableBuilds(const ProjectExplorer::Target *parent) const override;
     QList<ProjectExplorer::BuildInfo *> availableSetups(const ProjectExplorer::Kit *k,
-                                                        const QString &projectPath) const;
-    ProjectExplorer::BuildConfiguration *create(ProjectExplorer::Target *parent,
-                                                const ProjectExplorer::BuildInfo *info) const;
+                                                        const QString &projectPath) const override;
 
-    bool canClone(const ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *source) const;
-    ProjectExplorer::BuildConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *source);
-    bool canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const;
-    ProjectExplorer::BuildConfiguration *restore(ProjectExplorer::Target *parent, const QVariantMap &map);
 private:
-    bool canHandle(const ProjectExplorer::Target *t) const;
-
     ROSBuildInfo *createBuildInfo(const ProjectExplorer::Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const;
 };
 

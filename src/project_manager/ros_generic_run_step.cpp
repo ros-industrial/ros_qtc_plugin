@@ -18,93 +18,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ros_run_steps.h"
-#include "ros_project_constants.h"
+#include "ros_generic_run_step.h"
 #include "ros_project.h"
-#include "ui_ros_generic_configuration.h"
 #include "ros_build_configuration.h"
-#include "ros_utils.h"
+#include "ui_ros_generic_configuration.h"
 
-#include <projectexplorer/project.h>
 #include <projectexplorer/buildmanager.h>
-#include <debugger/debuggerruncontrol.h>
-#include <qtermwidget5/qtermwidget.h>
+
+#include <QStringListModel>
 
 namespace ROSProjectManager {
 namespace Internal {
 
 const char ROS_GENERIC_COMMAND_KEY[] = "ROSProjectManager.ROSGenericStep.Command";
 const char ROS_GENERIC_PACKAGE_KEY[] = "ROSProjectManager.ROSGenericStep.Package";
+const char ROS_GENERIC_PACKAGE_PATH_KEY[] = "ROSProjectManager.ROSGenericStep.PackagePath";
 const char ROS_GENERIC_TARGET_KEY[] = "ROSProjectManager.ROSGenericStep.Target";
 const char ROS_GENERIC_TARGET_PATH_KEY[] = "ROSProjectManager.ROSGenericStep.TargetPath";
 const char ROS_GENERIC_ARGUMENTS_KEY[] = "ROSProjectManager.ROSGenericStep.Arguments";
 const char ROS_GENERIC_DEBUG_CONTINUE_ON_ATTACH_KEY[] = "ROSProjectManager.ROSGenericStep.DebugContinueOnAttach";
 
-ROSRunStep::ROSRunStep(RunStepList *rsl) :
-    ROSRunStep(rsl, Core::Id(Constants::ROS_RUN_ID))
-{
-}
-
-ROSRunStep::ROSRunStep(RunStepList *rsl, Core::Id id) : ROSGenericRunStep(rsl, id)
-{
-}
-
-ROSRunStep::ROSRunStep(RunStepList *rsl, RunStep *rs) : ROSGenericRunStep(rsl, rs)
-{
-}
-
-ROSLaunchStep::ROSLaunchStep(RunStepList *rsl) :
-    ROSLaunchStep(rsl, Core::Id(Constants::ROS_LAUNCH_ID))
-{
-}
-
-ROSLaunchStep::ROSLaunchStep(RunStepList *rsl, Core::Id id) : ROSGenericRunStep(rsl, id)
-{
-}
-
-ROSLaunchStep::ROSLaunchStep(RunStepList *rsl, RunStep *rs) : ROSGenericRunStep(rsl, rs)
-{
-}
-
-ROSAttachToNodeStep::ROSAttachToNodeStep(RunStepList *rsl) :
-    ROSAttachToNodeStep(rsl, Core::Id(Constants::ROS_ATTACH_TO_NODE_ID))
-{
-}
-
-ROSAttachToNodeStep::ROSAttachToNodeStep(RunStepList *rsl, Core::Id id) : ROSGenericRunStep(rsl, id)
-{
-}
-
-ROSAttachToNodeStep::ROSAttachToNodeStep(RunStepList *rsl, RunStep *rs) : ROSGenericRunStep(rsl, rs)
-{
-}
-
-void ROSAttachToNodeStep::run()
-{
-}
-
-
 ROSGenericRunStep::ROSGenericRunStep(RunStepList *rsl, Core::Id id) : RunStep(rsl, id)
-{
-  if(id == Constants::ROS_LAUNCH_ID)
-  {
-    m_command = QLatin1String("roslaunch");
-  }
-  else if (id == Constants::ROS_RUN_ID)
-  {
-    m_command = QLatin1String("rosrun");
-  }
-  else if (id == Constants::ROS_ATTACH_TO_NODE_ID)
-  {
-    m_command = QLatin1String("debug");
-  }
-  else
-  {
-    //TODO: need to throw error
-  }
-}
-
-ROSGenericRunStep::ROSGenericRunStep(RunStepList *rsl, RunStep *rs) : RunStep(rsl, rs)
 {
 }
 
@@ -156,7 +90,7 @@ void ROSGenericRunStep::run()
        qDebug() << QString("The shell: %1 is currently not supported (Use bash, sh, or zsh)!").arg(shell.toString());
 
   //create terminal without starting shell
-  QTermWidget &terminal = ROSManager::instance()->startTerminal(0, command);
+  QTermWidget &terminal = ROSProjectPlugin::instance()->startTerminal(0, command);
 
   terminal.setWorkingDirectory(rp->projectDirectory().toString());
 
@@ -174,23 +108,25 @@ QVariantMap ROSGenericRunStep::toMap() const
 {
     QVariantMap map(RunStep::toMap());
 
-    map.insert(QLatin1String(ROS_GENERIC_COMMAND_KEY), m_command);
-    map.insert(QLatin1String(ROS_GENERIC_PACKAGE_KEY), m_package);
-    map.insert(QLatin1String(ROS_GENERIC_TARGET_KEY), m_target);
-    map.insert(QLatin1String(ROS_GENERIC_TARGET_PATH_KEY), m_targetPath);
-    map.insert(QLatin1String(ROS_GENERIC_ARGUMENTS_KEY), m_arguments);
-    map.insert(QLatin1String(ROS_GENERIC_DEBUG_CONTINUE_ON_ATTACH_KEY), m_debugContinueOnAttach);
+    map.insert(ROS_GENERIC_COMMAND_KEY, m_command);
+    map.insert(ROS_GENERIC_PACKAGE_KEY, m_package);
+    map.insert(ROS_GENERIC_PACKAGE_PATH_KEY, m_package_path);
+    map.insert(ROS_GENERIC_TARGET_KEY, m_target);
+    map.insert(ROS_GENERIC_TARGET_PATH_KEY, m_targetPath);
+    map.insert(ROS_GENERIC_ARGUMENTS_KEY, m_arguments);
+    map.insert(ROS_GENERIC_DEBUG_CONTINUE_ON_ATTACH_KEY, m_debugContinueOnAttach);
     return map;
 }
 
 bool ROSGenericRunStep::fromMap(const QVariantMap &map)
 {
-    m_command = map.value(QLatin1String(ROS_GENERIC_COMMAND_KEY)).toString();
-    m_package = map.value(QLatin1String(ROS_GENERIC_PACKAGE_KEY)).toString();
-    m_target = map.value(QLatin1String(ROS_GENERIC_TARGET_KEY)).toString();
-    m_targetPath = map.value(QLatin1String(ROS_GENERIC_TARGET_PATH_KEY)).toString();
-    m_arguments = map.value(QLatin1String(ROS_GENERIC_ARGUMENTS_KEY)).toString();
-    m_debugContinueOnAttach = map.value(QLatin1String(ROS_GENERIC_DEBUG_CONTINUE_ON_ATTACH_KEY)).toBool();
+    m_command = map.value(ROS_GENERIC_COMMAND_KEY).toString();
+    m_package = map.value(ROS_GENERIC_PACKAGE_KEY).toString();
+    m_package_path = map.value(ROS_GENERIC_PACKAGE_PATH_KEY).toString();
+    m_target = map.value(ROS_GENERIC_TARGET_KEY).toString();
+    m_targetPath = map.value(ROS_GENERIC_TARGET_PATH_KEY).toString();
+    m_arguments = map.value(ROS_GENERIC_ARGUMENTS_KEY).toString();
+    m_debugContinueOnAttach = map.value(ROS_GENERIC_DEBUG_CONTINUE_ON_ATTACH_KEY).toBool();
 
     return RunStep::fromMap(map);
 }
@@ -220,6 +156,11 @@ QString ROSGenericRunStep::getPackage() const
   return m_package;
 }
 
+QString ROSGenericRunStep::getPackagePath() const
+{
+  return m_package_path;
+}
+
 QString ROSGenericRunStep::getTarget() const
 {
   return m_target;
@@ -240,9 +181,19 @@ bool ROSGenericRunStep::getDebugContinueOnAttach() const
     return m_debugContinueOnAttach;
 }
 
+void ROSGenericRunStep::setCommand(const QString &command)
+{
+  m_command = command;
+}
+
 void ROSGenericRunStep::setPackage(const QString &package)
 {
   m_package = package;
+}
+
+void ROSGenericRunStep::setPackagePath(const QString &package)
+{
+  m_package_path = package;
 }
 
 void ROSGenericRunStep::setTarget(const QString &target)
@@ -265,9 +216,8 @@ void ROSGenericRunStep::setDebugContinueOnAttach(const bool &contOnAttach)
   m_debugContinueOnAttach = contOnAttach;
 }
 
-
 //
-// ROSLaunchStepConfigWidget
+// ROSGenericRunStepConfigWidget
 //
 
 ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *genericStep)
@@ -363,6 +313,7 @@ void ROSGenericRunStepConfigWidget::debugCheckBox_toggled(const bool &arg1)
 void ROSGenericRunStepConfigWidget::packageComboBox_currentIndexChanged(const QString &arg1)
 {
   m_rosGenericStep->setPackage(arg1);
+  m_rosGenericStep->setPackagePath(m_availablePackages[arg1]);
   m_ui->targetComboBox->clear();
   updateAvailableTargets();
 
@@ -384,156 +335,9 @@ void ROSGenericRunStepConfigWidget::argumentsLineEdit_textChanged(const QString 
 
 void ROSGenericRunStepConfigWidget::updateAvailableTargets()
 {
-    if(m_rosGenericStep->id() == Constants::ROS_LAUNCH_ID)
-    {
-      m_availableTargets = ROSUtils::getROSPackageLaunchFiles(m_availablePackages[m_rosGenericStep->getPackage()]);
-    }
-    else if (m_rosGenericStep->id() == Constants::ROS_RUN_ID || m_rosGenericStep->id() == Constants::ROS_ATTACH_TO_NODE_ID)
-    {
-      ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(m_rosGenericStep->target()->activeBuildConfiguration());
-      m_availableTargets = ROSUtils::getROSPackageExecutables(m_rosGenericStep->getPackage(), bc->environment().toStringList());
-    }
-    else
-    {
-      m_availableTargets = QMap<QString, QString>();
-    }
-
+    m_availableTargets = m_rosGenericStep->getAvailableTargets();
     m_targetNames->setStringList(m_availableTargets.keys());
 }
-
-//
-// ROSRunStepFactory
-//
-
-ROSRunStepFactory::ROSRunStepFactory(QObject *parent) :
-    IRunStepFactory(parent)
-{
-}
-
-bool ROSRunStepFactory::canCreate(RunStepList *parent, const Core::Id id) const
-{
-    if (parent->target()->project()->id() == Constants::ROS_PROJECT_ID)
-    {
-      if (id == Constants::ROS_LAUNCH_ID || id == Constants::ROS_RUN_ID || id == Constants::ROS_ATTACH_TO_NODE_ID)
-      {
-        return true;
-      }
-    }
-    return false;
-}
-
-RunStep *ROSRunStepFactory::create(RunStepList *parent, const Core::Id id)
-{
-    if (!canCreate(parent, id))
-        return 0;
-
-    if (id == Constants::ROS_LAUNCH_ID)
-    {
-        return new ROSLaunchStep(parent, id);
-    }
-    else if (id == Constants::ROS_RUN_ID)
-    {
-        return new ROSRunStep(parent, id);
-    }
-    else if(id == Constants::ROS_ATTACH_TO_NODE_ID)
-    {
-        return new ROSAttachToNodeStep(parent, id);
-    }
-
-    return 0;
-}
-
-bool ROSRunStepFactory::canClone(RunStepList *parent, RunStep *source) const
-{
-    return canCreate(parent, source->id());
-}
-
-RunStep *ROSRunStepFactory::clone(RunStepList *parent, RunStep *source)
-{
-    if (!canClone(parent, source))
-        return 0;
-
-    if (source->id() == Constants::ROS_LAUNCH_ID)
-    {
-        ROSLaunchStep *old(qobject_cast<ROSLaunchStep *>(source));
-        Q_ASSERT(old);
-        return new ROSLaunchStep(parent, old);
-    }
-    else if (source->id() == Constants::ROS_RUN_ID)
-    {
-        ROSRunStep *old(qobject_cast<ROSRunStep *>(source));
-        Q_ASSERT(old);
-        return new ROSRunStep(parent, old);
-    }
-    else if (source->id() == Constants::ROS_ATTACH_TO_NODE_ID)
-    {
-        ROSAttachToNodeStep *old(qobject_cast<ROSAttachToNodeStep *>(source));
-        Q_ASSERT(old);
-        return new ROSAttachToNodeStep(parent, old);
-    }
-    else
-    {
-      return 0;
-    }
-}
-
-bool ROSRunStepFactory::canRestore(RunStepList *parent, const QVariantMap &map) const
-{
-    return canCreate(parent, ProjectExplorer::idFromMap(map));
-}
-
-RunStep *ROSRunStepFactory::restore(RunStepList *parent, const QVariantMap &map)
-{
-    if (!canRestore(parent, map))
-        return 0;
-
-    if (ProjectExplorer::idFromMap(map) == Constants::ROS_LAUNCH_ID)
-    {
-      ROSLaunchStep *rs(new ROSLaunchStep(parent, ProjectExplorer::idFromMap(map)));
-      if (rs->fromMap(map))
-          return rs;
-      delete rs;
-      return 0;
-    }
-    else if (ProjectExplorer::idFromMap(map) == Constants::ROS_RUN_ID)
-    {
-      ROSRunStep *rs(new ROSRunStep(parent, ProjectExplorer::idFromMap(map)));
-      if (rs->fromMap(map))
-          return rs;
-      delete rs;
-      return 0;
-    }
-    else if (ProjectExplorer::idFromMap(map) == Constants::ROS_ATTACH_TO_NODE_ID)
-    {
-      ROSAttachToNodeStep *rs(new ROSAttachToNodeStep(parent, ProjectExplorer::idFromMap(map)));
-      if (rs->fromMap(map))
-          return rs;
-      delete rs;
-      return 0;
-    }
-
-    return 0;
-}
-
-QList<Core::Id> ROSRunStepFactory::availableCreationIds(RunStepList *parent) const
-{
-    if (parent->target()->project()->id() == Constants::ROS_PROJECT_ID)
-        return QList<Core::Id>() << Core::Id(Constants::ROS_LAUNCH_ID) << Core::Id(Constants::ROS_RUN_ID) << Core::Id(Constants::ROS_ATTACH_TO_NODE_ID);
-    return QList<Core::Id>();
-}
-
-QString ROSRunStepFactory::displayNameForId(const Core::Id id) const
-{
-    if (id == Constants::ROS_LAUNCH_ID)
-        return tr("ROS Launch Step");
-    else if (id== Constants::ROS_RUN_ID)
-        return tr("ROS Run Step");
-    else if (id== Constants::ROS_ATTACH_TO_NODE_ID)
-        return tr("ROS Attach to Node");
-
-    return QString();
-}
-
 
 } // namespace Internal
 } // namespace ROSProjectManager

@@ -41,8 +41,8 @@ class RunStep : public ProjectExplorer::ProjectConfiguration
     Q_OBJECT
 
 protected:
-    RunStep(RunStepList *rsl, Core::Id id);
-    RunStep(RunStepList *rsl, RunStep *rs);
+    friend class RunStepFactory;
+    explicit RunStep(RunStepList *rsl, Core::Id id);
 
 public:
     virtual bool init(QList<const RunStep *> &earlierSteps) = 0;
@@ -72,28 +72,71 @@ signals:
     void finished();
     void enabledChanged();
 private:
-    bool m_enabled;
+    bool m_enabled = true;
 };
 
-class IRunStepFactory : public QObject
+class RunStepInfo
 {
-    Q_OBJECT
-
 public:
-    explicit IRunStepFactory(QObject *parent = 0);
+    enum Flags {
+        Uncreatable = 1 << 0,
+        Unclonable  = 1 << 1,
+        UniqueStep  = 1 << 8    // Can't be used twice in a RunStepList
+    };
 
-    // used to show the list of possible additons to a target, returns a list of types
-    virtual QList<Core::Id> availableCreationIds(RunStepList *parent) const = 0;
-    // used to translate the types to names to display to the user
-    virtual QString displayNameForId(Core::Id id) const = 0;
+    using RunStepCreator = std::function<RunStep *(RunStepList *)>;
 
-    virtual bool canCreate(RunStepList *parent, Core::Id id) const = 0;
-    virtual RunStep *create(RunStepList *parent, Core::Id id) = 0;
-    // used to recreate the runConfigurations when restoring settings
-    virtual bool canRestore(RunStepList *parent, const QVariantMap &map) const = 0;
-    virtual RunStep *restore(RunStepList *parent, const QVariantMap &map) = 0;
-    virtual bool canClone(RunStepList *parent, RunStep *product) const = 0;
-    virtual RunStep *clone(RunStepList *parent, RunStep *product) = 0;
+    Core::Id id;
+    QString displayName;
+    Flags flags = Flags();
+    RunStepCreator creator;
+};
+
+class RunStepFactory
+{
+public:
+    RunStepFactory();
+    virtual ~RunStepFactory();
+
+    static const QList<RunStepFactory *> allRunStepFactories();
+
+    RunStepInfo stepInfo() const;
+    Core::Id stepId() const;
+    RunStep *create(RunStepList *parent, Core::Id id);
+    RunStep *restore(RunStepList *parent, const QVariantMap &map);
+
+    bool canHandle(RunStepList *rsl) const;
+
+protected:
+    RunStepFactory(const RunStepFactory &) = delete;
+    RunStepFactory &operator=(const RunStepFactory &) = delete;
+
+    template <class RunStepType>
+    void registerStep(Core::Id id)
+    {
+        QTC_CHECK(!m_info.creator);
+        m_info.id = id;
+        m_info.creator = [](RunStepList *rsl) { return new RunStepType(rsl); };
+    }
+
+    void setSupportedStepList(Core::Id id);
+    void setSupportedStepLists(const QList<Core::Id> &ids);
+    void setSupportedConfiguration(Core::Id id);
+    void setSupportedProjectType(Core::Id id);
+    void setSupportedDeviceType(Core::Id id);
+    void setSupportedDeviceTypes(const QList<Core::Id> &ids);
+    void setRepeatable(bool on) { m_isRepeatable = on; }
+    void setDisplayName(const QString &displayName);
+    void setFlags(RunStepInfo::Flags flags);
+
+private:
+    RunStepInfo m_info;
+
+    Core::Id m_supportedProjectType;
+    QList<Core::Id> m_supportedDeviceTypes;
+    QList<Core::Id> m_supportedStepLists;
+    Core::Id m_supportedConfiguration;
+    bool m_isRepeatable = true;
 };
 
 class RunStepList : public ProjectExplorer::ProjectConfiguration
@@ -102,11 +145,31 @@ class RunStepList : public ProjectExplorer::ProjectConfiguration
 
 public:
     RunStepList(QObject *parent, Core::Id id);
-    RunStepList(QObject *parent, RunStepList *source);
     ~RunStepList() override;
 
-    QList<RunStep *> steps() const;
+    void clear();
 
+    QList<RunStep *> steps() const;
+    QList<RunStep *> steps(const std::function<bool(const RunStep *)> &filter) const;
+        template <class RS> RS *firstOfType() {
+            RS *rs = nullptr;
+            for (int i = 0; i < count(); ++i) {
+                rs = qobject_cast<RS *>(at(i));
+                if (rs)
+                    return rs;
+            }
+            return nullptr;
+        }
+        template <class RS> QList<RS *>allOfType() {
+            QList<RS *> result;
+            RS *rs = nullptr;
+            for (int i = 0; i < count(); ++i) {
+                rs = qobject_cast<RS *>(at(i));
+                if (rs)
+                    result.append(rs);
+            }
+            return result;
+    }
     int count() const;
     bool isEmpty() const;
     bool contains(Core::Id id) const;
@@ -123,7 +186,6 @@ public:
 
     virtual QVariantMap toMap() const override;
     bool fromMap(const QVariantMap &map) override;
-    void cloneSteps(RunStepList *source);
 
     bool isActive() const override;
 
@@ -148,11 +210,15 @@ public:
     virtual QString summaryText() const = 0;
     virtual QString additionalSummaryText() const { return QString(); }
     virtual QString displayName() const = 0;
-    virtual bool showWidget() const { return true; }
+    virtual bool showWidget() const { return m_showWidget; }
+    void setShowWidget(bool showWidget) { m_showWidget = showWidget; }
 
 signals:
     void updateSummary();
     void updateAdditionalSummary();
+
+private:
+    bool m_showWidget = true;
 };
 
 } // Internal

@@ -42,11 +42,11 @@ ROSProjectNode::ROSProjectNode(const Utils::FileName &projectFilePath)
 bool ROSProjectNode::removeFile(const QString &parentPath, const QString &fileName)
 {
   FolderNode *folder = findFolderbyAbsolutePath(parentPath);
-  foreach (FileNode *fn, folder->fileNodes())
+  for (FileNode *fn : folder->fileNodes())
   {
       if (fn->filePath().fileName() == fileName)
       {
-          folder->removeNode(fn);
+          folder->takeNode(fn);
           return true;
       }
   }
@@ -68,17 +68,17 @@ bool ROSProjectNode::addFile(const QString &parentPath, const QString &fileName)
   else if(Constants::HEADER_FILE_EXTENSIONS.contains(fileInfo.suffix()))
     fileType = FileType::Source;
 
-  FileNode *fileNode = new FileNode(Utils::FileName::fromString(fileInfo.absoluteFilePath()),
-                                    fileType, /*generated = */ false);
+  std::unique_ptr<FileNode> fileNode(new FileNode(Utils::FileName::fromString(fileInfo.absoluteFilePath()),
+                                     fileType, /*generated = */ false));
 
-  folder->addNode(fileNode);
+  folder->addNode(std::move(fileNode));
   return true;
 }
 
 bool ROSProjectNode::renameFile(const QString &parentPath, const QString &oldFileName, const QString &newFileName)
 {
   FolderNode *folder = findFolderbyAbsolutePath(parentPath);
-  foreach (FileNode *fn, folder->fileNodes())
+  for (FileNode *fn : folder->fileNodes())
   {
       if (fn->filePath().fileName() == oldFileName)
       {
@@ -93,11 +93,11 @@ bool ROSProjectNode::renameFile(const QString &parentPath, const QString &oldFil
 bool ROSProjectNode::removeDirectory(const QString &parentPath, const QString &dirName)
 {
   FolderNode *folder = findFolderbyAbsolutePath(parentPath);
-  foreach (FolderNode *fn, folder->folderNodes())
+  for (FolderNode *fn : folder->folderNodes())
   {
       if (getFolderName(fn) == dirName)
       {
-        folder->removeNode(fn);
+        folder->takeNode(fn);
         return true;
       }
   }
@@ -134,14 +134,14 @@ bool ROSProjectNode::renameDirectory(const QString &parentPath, const QString &o
 void ROSProjectNode::renameDirectoryHelper(FolderNode * &folder)
 {
   // Update Files
-  foreach(FileNode *fn, folder->fileNodes())
+  for (FileNode *fn : folder->fileNodes())
   {
     QString newFilePath = folder->filePath().toString() + fn->displayName();
     fn->setAbsoluteFilePathAndLine(Utils::FileName::fromString(newFilePath), -1);
   }
 
   // Update subFolders
-  foreach(FolderNode *fn, folder->folderNodes()) {
+  for (FolderNode *fn : folder->folderNodes()) {
     QString newFilePath = folder->filePath().toString() + getFolderName(fn) + QLatin1Char('/');
     fn->setAbsoluteFilePathAndLine(Utils::FileName::fromString(newFilePath), -1);
     renameDirectoryHelper(fn);
@@ -159,7 +159,7 @@ FolderNode *ROSProjectNode::findFolderbyAbsolutePath(const QString &absolutePath
     if (!parent)
         return 0;
 
-    foreach (FolderNode *fn, parent->folderNodes()) {
+    for (FolderNode *fn : parent->folderNodes()) {
         if (fn->filePath().toString() == (absolutePath + QLatin1Char('/')))
             return fn;
     }
@@ -175,14 +175,14 @@ FolderNode *ROSProjectNode::findFolderbyAbsolutePath(const QString &absolutePath
 FolderNode *ROSProjectNode::createFolderbyAbsolutePath(const QString &absolutePath)
 {
   Utils::FileName folder = Utils::FileName::fromString(absolutePath);
-  FolderNode *folderNode = new ROSFolderNode(Utils::FileName::fromString(absolutePath + QLatin1Char('/')), folder.fileName());
+  std::unique_ptr<FolderNode> folderNode(new ROSFolderNode(Utils::FileName::fromString(absolutePath + QLatin1Char('/')), folder.fileName()));
   FolderNode *parent = findFolderbyAbsolutePath(folder.parentDir().toString());
 
   if (!parent)
       parent = createFolderbyAbsolutePath(folder.parentDir().toString());
 
-  parent->addNode(folderNode);
-  return folderNode;
+  parent->addNode(std::move(folderNode));
+  return findFolderbyAbsolutePath(absolutePath);
 }
 
 bool ROSProjectNode::showInSimpleTree() const

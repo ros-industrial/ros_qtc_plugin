@@ -59,6 +59,7 @@ public:
     void setRemoveEnabled(bool b);
     void setUpVisible(bool b);
     void setDownVisible(bool b);
+
 signals:
     void disabledClicked();
     void upClicked();
@@ -71,10 +72,10 @@ private:
     QToolButton *m_downButton;
     QToolButton *m_removeButton;
 
-    bool m_runStepEnabled;
+    bool m_runStepEnabled = true;
     Utils::FadingWidget *m_firstWidget;
     Utils::FadingWidget *m_secondWidget;
-    qreal m_targetOpacity;
+    qreal m_targetOpacity = 0.999;
 };
 
 class RunStepsWidgetData
@@ -97,10 +98,7 @@ public:
     RunStepListWidget(QWidget *parent = 0);
     virtual ~RunStepListWidget();
 
-    void init(RunStepList *bsl);
-
-signals:
-    void runStepListChanged();
+    void init(RunStepList *rsl);
 
 private:
     void updateAddRunStepMenu();
@@ -108,32 +106,21 @@ private:
     void updateSummary();
     void updateAdditionalSummary();
     void updateEnabledState();
-    void triggerStepMoveUp(int pos);
     void stepMoved(int from, int to);
-    void triggerStepMoveDown(int pos);
-    void triggerRemoveRunStep(int pos);
     void removeRunStep(int pos);
-    void triggerDisable(int pos);
 
     void setupUi();
     void updateRunStepButtonsState();
     void addRunStepWidget(int pos, RunStep *step);
 
-    RunStepList *m_runStepList;
+    RunStepList *m_runStepList = nullptr;
 
     QList<RunStepsWidgetData *> m_runStepsData;
 
-    QVBoxLayout *m_vbox;
+    QVBoxLayout *m_vbox = nullptr;
 
-    QLabel *m_noStepsLabel;
-    QPushButton *m_addButton;
-
-    QSignalMapper *m_disableMapper;
-    QSignalMapper *m_upMapper;
-    QSignalMapper *m_downMapper;
-    QSignalMapper *m_removeMapper;
-
-    int m_leftMargin;
+    QLabel *m_noStepsLabel = nullptr;
+    QPushButton *m_addButton = nullptr;
 };
 
 namespace Ui { class RunStepsPage; }
@@ -143,11 +130,11 @@ class RunStepsPage : public ProjectExplorer::NamedWidget
     Q_OBJECT
 
 public:
-    RunStepsPage(ROSRunConfiguration *rc);
-    virtual ~RunStepsPage();
+    RunStepsPage(ROSRunConfiguration *rc, Core::Id id);
 
 private:
-    RunStepListWidget *m_widget;
+    Core::Id m_id;
+    RunStepListWidget *m_widget = nullptr;
 };
 
 } // Internal

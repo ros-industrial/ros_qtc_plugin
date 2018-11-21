@@ -74,7 +74,6 @@ public:
     QVariantMap toMap() const;
 
 protected:
-    ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, ROSCatkinToolsStep *bs);
     ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     QStringList automaticallyAddedArguments() const;
     bool fromMap(const QVariantMap &map) override;
@@ -216,16 +215,10 @@ private:
 };
 
 
-class ROSCatkinToolsStepFactory : public ProjectExplorer::IBuildStepFactory
+class ROSCatkinToolsStepFactory : public ProjectExplorer::BuildStepFactory
 {
-    Q_OBJECT
-
 public:
-    explicit ROSCatkinToolsStepFactory(QObject *parent = 0);
-    QList<ProjectExplorer::BuildStepInfo> availableSteps(ProjectExplorer::BuildStepList *parent) const override;
-    ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent, Core::Id id) override;
-    ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent, const QVariantMap &map) override;
-    ProjectExplorer::BuildStep *clone(ProjectExplorer::BuildStepList *parent, ProjectExplorer::BuildStep *product) override;
+    explicit ROSCatkinToolsStepFactory();
 };
 
 } // namespace Internal

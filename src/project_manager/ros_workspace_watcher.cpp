@@ -62,7 +62,7 @@ void ROSWorkspaceWatcher::watchFolder(const QString &parentPath, const QString &
     static_cast<ROSProjectNode *>(m_project->rootProjectNode())->addDirectory(item.key());
 
     // Add all files in the directory node
-    foreach (QString file, item.value().files)
+    for (const QString& file : item.value().files)
     {
       static_cast<ROSProjectNode *>(m_project->rootProjectNode())->addFile(item.key(), file);
     }
@@ -86,9 +86,9 @@ void ROSWorkspaceWatcher::unwatchFolder(const QString &parentPath, const QString
   else
   {
       ROSProjectNode *folder = static_cast<ROSProjectNode *>(m_project->rootProjectNode());
-      foreach (ProjectExplorer::Node *n, folder->nodes())
+      for (ProjectExplorer::Node *n : folder->nodes())
           if (m_project->projectFilePath() != n->filePath())
-            folder->removeNode(n);
+            folder->takeNode(n);
   }
 
   QHashIterator<QString, ROSUtils::FolderContent> item(m_workspaceContent);
@@ -97,7 +97,7 @@ void ROSWorkspaceWatcher::unwatchFolder(const QString &parentPath, const QString
     item.next();
     if(item.key() == directory.toString() || item.key().startsWith(QString::fromLatin1("%1/").arg(directory.toString())))
     {
-      foreach (QString file, item.value().files)
+      for (const QString& file : item.value().files)
         m_workspaceFiles.removeAll(QString::fromLatin1("%1/%2").arg(item.key(), file));
 
       m_watcher.removePath(item.key());
@@ -185,7 +185,7 @@ void ROSWorkspaceWatcher::onFolderChanged(const QString &path)
       // New File Added to Dir
       if(!addedFiles.isEmpty())
       {
-        foreach(QString file, addedFiles)
+        for (const QString& file : addedFiles)
         {
           static_cast<ROSProjectNode *>(m_project->rootProjectNode())->addFile(path, file);
           m_workspaceFiles.append(dir.absoluteFilePath(file));
@@ -195,7 +195,7 @@ void ROSWorkspaceWatcher::onFolderChanged(const QString &path)
       // File is deleted from Dir
       if(!deletedFiles.isEmpty())
       {
-        foreach(QString file, deletedFiles)
+        for (const QString& file : deletedFiles)
         {
           static_cast<ROSProjectNode *>(m_project->rootProjectNode())->removeFile(path, file);
           m_workspaceFiles.removeAll(QString::fromLatin1("%1/%2").arg(path, file));
@@ -217,13 +217,13 @@ void ROSWorkspaceWatcher::onFolderChanged(const QString &path)
     else
     {
       // New Directory Added to Dir
-      foreach(QString directory, addedDirectories)
+      for (const QString& directory : addedDirectories)
       {
         watchFolder(path, directory);
       }
 
       // Directory is deleted from Dir
-      foreach(QString directory, deletedDirectories)
+      for (const QString& directory : deletedDirectories)
       {
         //Directory deleted
         unwatchFolder(path, directory);
@@ -246,16 +246,16 @@ void ROSWorkspaceWatcher::print()
     item.next();
     qDebug() << "Parent:" << item.key();
     qDebug() << "  Files: ";
-    foreach (QString str, item.value().files)
+    for (const QString& str : item.value().files)
       qDebug() << "    " << str;
 
     qDebug() << "  SubDirectories: ";
-    foreach (QString str, item.value().directories)
+    for (const QString& str : item.value().directories)
       qDebug() << "    " << str;
   }
 
   qDebug() << "File List:";
-  foreach (QString str, m_workspaceFiles)
+  for (const QString& str : m_workspaceFiles)
     qDebug() << "  " << str;
 
 }

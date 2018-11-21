@@ -20,7 +20,6 @@
  */
 #include "ros_run_steps_page.h"
 
-
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/projectexplorericons.h>
@@ -46,16 +45,15 @@
 namespace ROSProjectManager {
 namespace Internal {
 
-ToolWidget::ToolWidget(QWidget *parent)
-    : FadingPanel(parent), m_runStepEnabled(true), m_targetOpacity(1.0f)
+ToolWidget::ToolWidget(QWidget *parent) : FadingPanel(parent)
 {
-    QHBoxLayout *layout = new QHBoxLayout;
+    auto layout = new QHBoxLayout;
     layout->setMargin(4);
     layout->setSpacing(4);
     setLayout(layout);
     m_firstWidget = new Utils::FadingWidget(this);
     m_firstWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    QHBoxLayout *hbox = new QHBoxLayout();
+    auto hbox = new QHBoxLayout();
     hbox->setContentsMargins(0, 0, 0, 0);
     hbox->setSpacing(0);
     m_firstWidget->setLayout(hbox);
@@ -132,9 +130,9 @@ void ToolWidget::setRunStepEnabled(bool b)
             m_firstWidget->fadeTo(m_targetOpacity);
     } else {
         if (Utils::HostOsInfo::isMacHost())
-            m_firstWidget->setOpacity(1.0);
+            m_firstWidget->setOpacity(.999);
         else
-            m_firstWidget->fadeTo(1.0);
+            m_firstWidget->fadeTo(.999);
     }
     m_disableButton->setChecked(!b);
 }
@@ -165,7 +163,7 @@ void ToolWidget::setDownVisible(bool b)
 }
 
 RunStepsWidgetData::RunStepsWidgetData(RunStep *s) :
-    step(s), widget(0), detailsWidget(0)
+    step(s), widget(nullptr), detailsWidget(nullptr)
 {
     widget = s->createConfigWidget();
     Q_ASSERT(widget);
@@ -189,9 +187,7 @@ RunStepsWidgetData::~RunStepsWidgetData()
 }
 
 RunStepListWidget::RunStepListWidget(QWidget *parent) :
-    NamedWidget(parent),
-    m_runStepList(0),
-    m_addButton(0)
+    NamedWidget(parent)
 {
 }
 
@@ -205,7 +201,7 @@ void RunStepListWidget::updateSummary()
 {
     RunStepConfigWidget *widget = qobject_cast<RunStepConfigWidget *>(sender());
     if (widget) {
-        foreach (const RunStepsWidgetData *s, m_runStepsData) {
+        for (const RunStepsWidgetData *s : m_runStepsData) {
             if (s->widget == widget) {
                 s->detailsWidget->setSummaryText(widget->summaryText());
                 break;
@@ -218,7 +214,7 @@ void RunStepListWidget::updateAdditionalSummary()
 {
     RunStepConfigWidget *widget = qobject_cast<RunStepConfigWidget *>(sender());
     if (widget) {
-        foreach (const RunStepsWidgetData *s, m_runStepsData) {
+        for (const RunStepsWidgetData *s : m_runStepsData) {
             if (s->widget == widget) {
                 s->detailsWidget->setAdditionalSummaryText(widget->additionalSummaryText());
                 break;
@@ -231,7 +227,7 @@ void RunStepListWidget::updateEnabledState()
 {
     RunStep *step = qobject_cast<RunStep *>(sender());
     if (step) {
-        foreach (const RunStepsWidgetData *s, m_runStepsData) {
+        for (const RunStepsWidgetData *s : m_runStepsData) {
             if (s->step == step) {
                 s->toolWidget->setRunStepEnabled(step->enabled());
                 break;
@@ -241,10 +237,10 @@ void RunStepListWidget::updateEnabledState()
     updateRunStepButtonsState();
 }
 
-void RunStepListWidget::init(RunStepList *bsl)
+void RunStepListWidget::init(RunStepList *rsl)
 {
-    Q_ASSERT(bsl);
-    if (bsl == m_runStepList)
+    Q_ASSERT(rsl);
+    if (rsl == m_runStepList)
         return;
 
     setupUi();
@@ -258,25 +254,25 @@ void RunStepListWidget::init(RunStepList *bsl)
                    this, &RunStepListWidget::stepMoved);
     }
 
-    connect(bsl, &RunStepList::stepInserted, this, &RunStepListWidget::addRunStep);
-    connect(bsl, &RunStepList::stepRemoved, this, &RunStepListWidget::removeRunStep);
-    connect(bsl, &RunStepList::stepMoved, this, &RunStepListWidget::stepMoved);
+    connect(rsl, &RunStepList::stepInserted, this, &RunStepListWidget::addRunStep);
+    connect(rsl, &RunStepList::stepRemoved, this, &RunStepListWidget::removeRunStep);
+    connect(rsl, &RunStepList::stepMoved, this, &RunStepListWidget::stepMoved);
 
     qDeleteAll(m_runStepsData);
     m_runStepsData.clear();
 
-    m_runStepList = bsl;
+    m_runStepList = rsl;
     //: %1 is the name returned by BuildStepList::displayName
     setDisplayName(tr("%1 Steps").arg(m_runStepList->displayName()));
 
-    for (int i = 0; i < bsl->count(); ++i) {
+    for (int i = 0; i < rsl->count(); ++i) {
         addRunStep(i);
         // addBuilStep expands the config widget by default, which we don't want here
         if (m_runStepsData.at(i)->widget->showWidget())
             m_runStepsData.at(i)->detailsWidget->setState(Utils::DetailsWidget::Collapsed);
     }
 
-    m_noStepsLabel->setVisible(bsl->isEmpty());
+    m_noStepsLabel->setVisible(rsl->isEmpty());
     m_noStepsLabel->setText(tr("No %1 Steps").arg(m_runStepList->displayName()));
 
     m_addButton->setText(tr("Add %1 Step").arg(m_runStepList->displayName()));
@@ -286,34 +282,38 @@ void RunStepListWidget::init(RunStepList *bsl)
 
 void RunStepListWidget::updateAddRunStepMenu()
 {
-    QMap<QString, QPair<Core::Id, IRunStepFactory *> > map;
-    //Build up a list of possible steps and save map the display names to the (internal) name and factories.
-    QList<IRunStepFactory *> factories = ExtensionSystem::PluginManager::getObjects<IRunStepFactory>();
-    foreach (IRunStepFactory *factory, factories) {
-        QList<Core::Id> ids = factory->availableCreationIds(m_runStepList);
-        foreach (Core::Id id, ids)
-            map.insert(factory->displayNameForId(id), QPair<Core::Id, IRunStepFactory *>(id, factory));
-    }
+  QMap<QString, QPair<Core::Id, RunStepFactory *> > map;
+  //Build up a list of possible steps and save map the display names to the (internal) name and factories.
+  for (RunStepFactory *factory : RunStepFactory::allRunStepFactories()) {
+      if (factory->canHandle(m_runStepList)) {
+          const RunStepInfo &info = factory->stepInfo();
+          if (info.flags & RunStepInfo::Uncreatable)
+              continue;
+          if ((info.flags & RunStepInfo::UniqueStep) && m_runStepList->contains(info.id))
+              continue;
+          map.insert(info.displayName, qMakePair(info.id, factory));
+      }
+  }
 
-    // Ask the user which one to add
-    QMenu *menu = m_addButton->menu();
-    menu->clear();
-    if (!map.isEmpty()) {
-        QMap<QString, QPair<Core::Id, IRunStepFactory *> >::const_iterator it, end;
-        end = map.constEnd();
-        for (it = map.constBegin(); it != end; ++it) {
-            QAction *action = menu->addAction(it.key());
-            IRunStepFactory *factory = it.value().second;
-            Core::Id id = it.value().first;
+  // Ask the user which one to add
+  QMenu *menu = m_addButton->menu();
+  menu->clear();
+  if (!map.isEmpty()) {
+      QMap<QString, QPair<Core::Id, RunStepFactory *> >::const_iterator it, end;
+      end = map.constEnd();
+      for (it = map.constBegin(); it != end; ++it) {
+          QAction *action = menu->addAction(it.key());
+          RunStepFactory *factory = it.value().second;
+          Core::Id id = it.value().first;
 
-            connect(action, &QAction::triggered, [id, factory, this]() {
-                RunStep *newStep = factory->create(m_runStepList, id);
-                QTC_ASSERT(newStep, return);
-                int pos = m_runStepList->count();
-                m_runStepList->insertStep(pos, newStep);
-            });
-        }
-    }
+          connect(action, &QAction::triggered, [id, factory, this]() {
+              RunStep *newStep = factory->create(m_runStepList, id);
+              QTC_ASSERT(newStep, return);
+              int pos = m_runStepList->count();
+              m_runStepList->insertStep(pos, newStep);
+          });
+      }
+  }
 }
 
 void RunStepListWidget::addRunStepWidget(int pos, RunStep *step)
@@ -331,15 +331,6 @@ void RunStepListWidget::addRunStepWidget(int pos, RunStep *step)
 
     connect(s->step, &RunStep::enabledChanged,
             this, &RunStepListWidget::updateEnabledState);
-
-    connect(s->toolWidget, &ToolWidget::disabledClicked,
-            m_disableMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-    connect(s->toolWidget, &ToolWidget::upClicked,
-            m_upMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-    connect(s->toolWidget, &ToolWidget::downClicked,
-            m_downMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
-    connect(s->toolWidget, &ToolWidget::removeClicked,
-            m_removeMapper, static_cast<void (QSignalMapper::*)()>(&QSignalMapper::map));
 }
 
 void RunStepListWidget::addRunStep(int pos)
@@ -357,11 +348,6 @@ void RunStepListWidget::addRunStep(int pos)
     updateRunStepButtonsState();
 }
 
-void RunStepListWidget::triggerStepMoveUp(int pos)
-{
-    m_runStepList->moveStepUp(pos);
-}
-
 void RunStepListWidget::stepMoved(int from, int to)
 {
     m_vbox->insertWidget(to, m_runStepsData.at(from)->detailsWidget);
@@ -371,21 +357,6 @@ void RunStepListWidget::stepMoved(int from, int to)
     m_runStepsData.insert(to, data);
 
     updateRunStepButtonsState();
-}
-
-void RunStepListWidget::triggerStepMoveDown(int pos)
-{
-    triggerStepMoveUp(pos + 1);
-}
-
-void RunStepListWidget::triggerRemoveRunStep(int pos)
-{
-    if (!m_runStepList->removeStep(pos)) {
-        QMessageBox::warning(Core::ICore::mainWindow(),
-                             tr("Removing Step failed"),
-                             tr("Cannot remove build step while building"),
-                             QMessageBox::Ok, QMessageBox::Ok);
-    }
 }
 
 void RunStepListWidget::removeRunStep(int pos)
@@ -398,30 +369,10 @@ void RunStepListWidget::removeRunStep(int pos)
     m_noStepsLabel->setVisible(hasSteps);
 }
 
-void RunStepListWidget::triggerDisable(int pos)
-{
-    RunStep *bs = m_runStepsData.at(pos)->step;
-    bs->setEnabled(!bs->enabled());
-    m_runStepsData.at(pos)->toolWidget->setRunStepEnabled(bs->enabled());
-}
-
 void RunStepListWidget::setupUi()
 {
-    if (0 != m_addButton)
+    if (m_addButton)
         return;
-
-    m_disableMapper = new QSignalMapper(this);
-    connect(m_disableMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped),
-            this, &RunStepListWidget::triggerDisable);
-    m_upMapper = new QSignalMapper(this);
-    connect(m_upMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped),
-            this, &RunStepListWidget::triggerStepMoveUp);
-    m_downMapper = new QSignalMapper(this);
-    connect(m_downMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped),
-            this, &RunStepListWidget::triggerStepMoveDown);
-    m_removeMapper = new QSignalMapper(this);
-    connect(m_removeMapper, static_cast<void (QSignalMapper::*)(int)>(&QSignalMapper::mapped),
-            this, &RunStepListWidget::triggerRemoveRunStep);
 
     m_vbox = new QVBoxLayout(this);
     m_vbox->setContentsMargins(0, 0, 0, 0);
@@ -431,7 +382,7 @@ void RunStepListWidget::setupUi()
     m_noStepsLabel->setContentsMargins(0, 0, 0, 0);
     m_vbox->addWidget(m_noStepsLabel);
 
-    QHBoxLayout *hboxLayout = new QHBoxLayout();
+    auto hboxLayout = new QHBoxLayout();
     hboxLayout->setContentsMargins(0, 4, 0, 0);
     m_addButton = new QPushButton(this);
     m_addButton->setMenu(new QMenu(this));
@@ -450,33 +401,48 @@ void RunStepListWidget::setupUi()
 
 void RunStepListWidget::updateRunStepButtonsState()
 {
-    if (m_runStepsData.count() == m_runStepList->count()) {
-        for (int i = 0; i < m_runStepsData.count(); ++i) {
-            RunStepsWidgetData *s = m_runStepsData.at(i);
-            m_disableMapper->setMapping(s->toolWidget, i);
-            s->toolWidget->setRemoveEnabled(!m_runStepList->at(i)->immutable());
-            m_removeMapper->setMapping(s->toolWidget, i);
+    if (m_runStepsData.count() != m_runStepList->count())
+        return;
+    for (int i = 0; i < m_runStepsData.count(); ++i) {
+        RunStepsWidgetData *s = m_runStepsData.at(i);
+        disconnect(s->toolWidget, nullptr, this, nullptr);
+        connect(s->toolWidget, &ToolWidget::disabledClicked,
+                this, [s] {
+            RunStep *rs = s->step;
+            rs->setEnabled(!rs->enabled());
+            s->toolWidget->setRunStepEnabled(rs->enabled());
+        });
+        s->toolWidget->setRemoveEnabled(!m_runStepList->at(i)->immutable());
+        connect(s->toolWidget, &ToolWidget::removeClicked,
+                this, [this, i] {
+            if (!m_runStepList->removeStep(i)) {
+                QMessageBox::warning(Core::ICore::mainWindow(),
+                                     tr("Removing Step failed"),
+                                     tr("Cannot remove run step"),
+                                     QMessageBox::Ok, QMessageBox::Ok);
+            }
+        });
 
-            s->toolWidget->setUpEnabled((i > 0)
-                                        && !(m_runStepList->at(i)->immutable()
-                                             && m_runStepList->at(i - 1)->immutable()));
-            m_upMapper->setMapping(s->toolWidget, i);
-            s->toolWidget->setDownEnabled((i + 1 < m_runStepList->count())
-                                          && !(m_runStepList->at(i)->immutable()
-                                               && m_runStepList->at(i + 1)->immutable()));
-            m_downMapper->setMapping(s->toolWidget, i);
+        s->toolWidget->setUpEnabled((i > 0)
+                                    && !(m_runStepList->at(i)->immutable()
+                                         && m_runStepList->at(i - 1)->immutable()));
+        connect(s->toolWidget, &ToolWidget::upClicked,
+                this, [this, i] { m_runStepList->moveStepUp(i); });
+        s->toolWidget->setDownEnabled((i + 1 < m_runStepList->count())
+                                      && !(m_runStepList->at(i)->immutable()
+                                           && m_runStepList->at(i + 1)->immutable()));
+        connect(s->toolWidget, &ToolWidget::downClicked,
+                this, [this, i] { m_runStepList->moveStepUp(i + 1); });
 
-            // Only show buttons when needed
-            s->toolWidget->setDownVisible(m_runStepList->count() != 1);
-            s->toolWidget->setUpVisible(m_runStepList->count() != 1);
-        }
+        // Only show buttons when needed
+        s->toolWidget->setDownVisible(m_runStepList->count() != 1);
+        s->toolWidget->setUpVisible(m_runStepList->count() != 1);
     }
-
-    emit runStepListChanged();
 }
 
-RunStepsPage::RunStepsPage(ROSRunConfiguration *rc) :
+RunStepsPage::RunStepsPage(ROSRunConfiguration *rc, Core::Id id) :
     NamedWidget(),
+    m_id(id),
     m_widget(new RunStepListWidget(this))
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -484,14 +450,9 @@ RunStepsPage::RunStepsPage(ROSRunConfiguration *rc) :
     layout->setSpacing(0);
     layout->addWidget(m_widget);
 
-    connect(m_widget,SIGNAL(runStepListChanged()), rc, SIGNAL(requestRunActionsUpdate()));
-
     m_widget->init(rc->stepList());
     setDisplayName(tr("ROS Run Steps"));
 }
-
-RunStepsPage::~RunStepsPage()
-{ }
 
 } // namespace Internal
 } // namespace ROSProjectManager

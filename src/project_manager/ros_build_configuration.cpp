@@ -48,22 +48,53 @@ const char ROS_BC_ID[] = "ROSProjectManager.ROSBuildConfiguration";
 const char ROS_BC_BUILD_SYSTEM[] = "ROSProjectManager.ROSBuildConfiguration.BuildSystem";
 const char ROS_BC_CMAKE_BUILD_TYPE[] = "ROSProjectManager.ROSBuildConfiguration.CMakeBuildType";
 
-ROSBuildConfiguration::ROSBuildConfiguration(Target *parent)
-    : BuildConfiguration(parent, Core::Id(ROS_BC_ID))
-{
-}
-
 ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, Core::Id id)
     : BuildConfiguration(parent, id)
 {
 }
 
-ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, ROSBuildConfiguration *source) :
-    BuildConfiguration(parent, source),
-    m_buildSystem(source->m_buildSystem),
-    m_cmakeBuildType(source->m_cmakeBuildType)
+void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo *info)
 {
-    cloneSteps(source);
+    BuildConfiguration::initialize(info);
+
+    ROSBuildInfo ros_info(*static_cast<const ROSBuildInfo *>(info));
+
+    setDisplayName(ros_info.displayName);
+    setDefaultDisplayName(ros_info.displayName);
+    setBuildDirectory(ros_info.buildDirectory);
+    setBuildSystem(ros_info.buildSystem);
+    setCMakeBuildType(ros_info.cmakeBuildType);
+
+    BuildStepList *buildSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
+    BuildStepList *cleanSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_CLEAN);
+    Q_ASSERT(buildSteps);
+    Q_ASSERT(cleanSteps);
+
+    switch (ros_info.buildSystem)
+    {
+        case ROSUtils::CatkinMake:
+        {
+            ROSCatkinMakeStep *makeStep = new ROSCatkinMakeStep(buildSteps);
+            buildSteps->insertStep(0, makeStep);
+            makeStep->setBuildTarget(ROSCatkinMakeStep::BUILD);
+
+            ROSCatkinMakeStep *cleanMakeStep = new ROSCatkinMakeStep(cleanSteps);
+            cleanSteps->insertStep(0, cleanMakeStep);
+            cleanMakeStep->setBuildTarget(ROSCatkinMakeStep::CLEAN);
+            break;
+        }
+        case ROSUtils::CatkinTools:
+        {
+            ROSCatkinToolsStep *makeStep = new ROSCatkinToolsStep(buildSteps);
+            buildSteps->insertStep(0, makeStep);
+            makeStep->setBuildTarget(ROSCatkinToolsStep::BUILD);
+
+            ROSCatkinToolsStep *cleanMakeStep = new ROSCatkinToolsStep(cleanSteps);
+            cleanSteps->insertStep(0, cleanMakeStep);
+            cleanMakeStep->setBuildTarget(ROSCatkinToolsStep::CLEAN);
+            break;
+        }
+    }
 }
 
 QVariantMap ROSBuildConfiguration::toMap() const
@@ -130,18 +161,17 @@ QList<NamedWidget *> ROSBuildConfiguration::createSubConfigWidgets()
   \class ROSBuildConfigurationFactory
 */
 
-ROSBuildConfigurationFactory::ROSBuildConfigurationFactory(QObject *parent) :
-    IBuildConfigurationFactory(parent)
+ROSBuildConfigurationFactory::ROSBuildConfigurationFactory() :
+    IBuildConfigurationFactory()
 {
+    registerBuildConfiguration<ROSBuildConfiguration>(ROS_BC_ID);
+
+    setSupportedProjectType(Constants::ROS_PROJECT_ID);
+    setSupportedProjectMimeTypeName(Constants::ROS_MIME_TYPE);
 }
 
 ROSBuildConfigurationFactory::~ROSBuildConfigurationFactory()
 {
-}
-
-int ROSBuildConfigurationFactory::priority(const Target *parent) const
-{
-    return canHandle(parent) ? 0 : -1;
 }
 
 QList<BuildInfo *> ROSBuildConfigurationFactory::availableBuilds(const Target *parent) const
@@ -160,16 +190,6 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableBuilds(const Target *p
     return result;
 }
 
-int ROSBuildConfigurationFactory::priority(const Kit *k, const QString &projectPath) const
-{
-
-    if (k && Utils::mimeTypeForFile(projectPath).matchesName(QLatin1String(Constants::ROS_MIME_TYPE)))
-        return 0;
-
-
-    return -1;
-}
-
 QList<BuildInfo *> ROSBuildConfigurationFactory::availableSetups(const Kit *k, const QString &projectPath) const
 {
     QList<BuildInfo *> result;
@@ -185,94 +205,6 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableSetups(const Kit *k, c
 
     //TO DO: Should probably check if the directory that was selected was the workspace
     return result;
-}
-
-BuildConfiguration *ROSBuildConfigurationFactory::create(Target *parent, const BuildInfo *info) const
-{
-    QTC_ASSERT(info->factory() == this, return 0);
-    QTC_ASSERT(info->kitId == parent->kit()->id(), return 0);
-    QTC_ASSERT(!info->displayName.isEmpty(), return 0);
-
-    ROSBuildInfo ros_info(*static_cast<const ROSBuildInfo *>(info));
-    ROSBuildConfiguration *bc = new ROSBuildConfiguration(parent);
-
-    bc->setDisplayName(ros_info.displayName);
-    bc->setDefaultDisplayName(ros_info.displayName);
-    bc->setBuildDirectory(ros_info.buildDirectory);
-    bc->setBuildSystem(ros_info.buildSystem);
-    bc->setCMakeBuildType(ros_info.cmakeBuildType);
-
-    BuildStepList *buildSteps = bc->stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
-    BuildStepList *cleanSteps = bc->stepList(ProjectExplorer::Constants::BUILDSTEPS_CLEAN);
-    Q_ASSERT(buildSteps);
-    Q_ASSERT(cleanSteps);
-
-    switch (bc->buildSystem())
-    {
-    case ROSUtils::CatkinMake:
-    {
-        ROSCatkinMakeStep *makeStep = new ROSCatkinMakeStep(buildSteps);
-        buildSteps->insertStep(0, makeStep);
-        makeStep->setBuildTarget(ROSCatkinMakeStep::BUILD);
-
-        ROSCatkinMakeStep *cleanMakeStep = new ROSCatkinMakeStep(cleanSteps);
-        cleanSteps->insertStep(0, cleanMakeStep);
-        cleanMakeStep->setBuildTarget(ROSCatkinMakeStep::CLEAN);
-        break;
-    }
-    case ROSUtils::CatkinTools:
-    {
-        ROSCatkinToolsStep *makeStep = new ROSCatkinToolsStep(buildSteps);
-        buildSteps->insertStep(0, makeStep);
-        makeStep->setBuildTarget(ROSCatkinToolsStep::BUILD);
-
-        ROSCatkinToolsStep *cleanMakeStep = new ROSCatkinToolsStep(cleanSteps);
-        cleanSteps->insertStep(0, cleanMakeStep);
-        cleanMakeStep->setBuildTarget(ROSCatkinToolsStep::CLEAN);
-        break;
-    }
-    }
-
-    return bc;
-}
-
-bool ROSBuildConfigurationFactory::canClone(const Target *parent, BuildConfiguration *source) const
-{
-    if (!canHandle(parent))
-        return false;
-    return source->id() == ROS_BC_ID;
-}
-
-BuildConfiguration *ROSBuildConfigurationFactory::clone(Target *parent, BuildConfiguration *source)
-{
-    if (!canClone(parent, source))
-        return 0;
-    return new ROSBuildConfiguration(parent, qobject_cast<ROSBuildConfiguration *>(source));
-}
-
-bool ROSBuildConfigurationFactory::canRestore(const Target *parent, const QVariantMap &map) const
-{
-    if (!canHandle(parent))
-        return false;
-    return ProjectExplorer::idFromMap(map) == ROS_BC_ID;
-}
-
-BuildConfiguration *ROSBuildConfigurationFactory::restore(Target *parent, const QVariantMap &map)
-{
-    if (!canRestore(parent, map))
-        return 0;
-    ROSBuildConfiguration *bc(new ROSBuildConfiguration(parent));
-    if (bc->fromMap(map))
-        return bc;
-    delete bc;
-    return 0;
-}
-
-bool ROSBuildConfigurationFactory::canHandle(const Target *t) const
-{
-    if (!t->project()->supportsKit(t->kit()))
-        return false;
-    return qobject_cast<ROSProject *>(t->project());
 }
 
 ROSBuildInfo *ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const

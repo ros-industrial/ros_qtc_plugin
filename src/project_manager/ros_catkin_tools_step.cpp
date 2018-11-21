@@ -76,19 +76,6 @@ ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, const Id id) :
     ctor();
 }
 
-ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, ROSCatkinToolsStep *bs) :
-    AbstractProcessStep(parent, bs),
-    m_target(bs->m_target),
-    m_activeProfile(bs->m_activeProfile),
-    m_catkinToolsArguments(bs->m_catkinToolsArguments),
-    m_catkinMakeArguments(bs->m_catkinMakeArguments),
-    m_cmakeArguments(bs->m_cmakeArguments),
-    m_makeArguments(bs->m_makeArguments),
-    m_catkinToolsWorkingDir(bs->m_catkinToolsWorkingDir)
-{
-    ctor();
-}
-
 void ROSCatkinToolsStep::ctor()
 {
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinToolsStep",
@@ -444,7 +431,7 @@ void ROSCatkinToolsStepWidget::updateProfileButtonMenu()
     m_profileMenu->clear();
 
     QStringList profileNames = ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory());
-    foreach( QString profile, profileNames)
+    for(const QString& profile : profileNames)
     {
         QAction *action = m_profileMenu->addAction(profile);
         connect(action, &QAction::triggered, this, [this, profile] { setProfile(profile); });
@@ -527,15 +514,15 @@ QString ROSCatkinToolsStepWidget::uniqueName(const QString &name, const bool &is
         if(isRename)
         {
             QStringList pNames;
-            foreach (QString profile, profileNames) {
+            for (const QString& profile : profileNames) {
                 if (profile == m_makeStep->activeProfile())
                     continue;
                 pNames.append(profile);
             }
-            return Project::makeUnique(result, pNames);
+            return Utils::makeUniquelyNumbered(result, pNames);
         }
 
-        return Project::makeUnique(result, profileNames);
+        return Utils::makeUniquelyNumbered(result, profileNames);
     }
 
     return result;
@@ -572,7 +559,7 @@ ROSCatkinToolsListEditorWidget::~ROSCatkinToolsListEditorWidget()
 void ROSCatkinToolsListEditorWidget::setList(const QStringList &list)
 {
     m_ui->listWidget->clear();
-    foreach (const QString &str, list)
+    for (const QString &str : list)
         addItem(str);
 
     listWidget_itemChanged();
@@ -931,43 +918,13 @@ ROSCatkinToolsProfileEditorDialog::ROSCatkinToolsProfileEditorDialog(Utils::File
 // ROSCatkinToolsStepFactory
 //
 
-ROSCatkinToolsStepFactory::ROSCatkinToolsStepFactory(QObject *parent) :
-    IBuildStepFactory(parent)
+ROSCatkinToolsStepFactory::ROSCatkinToolsStepFactory() : BuildStepFactory()
 {
-}
-
-BuildStep *ROSCatkinToolsStepFactory::create(BuildStepList *parent, const Id id)
-{
-    Q_UNUSED(id);
-    ROSCatkinToolsStep *step = new ROSCatkinToolsStep(parent);
-    if (parent->id() == ProjectExplorer::Constants::BUILDSTEPS_CLEAN) {
-        step->setBuildTarget(ROSCatkinToolsStep::CLEAN);
-    } else if (parent->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD) {
-        step->setBuildTarget(ROSCatkinToolsStep::BUILD);
-    }
-    return step;
-}
-
-BuildStep *ROSCatkinToolsStepFactory::clone(BuildStepList *parent, BuildStep *source)
-{
-    return new ROSCatkinToolsStep(parent, qobject_cast<ROSCatkinToolsStep *>(source));
-}
-
-BuildStep *ROSCatkinToolsStepFactory::restore(BuildStepList *parent, const QVariantMap &map)
-{
-    ROSCatkinToolsStep *bs(new ROSCatkinToolsStep(parent));
-    if (bs->fromMap(map))
-        return bs;
-    delete bs;
-    return 0;
-}
-
-QList<ProjectExplorer::BuildStepInfo> ROSCatkinToolsStepFactory::availableSteps(BuildStepList *parent) const
-{
-    if (parent->target()->project()->id() != Constants::ROS_PROJECT_ID || (parent->id() != ProjectExplorer::Constants::BUILDSTEPS_CLEAN && parent->id() != ProjectExplorer::Constants::BUILDSTEPS_BUILD))
-        return {};
-
-    return {{ROS_CTS_ID,  QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinToolsConfigStep", ROS_CTS_DISPLAY_NAME)}};
+  registerStep<ROSCatkinToolsStep>(ROS_CTS_ID);
+  setFlags(BuildStepInfo::Flags::UniqueStep);
+  setDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinToolsConfigStep", ROS_CTS_DISPLAY_NAME));
+  setSupportedProjectType(Constants::ROS_PROJECT_ID);
+  setSupportedStepLists({ProjectExplorer::Constants::BUILDSTEPS_BUILD, ProjectExplorer::Constants::BUILDSTEPS_CLEAN});
 }
 
 } // namespace Internal

@@ -22,6 +22,8 @@
 #include "ros_project_constants.h"
 
 #include <extensionsystem/pluginmanager.h>
+#include <projectexplorer/kitinformation.h>
+#include <projectexplorer/project.h>
 #include <utils/algorithm.h>
 #include <QDebug>
 
@@ -32,62 +34,166 @@ static const char runStepEnabledKey[] = "ProjectExplorer.RunStep.Enabled";
 namespace ROSProjectManager {
 namespace Internal {
 
+static QList<RunStepFactory *> g_runStepFactories;
+
+RunStepFactory::RunStepFactory()
+{
+    g_runStepFactories.append(this);
+}
+
+RunStepFactory::~RunStepFactory()
+{
+    g_runStepFactories.removeOne(this);
+}
+
+const QList<RunStepFactory *> RunStepFactory::allRunStepFactories()
+{
+    return g_runStepFactories;
+}
+
+bool RunStepFactory::canHandle(RunStepList *rsl) const
+{
+    if (!m_supportedStepLists.isEmpty() && !m_supportedStepLists.contains(rsl->id()))
+        return false;
+
+    auto config = qobject_cast<ProjectExplorer::ProjectConfiguration *>(rsl->parent());
+
+    if (!m_supportedDeviceTypes.isEmpty()) {
+        ProjectExplorer::Target *target = rsl->target();
+        QTC_ASSERT(target, return false);
+        Core::Id deviceType = ProjectExplorer::DeviceTypeKitInformation::deviceTypeId(target->kit());
+        if (!m_supportedDeviceTypes.contains(deviceType))
+            return false;
+    }
+
+    if (m_supportedProjectType.isValid()) {
+        if (!config)
+            return false;
+        Core::Id projectId = config->project()->id();
+        if (projectId != m_supportedProjectType)
+            return false;
+    }
+
+    if (!m_isRepeatable && rsl->contains(m_info.id))
+        return false;
+
+    if (m_supportedConfiguration.isValid()) {
+        if (!config)
+            return false;
+        Core::Id configId = config->id();
+        if (configId != m_supportedConfiguration)
+            return false;
+    }
+
+    return true;
+}
+
+void RunStepFactory::setDisplayName(const QString &displayName)
+{
+    m_info.displayName = displayName;
+}
+
+void RunStepFactory::setFlags(RunStepInfo::Flags flags)
+{
+    m_info.flags = flags;
+}
+
+void RunStepFactory::setSupportedStepList(Core::Id id)
+{
+    m_supportedStepLists = {id};
+}
+
+void RunStepFactory::setSupportedStepLists(const QList<Core::Id> &ids)
+{
+    m_supportedStepLists = ids;
+}
+
+void RunStepFactory::setSupportedConfiguration(Core::Id id)
+{
+    m_supportedConfiguration = id;
+}
+
+void RunStepFactory::setSupportedProjectType(Core::Id id)
+{
+    m_supportedProjectType = id;
+}
+
+void RunStepFactory::setSupportedDeviceType(Core::Id id)
+{
+    m_supportedDeviceTypes = {id};
+}
+
+void RunStepFactory::setSupportedDeviceTypes(const QList<Core::Id> &ids)
+{
+    m_supportedDeviceTypes = ids;
+}
+
+RunStepInfo RunStepFactory::stepInfo() const
+{
+    return m_info;
+}
+
+Core::Id RunStepFactory::stepId() const
+{
+    return m_info.id;
+}
+
+RunStep *RunStepFactory::create(RunStepList *parent, Core::Id id)
+{
+    RunStep *rs = nullptr;
+    if (id == m_info.id)
+        rs = m_info.creator(parent);
+    return rs;
+}
+
+RunStep *RunStepFactory::restore(RunStepList *parent, const QVariantMap &map)
+{
+    RunStep *rs = m_info.creator(parent);
+    if (!rs)
+        return nullptr;
+    if (!rs->fromMap(map)) {
+        QTC_CHECK(false);
+        delete rs;
+        return nullptr;
+    }
+    return rs;
+}
+
 namespace {
-
-IRunStepFactory *findCloneFactory(RunStepList *parent, RunStep *source)
-{
-    return ExtensionSystem::PluginManager::getObject<IRunStepFactory>(
-        [&parent, &source](IRunStepFactory *factory) {
-            return factory->canClone(parent, source);
-        });
-}
-
-IRunStepFactory *findRestoreFactory(RunStepList *parent, const QVariantMap &map)
-{
-    return ExtensionSystem::PluginManager::getObject<IRunStepFactory>(
-        [&parent, &map](IRunStepFactory *factory) {
-            return factory->canRestore(parent, map);
-        });
-}
-
 const char STEPS_COUNT_KEY[] = "ProjectExplorer.RunStepList.StepsCount";
 const char STEPS_PREFIX[] = "ProjectExplorer.RunStepList.Step.";
-
-} // namespace
+}
 
 
 RunStep::RunStep(RunStepList *rsl, Core::Id id) :
-    ProjectConfiguration(rsl), m_enabled(true)
+    ProjectConfiguration(rsl, id)
 {
-    initialize(id);
-    Q_ASSERT(rsl);
-
-}
-
-RunStep::RunStep(RunStepList *rsl, RunStep *rs) :
-    ProjectConfiguration(rsl), m_enabled(rs->m_enabled)
-{
-    copyFrom(rs);
-    Q_ASSERT(rsl);
-    setDisplayName(rs->displayName());
+  Utils::MacroExpander *expander = macroExpander();
+  expander->setDisplayName(tr("Run Step"));
+  expander->setAccumulating(true);
+  expander->registerSubProvider([this] { return projectConfiguration()->macroExpander(); });
 }
 
 bool RunStep::fromMap(const QVariantMap &map)
 {
-    m_enabled = map.value(QLatin1String(runStepEnabledKey), true).toBool();
+    m_enabled = map.value(runStepEnabledKey, true).toBool();
     return ProjectConfiguration::fromMap(map);
 }
 
 QVariantMap RunStep::toMap() const
 {
     QVariantMap map = ProjectConfiguration::toMap();
-    map.insert(QLatin1String(runStepEnabledKey), m_enabled);
+    map.insert(runStepEnabledKey, m_enabled);
     return map;
 }
 
 ProjectExplorer::RunConfiguration *RunStep::runConfiguration() const
 {
-    return qobject_cast<ProjectExplorer::RunConfiguration *>(parent()->parent());
+    auto config = qobject_cast<ProjectExplorer::RunConfiguration *>(parent()->parent());
+    if (config)
+      return config;
+
+    return target()->activeRunConfiguration();
 }
 
 ProjectExplorer::ProjectConfiguration *RunStep::projectConfiguration() const
@@ -150,38 +256,29 @@ bool RunStep::enabled() const
     return m_enabled;
 }
 
-IRunStepFactory::IRunStepFactory(QObject *parent) :
-    QObject(parent)
-{ }
-
-
 RunStepList::RunStepList(QObject *parent, Core::Id id) :
-    ProjectConfiguration(parent)
+    ProjectConfiguration(parent, id)
 {
     Q_ASSERT(parent);
-    initialize(id);
+    setDefaultDisplayName(tr("Run"));
 }
 
-RunStepList::RunStepList(QObject *parent, RunStepList *source) :
-    ProjectConfiguration(parent)
-{
-    copyFrom(source);
-    setDisplayName(source->displayName());
-    Q_ASSERT(parent);
-    // do not clone the steps here:
-    // The BC is not fully set up yet and thus some of the buildstepfactories
-    // will fail to clone the buildsteps!
-}
 
 RunStepList::~RunStepList()
 {
+    clear();
+}
+
+void RunStepList::clear()
+{
     qDeleteAll(m_steps);
+    m_steps.clear();
 }
 
 QVariantMap RunStepList::toMap() const
 {
     QVariantMap map(ProjectConfiguration::toMap());
-    // Save build steps
+    // Save run steps
     map.insert(QString::fromLatin1(STEPS_COUNT_KEY), m_steps.count());
     for (int i = 0; i < m_steps.count(); ++i)
         map.insert(QString::fromLatin1(STEPS_PREFIX) + QString::number(i), m_steps.at(i)->toMap());
@@ -201,32 +298,18 @@ bool RunStepList::isEmpty() const
 
 bool RunStepList::contains(Core::Id id) const
 {
-    return Utils::anyOf(steps(), [id](RunStep *bs){
-        return bs->id() == id;
+    return Utils::anyOf(steps(), [id](RunStep *rs){
+        return rs->id() == id;
     });
 }
 
 bool RunStepList::enabled() const
 {
-    foreach(RunStep *rs, m_steps)
-    {
+    for (RunStep *rs : m_steps) {
         if (rs->enabled() == true)
             return true;
     }
     return false;
-}
-
-void RunStepList::cloneSteps(RunStepList *source)
-{
-    Q_ASSERT(source);
-    foreach (RunStep *originalbs, source->steps()) {
-        IRunStepFactory *factory(findCloneFactory(this, originalbs));
-        if (!factory)
-            continue;
-        RunStep *clonebs(factory->clone(this, originalbs));
-        if (clonebs)
-            m_steps.append(clonebs);
-    }
 }
 
 bool RunStepList::isActive() const
@@ -236,28 +319,35 @@ bool RunStepList::isActive() const
 
 bool RunStepList::fromMap(const QVariantMap &map)
 {
+    clear();
+
     // We need the ID set before trying to restore the steps!
     if (!ProjectConfiguration::fromMap(map))
         return false;
 
+    const QList<RunStepFactory *> factories = RunStepFactory::allRunStepFactories();
     int maxSteps = map.value(QString::fromLatin1(STEPS_COUNT_KEY), 0).toInt();
     for (int i = 0; i < maxSteps; ++i) {
-        QVariantMap bsData(map.value(QString::fromLatin1(STEPS_PREFIX) + QString::number(i)).toMap());
-        if (bsData.isEmpty()) {
+        QVariantMap rsData(map.value(QString::fromLatin1(STEPS_PREFIX) + QString::number(i)).toMap());
+        if (rsData.isEmpty()) {
             qWarning() << "No step data found for" << i << "(continuing).";
             continue;
         }
-        IRunStepFactory *factory = findRestoreFactory(this, bsData);
-        if (!factory) {
-            qWarning() << "No factory for step" << i << "in list" << displayName() << "found (continuing).";
-            continue;
+        bool handled = false;
+        Core::Id stepId = ProjectExplorer::idFromMap(rsData);
+        for (RunStepFactory *factory : factories) {
+            if (factory->stepId() == stepId) {
+                if (factory->canHandle(this)) {
+                    if (RunStep *rs = factory->restore(this, rsData)) {
+                        appendStep(rs);
+                        handled = true;
+                    } else {
+                        qWarning() << "Restoration of step" << i << "failed (continuing).";
+                    }
+                }
+            }
         }
-        RunStep *bs(factory->restore(this, bsData));
-        if (!bs) {
-            qWarning() << "Restoration of step" << i << "failed (continuing).";
-            continue;
-        }
-        insertStep(m_steps.count(), bs);
+        QTC_ASSERT(handled, qDebug() << "No factory for run step" << stepId.toString() << "found.");
     }
     return true;
 }
@@ -266,7 +356,7 @@ void RunStepList::runStep_enabledChanged(RunStep *step)
 {
     if (step->enabled() == true)
     {
-        foreach(RunStep *rs, m_steps)
+        for (RunStep *rs : m_steps)
         {
             if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID && rs != step)
             {
@@ -281,13 +371,18 @@ QList<RunStep *> RunStepList::steps() const
     return m_steps;
 }
 
+QList<RunStep *> RunStepList::steps(const std::function<bool (const RunStep *)> &filter) const
+{
+    return Utils::filtered(steps(), filter);
+}
+
 void RunStepList::insertStep(int position, RunStep *step)
 {
     if (step->id() == Constants::ROS_ATTACH_TO_NODE_ID)
     {
         if (step->enabled() == true)
         {
-            foreach(RunStep *rs, m_steps)
+            for (RunStep *rs : m_steps)
             {
                 if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID)
                 {
@@ -304,11 +399,11 @@ void RunStepList::insertStep(int position, RunStep *step)
 
 bool RunStepList::removeStep(int position)
 {
-    RunStep *bs = at(position);
+    RunStep *rs = at(position);
 
     emit aboutToRemoveStep(position);
     m_steps.removeAt(position);
-    delete bs;
+    delete rs;
     emit stepRemoved(position);
     return true;
 }

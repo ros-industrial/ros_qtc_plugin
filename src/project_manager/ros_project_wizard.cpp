@@ -247,7 +247,7 @@ Core::BaseFileWizard *ROSProjectWizard::create(QWidget *parent,
     Q_UNUSED(parameters);
     ROSProjectWizardDialog *wizard = new ROSProjectWizardDialog(this, parent);
 
-    foreach (QWizardPage *p, wizard->extensionPages())
+    for (QWizardPage *p : wizard->extensionPages())
         wizard->addPage(p);
 
     return wizard;

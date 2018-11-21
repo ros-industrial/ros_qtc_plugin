@@ -50,6 +50,8 @@ const char ROS_WIZARD_CATEGORY[] = "A.ROS";
 const char ROS_WIZARD_CATEGORY_DISPLAY[] = "ROS";
 
 // ROS run step constants
+const char ROS_RUN_STEP_LIST_ID[] = "ROSProjectManager.RunStepList";
+const char ROS_RUN_STEPS_PAGE_ID[] = "ROSProjectManager.RunSteps";
 const char ROS_LAUNCH_ID[] = "ROSProjectManager.ROSLaunchStep";
 const char ROS_RUN_ID[] = "ROSProjectManager.ROSRunStep";
 const char ROS_ATTACH_TO_NODE_ID[] = "ROSProjectManager.ROSAttachToNode";

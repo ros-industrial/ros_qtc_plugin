@@ -117,16 +117,14 @@ void ROSTerminalPane::updateToolBarButtonsEnabled()
 
 void ROSTerminalPane::zoomIn()
 {
-  foreach(QTermWidget *ow, m_terminals)
-  {
+  for (QTermWidget *ow : m_terminals) {
     ow->zoomIn();
   }
 }
 
 void ROSTerminalPane::zoomOut()
 {
-  foreach(QTermWidget *ow, m_terminals)
-  {
+  for (QTermWidget *ow : m_terminals) {
     ow->zoomOut();
   }
 }
@@ -169,7 +167,7 @@ void ROSTerminalPane::termKeyPressed(QKeyEvent *event)
 
 void ROSTerminalPane::stopProcess()
 {
-  foreach(QObject *obj, m_tabWidget->currentWidget()->children())
+  for (QObject *obj : m_tabWidget->currentWidget()->children())
   {
     if(QLatin1String(obj->metaObject()->className()) == QLatin1String("Konsole::TerminalDisplay"))
     {
