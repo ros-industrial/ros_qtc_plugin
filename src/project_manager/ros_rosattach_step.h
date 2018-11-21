@@ -18,37 +18,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ROSPROJECTMANAGER_H
-#define ROSPROJECTMANAGER_H
+#ifndef ROS_ROSATTACH_STEP_H
+#define ROS_ROSATTACH_STEP_H
 
-#include "ros_project_constants.h"
-#include "ros_terminal_pane.h"
-#include <projectexplorer/processparameters.h>
-#include <qtermwidget5/qtermwidget.h>
+#include "ros_generic_run_step.h"
 
 namespace ROSProjectManager {
 namespace Internal {
 
-class ROSProject;
+namespace Ui { class ROSGenericStep; }
 
-class ROSManager : public QObject
+class ROSAttachStep : public ROSGenericRunStep
 {
-    Q_OBJECT
+  Q_OBJECT
+  friend class ROSAttachStepFactory;
 
 public:
-    ROSManager();
-    ~ROSManager();
+  ROSAttachStep(RunStepList *rsl);
 
-    static ROSManager *instance();
+  void run() override;
 
-    QTermWidget &startTerminal(int startnow = 1, const QString name = QString());
+protected:
+  ROSAttachStep(RunStepList *rsl, Core::Id id);
 
-private:
-    ROSTerminalPane *m_terminalPane;
+  void ctor();
+
+  QMap<QString, QString> getAvailableTargets() override;
 
 };
 
-} // namespace Internal
-} // namespace ROSProjectManager
+class ROSAttachStepFactory : public RunStepFactory
+{
+public:
+    ROSAttachStepFactory();
+};
 
-#endif // ROSPROJECTMANAGER_H
+} // Internal
+} // ROSProjectManager
+#endif // ROS_ROSATTACH_STEP_H

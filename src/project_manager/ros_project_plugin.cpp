@@ -19,11 +19,12 @@
  * limitations under the License.
  */
 #include "ros_project_plugin.h"
-
+#include "ros_terminal_pane.h"
 #include "ros_build_configuration.h"
 #include "ros_run_configuration.h"
-#include "ros_run_steps.h"
-#include "ros_project_manager.h"
+#include "ros_rosrun_step.h"
+#include "ros_roslaunch_step.h"
+#include "ros_rosattach_step.h"
 #include "ros_project_wizard.h"
 #include "ros_project_constants.h"
 #include "ros_catkin_make_step.h"
@@ -38,7 +39,6 @@
 #include <coreplugin/actionmanager/actionmanager.h>
 #include <coreplugin/actionmanager/actioncontainer.h>
 #include <coreplugin/actionmanager/command.h>
-#include <coreplugin/removefiledialog.h>
 #include <coreplugin/progressmanager/progressmanager.h>
 
 #include <cpptools/cppcodestylepreferences.h>
@@ -68,6 +68,7 @@
 #include <utils/algorithm.h>
 #include <utils/fileutils.h>
 #include <utils/mimetypes/mimedatabase.h>
+#include <utils/removefiledialog.h>
 
 #include <QtPlugin>
 #include <QDebug>
@@ -80,9 +81,46 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
+static ROSProjectPlugin *m_instance = nullptr;
+
+class ROSProjectPluginPrivate
+{
+public:
+    ROSRunConfigurationFactory runConfigFactory;
+    ROSRunStepFactory rosRunStepFactory;
+    ROSLaunchStepFactory rosLaunchStepFactory;
+    ROSAttachStepFactory rosAttachStepFactory;
+
+    ROSBuildConfigurationFactory buildConfigFactory;
+    ROSCatkinMakeStepFactory catkinMakeStepFactory;
+    ROSCatkinToolsStepFactory catkinToolsStepFactory;
+
+    ROSTerminalPane terminalPane;
+};
+
+ROSProjectPlugin::ROSProjectPlugin() : ExtensionSystem::IPlugin()
+{
+  m_instance = this;
+}
+
+ROSProjectPlugin::~ROSProjectPlugin()
+{
+  ExtensionSystem::PluginManager::removeObject(&(d->terminalPane));
+  delete d;
+  m_instance = nullptr;
+}
+
+ROSProjectPlugin *ROSProjectPlugin::instance()
+{
+    return m_instance;
+}
+
 bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
 {
     Q_UNUSED(errorMessage);
+
+    d = new ROSProjectPluginPrivate();
+    ExtensionSystem::PluginManager::addObject(&(d->terminalPane));
 
     QFile mimeFilePath(":rosproject/ROSProjectManager.mimetypes.xml");
 
@@ -94,44 +132,36 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
         else { Q_ASSERT(false); }
     }
 
-    RunControl::registerWorker<ROSRunConfiguration, ROSRunWorker>(ProjectExplorer::Constants::NORMAL_RUN_MODE);
-    RunControl::registerWorker<ROSRunConfiguration, ROSDebugRunWorker>(ProjectExplorer::Constants::DEBUG_RUN_MODE);
-
-    addAutoReleasedObject(new ROSManager);
-    addAutoReleasedObject(new ROSCatkinMakeStepFactory);
-    addAutoReleasedObject(new ROSCatkinToolsStepFactory);
-    addAutoReleasedObject(new ROSBuildConfigurationFactory);
-    addAutoReleasedObject(new ROSRunConfigurationFactory);
-    addAutoReleasedObject(new ROSRunStepFactory);
-
     ProjectManager::registerProjectType<ROSProject>(Constants::ROS_MIME_TYPE);
 
     IWizardFactory::registerFactoryCreator([]() { return QList<IWizardFactory *>() << new ROSProjectWizard << new ROSPackageWizard; });
 
     ActionContainer *mproject = ActionManager::actionContainer(ProjectExplorer::Constants::M_PROJECTCONTEXT);
 
-     auto reloadProjectBuildInfoAction = new QAction(tr("Reload Project Build Info..."), this);
-     Command *reloadCommand = ActionManager::registerAction(reloadProjectBuildInfoAction,
-                                                            Constants::ROS_RELOAD_BUILD_INFO,
-                                                            Context(Constants::ROS_PROJECT_CONTEXT));
+    auto reloadProjectBuildInfoAction = new QAction(tr("Reload Project Build Info..."), this);
+    Command *reloadCommand = ActionManager::registerAction(reloadProjectBuildInfoAction,
+                                                           Constants::ROS_RELOAD_BUILD_INFO,
+                                                           Context(Constants::ROS_PROJECT_CONTEXT));
 
-     reloadCommand->setAttribute(Command::CA_Hide);
-     mproject->addAction(reloadCommand, ProjectExplorer::Constants::G_PROJECT_FILES);
-     connect(reloadProjectBuildInfoAction, &QAction::triggered, this, &ROSProjectPlugin::reloadProjectBuildInfo);
+    reloadCommand->setAttribute(Command::CA_Hide);
+    mproject->addAction(reloadCommand, ProjectExplorer::Constants::G_PROJECT_FILES);
+    connect(reloadProjectBuildInfoAction, &QAction::triggered, this, &ROSProjectPlugin::reloadProjectBuildInfo);
 
     // This will context menu action for deleting and renaming project folders from the ProjectTree.
     ActionContainer *mfolderContextMenu = ActionManager::actionContainer(ProjectExplorer::Constants::M_FOLDERCONTEXT);
 
     auto removeProjectDirectoryAction = new QAction(tr("Remove Directory..."), this);
     Command *removeCommand = ActionManager::registerAction(removeProjectDirectoryAction,
-        Constants::ROS_REMOVE_DIR, Context(Constants::ROS_PROJECT_CONTEXT));
+                                                           Constants::ROS_REMOVE_DIR,
+                                                           Context(Constants::ROS_PROJECT_CONTEXT));
     removeCommand->setAttribute(Command::CA_Hide);
     mfolderContextMenu->addAction(removeCommand, ProjectExplorer::Constants::G_FOLDER_FILES);
     connect(removeProjectDirectoryAction, &QAction::triggered, this, &ROSProjectPlugin::removeProjectDirectory);
 
     auto renameFileAction = new QAction(tr("Rename File..."), this);
     Command *renameCommand = ActionManager::registerAction(renameFileAction,
-        Constants::ROS_RENAME_FILE, Context(Constants::ROS_PROJECT_CONTEXT));
+                                                           Constants::ROS_RENAME_FILE,
+                                                           Context(Constants::ROS_PROJECT_CONTEXT));
 
     renameCommand->setAttribute(Command::CA_Hide);
 
@@ -140,6 +170,11 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     createCppCodeStyle();
 
     return true;
+}
+
+QTermWidget &ROSProjectPlugin::startTerminal(int startnow, const QString name)
+{
+  return d->terminalPane.startTerminal(startnow, name);
 }
 
 void ROSProjectPlugin::createCppCodeStyle()

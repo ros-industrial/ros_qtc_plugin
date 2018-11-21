@@ -58,13 +58,13 @@ public:
 
         void removeDirectories(const QStringList &filters)
         {
-            foreach (QString filter, filters)
+            for (const QString& filter : filters)
                 directories.removeAll(filter);
         }
 
         void removeFiles(const QStringList &filters)
         {
-            foreach (QString filter, filters)
+            for (const QString& filter : filters)
                 files.removeAll(filter);
         }
     };

@@ -33,7 +33,6 @@
 #include <cpptools/cpptoolsconstants.h>
 #include <cpptools/cppmodelmanager.h>
 #include <cpptools/projectinfo.h>
-#include <cpptools/projectpartheaderpath.h>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/abi.h>
 #include <projectexplorer/buildsteplist.h>
@@ -74,13 +73,13 @@ ROSProject::ROSProject(const Utils::FileName &fileName) :
     m_workspaceWatcher(new ROSWorkspaceWatcher(this))
 {
     setId(Constants::ROS_PROJECT_ID);
-    setProjectContext(Context(Constants::ROS_PROJECT_CONTEXT));
     setProjectLanguages(Context(ProjectExplorer::Constants::CXX_LANGUAGE_ID));
     setDisplayName(projectFilePath().toFileInfo().completeBaseName());
 
-    ROSProjectNode *project_node = new ROSProjectNode(this->projectFilePath());
-    project_node->addNode(new FileNode(projectFilePath(), FileType::Project, false));
-    setRootProjectNode(project_node);
+    ROSProjectNodeUPtr project_node(new ROSProjectNode(this->projectFilePath()));
+    std::unique_ptr<FileNode> root_node(new FileNode(projectFilePath(), FileType::Project, false));
+    project_node->addNode(std::move(root_node));
+    setRootProjectNode(std::move(project_node));
 
     refresh();
 
@@ -194,7 +193,7 @@ void ROSProject::refresh()
     int cnt = 0;
     int max = removedDirectories.size() + addedDirectories.size();
 
-    foreach (QString dir, removedDirectories) {
+    for (const QString& dir : removedDirectories) {
         cnt += 1;
         Utils::FileName removedDir = projectDirectory().appendPath(dir);
         if (removedDir == projectDirectory() || removedDir.isChildOf(projectDirectory()))
@@ -203,7 +202,7 @@ void ROSProject::refresh()
         m_projectFutureInterface->setProgressValue(floor(100.0 * (float)cnt / (float)max));
     }
 
-    foreach (QString dir, addedDirectories) {
+    for (const QString& dir : addedDirectories) {
         cnt += 1;
         Utils::FileName addedDir = projectDirectory().appendPath(dir);
         if (addedDir.exists())
@@ -240,11 +239,10 @@ void ROSProject::refreshCppCodeModel(bool success)
         m_cppCodeModelUpdater->cancel();
 
         CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
-        if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(k)) {
-            if (qtVersion->qtVersion() <= QtSupport::QtVersionNumber(4,8,6))
-                activeQtVersion = CppTools::ProjectPart::Qt4_8_6AndOlder;
-            else if (qtVersion->qtVersion() < QtSupport::QtVersionNumber(5,0,0))
-                activeQtVersion = CppTools::ProjectPart::Qt4Latest;
+        if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(activeTarget()->kit()))
+        {
+            if (qtVersion->qtVersion() < QtSupport::QtVersionNumber(5,0,0))
+                activeQtVersion = CppTools::ProjectPart::Qt4;
             else
                 activeQtVersion = CppTools::ProjectPart::Qt5;
         }
@@ -255,11 +253,11 @@ void ROSProject::refreshCppCodeModel(bool success)
 
         ToolChain *cxxToolChain = ToolChainKitInformation::toolChain(k, ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
-        foreach(ROSUtils::PackageBuildInfo buildInfo, m_wsPackageBuildInfo)
+        for (const ROSUtils::PackageBuildInfo& buildInfo : m_wsPackageBuildInfo)
         {
             QStringList packgeFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
 
-            foreach(ROSUtils::PackageTargetInfo targetInfo, buildInfo.targets)
+            for (const ROSUtils::PackageTargetInfo& targetInfo : buildInfo.targets)
             {
                 CppTools::RawProjectPart rpp;
                 const QString defineArg
@@ -278,11 +276,12 @@ void ROSProject::refreshCppCodeModel(bool success)
                 rpp.setMacros(ProjectExplorer::Macro::toMacros(defineArg.toUtf8()));
 
                 QSet<QString> toolChainIncludes;
-                foreach (const HeaderPath &hp, cxxToolChain->systemHeaderPaths(targetInfo.flags, sysRoot))
-                    toolChainIncludes.insert(hp.path());
+                for (const HeaderPath &hp : cxxToolChain->builtInHeaderPaths(targetInfo.flags, sysRoot)) {
+                    toolChainIncludes.insert(hp.path);
+                }
 
                 QStringList includePaths;
-                foreach (const QString &i, targetInfo.includes) {
+                for (const QString &i : targetInfo.includes) {
                     if (!toolChainIncludes.contains(i))
                         includePaths.append(i);
                 }
@@ -297,12 +296,6 @@ void ROSProject::refreshCppCodeModel(bool success)
         m_cppCodeModelUpdater->update({this, nullptr, cxxToolChain, k, rpps});
     }
     emitParsingFinished(success);
-}
-
-QStringList ROSProject::files(FilesMode fileMode) const
-{
-    Q_UNUSED(fileMode);
-    return m_workspaceWatcher->getWorkspaceFiles();
 }
 
 Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *errorMessage)
@@ -320,7 +313,7 @@ Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *erro
       if (targetList.isEmpty())
           return RestoreResult::Error;
 
-      foreach (Target *t, targetList) {
+      for (Target *t : targetList) {
           if (!t->activeBuildConfiguration()) {
               removeTarget(t);
               continue;

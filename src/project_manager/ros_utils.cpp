@@ -280,7 +280,7 @@ bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const R
     xmlFile.writeEndElement();
 
     xmlFile.writeStartElement(QLatin1String("WatchDirectories"));
-    foreach (QString str, content.watchDirectories)
+    for (const QString& str : content.watchDirectories)
         xmlFile.writeTextElement(QLatin1String("Directory"), str);
 
     xmlFile.writeEndElement();
@@ -374,7 +374,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
 
     workspaceFiles[folder] = content;
 
-    foreach (QString file, content.files)
+    for (const QString& file : content.files)
         fileList.append(QDir(folder).absoluteFilePath(file));
 
     // Get SubDirectory Information
@@ -392,7 +392,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
         }
 
         bool skip = false;
-        foreach (QString exclude, excludeDir)
+        for (const QString& exclude : excludeDir)
         {
             if (folder.startsWith(exclude))
             {
@@ -411,7 +411,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
 
         workspaceFiles[folder] = content;
 
-        foreach (QString file, content.files)
+        for (const QString& file : content.files)
             fileList.append(QDir(folder).absoluteFilePath(file));
     }
 
@@ -457,7 +457,7 @@ ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const Works
 {
     PackageBuildInfoMap wsBuildInfo;
     QStringList env = ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList();
-    foreach(PackageInfo package, packageInfo)
+    for (const PackageInfo& package : packageInfo)
     {
         PackageBuildInfo buildInfo(package, env);
         if (findPackageBuildDirectory(workspaceInfo, package, buildInfo.path))
@@ -681,7 +681,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
     QString output = QString::fromStdString(process.readAllStandardOutput().toStdString());
     QStringList package_list = output.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
 
-    foreach (QString str, package_list)
+    for (const QString& str : package_list)
     {
         tmp = str.split(QLatin1String(" "));
         package_map.insert(tmp[0],tmp[1]);

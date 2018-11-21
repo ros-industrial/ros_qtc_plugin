@@ -69,6 +69,7 @@ private:
     QString getFolderName(FolderNode *folderNode) const;
     QString getFolderPath(FolderNode *folderNode) const;
 };
+typedef std::unique_ptr<ROSProjectNode> ROSProjectNodeUPtr;
 
 class ROSFolderNode: public ProjectExplorer::FolderNode
 {

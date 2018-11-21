@@ -21,7 +21,7 @@
 #include "ros_run_configuration.h"
 #include "ros_project.h"
 #include "ros_run_steps_page.h"
-#include "ros_run_steps.h"
+#include "ros_generic_run_step.h"
 #include "ui_ros_run_configuration.h"
 
 #include <coreplugin/editormanager/editormanager.h>
@@ -33,7 +33,6 @@
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorericons.h>
 #include <projectexplorer/buildstepspage.h>
-#include <projectexplorer/runnables.h>
 #include <debugger/debuggerengine.h>
 
 #include <qtsupport/qtkitinformation.h>
@@ -64,98 +63,55 @@ namespace ROSProjectManager {
 namespace Internal {
 
 const char ROS_RC_ID[] = "ROSProjectManager.ROSRunConfiguration";
-const char ROS_RUN_STEP_LIST_ID[] = "ROSProjectManager.ROSRunConfiguration.RunStepList";
-
-bool operator==(const ROSRunnable &r1, const ROSRunnable &r2)
-{
-    Q_UNUSED(r1);
-    Q_UNUSED(r2);
-    return true;
-}
-
-void *ROSRunnable::staticTypeId = &ROSRunnable::staticTypeId;
-
-
-ROSRunConfiguration::ROSRunConfiguration(Target *parent):
-    ROSRunConfiguration(parent, Core::Id(ROS_RC_ID))
-{
-}
 
 ROSRunConfiguration::ROSRunConfiguration(Target *parent, Id id) :
-    RunConfiguration(parent),
-    m_stepList(new RunStepList(this, Core::Id(ROS_RUN_STEP_LIST_ID)))
+    RunConfiguration(parent, id),
+    m_stepList(new RunStepList(this, Constants::ROS_RUN_STEP_LIST_ID))
 {
-    initialize(id);
-    m_stepList->setDefaultDisplayName(tr("Run"));   
-    ctor();
-}
-
-ROSRunConfiguration::ROSRunConfiguration(Target *parent, ROSRunConfiguration *source) :
-    RunConfiguration(parent),
-    m_stepList(source->m_stepList)
-{
-    copyFrom(source);
-    ctor();
 }
 
 
 QString ROSRunConfiguration::disabledReason() const
 {
-    if (!isEnabled())
-        return tr("No ROS run step for active project.");
-    return QString();
-}
+  QString output;
+  output = RunConfiguration::disabledReason();
 
-void ROSRunConfiguration::ctor()
-{
-    setDisplayName(tr("ROS Run Configuration", "ROS run configuration display name."));
+  if (output.isEmpty())
+  {
+    if (!isEnabled())
+        output = tr("No ROS run step for active project.");
+  }
+
+  return output;
 }
 
 QWidget *ROSRunConfiguration::createConfigurationWidget()
 {
-    return new RunStepsPage(this);
-}
-
-Utils::OutputFormatter *ROSRunConfiguration::createOutputFormatter() const
-{
-    return new QtSupport::QtOutputFormatter(target()->project());
-}
-
-Abi ROSRunConfiguration::abi() const
-{
-    Abi hostAbi = Abi::hostAbi();
-    return Abi(hostAbi.architecture(), hostAbi.os(), hostAbi.osFlavor(),
-               Abi::RuntimeQmlFormat, hostAbi.wordWidth());
-}
-
-ProjectExplorer::Runnable ROSRunConfiguration::runnable() const
-{
-    ROSRunnable r;
-    return r;
+    return new RunStepsPage(this, Constants::ROS_RUN_STEPS_PAGE_ID);
 }
 
 QVariantMap ROSRunConfiguration::toMap() const
 {
     QVariantMap map(RunConfiguration::toMap());
-    map.insert(QLatin1String(ROS_RUN_STEP_LIST_ID), m_stepList->toMap());
+    map.insert(Constants::ROS_RUN_STEP_LIST_ID, m_stepList->toMap());
 
     return map;
 }
 
 bool ROSRunConfiguration::fromMap(const QVariantMap &map)
 {
-    QVariantMap data = map.value(QLatin1String(ROS_RUN_STEP_LIST_ID)).toMap();
+    QVariantMap data = map.value(Constants::ROS_RUN_STEP_LIST_ID).toMap();
     if (data.isEmpty()) {
         qWarning() << "No data for ROS run step list found!";
         return false;
     }
-    RunStepList *list = new RunStepList(this, Core::Id());
+    RunStepList *list = new RunStepList(this, Constants::ROS_RUN_STEP_LIST_ID);
     if (!list->fromMap(data)) {
         qWarning() << "Failed to restore ROS run step list!";
         delete list;
         return false;
     }
-    list->setDefaultDisplayName(tr("Run"));
+
     m_stepList = list;
 
     return RunConfiguration::fromMap(map);
@@ -170,87 +126,34 @@ RunStepList* ROSRunConfiguration::stepList() const
   \class ROSRunConfigurationFactory
 */
 
-ROSRunConfigurationFactory::ROSRunConfigurationFactory(QObject *parent) :
-    ProjectExplorer::IRunConfigurationFactory(parent)
+ROSRunConfigurationFactory::ROSRunConfigurationFactory() :
+    ProjectExplorer::RunConfigurationFactory()
 {
-    setObjectName(QLatin1String("ROSRunConfigurationFactory"));
+  registerRunConfiguration<ROSRunConfiguration>(ROS_RC_ID);
+  addSupportedProjectType(Constants::ROS_PROJECT_ID);
+  addSupportedTargetDeviceType(ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE);
+
+//  addRunWorkerFactory<SimpleTargetRunner>(ProjectExplorer::Constants::NORMAL_RUN_MODE);
+  addRunWorkerFactory<ROSRunWorker>(ProjectExplorer::Constants::NORMAL_RUN_MODE);
+  addRunWorkerFactory<ROSDebugRunWorker>(ProjectExplorer::Constants::DEBUG_RUN_MODE);
 }
 
 ROSRunConfigurationFactory::~ROSRunConfigurationFactory()
 {
 }
 
-QList<Core::Id> ROSRunConfigurationFactory::availableCreationIds(ProjectExplorer::Target *parent, CreationMode mode) const
+QList<ProjectExplorer::RunConfigurationCreationInfo>
+ROSRunConfigurationFactory::availableCreators(ProjectExplorer::Target */*parent*/) const
 {
-    Q_UNUSED(mode);
+  RunConfigurationCreationInfo rci;
+  rci.factory = this;
+  rci.id = runConfigurationBaseId();
+  rci.buildKey = "This is a test";
+  rci.displayName = "ROS Run Configuration";
+  rci.creationMode = RunConfigurationCreationInfo::ManualCreationOnly;
+  rci.useTerminal = false;
 
-    if (!canHandle(parent))
-        return QList<Core::Id>();
-
-    // First id will be the default run configuration
-    QList<Core::Id> list;
-    list << Core::Id(ROS_RC_ID);
-
-    return list;
-}
-
-QString ROSRunConfigurationFactory::displayNameForId(Core::Id id) const
-{
-    if (id == ROS_RC_ID)
-        return tr("ROS Run Configuration");
-
-    return QString();
-}
-
-bool ROSRunConfigurationFactory::canCreate(ProjectExplorer::Target *parent,
-                                                  const Core::Id id) const
-{
-    if (!canHandle(parent))
-        return false;
-
-    if (id == ROS_RC_ID)
-        return true;
-
-    return false;
-}
-
-ProjectExplorer::RunConfiguration *ROSRunConfigurationFactory::doCreate(ProjectExplorer::Target *parent, Core::Id id)
-{
-  return new ROSRunConfiguration(parent, id);
-}
-
-bool ROSRunConfigurationFactory::canRestore(ProjectExplorer::Target *parent, const QVariantMap &map) const
-{
-    return parent && canCreate(parent, ProjectExplorer::idFromMap(map));
-}
-
-ProjectExplorer::RunConfiguration *ROSRunConfigurationFactory::doRestore(ProjectExplorer::Target *parent,
-                                                                                const QVariantMap &map)
-{
-    return new ROSRunConfiguration(parent, ProjectExplorer::idFromMap(map));
-}
-
-bool ROSRunConfigurationFactory::canClone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *source) const
-{
-    return canCreate(parent, source->id());
-}
-
-ProjectExplorer::RunConfiguration *ROSRunConfigurationFactory::clone(ProjectExplorer::Target *parent,
-                                                                     ProjectExplorer::RunConfiguration *source)
-{
-    if (!canClone(parent, source))
-        return 0;
-    return new ROSRunConfiguration(parent, qobject_cast<ROSRunConfiguration *>(source));
-}
-
-bool ROSRunConfigurationFactory::canHandle(ProjectExplorer::Target *parent) const
-{
-    if (!parent->project()->supportsKit(parent->kit()))
-        return false;
-    if (!qobject_cast<ROSProject *>(parent->project()))
-        return false;
-    Core::Id deviceType = ProjectExplorer::DeviceTypeKitInformation::deviceTypeId(parent->kit());
-    return deviceType == ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE;
+  return {rci};
 }
 
 ////////////////////////////////////
@@ -258,12 +161,12 @@ bool ROSRunConfigurationFactory::canHandle(ProjectExplorer::Target *parent) cons
 ////////////////////////////////////
 ROSRunWorker::ROSRunWorker(RunControl *runControl) : RunWorker(runControl)
 {
-    setDisplayName("RosRunWorker");
+    setId("RosRunWorker");
 }
 
 void ROSRunWorker::start()
 {
-    foreach(RunStep *rs, qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
+    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
     {
         if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
         {
@@ -278,7 +181,7 @@ void ROSRunWorker::start()
 
 ROSDebugRunWorker::ROSDebugRunWorker(RunControl *runControl) : Debugger::DebuggerRunTool(runControl)
 {
-    setDisplayName("RosDebugRunWorker");
+    setId("RosDebugRunWorker");
 
     connect(&m_timer, &QTimer::timeout,
     this, &ROSDebugRunWorker::findProcess);
@@ -290,7 +193,7 @@ ROSDebugRunWorker::ROSDebugRunWorker(RunControl *runControl) : Debugger::Debugge
 void ROSDebugRunWorker::start()
 {
     bool found = false;
-    foreach(RunStep *rs,  qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
+    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
     {
         if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID)
         {
@@ -319,7 +222,7 @@ void ROSDebugRunWorker::start()
     if (found)
     {
         // Now that the watcher is started run all of the other steps
-        foreach(RunStep *rs, qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
+        for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
         {
             if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
             {
@@ -343,7 +246,7 @@ void ROSDebugRunWorker::pidFound(ProjectExplorer::DeviceProcessItem process)
 {
     m_timer.stop();
     setAttachPid(Utils::ProcessHandle(process.pid));
-    setDisplayName(tr("Process %1").arg(process.pid));
+    setId(tr("Process %1").arg(process.pid));
     setInferiorExecutable(process.exe);
     setStartMode(Debugger::AttachExternal);
     setCloseMode(Debugger::DetachAtClose);
@@ -356,7 +259,7 @@ void ROSDebugRunWorker::findProcess()
     m_timeElapsed += 10;
     const QString &appName = Utils::FileUtils::normalizePathName(m_debugTargetPath);
     ProjectExplorer::DeviceProcessItem fallback;
-    foreach (const ProjectExplorer::DeviceProcessItem &p, ProjectExplorer::DeviceProcessList::localProcesses()) {
+    for (const ProjectExplorer::DeviceProcessItem &p : ProjectExplorer::DeviceProcessList::localProcesses()) {
         if (Utils::FileUtils::normalizePathName(p.exe) == appName) {
             pidFound(p);
             return;

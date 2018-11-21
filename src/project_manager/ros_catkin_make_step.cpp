@@ -68,16 +68,6 @@ ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, const Id id) :
     ctor();
 }
 
-ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, ROSCatkinMakeStep *bs) :
-    AbstractProcessStep(parent, bs),
-    m_target(bs->m_target),
-    m_catkinMakeArguments(bs->m_catkinMakeArguments),
-    m_cmakeArguments(bs->m_cmakeArguments),
-    m_makeArguments(bs->m_makeArguments)
-{
-    ctor();
-}
-
 void ROSCatkinMakeStep::ctor()
 {
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep",
@@ -360,43 +350,13 @@ QString ROSCatkinMakeStepWidget::summaryText() const
 // ROSCatkinMakeStepFactory
 //
 
-ROSCatkinMakeStepFactory::ROSCatkinMakeStepFactory(QObject *parent) :
-    IBuildStepFactory(parent)
+ROSCatkinMakeStepFactory::ROSCatkinMakeStepFactory() : BuildStepFactory()
 {
-}
-
-BuildStep *ROSCatkinMakeStepFactory::create(BuildStepList *parent, const Id id)
-{
-    Q_UNUSED(id);
-    ROSCatkinMakeStep *step = new ROSCatkinMakeStep(parent);
-    if (parent->id() == ProjectExplorer::Constants::BUILDSTEPS_CLEAN) {
-        step->setBuildTarget(ROSCatkinMakeStep::CLEAN);
-    } else if (parent->id() == ProjectExplorer::Constants::BUILDSTEPS_BUILD) {
-        step->setBuildTarget(ROSCatkinMakeStep::BUILD);
-    }
-    return step;
-}
-
-BuildStep *ROSCatkinMakeStepFactory::clone(BuildStepList *parent, BuildStep *source)
-{
-    return new ROSCatkinMakeStep(parent, qobject_cast<ROSCatkinMakeStep *>(source));
-}
-
-BuildStep *ROSCatkinMakeStepFactory::restore(BuildStepList *parent, const QVariantMap &map)
-{
-    ROSCatkinMakeStep *bs(new ROSCatkinMakeStep(parent));
-    if (bs->fromMap(map))
-        return bs;
-    delete bs;
-    return 0;
-}
-
-QList<ProjectExplorer::BuildStepInfo> ROSCatkinMakeStepFactory::availableSteps(BuildStepList *parent) const
-{
-    if (parent->target()->project()->id() != Constants::ROS_PROJECT_ID || (parent->id() != ProjectExplorer::Constants::BUILDSTEPS_CLEAN && parent->id() != ProjectExplorer::Constants::BUILDSTEPS_BUILD))
-        return {};
-
-    return {{ROS_CMS_ID,  QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep", ROS_CMS_DISPLAY_NAME)}};
+  registerStep<ROSCatkinMakeStep>(ROS_CMS_ID);
+  setFlags(BuildStepInfo::Flags::UniqueStep);
+  setDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep", ROS_CMS_DISPLAY_NAME));
+  setSupportedProjectType(Constants::ROS_PROJECT_ID);
+  setSupportedStepLists(QList<Core::Id>({ProjectExplorer::Constants::BUILDSTEPS_BUILD, ProjectExplorer::Constants::BUILDSTEPS_CLEAN}));
 }
 
 } // namespace Internal

@@ -44,70 +44,41 @@ class ROSRunConfigurationFactory;
 
 namespace Ui { class ROSRunConfiguration; class ROSLaunchConfiguration;}
 
-class ROSRunnable
-{
-public:
-    QString displayName() const { return QString("ROSRunnable"); }
-    static void *staticTypeId;
-};
-bool operator==(const ROSRunnable &r1, const ROSRunnable &r2);
-
-
 class ROSRunConfiguration : public ProjectExplorer::RunConfiguration
 {
     Q_OBJECT
     friend class ROSRunConfigurationFactory;
-    friend class ROSRunConfigurationWidget;
 
 public:
-    explicit ROSRunConfiguration(ProjectExplorer::Target *parent);
+    ROSRunConfiguration(ProjectExplorer::Target *parent, Core::Id id);
 
     // RunConfiguration
     QString disabledReason() const override;
+
     virtual QWidget *createConfigurationWidget() override;
-    Utils::OutputFormatter *createOutputFormatter() const override;
+
     QVariantMap toMap() const override;
-
-    ProjectExplorer::Abi abi() const override;
-
-    ProjectExplorer::Runnable runnable() const override;
 
     RunStepList *stepList() const;
 
 protected:
-    ROSRunConfiguration(ProjectExplorer::Target *parent, Core::Id id);
-    ROSRunConfiguration(ProjectExplorer::Target *parent,
-                               ROSRunConfiguration *source);
+
     virtual bool fromMap(const QVariantMap &map) override;
 
 private:
-    void ctor();
 
     RunStepList *m_stepList;
 };
 
-class ROSRunConfigurationFactory : public ProjectExplorer::IRunConfigurationFactory
+class ROSRunConfigurationFactory : public ProjectExplorer::RunConfigurationFactory
 {
-    Q_OBJECT
-
 public:
-    explicit ROSRunConfigurationFactory(QObject *parent = 0);
-    ~ROSRunConfigurationFactory();
+    explicit ROSRunConfigurationFactory();
+    ~ROSRunConfigurationFactory() override;
 
-    QList<Core::Id> availableCreationIds(ProjectExplorer::Target *parent, CreationMode mode) const override;
-    QString displayNameForId(Core::Id id) const override;
-
-    bool canCreate(ProjectExplorer::Target *parent, Core::Id id) const override;
-    bool canRestore(ProjectExplorer::Target *parent, const QVariantMap &map) const override;
-    bool canClone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *source) const override;
-    ProjectExplorer::RunConfiguration *clone(ProjectExplorer::Target *parent, ProjectExplorer::RunConfiguration *source) override;
-
-private:
-    bool canHandle(ProjectExplorer::Target *parent) const;
-
-    ProjectExplorer::RunConfiguration *doCreate(ProjectExplorer::Target *parent, Core::Id id) override;
-    ProjectExplorer::RunConfiguration *doRestore(ProjectExplorer::Target *parent,
-                                                 const QVariantMap &map) override;
+protected:
+    QList<ProjectExplorer::RunConfigurationCreationInfo>
+    availableCreators(ProjectExplorer::Target *parent) const override;
 };
 
 class ROSRunWorker : public ProjectExplorer::RunWorker
