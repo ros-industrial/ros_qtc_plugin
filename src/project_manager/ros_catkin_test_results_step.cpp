@@ -19,48 +19,38 @@
  * limitations under the License.
  */
 
-#include "ros_rosattach_step.h"
+#include "ros_catkin_test_results_step.h"
 #include "ros_utils.h"
 #include "ros_build_configuration.h"
 
 namespace ROSProjectManager {
 namespace Internal {
 
-ROSAttachStep::ROSAttachStep(RunStepList *rsl) : ROSGenericRunStep(rsl, Constants::ROS_ATTACH_TO_NODE_ID)
+ROSCatkinTestResultsStep::ROSCatkinTestResultsStep(RunStepList *rsl) : ROSGenericRunStep(rsl, Constants::ROS_CATKIN_TEST_RESULTS_ID)
 {
   ctor();
 }
 
-ROSAttachStep::ROSAttachStep(RunStepList *rsl, Core::Id id) : ROSGenericRunStep(rsl, id)
+ROSCatkinTestResultsStep::ROSCatkinTestResultsStep(RunStepList *rsl, Core::Id id) : ROSGenericRunStep(rsl, id)
 {
   ctor();
 }
 
-void ROSAttachStep::run()
+void ROSCatkinTestResultsStep::ctor()
 {
+  setCommand("catkin_test_results");
 }
 
-void ROSAttachStep::ctor()
+RunStepConfigWidget *ROSCatkinTestResultsStep::createConfigWidget()
 {
-  setCommand("debug");
+  return new ROSGenericRunStepConfigWidget(this, false, true, false);
 }
 
-RunStepConfigWidget *ROSAttachStep::createConfigWidget()
-{
-  return new ROSGenericRunStepConfigWidget(this, true, false, true);
-}
-
-QMap<QString, QString> ROSAttachStep::getAvailableTargets()
-{
-  ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
-  return ROSUtils::getROSPackageExecutables(getPackage(), bc->environment().toStringList());
-}
-
-ROSAttachStepFactory::ROSAttachStepFactory() :
+ROSCatkinTestResultsStepFactory::ROSCatkinTestResultsStepFactory() :
     RunStepFactory()
 {
-  registerStep<ROSAttachStep>(Constants::ROS_ATTACH_TO_NODE_ID);
-  setDisplayName("ROS Attach to Node Step");
+  registerStep<ROSCatkinTestResultsStep>(Constants::ROS_CATKIN_TEST_RESULTS_ID);
+  setDisplayName("ROS Catkin Test Results Step");
   setFlags(RunStepInfo::Flags::UniqueStep);
   setSupportedProjectType(Constants::ROS_PROJECT_ID);
   setSupportedStepList(Constants::ROS_RUN_STEP_LIST_ID);

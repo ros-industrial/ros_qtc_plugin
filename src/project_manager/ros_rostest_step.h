@@ -41,6 +41,8 @@ protected:
 
   void ctor();
 
+  RunStepConfigWidget *createConfigWidget() override;
+
   QMap<QString, QString> getAvailableTargets() override;
 
 };

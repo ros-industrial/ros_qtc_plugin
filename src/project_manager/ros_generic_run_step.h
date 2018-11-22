@@ -87,7 +87,7 @@ class ROSGenericRunStepConfigWidget : public RunStepConfigWidget
     Q_OBJECT
 
 public:
-    ROSGenericRunStepConfigWidget(ROSGenericRunStep *genericStep);
+    ROSGenericRunStepConfigWidget(ROSGenericRunStep *genericStep, bool packages_show, bool targets_show, bool debug_show);
     ~ROSGenericRunStepConfigWidget();
     QString summaryText() const override;
     QString displayName() const override;
