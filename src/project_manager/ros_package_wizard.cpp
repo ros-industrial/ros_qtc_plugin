@@ -244,30 +244,28 @@ ROSPackageWizard::ROSPackageWizard()
     setFlags(Core::IWizardFactory::PlatformIndependent);
 }
 
-Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent,
-                                                   const Core::WizardDialogParameters &parameters) const
-{
-    Q_UNUSED(parameters);
-    m_wizard = new ROSPackageWizardDialog(this, parent);
-
+Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent, const Core::WizardDialogParameters &parameters) const
+{  
     QString defaultPath = parameters.defaultPath();
 
     ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectExplorer::ProjectTree::currentProject());
 
-    if( rosProject )
+    if(!rosProject )
+        return nullptr;
+
+    ROSBuildConfiguration *bc = rosProject->rosBuildConfiguration();
+
+    if( bc )
     {
-        ROSBuildConfiguration *bc = rosProject->rosBuildConfiguration();
+        ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(),
+                                                                           bc->buildSystem(),
+                                                                           bc->project()->distribution());
 
-        if( bc )
-        {
-            ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(),
-                                                                               bc->buildSystem(),
-                                                                               bc->project()->distribution());
-
-            if( defaultPath ==  workspaceInfo.path.toString() )
-                defaultPath = workspaceInfo.sourcePath.toString();
-        }
+        if( defaultPath ==  workspaceInfo.path.toString() )
+            defaultPath = workspaceInfo.sourcePath.toString();
     }
+
+    m_wizard = new ROSPackageWizardDialog(this, parent);
 
     m_wizard->setProjectDirectory(rosProject->projectDirectory().toString() + QDir::separator());
     m_wizard->setPath(defaultPath);
