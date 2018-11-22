@@ -55,6 +55,7 @@ const char ROS_RUN_STEPS_PAGE_ID[] = "ROSProjectManager.RunSteps";
 const char ROS_LAUNCH_ID[] = "ROSProjectManager.ROSLaunchStep";
 const char ROS_RUN_ID[] = "ROSProjectManager.ROSRunStep";
 const char ROS_ATTACH_TO_NODE_ID[] = "ROSProjectManager.ROSAttachToNode";
+const char ROS_TEST_ID[] = "ROSProjectManager.ROSTestStep";
 
 // Project Exclude Extension
 const QStringList ROS_EXCLUDE_FILE_EXTENSION = QStringList() << QLatin1Literal("*.autosave") << QLatin1Literal("*.workspace");
