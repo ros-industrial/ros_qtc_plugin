@@ -143,7 +143,7 @@ ROSRunConfiguration *ROSGenericRunStep::targetsActiveRunConfiguration() const
 
 RunStepConfigWidget *ROSGenericRunStep::createConfigWidget()
 {
-    return new ROSGenericRunStepConfigWidget(this);
+    Q_ASSERT(false);
 }
 
 QString ROSGenericRunStep::getCommand() const
@@ -220,52 +220,70 @@ void ROSGenericRunStep::setDebugContinueOnAttach(const bool &contOnAttach)
 // ROSGenericRunStepConfigWidget
 //
 
-ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *genericStep)
+ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *genericStep, bool packages_show, bool args_show, bool debug_show)
     : m_rosGenericStep(genericStep),
       m_packageNames(new QStringListModel()),
       m_targetNames(new QStringListModel())
 {
     m_ui = new Ui::ROSGenericStep();
     m_ui->setupUi(this);
-    m_ui->packageComboBox->setStyleSheet(tr("combobox-popup: 0;"));
-    m_ui->targetComboBox->setStyleSheet(tr("combobox-popup: 0;"));
-    m_ui->packageComboBox->setModel(m_packageNames);
-    m_ui->targetComboBox->setModel(m_targetNames);
 
-    if (genericStep->id() == Constants::ROS_ATTACH_TO_NODE_ID) //Note this only used for Attach to Node Run Step
+
+    if (!packages_show)
     {
-        m_ui->argumentsLabel->hide();
-        m_ui->argumentsLineEdit->hide();
-        m_ui->debugCheckBox->setChecked(genericStep->getDebugContinueOnAttach());
+        m_ui->packageLabel->hide();
+        m_ui->packageComboBox->hide();
+
+        m_ui->targetLabel->hide();
+        m_ui->targetComboBox->hide();
     }
     else
     {
-         m_ui->debugLabel->hide();
-         m_ui->debugCheckBox->hide();
+      m_ui->packageComboBox->setStyleSheet(tr("combobox-popup: 0;"));
+      m_ui->packageComboBox->setModel(m_packageNames);
+      m_ui->targetComboBox->setStyleSheet(tr("combobox-popup: 0;"));
+      m_ui->targetComboBox->setModel(m_targetNames);
+
+      int idx;
+      updateAvailablePackages();
+      idx = m_ui->packageComboBox->findText(genericStep->getPackage(), Qt::MatchExactly);
+      m_ui->packageComboBox->setCurrentIndex(idx);
+
+      updateAvailableTargets();
+      idx = m_ui->targetComboBox->findText(genericStep->getTarget(), Qt::MatchExactly);
+      m_ui->targetComboBox->setCurrentIndex(idx);
+
+      connect(m_ui->packageComboBox, SIGNAL(currentIndexChanged(QString)),
+              this, SLOT(packageComboBox_currentIndexChanged(QString)));
+
+      connect(m_ui->targetComboBox, SIGNAL(currentIndexChanged(QString)),
+              this, SLOT(targetComboBox_currentIndexChanged(QString)));
     }
 
-    int idx;
-    updateAvailablePackages();
-    idx = m_ui->packageComboBox->findText(genericStep->getPackage(), Qt::MatchExactly);
-    m_ui->packageComboBox->setCurrentIndex(idx);
+    if (!args_show)
+    {
+        m_ui->argumentsLabel->hide();
+        m_ui->argumentsLineEdit->hide();
+    }
+    else
+    {
+        m_ui->argumentsLineEdit->setText(genericStep->getArguments());
 
-    updateAvailableTargets();
-    idx = m_ui->targetComboBox->findText(genericStep->getTarget(), Qt::MatchExactly);
-    m_ui->targetComboBox->setCurrentIndex(idx);
+        connect(m_ui->argumentsLineEdit, SIGNAL(textChanged(QString)),
+                this, SLOT(argumentsLineEdit_textChanged(QString)));
+    }
 
-    m_ui->argumentsLineEdit->setText(genericStep->getArguments());
-
-    connect(m_ui->debugCheckBox, SIGNAL(toggled(bool)),
-            this, SLOT(debugCheckBox_toggled(bool)));
-
-    connect(m_ui->packageComboBox, SIGNAL(currentIndexChanged(QString)),
-            this, SLOT(packageComboBox_currentIndexChanged(QString)));
-
-    connect(m_ui->targetComboBox, SIGNAL(currentIndexChanged(QString)),
-            this, SLOT(targetComboBox_currentIndexChanged(QString)));
-
-    connect(m_ui->argumentsLineEdit, SIGNAL(textChanged(QString)),
-            this, SLOT(argumentsLineEdit_textChanged(QString)));
+    if (!debug_show) //Note this only used for Attach to Node Run Step
+    {
+        m_ui->debugLabel->hide();
+        m_ui->debugCheckBox->hide();
+    }
+    else
+    {
+        m_ui->debugCheckBox->setChecked(genericStep->getDebugContinueOnAttach());
+        connect(m_ui->debugCheckBox, SIGNAL(toggled(bool)),
+                this, SLOT(debugCheckBox_toggled(bool)));
+    }
 
     connect(ProjectExplorer::BuildManager::instance(), &ProjectExplorer::BuildManager::buildQueueFinished,
             this, &ROSGenericRunStepConfigWidget::updateAvailablePackages);

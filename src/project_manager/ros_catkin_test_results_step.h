@@ -18,8 +18,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ROS_ROSRUN_STEP_H
-#define ROS_ROSRUN_STEP_H
+#ifndef ROS_CATKIN_TEST_RESULTS_STEP_H
+#define ROS_CATKIN_TEST_RESULTS_STEP_H
 
 #include "ros_generic_run_step.h"
 
@@ -28,31 +28,30 @@ namespace Internal {
 
 namespace Ui { class ROSGenericStep; }
 
-class ROSRunStep : public ROSGenericRunStep
+class ROSCatkinTestResultsStep : public ROSGenericRunStep
 {
   Q_OBJECT
-  friend class ROSRunStepFactory;
+  friend class ROSCatkinTestResultsStepFactory;
 
 public:
-  ROSRunStep(RunStepList *rsl);
+  ROSCatkinTestResultsStep(RunStepList *rsl);
 
 protected:
-  ROSRunStep(RunStepList *rsl, Core::Id id);
+  ROSCatkinTestResultsStep(RunStepList *rsl, Core::Id id);
 
   void ctor();
 
   RunStepConfigWidget *createConfigWidget() override;
 
-  QMap<QString, QString> getAvailableTargets() override;
-
 };
 
-class ROSRunStepFactory : public RunStepFactory
+class ROSCatkinTestResultsStepFactory : public RunStepFactory
 {
 public:
-    ROSRunStepFactory();
+    ROSCatkinTestResultsStepFactory();
 };
 
 } // Internal
 } // ROSProjectManager
-#endif // ROS_ROSRUN_STEP_H
+
+#endif // ROS_CATKIN_TEST_RESULTS_STEP_H

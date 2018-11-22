@@ -35,6 +35,11 @@ ROSLaunchStep::ROSLaunchStep(RunStepList *rsl, Core::Id id) : ROSGenericRunStep(
   ctor();
 }
 
+RunStepConfigWidget *ROSLaunchStep::createConfigWidget()
+{
+  return new ROSGenericRunStepConfigWidget(this, true, true, false);
+}
+
 QMap<QString, QString> ROSLaunchStep::getAvailableTargets()
 {
   return ROSUtils::getROSPackageLaunchFiles(getPackagePath());

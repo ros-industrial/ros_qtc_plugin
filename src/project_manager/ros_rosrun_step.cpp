@@ -41,6 +41,11 @@ void ROSRunStep::ctor()
   setCommand("rosrun");
 }
 
+RunStepConfigWidget *ROSRunStep::createConfigWidget()
+{
+  return new ROSGenericRunStepConfigWidget(this, true, true, false);
+}
+
 QMap<QString, QString> ROSRunStep::getAvailableTargets()
 {
   ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());

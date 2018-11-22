@@ -26,6 +26,7 @@
 #include "ros_roslaunch_step.h"
 #include "ros_rosattach_step.h"
 #include "ros_rostest_step.h"
+#include "ros_catkin_test_results_step.h"
 #include "ros_project_wizard.h"
 #include "ros_project_constants.h"
 #include "ros_catkin_make_step.h"
@@ -92,6 +93,7 @@ public:
     ROSLaunchStepFactory rosLaunchStepFactory;
     ROSAttachStepFactory rosAttachStepFactory;
     ROSTestStepFactory rosTestStepFactory;
+    ROSCatkinTestResultsStepFactory rosCatkinTestResultsStepFactory;
 
     ROSBuildConfigurationFactory buildConfigFactory;
     ROSCatkinMakeStepFactory catkinMakeStepFactory;
