@@ -36,7 +36,6 @@ const char ROS_DEFAULT_WORKING_DIR[] = "%{CurrentProject:Path}";
 const char ROS_READING_PROJECT[] = "ROSProjectManager.ReadingProject";
 const char ROS_RELOADING_BUILD_INFO[] = "ROSProjectManager.ReloadingBuildInfo";
 
-
 // ROS default install directory
 const char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
 
@@ -80,6 +79,13 @@ const QStringList HEADER_FILE_EXTENSIONS = QStringList() << QLatin1Literal("h")
                                                          << QLatin1Literal("h++")
                                                          << QLatin1Literal("hp")
                                                          << QLatin1Literal("hxx");
+
+// ROS Settings Widgets
+const char ROS_SETTINGS_GROUP_ID[] = "ROSProjectManager.ROSSettingsGroup";
+const char ROS_SETTINGS_CATEGORY_ID[] = "ROSProjectManager.ROSSettingsCategory";
+const char ROS_SETTINGS_CATEGORY_NAME_ID[] = "ROSProjectManager.ROSSettingsCategoryName";
+const char ROS_SETTINGS_MAIN_PAGE_ID[] = "ROSProjectManager.ROSSettingsMainPage";
+const char ROS_SETTINGS_MAIN_PAGE_NAME_ID[] = "ROSProjectManager.ROSSettingsMainPageName";
 
 } // namespace Constants
 } // namespace ROSProjectManager
