@@ -33,6 +33,8 @@ class Node;
 namespace ROSProjectManager {
 namespace Internal {
 
+class ROSSettings;
+
 class ROSProjectPlugin : public ExtensionSystem::IPlugin
 {
     Q_OBJECT
@@ -46,7 +48,19 @@ public:
 
     static ROSProjectPlugin *instance();
 
+    /**
+     * @brief Start a terminal in the tabbed terminal widget
+     * @param startnow If 1 the terminal shell is started
+     * @param name Tab name in the tabbed terminal widget
+     * @return A a reference to the created terminal
+     */
     QTermWidget &startTerminal(int startnow = 1, const QString name = QString());
+
+    /**
+     * @brief Get ROS Main settings
+     * @return ROS Settings
+     */
+    QSharedPointer<ROSSettings> settings() const;
 
 private slots:
 

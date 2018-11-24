@@ -35,6 +35,7 @@
 #include "ros_utils.h"
 #include "ros_project_constants.h"
 #include "ros_package_wizard.h"
+#include "ros_settings_page.h"
 #include "remove_directory_dialog.h"
 
 #include <coreplugin/icore.h>
@@ -88,6 +89,13 @@ static ROSProjectPlugin *m_instance = nullptr;
 class ROSProjectPluginPrivate
 {
 public:
+    ROSProjectPluginPrivate() :
+      settings(new ROSSettings()),
+      settingsPage(new ROSSettingsPage(settings))
+    {
+      settings->fromSettings(ICore::settings());
+    }
+
     ROSRunConfigurationFactory runConfigFactory;
     ROSRunStepFactory rosRunStepFactory;
     ROSLaunchStepFactory rosLaunchStepFactory;
@@ -100,6 +108,9 @@ public:
     ROSCatkinToolsStepFactory catkinToolsStepFactory;
 
     ROSTerminalPane terminalPane;
+
+    QSharedPointer<ROSSettings> settings;
+    QSharedPointer<ROSSettingsPage> settingsPage;
 };
 
 ROSProjectPlugin::ROSProjectPlugin() : ExtensionSystem::IPlugin()
@@ -181,6 +192,11 @@ QTermWidget &ROSProjectPlugin::startTerminal(int startnow, const QString name)
   return d->terminalPane.startTerminal(startnow, name);
 }
 
+QSharedPointer<ROSSettings> ROSProjectPlugin::settings() const
+{
+    return d->settings;
+}
+
 void ROSProjectPlugin::createCppCodeStyle()
 {
   TextEditor::CodeStylePool *pool = TextEditor::TextEditorSettings::codeStylePool(CppTools::Constants::CPP_SETTINGS_ID);
@@ -190,6 +206,7 @@ void ROSProjectPlugin::createCppCodeStyle()
   rosCodeStyle->setId(Constants::ROS_CPP_CODE_STYLE_ID);
   rosCodeStyle->setDisplayName(tr("ROS"));
   rosCodeStyle->setReadOnly(true);
+
   TextEditor::TabSettings rosTabSettings;
   rosTabSettings.m_tabPolicy = TextEditor::TabSettings::SpacesOnlyTabPolicy;
   rosTabSettings.m_tabSize = 2;
