@@ -48,9 +48,9 @@ Installation Procedure for Ubuntu 14.04
 
 #. Download Installer:
 
-   #. `Trusty Online Installer <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/trusty/qtcreator-ros-trusty-latest-online-installer.run>`_ (Recommended)
+   #. `Trusty Online Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/trusty/qtcreator-ros-trusty-latest-online-installer.run>`_ (Recommended)
 
-   #. `Trusty Offline Installer <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/trusty/qtcreator-ros-trusty-latest-offline-installer.run>`_
+   #. `Trusty Offline Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/trusty/qtcreator-ros-trusty-latest-offline-installer.run>`_
 
    .. Note::
 
@@ -76,7 +76,7 @@ Installation Procedure for Ubuntu 14.04
 Archived Versions
 ~~~~~~~~~~~~~~~~~
 
-If for some reason you need a version other than the latest, all installers may be found `here <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/installers/>`_.
+If for some reason you need a version other than the latest, all installers may be found `here <https://qtcreator-ros.datasys.swri.edu/downloads/installers/>`_.
 
 
 Qt Installer Procedure
