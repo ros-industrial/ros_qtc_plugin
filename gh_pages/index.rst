@@ -13,9 +13,9 @@ Installation
 .. toctree::
    :maxdepth: 1
 
-   Installation Video (Users) <https://aeswiki.datasys.swri.edu/qtcreator_ros/downloads/tutorials/videos/introduction/>
    Installation Instructions (Users) <_source/How-to-Install-Users.rst>
    Installation Instructions (Developers) <_source/Improve-ROS-Qt-Creator-Plugin-Developers-ONLY>
+   Installation Video (Users) <https://qtcreator-ros.datasys.swri.edu/downloads/tutorials/videos/introduction/(Part%201)%20ROS%20QT%20Intro%20-%20Installation.mp4>
 
 FAQ
 ---
@@ -33,6 +33,17 @@ Users Help
    Setup Qt Creator for ROS <_source/Setup-Qt-Creator-for-ROS.rst>
    Import ROS Workspace <_source/Import-ROS-Workspace.rst>
    Debugging Catkin Workspace <_source/Debugging-Catkin-Workspace.rst>
+
+Tutorial Videos
+---------------
+
+.. toctree::
+   :maxdepth: 1
+
+   ROS Qt Intro - Import, Build, and Run Settings <https://qtcreator-ros.datasys.swri.edu/downloads/tutorials/videos/introduction/(Part%202)%20ROS%20QT%20Intro%20-%20Import,%20Build,%20and%20Run%20Settings.mp4>
+   ROS Qt Intro - Hello World! (Part 1) <https://qtcreator-ros.datasys.swri.edu/downloads/tutorials/videos/introduction/(Part%203)%20ROS%20QT%20Intro%20-%20Hello%20World!.mp4>
+   ROS Qt Intro - Hello World! (Part 2) <https://qtcreator-ros.datasys.swri.edu/downloads/tutorials/videos/introduction/(Part%204)%20ROS%20QT%20Intro%20-%20Hello%20World!.mp4>
+   ROS Qt Intro - Indexing and IDE Preferences (Part 2) <https://qtcreator-ros.datasys.swri.edu/downloads/tutorials/videos/introduction/(Part%205)%20ROS%20QT%20Intro%20-%20Indexing%20and%20IDE%20Preferences.mp4>
 
 Developers Help
 ---------------
