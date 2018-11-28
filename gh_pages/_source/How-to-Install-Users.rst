@@ -11,6 +11,21 @@ Installation
 
    The install method has changed from using the ppa method to a custom installer. This is to enable the ability to provide richer support leveraging existing ros tools which was not possible using the ppa.
 
+Installation Procedure for Ubuntu 18.04
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#. Download Installer:
+
+   #. `Bionic Online Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/bionic/qtcreator-ros-bionic-latest-online-installer.run>`_ (Recommended)
+
+   #. `Bionic Offline Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/bionic/qtcreator-ros-bionic-latest-offline-installer.run>`_
+
+   .. Note::
+
+      The Offline Installer is to be used on machines that do not have internet access.
+
+#. Next proceed to `Qt Installer Procedure`_
+
 Installation Procedure for Ubuntu 16.04
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
