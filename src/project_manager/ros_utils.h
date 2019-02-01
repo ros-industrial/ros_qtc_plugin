@@ -234,11 +234,13 @@ public:
     /**
      * @brief Gets all fo the files in a given folder
      * @param folderPath Path to the foder
-     * @param fileList List of files in directory
+     * @param fileList List of files in directory and sub directories
+     * @param fileList List of sub directories
      * @return QHash<QString, FolderContent> Directory, FolderContent
      */
     static QHash<QString, FolderContent> getFolderContent(const Utils::FileName &folderPath,
-                                                          QStringList &fileList);
+                                                          QStringList &fileList,
+                                                          QStringList &directoryList);
 
     /**
      * @brief Get relevant workspace information

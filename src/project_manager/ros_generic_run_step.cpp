@@ -144,6 +144,7 @@ ROSRunConfiguration *ROSGenericRunStep::targetsActiveRunConfiguration() const
 RunStepConfigWidget *ROSGenericRunStep::createConfigWidget()
 {
     Q_ASSERT(false);
+    return nullptr;
 }
 
 QString ROSGenericRunStep::getCommand() const
