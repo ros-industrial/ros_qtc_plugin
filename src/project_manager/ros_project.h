@@ -21,8 +21,6 @@
 #ifndef ROSPROJECT_H
 #define ROSPROJECT_H
 
-#include "ros_workspace_watcher.h"
-#include "ros_project_nodes.h"
 #include "ros_project_plugin.h"
 #include "ros_utils.h"
 
@@ -34,7 +32,10 @@
 #include <coreplugin/idocument.h>
 
 #include <QFuture>
+#include <QFutureWatcher>
 #include <QFutureInterface>
+#include <QTimer>
+#include <QFileSystemWatcher>
 
 namespace CppTools {
     class CppProjectUpdater;
@@ -66,25 +67,39 @@ public:
 
 public slots:
     void buildQueueFinished(bool success);
+    void fileSystemChanged();
+    void updateProjectTree();
 
 protected:
     Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage) override;
 
 private:
+    void asyncUpdate();
     bool saveProjectFile();
-    void parseProjectFile();
-
-    void update();
     void refreshCppCodeModel(bool success);
 
+    static void buildProjectTree(const Utils::FileName& projectFilePath,
+                                 const QStringList& watchDirectories,
+                                 QFutureInterface<ProjectExplorer::ProjectNode*> &fi,
+                                 QHash<QString, ROSUtils::FolderContent> &workspaceContent,
+                                 QStringList &files,
+                                 QStringList &directories);
+
     ROSUtils::ROSProjectFileContent m_projectFileContent;
-    QFutureInterface<void>         *m_projectFutureInterface = nullptr;
     ROSUtils::PackageInfoMap        m_wsPackageInfo;
     ROSUtils::PackageBuildInfoMap   m_wsPackageBuildInfo;
     Utils::Environment              m_wsEnvironment;
 
     CppTools::CppProjectUpdater *m_cppCodeModelUpdater;
-    ROSWorkspaceWatcher         *m_workspaceWatcher;
+
+    // Watching Directories to keep Project Tree updated
+    QTimer m_asyncUpdateTimer;
+    QFutureInterface<ProjectExplorer::ProjectNode*> *m_asyncUpdateFutureInterface = nullptr;
+    QFileSystemWatcher m_watcher;
+    QHash<QString, ROSUtils::FolderContent> m_workspaceContent;
+    QStringList m_workspaceFiles;
+    QStringList m_workspaceDirectories;
+    QFutureWatcher<ProjectExplorer::ProjectNode*> m_futureWatcher;
 };
 
 } // namespace Internal

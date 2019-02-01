@@ -19,7 +19,6 @@
  * limitations under the License.
  */
 #include "ros_project_nodes.h"
-#include "ros_project.h"
 #include "ros_project_constants.h"
 
 #include <utils/fileutils.h>
@@ -33,156 +32,25 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
-ROSProjectNode::ROSProjectNode(const Utils::FileName &projectFilePath)
-    : ProjectNode(projectFilePath)
+ROSProjectNode::ROSProjectNode(const Utils::FileName &projectFilePath) : ProjectNode(projectFilePath)
 {
     setDisplayName(projectFilePath.toFileInfo().completeBaseName());
 }
 
-bool ROSProjectNode::removeFile(const QString &parentPath, const QString &fileName)
+FileNode *ROSProjectNode::findFileNode(FolderNode *folder_node, const Utils::FileName &filePaths)
 {
-  FolderNode *folder = findFolderbyAbsolutePath(parentPath);
-  for (FileNode *fn : folder->fileNodes())
+  FileNode* file_node = folder_node->fileNode(filePaths);
+  if (file_node)
+      return file_node;
+
+  for (FolderNode *fn : folder_node->folderNodes())
   {
-      if (fn->filePath().fileName() == fileName)
-      {
-          folder->takeNode(fn);
-          return true;
-      }
-  }
-  return false;
-}
-
-bool ROSProjectNode::addFile(const QString &parentPath, const QString &fileName)
-{
-  FolderNode *folder = findFolderbyAbsolutePath(parentPath);
-  if(!folder)
-    folder = createFolderbyAbsolutePath(parentPath);
-
-  QFileInfo fileInfo(QDir(parentPath), fileName);
-
-  FileType fileType = FileType::Resource;
-
-  if (Constants::SOURCE_FILE_EXTENSIONS.contains(fileInfo.suffix()))
-    fileType = FileType::Header;
-  else if(Constants::HEADER_FILE_EXTENSIONS.contains(fileInfo.suffix()))
-    fileType = FileType::Source;
-
-  std::unique_ptr<FileNode> fileNode(new FileNode(Utils::FileName::fromString(fileInfo.absoluteFilePath()),
-                                     fileType, /*generated = */ false));
-
-  folder->addNode(std::move(fileNode));
-  return true;
-}
-
-bool ROSProjectNode::renameFile(const QString &parentPath, const QString &oldFileName, const QString &newFileName)
-{
-  FolderNode *folder = findFolderbyAbsolutePath(parentPath);
-  for (FileNode *fn : folder->fileNodes())
-  {
-      if (fn->filePath().fileName() == oldFileName)
-      {
-          QFileInfo fileInfo(QDir(parentPath), newFileName);
-          fn->setAbsoluteFilePathAndLine(Utils::FileName::fromString(fileInfo.absoluteFilePath()),-1);
-          return true;
-      }
-  }
-  return false;
-}
-
-bool ROSProjectNode::removeDirectory(const QString &parentPath, const QString &dirName)
-{
-  FolderNode *folder = findFolderbyAbsolutePath(parentPath);
-  for (FolderNode *fn : folder->folderNodes())
-  {
-      if (getFolderName(fn) == dirName)
-      {
-        folder->takeNode(fn);
-        return true;
-      }
-  }
-  return false;
-}
-
-bool ROSProjectNode::addDirectory(const QString &parentPath, const QString &dirName)
-{
-  return addDirectory(QString::fromLatin1("%1/%2").arg(parentPath, dirName));
-}
-
-bool ROSProjectNode::addDirectory(const QString &dirPath)
-{
-  FolderNode *folder = findFolderbyAbsolutePath(dirPath);
-  if (!folder)
-    createFolderbyAbsolutePath(dirPath);
-
-  return true;
-}
-
-bool ROSProjectNode::renameDirectory(const QString &parentPath, const QString &oldDirName, const QString &newDirName)
-{
-  QString newFilePath = QString::fromLatin1("%1/%2").arg(parentPath, newDirName);
-  QString oldFilePath = QString::fromLatin1("%1/%2").arg(parentPath, oldDirName);
-  FolderNode *folder = findFolderbyAbsolutePath(oldFilePath);
-  Utils::FileName folderPath =  Utils::FileName::fromString(newFilePath + QLatin1Char('/'));
-  folder->setAbsoluteFilePathAndLine(folderPath, -1);
-  folder->setDisplayName(newDirName);
-  renameDirectoryHelper(folder);
-
-  return true;
-}
-
-void ROSProjectNode::renameDirectoryHelper(FolderNode * &folder)
-{
-  // Update Files
-  for (FileNode *fn : folder->fileNodes())
-  {
-    QString newFilePath = folder->filePath().toString() + fn->displayName();
-    fn->setAbsoluteFilePathAndLine(Utils::FileName::fromString(newFilePath), -1);
+    file_node = findFileNode(fn, filePaths);
+    if (file_node)
+        return file_node;
   }
 
-  // Update subFolders
-  for (FolderNode *fn : folder->folderNodes()) {
-    QString newFilePath = folder->filePath().toString() + getFolderName(fn) + QLatin1Char('/');
-    fn->setAbsoluteFilePathAndLine(Utils::FileName::fromString(newFilePath), -1);
-    renameDirectoryHelper(fn);
-  }
-}
-
-FolderNode *ROSProjectNode::findFolderbyAbsolutePath(const QString &absolutePath)
-{
-  Utils::FileName temp = filePath().parentDir();
-  if (temp.toString() != absolutePath)
-  {
-    Utils::FileName folder = Utils::FileName::fromString(absolutePath);
-    FolderNode *parent = findFolderbyAbsolutePath(folder.parentDir().toString());
-
-    if (!parent)
-        return 0;
-
-    for (FolderNode *fn : parent->folderNodes()) {
-        if (fn->filePath().toString() == (absolutePath + QLatin1Char('/')))
-            return fn;
-    }
-
-    return 0;
-  }
-  else
-  {
-    return asFolderNode();
-  }
-}
-
-FolderNode *ROSProjectNode::createFolderbyAbsolutePath(const QString &absolutePath)
-{
-  Utils::FileName folder = Utils::FileName::fromString(absolutePath);
-  std::unique_ptr<FolderNode> folderNode(new ROSFolderNode(Utils::FileName::fromString(absolutePath + QLatin1Char('/')), folder.fileName()));
-  FolderNode *parent = findFolderbyAbsolutePath(folder.parentDir().toString());
-
-  if (!parent)
-      parent = createFolderbyAbsolutePath(folder.parentDir().toString());
-
-  parent->addNode(std::move(folderNode));
-  return findFolderbyAbsolutePath(absolutePath);
+  return nullptr;
 }
 
 bool ROSProjectNode::showInSimpleTree() const
@@ -207,17 +75,31 @@ bool ROSProjectNode::supportsAction(ProjectExplorer::ProjectAction action, const
     }
 }
 
-QString ROSProjectNode::getFolderName(FolderNode *folderNode) const
+ROSFolderNode::ROSFolderNode(const Utils::FileName &folderPath, const QString  &displayName) : FolderNode(folderPath, ProjectExplorer::NodeType::Folder, displayName), m_repository(nullptr)
 {
-  QString path = getFolderPath(folderNode);
-  return Utils::FileName::fromString(path).fileName();
+    QString path = this->filePath().toString();
+
+    if (Core::IVersionControl *vc = Core::VcsManager::findVersionControlForDirectory(path))
+    {
+        if (path == Core::VcsManager::findTopLevelForDirectory(path))
+        {
+            m_repository = vc;
+        }
+    }
 }
 
-QString ROSProjectNode::getFolderPath(FolderNode *folderNode) const
+QString ROSFolderNode::displayName() const
 {
-  QString path = folderNode->filePath().toString();
-  path.chop(1);
-  return path;
+    if (m_repository)
+    {
+        QString path = this->filePath().toString();
+        QString name = Utils::FileName::fromString(path).fileName();
+        return QString::fromLatin1("%1 [%2]").arg(name, m_repository->vcsTopic(path));
+    }
+    else
+    {
+        return this->FolderNode::displayName();
+    }
 }
 
 } // namespace Internal

@@ -355,7 +355,7 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FileName &filePath, ROSP
     return false;
 }
 
-QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::FileName &folderPath, QStringList &fileList)
+QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::FileName &folderPath, QStringList &fileList, QStringList& directoryList)
 {
     QHash<QString, ROSUtils::FolderContent> workspaceFiles;
     ROSUtils::FolderContent content;
@@ -376,6 +376,9 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
 
     for (const QString& file : content.files)
         fileList.append(QDir(folder).absoluteFilePath(file));
+
+    for (const QString& directory : content.directories)
+        directoryList.append(QDir(folder).absoluteFilePath(directory));
 
     // Get SubDirectory Information
     const QDir subDir(folder);
@@ -413,6 +416,9 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
 
         for (const QString& file : content.files)
             fileList.append(QDir(folder).absoluteFilePath(file));
+
+        for (const QString& directory : content.directories)
+            directoryList.append(QDir(folder).absoluteFilePath(directory));
     }
 
     return workspaceFiles;
