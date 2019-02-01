@@ -30,6 +30,7 @@
 #include <projectexplorer/toolchain.h>
 #include <projectexplorer/buildconfiguration.h>
 #include <coreplugin/idocument.h>
+#include <cpptools/cpprawprojectpart.h>
 
 #include <QFuture>
 #include <QFutureWatcher>
@@ -68,7 +69,10 @@ public:
 public slots:
     void buildQueueFinished(bool success);
     void fileSystemChanged();
+
+private slots:
     void updateProjectTree();
+    void updateCppCodeModel();
 
 protected:
     Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage) override;
@@ -76,7 +80,8 @@ protected:
 private:
     void asyncUpdate();
     bool saveProjectFile();
-    void refreshCppCodeModel(bool success);
+    void asyncUpdateCppCodeModel(bool success);
+    void updateEnvironment();
 
     static void buildProjectTree(const Utils::FileName& projectFilePath,
                                  const QStringList& watchDirectories,
@@ -84,6 +89,15 @@ private:
                                  QHash<QString, ROSUtils::FolderContent> &workspaceContent,
                                  QStringList &files,
                                  QStringList &directories);
+
+    static void buildCppCodeModel(const ROSUtils::WorkspaceInfo& workspaceInfo,
+                                  const Utils::FileName& projectFilePath,
+                                  const QStringList workspaceFiles,
+                                  const ProjectExplorer::Kit *k,
+                                  QFutureInterface<CppTools::RawProjectParts> &fi,
+                                  ROSUtils::PackageInfoMap& wsPackageInfo,
+                                  ROSUtils::PackageBuildInfoMap& wsPackageBuildInfo,
+                                  Utils::Environment& wsEnvironment);
 
     ROSUtils::ROSProjectFileContent m_projectFileContent;
     ROSUtils::PackageInfoMap        m_wsPackageInfo;
@@ -100,6 +114,11 @@ private:
     QStringList m_workspaceFiles;
     QStringList m_workspaceDirectories;
     QFutureWatcher<ProjectExplorer::ProjectNode*> m_futureWatcher;
+
+    // Parse Code Blocks Files and build Code Model
+    QFutureInterface<CppTools::RawProjectParts> *m_asyncBuildCodeModelFutureInterface = nullptr;
+    QFutureWatcher<CppTools::RawProjectParts> m_futureBuildCodeModelWatcher;
+
 };
 
 } // namespace Internal
