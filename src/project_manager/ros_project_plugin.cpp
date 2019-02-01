@@ -248,25 +248,8 @@ void ROSProjectPlugin::createCppCodeStyle()
 
 void ROSProjectPlugin::reloadProjectBuildInfo()
 {
-    QFutureInterface<void> f;
-
-    f.setProgressRange(0, 100);
-    Core::ProgressManager::addTask(f.future(),
-                                   tr("Reloading Project Build Info"),
-                                   Constants::ROS_RELOADING_BUILD_INFO);
-
-    f.reportStarted();
-    ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectTree::currentProject());
-    if (rosProject) {
-        rosProject->refreshCppCodeModel(true);
-        f.setProgressValue(100);
-        f.reportFinished();
-        return;
-    }
-
-    f.reportCanceled();
-    f.reportFinished();
-    return;
+    if (ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectTree::currentProject()))
+        rosProject->asyncUpdateCppCodeModel(true);
 }
 
 void ROSProjectPlugin::removeProjectDirectory()
