@@ -79,7 +79,7 @@ bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspace
     }
     else
     {
-        qDebug() << "Warning: Failed to source workspace because this file does not exist: " << bash.path.toString();
+        qDebug() << "Warning: Failed to source workspace because this file does not exist: " << bash.toString();
         return true;
     }
 
