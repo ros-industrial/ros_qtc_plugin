@@ -24,6 +24,7 @@
 #include "ui_ros_generic_configuration.h"
 
 #include <projectexplorer/buildmanager.h>
+#include <coreplugin/messagemanager.h>
 
 #include <QStringListModel>
 
@@ -87,7 +88,7 @@ void ROSGenericRunStep::run()
   else if (shell.fileName() == "zsh")
        source_cmd = QString("source %1\n").arg(workspaceInfo.develPath.appendPath("setup.zsh").toString());
   else
-       qDebug() << QString("The shell: %1 is currently not supported (Use bash, sh, or zsh)!").arg(shell.toString());
+       Core::MessageManager::write(tr("[ROS Error] The shell: %1 is currently not supported (Use bash, sh, or zsh)!").arg(shell.toString()));
 
   //create terminal without starting shell
   QTermWidget &terminal = ROSProjectPlugin::instance()->startTerminal(0, command);

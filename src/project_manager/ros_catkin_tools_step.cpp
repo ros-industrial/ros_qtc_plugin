@@ -40,6 +40,7 @@
 #include <utils/qtcprocess.h>
 #include <cmakeprojectmanager/cmakeparser.h>
 #include <coreplugin/variablechooser.h>
+#include <coreplugin/messagemanager.h>
 
 #include <fstream>
 #include <QDir>
@@ -731,7 +732,7 @@ bool ROSCatkinToolsConfigEditorWidget::parseProfileConfig(Utils::FileName filePa
     m_profileConfigPath = filePath;
     if (!m_profileConfigPath.exists())
     {
-        qWarning() << QString("Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString());
+        Core::MessageManager::write(tr("[ROS Warning] Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString()));
         return false;
     }
     m_parsing = true;
@@ -820,7 +821,7 @@ bool ROSCatkinToolsConfigEditorWidget::saveProfileConfig()
 {
     if (!m_profileConfigPath.exists())
     {
-        qWarning() << QString("Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString());
+        Core::MessageManager::write(tr("[ROS Warning] Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString()));
         return false;
     }
 

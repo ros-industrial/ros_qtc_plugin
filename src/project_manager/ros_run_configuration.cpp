@@ -29,6 +29,7 @@
 #include <coreplugin/coreicons.h>
 #include <coreplugin/icore.h>
 #include <coreplugin/idocument.h>
+#include <coreplugin/messagemanager.h>
 #include <projectexplorer/target.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorericons.h>
@@ -102,12 +103,12 @@ bool ROSRunConfiguration::fromMap(const QVariantMap &map)
 {
     QVariantMap data = map.value(Constants::ROS_RUN_STEP_LIST_ID).toMap();
     if (data.isEmpty()) {
-        qWarning() << "No data for ROS run step list found!";
+        Core::MessageManager::write(tr("[ROS Warning] No data for ROS run step list found!"));
         return false;
     }
     RunStepList *list = new RunStepList(this, Constants::ROS_RUN_STEP_LIST_ID);
     if (!list->fromMap(data)) {
-        qWarning() << "Failed to restore ROS run step list!";
+        Core::MessageManager::write(tr("[ROS Warning] Failed to restore ROS run step list!"));
         delete list;
         return false;
     }
@@ -261,6 +262,7 @@ void ROSDebugRunWorker::findProcess()
     ProjectExplorer::DeviceProcessItem fallback;
     for (const ProjectExplorer::DeviceProcessItem &p : ProjectExplorer::DeviceProcessList::localProcesses()) {
         if (Utils::FileUtils::normalizePathName(p.exe) == appName) {
+            Core::MessageManager::write(tr("[ROS] Attaching to process: %1.").arg(appName));
             pidFound(p);
             return;
         }
@@ -272,7 +274,10 @@ void ROSDebugRunWorker::findProcess()
 
     // Make sure this does not run indefinitely. Allow 30sec to start the process.
     if (m_timeElapsed >= 30000)
+    {
         m_timer.stop();
+        Core::MessageManager::write(tr("[ROS Error] Unable to find process: %1.").arg(appName));
+    }
 }
 
 } // namespace Internal
