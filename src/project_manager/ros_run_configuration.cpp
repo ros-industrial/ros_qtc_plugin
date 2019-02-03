@@ -252,7 +252,7 @@ void ROSDebugRunWorker::pidFound(ProjectExplorer::DeviceProcessItem process)
     setStartMode(Debugger::AttachExternal);
     setCloseMode(Debugger::DetachAtClose);
     setContinueAfterAttach(m_debugContinueOnAttach);
-    startRunControl();
+    DebuggerRunTool::start();
 }
 
 void ROSDebugRunWorker::findProcess()
