@@ -27,6 +27,7 @@
 
 #include <coreplugin/icore.h>
 #include <coreplugin/coreicons.h>
+#include <coreplugin/messagemanager.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/customwizard/customwizard.h>
 #include <projectexplorer/projecttree.h>
@@ -355,7 +356,7 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   }
   else
   {
-    qDebug() << "Faild to create catkin package.";
+    Core::MessageManager::write(tr("[ROS Error] Faild to create catkin package."));
     success = false;
   }
 

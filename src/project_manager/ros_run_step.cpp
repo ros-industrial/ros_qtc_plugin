@@ -21,6 +21,7 @@
 #include "ros_run_step.h"
 #include "ros_project_constants.h"
 
+#include <coreplugin/messagemanager.h>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/kitinformation.h>
 #include <projectexplorer/project.h>
@@ -330,7 +331,7 @@ bool RunStepList::fromMap(const QVariantMap &map)
     for (int i = 0; i < maxSteps; ++i) {
         QVariantMap rsData(map.value(QString::fromLatin1(STEPS_PREFIX) + QString::number(i)).toMap());
         if (rsData.isEmpty()) {
-            qWarning() << "No step data found for" << i << "(continuing).";
+            Core::MessageManager::write(tr("[ROS Warning] No step data found for step %1 (continuing).").arg(i));
             continue;
         }
         bool handled = false;
@@ -342,7 +343,7 @@ bool RunStepList::fromMap(const QVariantMap &map)
                         appendStep(rs);
                         handled = true;
                     } else {
-                        qWarning() << "Restoration of step" << i << "failed (continuing).";
+                        Core::MessageManager::write(tr("[ROS Warning] Restoration of step %1 failed (continuing).").arg(i));
                     }
                 }
             }

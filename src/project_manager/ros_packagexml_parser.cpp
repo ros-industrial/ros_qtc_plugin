@@ -20,7 +20,7 @@
  */
 
 #include "ros_packagexml_parser.h"
-
+#include <coreplugin/messagemanager.h>
 #include <QFile>
 #include <QDebug>
 
@@ -50,7 +50,7 @@ bool ROSPackageXmlParser::parsePackageXml(const Utils::FileName &filepath)
         return true;
     }
 
-    qDebug() << QString("Failed to parse file: %1").arg(m_packageInfo.filepath.toString());
+    Core::MessageManager::write(QObject::tr("[ROS Error] Failed to parse file: %1.").arg(m_packageInfo.filepath.toString()));
     return false;
 }
 
