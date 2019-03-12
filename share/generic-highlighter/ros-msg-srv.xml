@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<language name="ROS msg/srv" section="Sources" extensions="*.msg;*.srv" version="1" kateversion="5.0" mimetype="text/plain" author="Julian Exner (github AT jexner.de)" license="MIT">
+    <highlighting>
+        <list name="datatypes">
+            <!-- primitives -->
+            <item>int8</item>
+            <item>uint8</item>
+            <item>int16</item>
+            <item>uint16</item>
+            <item>int32</item>
+            <item>uint32</item>
+            <item>int64</item>
+            <item>uint64</item>
+            <item>float32</item>
+            <item>float64</item>
+
+            <item>string</item>
+            <item>bool</item>
+
+            <!-- deprecated -->
+            <item>char</item>
+            <item>byte</item>
+
+            <!-- other built-in -->
+            <item>time</item>
+            <item>duration</item>
+            <item>Header</item>
+        </list>
+        <contexts>
+            <context name="Normal" attribute="Normal Text" lineEndContext="#pop">
+                <DetectChar char="#" attribute="Comment" context="Comment" />
+                <RegExpr String="string\s+[a-zA-Z0-9_/]+\s+=" context="String Constant" firstNonSpace="true" lookAhead="true" />
+                <keyword String="datatypes" attribute="Built-in Data Type" context="Field" firstNonSpace="true" />
+                <RegExpr String="[a-zA-Z0-9_/]+" attribute="Data Type" context="Field" firstNonSpace="true" />
+            </context>
+
+            <context name="Comment" attribute="Comment" lineEndContext="#pop">
+                <IncludeRules context="##Alerts" />
+            </context>
+
+            <context name="Field" attribute="Normal Text" lineEndContext="#pop">
+                <RangeDetect char="[" char1="]" context="Array Field" lookAhead="true" />
+                <DetectIdentifier attribute="Symbol" context="Field Name" />
+                <!-- a comment after the data type is actually not allowed, but it looks nicer for highlighting-->
+                <DetectChar char="#" attribute="Comment" context="Comment" />
+            </context>
+
+            <context name="Array Field" attribute="Normal Text" lineEndContext="#pop">
+                <Int attribute="Decimal" context="#pop" />
+                <Detect2Chars char="[" char1="]" context="#pop" />
+            </context>
+
+            <context name="Field Name" attribute="Normal Text" lineEndContext="#pop">
+                <DetectChar char="#" attribute="Comment" context="Comment" />
+                <DetectChar char="=" attribute="Operator" context="Constant" />
+            </context>
+
+            <context name="Constant" attribute="Normal Text" lineEndContext="#pop">
+                <Int attribute="Decimal" />
+                <Float attribute="Float" />
+                <DetectChar char="#" attribute="Comment" context="Comment" />
+            </context>
+
+            <!-- string constants are treated seperately as the comment char # is ignored -->
+            <context name="String Constant" attribute="Normal Text" lineEndContext="#pop">
+                <StringDetect String="string" insensitive="false" attribute="Built-in Data Type" context="#stay" />
+                <DetectIdentifier attribute="Symbol" context="#stay" />
+                <DetectChar char="=" attribute="Operator" context="String Constant Value" />
+            </context>
+
+            <!-- a context to stay in for the string constant value until the line ends -->
+            <context name="String Constant Value" attribute="String" lineEndContext="#pop">
+            </context>
+
+        </contexts>
+        <itemDatas>
+            <itemData name="Normal Text" defStyleNum="dsNormal" spellChecking="false"/>
+            <itemData name="Data Type" defStyleNum="dsDataType" spellChecking="false"/>
+            <itemData name="Built-in Data Type" defStyleNum="dsExtension" spellChecking="false"/>
+            <itemData name="Comment" defStyleNum="dsComment"/>
+
+            <itemData name="Decimal" defStyleNum="dsDecVal" spellChecking="false"/>
+            <itemData name="Float" defStyleNum="dsFloat" spellChecking="false"/>
+            <itemData name="String" defStyleNum="dsString"/>
+
+            <itemData name="Operator" defStyleNum="dsOperator" spellChecking="false"/>
+            <itemData name="Symbol" defStyleNum="dsVariable" spellChecking="false"/>
+        </itemDatas>
+    </highlighting>
+    <general>
+        <comments>
+            <comment name="singleLine" start="#" />
+        </comments>
+        <keywords casesensitive="1" />
+    </general>
+</language>

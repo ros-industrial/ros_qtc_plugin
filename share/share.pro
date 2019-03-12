@@ -9,7 +9,8 @@ STATIC_INSTALL_BASE = $$INSTALL_DATA_PATH
 DATA_DIRS = \
     templates \
     styles \
-    qtermwidget
+    qtermwidget \
+    generic-highlighter
 
 for(data_dir, DATA_DIRS) {
     files = $$files($$PWD/$$data_dir/*, true)
