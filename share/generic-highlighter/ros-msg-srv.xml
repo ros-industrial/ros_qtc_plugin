@@ -57,6 +57,7 @@
             </context>
 
             <context name="Constant" attribute="Normal Text" lineEndContext="#pop">
+                <DetectChar char="0" attribute="Decimal" /> <!-- work-around QtCreator doesn't recognize 0 with the <Int /> tag -->
                 <Int attribute="Decimal" />
                 <Float attribute="Float" />
                 <DetectChar char="#" attribute="Comment" context="Comment" />
