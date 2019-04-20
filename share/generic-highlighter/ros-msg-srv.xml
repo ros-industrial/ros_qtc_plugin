@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE language SYSTEM "language.dtd">
-<language name="ROS msg/srv" section="Sources" extensions="*.msg;*.srv" version="1" kateversion="5.0" mimetype="text/plain" author="Julian Exner (github AT jexner.de)" license="MIT">
+<language name="ROS msg/srv" section="Sources" extensions="*.msg;*.srv" version="1" kateversion="5.0" mimetype="application/ros.text" author="Julian Exner (github AT jexner.de)" license="MIT">
     <highlighting>
         <list name="datatypes">
             <!-- primitives -->
