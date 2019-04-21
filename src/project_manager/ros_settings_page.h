@@ -75,7 +75,7 @@ class ROSSettingsPage : public Core::IOptionsPage
 {
 public:
     explicit ROSSettingsPage(QSharedPointer<ROSSettings> &settings,
-                             QObject *parent = 0);
+                             QObject *parent = nullptr);
 
     QWidget *widget();
     void apply();

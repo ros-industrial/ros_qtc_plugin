@@ -57,7 +57,7 @@ void ROSSettings::toSettings(QSettings *s) const
 void ROSSettings::fromSettings(QSettings *s)
 {
     s->beginGroup(QLatin1String(Constants::ROS_SETTINGS_GROUP_ID));
-    default_distribution = s->value(DEFAULT_DISTRIBUTION_ID).toString();
+    default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, ROSUtils::installedDistributions().last()).toString();
     default_build_system = static_cast<ROSUtils::BuildSystem>(s->value(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(ROSUtils::BuildSystem::CatkinTools)).toInt());
     default_code_style = s->value(DEFAULT_CODE_STYLE_ID, "ROS").toString();
     s->endGroup();
