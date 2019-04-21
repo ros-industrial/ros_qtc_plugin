@@ -81,12 +81,17 @@ void ROSGenericRunStep::run()
   Utils::Environment env = bc->environment();
   Utils::FileName shell = Utils::FileName::fromString(env.value("SHELL"));
   QString source_cmd;
+
+  Utils::FileName sourcePath(workspaceInfo.develPath);
+  if (workspaceInfo.install)
+    sourcePath = Utils::FileName(workspaceInfo.installPath);
+
   if (shell.fileName() == "bash")
-      source_cmd = QString("source %1\n").arg(workspaceInfo.develPath.appendPath("setup.bash").toString());
+      source_cmd = QString("source %1\n").arg(sourcePath.appendPath("setup.bash").toString());
   else if (shell.fileName() == "sh")
-      source_cmd = QString("source %1\n").arg(workspaceInfo.develPath.appendPath("setup.sh").toString());
+      source_cmd = QString("source %1\n").arg(sourcePath.appendPath("setup.sh").toString());
   else if (shell.fileName() == "zsh")
-       source_cmd = QString("source %1\n").arg(workspaceInfo.develPath.appendPath("setup.zsh").toString());
+       source_cmd = QString("source %1\n").arg(sourcePath.appendPath("setup.zsh").toString());
   else
        Core::MessageManager::write(tr("[ROS Error] The shell: %1 is currently not supported (Use bash, sh, or zsh)!").arg(shell.toString()));
 

@@ -68,7 +68,7 @@ public:
 
 public slots:
     void buildQueueFinished(bool success);
-    void fileSystemChanged();
+    void fileSystemChanged(const QString &path);
 
 private slots:
     void updateProjectTree();
@@ -83,41 +83,55 @@ private:
     void asyncUpdateCppCodeModel(bool success);
     void updateEnvironment();
 
-    static void buildProjectTree(const Utils::FileName& projectFilePath,
-                                 const QStringList& watchDirectories,
-                                 QFutureInterface<ProjectExplorer::ProjectNode*> &fi,
-                                 QHash<QString, ROSUtils::FolderContent> &workspaceContent,
-                                 QStringList &files,
-                                 QStringList &directories);
-
-    static void buildCppCodeModel(const ROSUtils::WorkspaceInfo& workspaceInfo,
-                                  const Utils::FileName& projectFilePath,
-                                  const QStringList workspaceFiles,
-                                  const ProjectExplorer::Kit *k,
-                                  QFutureInterface<CppTools::RawProjectParts> &fi,
-                                  ROSUtils::PackageInfoMap& wsPackageInfo,
-                                  ROSUtils::PackageBuildInfoMap& wsPackageBuildInfo,
-                                  Utils::Environment& wsEnvironment);
-
-    ROSUtils::ROSProjectFileContent m_projectFileContent;
-    ROSUtils::PackageInfoMap        m_wsPackageInfo;
-    ROSUtils::PackageBuildInfoMap   m_wsPackageBuildInfo;
-    Utils::Environment              m_wsEnvironment;
+    ROSUtils::ROSProjectFileContent m_projectFileContent = ROSUtils::ROSProjectFileContent();
+    ROSUtils::PackageInfoMap        m_wsPackageInfo = ROSUtils::PackageInfoMap();
+    ROSUtils::PackageBuildInfoMap   m_wsPackageBuildInfo = ROSUtils::PackageBuildInfoMap();
+    Utils::Environment              m_wsEnvironment = Utils::Environment();
 
     CppTools::CppProjectUpdater *m_cppCodeModelUpdater;
 
     // Watching Directories to keep Project Tree updated
     QTimer m_asyncUpdateTimer;
-    QFutureInterface<ProjectExplorer::ProjectNode*> *m_asyncUpdateFutureInterface = nullptr;
     QFileSystemWatcher m_watcher;
-    QHash<QString, ROSUtils::FolderContent> m_workspaceContent;
-    QStringList m_workspaceFiles;
-    QStringList m_workspaceDirectories;
-    QFutureWatcher<ProjectExplorer::ProjectNode*> m_futureWatcher;
+    QHash<QString, ROSUtils::FolderContent> m_workspaceContent = QHash<QString, ROSUtils::FolderContent>();
+    QStringList m_workspaceFiles = QStringList();
+    QStringList m_workspaceDirectories = QStringList();
+    bool m_project_loaded = false;
 
+
+    struct FutureWatcherResults
+    {
+      ProjectExplorer::ProjectNode* node;
+      QHash<QString, ROSUtils::FolderContent> workspaceContent;
+      QStringList files;
+      QStringList directories;
+    };
+
+    struct CppToolsFutureResults
+    {
+      CppTools::RawProjectParts parts;
+      ROSUtils::PackageInfoMap wsPackageInfo;
+      ROSUtils::PackageBuildInfoMap wsPackageBuildInfo;
+      Utils::Environment wsEnvironment;
+    };
+
+    QFutureInterface<FutureWatcherResults> *m_asyncUpdateFutureInterface = nullptr;
+    QFutureWatcher<FutureWatcherResults> m_futureWatcher;
     // Parse Code Blocks Files and build Code Model
-    QFutureInterface<CppTools::RawProjectParts> *m_asyncBuildCodeModelFutureInterface = nullptr;
-    QFutureWatcher<CppTools::RawProjectParts> m_futureBuildCodeModelWatcher;
+    QFutureInterface<CppToolsFutureResults> *m_asyncBuildCodeModelFutureInterface = nullptr;
+    QFutureWatcher<CppToolsFutureResults> m_futureBuildCodeModelWatcher;
+
+    static void buildProjectTree(const Utils::FileName projectFilePath,
+                                 const QStringList watchDirectories,
+                                 QFutureInterface<FutureWatcherResults> &fi);
+
+    static void buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
+                                  const Utils::FileName projectFilePath,
+                                  const QStringList workspaceFiles,
+                                  const ProjectExplorer::Kit *k,
+                                  const ROSUtils::PackageInfoMap wsPackageInfo,
+                                  const ROSUtils::PackageBuildInfoMap  wsPackageBuildInfo,
+                                  QFutureInterface<CppToolsFutureResults> &fi);
 
 };
 

@@ -347,7 +347,7 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   catkin_create_pkg->setWorkingDirectory(packagePath.toString());
 
   ROSUtils::sourceROS(catkin_create_pkg, project->distribution());
-  catkin_create_pkg->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << cmd);
+  catkin_create_pkg->start(QLatin1String("bash"), QStringList() << QLatin1String("-i") << QLatin1String("-c") << cmd);
   catkin_create_pkg->waitForFinished();
   bool success;
   if (catkin_create_pkg->exitStatus() != QProcess::CrashExit)

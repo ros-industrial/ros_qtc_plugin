@@ -21,6 +21,8 @@
 #include "ros_utils.h"
 #include "ros_project_constants.h"
 #include "ros_packagexml_parser.h"
+#include "ros_settings_page.h"
+#include "ros_project_plugin.h"
 
 #include <utils/fileutils.h>
 #include <utils/environment.h>
@@ -32,6 +34,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDirIterator>
+#include <QStandardPaths>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -72,6 +75,9 @@ bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspace
         return false;
 
     Utils::FileName bash(workspaceInfo.develPath);
+    if (workspaceInfo.install)
+      bash = Utils::FileName(workspaceInfo.installPath);
+
     bash.appendPath(QLatin1String("setup.bash"));
     if (bash.exists())
     {
@@ -166,7 +172,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
                     return false;
 
                 process->setWorkingDirectory(workspaceInfo.sourcePath.toString());
-                process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin_init_workspace"));
+                process->start(QLatin1String("bash"), QStringList() << QStringList() << QLatin1String("-i") << QLatin1String("-c") << QLatin1String("catkin_init_workspace"));
 
                 if( !process->waitForFinished() )
                     return false;
@@ -185,7 +191,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
                     return false;
 
                 process->setWorkingDirectory(workspace.path.toString());
-                process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin init"));
+                process->start(QLatin1String("bash"), QStringList() << QLatin1String("-i") << QLatin1String("-c") << QLatin1String("catkin init"));
 
                 if( !process->waitForFinished() )
                     return false;
@@ -210,14 +216,14 @@ bool ROSUtils::buildWorkspace(QProcess *process, const WorkspaceInfo &workspaceI
     case CatkinMake:
     {
         process->setWorkingDirectory(workspaceInfo.path.toString());
-        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin_make --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-i") << QLatin1String("-c") << QLatin1String("catkin_make --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
         process->waitForFinished();
         break;
     }
     case CatkinTools:
     {
         process->setWorkingDirectory(workspaceInfo.path.toString());
-        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-i") << QLatin1String("-c") << QLatin1String("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
         process->waitForFinished();
         break;
     }
@@ -245,14 +251,13 @@ QStringList ROSUtils::installedDistributions()
 bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
 {
   QStringList env_list;
-
-  process->start(QLatin1String("bash"));
-  process->waitForStarted();
   QString cmd = QLatin1String("source ") + path + QLatin1String(" && env");
+
+  process->start(QLatin1String("bash"), QStringList() << QLatin1String("-i"));
+  process->waitForStarted();
   process->write(cmd.toLatin1());
   process->closeWriteChannel();
   process->waitForFinished();
-
 
   if (process->exitStatus() != QProcess::CrashExit)
   {
@@ -310,14 +315,22 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FileName &filePath, ROSP
                 {
                     content.distribution = attributes.value(QLatin1String("name")).toString();
                     if (!distributions.isEmpty() && !distributions.contains(content.distribution))
+                    {
+                        Core::MessageManager::write(QObject::tr("[ROS Error] Project file distribution [%1] is not installed. Setting to [%2], if incorrect modify project file [%3].").arg(content.distribution, distributions.first(), filePath.fileName()));
                         content.distribution = distributions.first();
+                    }
                 }
                 else
                 {
                     if (!distributions.isEmpty())
+                    {
                         content.distribution = distributions.first();
+                        Core::MessageManager::write(QObject::tr("[ROS Error] Unable to find ROS distributions."));
+                    }
                     else
+                    {
                         Core::MessageManager::write(QObject::tr("[ROS Error] Project file Distribution tag did not have a name attribute."));
+                    }
                 }
 
                 workspaceXml.readNextStartElement();
@@ -356,22 +369,37 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FileName &filePath, ROSP
     return false;
 }
 
-QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::FileName &folderPath, QStringList &fileList, QStringList& directoryList)
+void ROSUtils::getDefaultFolderContentFilters(QStringList& folderNameFilters, QStringList& fileNameFilters)
+{
+  folderNameFilters.push_back("\\.git");
+  fileNameFilters.push_back("^.*\\.autosave");
+}
+
+ROSUtils::FolderContent ROSUtils::getFolderContent(const QString &folder, const QStringList& folderNameFilters, const QStringList& fileNameFilters)
+{
+  ROSUtils::FolderContent content;
+
+  // Get Directory data
+  content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Hidden);
+  content.removeDirectories(folderNameFilters);
+
+  content.files = QDir(folder).entryList(QDir::NoDotAndDotDot | QDir::Files | QDir::Hidden);
+  content.removeFiles(fileNameFilters);
+
+  return content;
+}
+
+QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContentRecurisve(const Utils::FileName &folderPath, QStringList &fileList, QStringList& directoryList)
 {
     QHash<QString, ROSUtils::FolderContent> workspaceFiles;
-    ROSUtils::FolderContent content;
+
     QString folder = folderPath.toString();
 
     // Need to remove unwanted directories
     QStringList folderNameFilters, fileNameFilters;
-    folderNameFilters.push_back(".git");
+    getDefaultFolderContentFilters(folderNameFilters, fileNameFilters);
 
-    // Get Directory data
-    content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs | QDir::Hidden);
-    content.removeDirectories(folderNameFilters);
-
-    content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files | QDir::Hidden);
-    content.removeFiles(fileNameFilters);
+    ROSUtils::FolderContent content = getFolderContent(folder, folderNameFilters, fileNameFilters);
 
     workspaceFiles[folder] = content;
 
@@ -389,11 +417,21 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
     {
         folder = itSrc.next();
 
-        if (folderNameFilters.contains(Utils::FileName::fromString(folder).fileName()))
+        QString folder_name = Utils::FileName::fromString(folder).fileName();
+        bool found = false;
+        for (auto filter : folderNameFilters)
         {
+          QRegularExpression rx(filter);
+          if (rx.match(folder_name).hasMatch())
+          {
             excludeDir.push_back(folder + QLatin1Char('/'));
-            continue;
+            found = true;
+            break;
+          }
         }
+
+        if (found)
+          continue;
 
         bool skip = false;
         for (const QString& exclude : excludeDir)
@@ -407,11 +445,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContent(const Utils::
 
         if (skip) continue;
 
-        content.directories = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Dirs | QDir::Hidden);
-        content.removeDirectories(folderNameFilters);
-
-        content.files = QDir(folder).entryList(QDir::NoDotAndDotDot  | QDir::Files | QDir::Hidden);
-        content.removeFiles(fileNameFilters);
+        content = getFolderContent(folder, folderNameFilters, fileNameFilters);
 
         workspaceFiles[folder] = content;
 
@@ -528,9 +562,12 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
   // make sure targets are cleared
   buildInfo.targets.clear();
 
-  // devel include directory
-  Utils::FileName develInclude(workspaceInfo.develPath);
-  develInclude = develInclude.appendPath(QLatin1String("include"));
+  // build time include directory
+  Utils::FileName buildtimeInclude(workspaceInfo.develPath);
+  if (workspaceInfo.install)
+    buildtimeInclude = Utils::FileName(workspaceInfo.installPath);
+
+  buildtimeInclude = buildtimeInclude.appendPath(QLatin1String("include"));
 
   cbpXml.setDevice(&cbpFile);
   cbpXml.readNext();
@@ -607,7 +644,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
         // Only need to add target types ExecutableType and StaticLibraryType to the code model
         if (targetType != UtilityType)
         {
-            targetLocalIncludes.append(develInclude.toString());
+            targetLocalIncludes.append(buildtimeInclude.toString());
 
             PackageTargetInfo targetInfo;
             targetInfo.name = targetName;
@@ -676,7 +713,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   QStringList tmp;
 
   process.setEnvironment(env);
-  process.start(QLatin1String("bash"));
+  process.start(QLatin1String("bash"), QStringList() << QLatin1String("-i"));
   process.waitForStarted();
   QString cmd = QLatin1String("rospack list");
   process.write(cmd.toLatin1());
@@ -746,7 +783,7 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
   QMap<QString, QString> package_executables;
 
   process.setEnvironment(env);
-  process.start(QLatin1String("bash"));
+  process.start(QLatin1String("bash"), QStringList() << QLatin1String("-i"));
   process.waitForStarted();
   QString cmd = QLatin1String("catkin_find --without-underlays --libexec ") + packageName;
   process.write(cmd.toLatin1());
@@ -991,6 +1028,7 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FileName &worksp
         space.develPath = Utils::FileName(workspaceDir).appendPath("devel");
         space.installPath = Utils::FileName(workspaceDir).appendPath("install");
         space.logPath = Utils::FileName(workspaceDir).appendPath("logs");
+        space.install = false; //TODO: Need to find how best to determine if installing
         break;
     }
     case CatkinTools:
@@ -1007,6 +1045,7 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FileName &worksp
             space.develPath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString(config["devel_space"].as<std::string>()));
             space.installPath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString(config["install_space"].as<std::string>()));
             space.logPath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString(config["log_space"].as<std::string>()));
+            space.install = config["install"].as<bool>();
         }
         else
         {

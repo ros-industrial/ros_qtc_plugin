@@ -24,6 +24,7 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QXmlStreamWriter>
+#include <QRegularExpression>
 #include <utils/fileutils.h>
 #include "ros_project_constants.h"
 
@@ -59,13 +60,21 @@ public:
         void removeDirectories(const QStringList &filters)
         {
             for (const QString& filter : filters)
-                directories.removeAll(filter);
+            {
+                QStringList remove_dirs = directories.filter(QRegularExpression(filter));
+                for (auto& d : remove_dirs)
+                    directories.removeAll(d);
+            }
         }
 
         void removeFiles(const QStringList &filters)
         {
             for (const QString& filter : filters)
-                files.removeAll(filter);
+            {
+                QStringList remove_files = files.filter(QRegularExpression(filter));
+                for (auto& f : remove_files)
+                    files.removeAll(f);
+            }
         }
     };
 
@@ -77,6 +86,7 @@ public:
         Utils::FileName develPath;
         Utils::FileName installPath;
         Utils::FileName logPath;
+        bool install = false;
 
         QString rosDistribution;
         BuildSystem buildSystem;
@@ -231,16 +241,36 @@ public:
     static bool parseQtCreatorWorkspaceFile(const Utils::FileName &filePath,
                                             ROSProjectFileContent &content);
 
+
+    /**
+     * @brief Get the default folder content filters used when building the project tree
+     * @param folderNameFilters Return the default folder to be filtered
+     * @param fileNameFilters Return the default files to be filtered
+     */
+    static void getDefaultFolderContentFilters(QStringList& folderNameFilters,
+                                               QStringList& fileNameFilters);
+
+
+    /**
+     * @brief Get folder content for a given folder
+     * @param folderPath Path to the foder
+     * @return FolderContent FolderContent
+     */
+    static FolderContent getFolderContent(const QString &folderPath,
+                                          const QStringList& folderNameFilters,
+                                          const QStringList& fileNameFilters);
+
     /**
      * @brief Gets all fo the files in a given folder
      * @param folderPath Path to the foder
      * @param fileList List of files in directory and sub directories
      * @param fileList List of sub directories
+     * @param recursive Process sub directoires
      * @return QHash<QString, FolderContent> Directory, FolderContent
      */
-    static QHash<QString, FolderContent> getFolderContent(const Utils::FileName &folderPath,
-                                                          QStringList &fileList,
-                                                          QStringList &directoryList);
+    static QHash<QString, FolderContent> getFolderContentRecurisve(const Utils::FileName &folderPath,
+                                                                   QStringList &fileList,
+                                                                   QStringList &directoryList);
 
     /**
      * @brief Get relevant workspace information
