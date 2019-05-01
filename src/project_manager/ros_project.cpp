@@ -348,13 +348,17 @@ void ROSProject::fileSystemChanged(const QString &path)
   QSet<QString> cur_content_files = QSet<QString>::fromList(cur_content.files);
   QSet<QString> cur_content_dirs = QSet<QString>::fromList(cur_content.directories);
 
-  // Files that have been added
-  QSet<QString> files_diff = cur_content_files - pre_content_files;
-  QSet<QString> dirs_diff = cur_content_dirs - pre_content_dirs;
+  // Content that has been added
+  QSet<QString> files_added = cur_content_files - pre_content_files;
+  QSet<QString> dirs_added = cur_content_dirs - pre_content_dirs;
+
+  // Content that has been removed
+  QSet<QString> files_removed = pre_content_files - cur_content_files;
+  QSet<QString> dirs_removed = pre_content_dirs - cur_content_dirs;
 
   // This is to check if untracked dirs or files were added. If so do not start timer.
-  if (files_diff.empty() && dirs_diff.empty())
-    return;
+  if (files_added.empty() && dirs_added.empty() && files_removed.empty() && dirs_removed.empty())
+    return;  
 
   m_asyncUpdateTimer.setInterval(UPDATE_INTERVAL);
   m_asyncUpdateTimer.start();
@@ -458,17 +462,12 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
             activeQtVersion = CppTools::ProjectPart::Qt5;
     }
 
-    // This assumes package follow the ros package configuration.
-    // Could improve to to parse packges for c++ file and add all directories
+    // Get all of the workspace includes directories
     QStringList workspace_includes;
-    for (const auto& package : results.wsPackageInfo)
-    {
-      Utils::FileName include_path = Utils::FileName(package.path);
-      include_path.appendPath("include");
-      if (include_path.exists())
-        workspace_includes.push_back(include_path.toString());
-
-    }
+    for (const auto& package : results.wsPackageBuildInfo)
+      for (const auto& target : package.targets)
+        workspace_includes.append(target.includes.filter(package.parent.path.toString()));
+    workspace_includes.removeDuplicates();
 
     CppTools::RawProjectParts rpps;
 
