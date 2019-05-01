@@ -10,6 +10,7 @@ INCLUDEPATH += $$(QTW_INCLUDE_PATH)
 INCLUDEPATH += $$PWD
 
 CONFIG += link_pkgconfig
+CONFIG += c++14
 PKGCONFIG += yaml-cpp
 
 HEADERS += $$files(*.h)
