@@ -458,6 +458,18 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
             activeQtVersion = CppTools::ProjectPart::Qt5;
     }
 
+    // This assumes package follow the ros package configuration.
+    // Could improve to to parse packges for c++ file and add all directories
+    QStringList workspace_includes;
+    for (const auto& package : results.wsPackageInfo)
+    {
+      Utils::FileName include_path = Utils::FileName(package.path);
+      include_path.appendPath("include");
+      if (include_path.exists())
+        workspace_includes.push_back(include_path.toString());
+
+    }
+
     CppTools::RawProjectParts rpps;
 
     ToolChain *cxxToolChain = ToolChainKitInformation::toolChain(k, ProjectExplorer::Constants::CXX_LANGUAGE_ID);
@@ -507,9 +519,10 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
             QStringList includePaths;
             for (const QString &i : targetInfo.includes) {
-                if (!toolChainIncludes.contains(i))
+                if (!toolChainIncludes.contains(i) && !i.startsWith(workspaceInfo.installPath.toString()) && !i.startsWith(workspaceInfo.develPath.toString()))
                     includePaths.append(i);
             }
+            includePaths.append(workspace_includes);
 
             rpp.setIncludePaths(includePaths);
             rpp.setFlagsForCxx({cxxToolChain, targetInfo.flags});
