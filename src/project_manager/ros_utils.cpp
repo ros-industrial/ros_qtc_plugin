@@ -864,6 +864,36 @@ Utils::FileName ROSUtils::getCatkinToolsProfileConfigFile(const Utils::FileName 
     return profile;
 }
 
+bool ROSUtils::isCatkinToolsProfileConfigValid(const Utils::FileName& configPath)
+{
+  if (!configPath.exists())
+    return false;
+
+  YAML::Node config = YAML::LoadFile(configPath.toString().toStdString());
+  if (config.IsNull())
+    return false;
+
+  if (!config["source_space"].IsDefined())
+    return false;
+
+  if (!config["build_space"].IsDefined())
+    return false;
+
+  if (!config["devel_space"].IsDefined())
+    return false;
+
+  if (!config["install_space"].IsDefined())
+    return false;
+
+  if (!config["log_space"].IsDefined())
+    return false;
+
+  if (!config["install"].IsDefined())
+    return false;
+
+  return true;
+}
+
 bool ROSUtils::removeCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString &profileName)
 {
     QString activeProfile = getCatkinToolsActiveProfile(workspaceDir);
@@ -892,24 +922,23 @@ bool ROSUtils::renameCatkinToolsProfile(const Utils::FileName &workspaceDir, con
     if (d.exists())
         return d.rename(oldProfileName, newProfileName);
 
-    return createCatkinToolsProfile(workspaceDir, newProfileName);
+    return createCatkinToolsProfile(workspaceDir, newProfileName, true);
 }
 
-bool ROSUtils::createCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString profileName)
+bool ROSUtils::createCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString profileName, bool overwrite)
 {
     Utils::FileName config = getCatkinToolsProfileConfigFile(workspaceDir, profileName);
-    if (!config.exists())
-    {
-        QDir().mkpath(getCatkinToolsProfilePath(workspaceDir, profileName).toString());
-        return (QFile::copy(":rosproject/config.yaml", config.toString()) &&
-                QFile::setPermissions(config.toString(),
-                                      QFile::ReadUser |
-                                      QFile::WriteUser |
-                                      QFile::ReadGroup |
-                                      QFile::WriteGroup));
-    }
 
-    return true;
+    QDir().mkpath(getCatkinToolsProfilePath(workspaceDir, profileName).toString());
+    if (overwrite)
+      QFile::remove(config.toString());
+
+    return (QFile::copy(":rosproject/config.yaml", config.toString()) &&
+            QFile::setPermissions(config.toString(),
+                                  QFile::ReadUser |
+                                  QFile::WriteUser |
+                                  QFile::ReadGroup |
+                                  QFile::WriteGroup));
 }
 
 bool ROSUtils::cloneCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString &profileName, const QString &newProfileName)
@@ -917,8 +946,8 @@ bool ROSUtils::cloneCatkinToolsProfile(const Utils::FileName &workspaceDir, cons
     Utils::FileName copyConfig = getCatkinToolsProfileConfigFile(workspaceDir, profileName);
     Utils::FileName newConfig = getCatkinToolsProfileConfigFile(workspaceDir, newProfileName);
 
-    if (!copyConfig.exists())
-        return createCatkinToolsProfile(workspaceDir, profileName);
+    if (!isCatkinToolsProfileConfigValid(copyConfig))
+        return createCatkinToolsProfile(workspaceDir, profileName, true);
 
     QDir().mkpath(getCatkinToolsProfilePath(workspaceDir, newProfileName).toString());
     return QFile::copy(copyConfig.toString(), newConfig.toString());
@@ -951,13 +980,6 @@ QString ROSUtils::setCatkinToolsDefaultProfile(const Utils::FileName &workspaceD
 
 bool ROSUtils::setCatkinToolsActiveProfile(const Utils::FileName &workspaceDir, const QString &profileName)
 {
-    YAML::Node config;
-    Utils::FileName profiles = getCatkinToolsProfileConfigFile(workspaceDir, profileName);
-    if (profiles.exists())
-        config = YAML::LoadFile(profiles.toString().toStdString());
-    else
-        config = YAML::Load("active: " + profileName.toStdString());
-
     // Create profiles directory if it does not exist
     QDir().mkpath(getCatkinToolsProfilesPath(workspaceDir).toString());
 
@@ -965,7 +987,7 @@ bool ROSUtils::setCatkinToolsActiveProfile(const Utils::FileName &workspaceDir, 
         return false;
 
     // This will create the profile if it does not exist with default config.
-    createCatkinToolsProfile(workspaceDir, profileName);
+    createCatkinToolsProfile(workspaceDir, profileName, false);
 
     return true;
 }
@@ -982,15 +1004,15 @@ QStringList ROSUtils::getCatkinToolsProfileNames(const Utils::FileName &workspac
     }
 
     // If there are currently no profiles, create a default profile.
-    createCatkinToolsProfile(workspaceDir, QLatin1String("default"));
+    createCatkinToolsProfile(workspaceDir, QLatin1String("default"), true);
     return QStringList() << QLatin1String("default");
 }
 
 Utils::FileName ROSUtils::getCatkinToolsProfile(const Utils::FileName &workspaceDir, const QString &profileName)
 {
     Utils::FileName profile = ROSUtils::getCatkinToolsProfileConfigFile(workspaceDir, profileName);
-    if(!profile.exists())
-        createCatkinToolsProfile(workspaceDir, profileName);
+    if(!isCatkinToolsProfileConfigValid(profile))
+        createCatkinToolsProfile(workspaceDir, profileName, true);
 
     return profile;
 }
@@ -1039,6 +1061,9 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FileName &worksp
         if( activeProfile.length() )
         {
             Utils::FileName configPath = getCatkinToolsProfileConfigFile(workspaceDir, activeProfile);
+            if (!isCatkinToolsProfileConfigValid(configPath))
+              createCatkinToolsProfile(workspaceDir, activeProfile, true);
+
             config = YAML::LoadFile(configPath.toString().toStdString());
             space.sourcePath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString(config["source_space"].as<std::string>()));
             space.buildPath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString(config["build_space"].as<std::string>()));

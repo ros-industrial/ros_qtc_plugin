@@ -466,7 +466,7 @@ void ROSCatkinToolsStepWidget::newProfile()
     if (name.isEmpty())
         return;
 
-    if (!ROSUtils::createCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), name))
+    if (!ROSUtils::createCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), name, false))
         return;
 
     setProfile(name);

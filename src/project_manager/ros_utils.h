@@ -367,10 +367,12 @@ public:
      * @brief Create a new catkin tools profile
      * @param workspaceDir Workspace directory path
      * @param profileName Profile name
+     * @param overwrite Indicate if profile should be overwritten if already exists
      * @return True if successful, otherwise false
      */
     static bool createCatkinToolsProfile(const Utils::FileName &workspaceDir,
-                                         const QString profileName);
+                                         const QString profileName,
+                                         bool overwrite);
 
     /**
      * @brief Get the active catkin tools profile
@@ -488,6 +490,13 @@ private:
      */
     static Utils::FileName getCatkinToolsProfileConfigFile(const Utils::FileName &workspaceDir,
                                                            const QString &profileName);
+
+    /**
+     * @brief Check if the config file is valid
+     * @param configPath Path to profiles config.yaml file
+     * @return False if the file does not exist or if the contents of the yaml file are not valid.
+     */
+    static bool isCatkinToolsProfileConfigValid(const Utils::FileName& configPath);
 
     /**
      * @brief Find a given packages build directory
