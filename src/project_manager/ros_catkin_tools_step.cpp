@@ -30,6 +30,7 @@
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/gnumakeparser.h>
 #include <projectexplorer/kitinformation.h>
+#include <projectexplorer/processparameters.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/toolchain.h>
@@ -106,7 +107,7 @@ ROSCatkinToolsStep::~ROSCatkinToolsStep()
 {
 }
 
-bool ROSCatkinToolsStep::init(QList<const BuildStep *> &earlierSteps)
+bool ROSCatkinToolsStep::init()
 {
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (!bc)
@@ -157,7 +158,7 @@ bool ROSCatkinToolsStep::init(QList<const BuildStep *> &earlierSteps)
 
     outputParser()->setWorkingDirectory(pp->effectiveWorkingDirectory());
 
-    return AbstractProcessStep::init(earlierSteps);
+    return AbstractProcessStep::init();
 }
 
 QVariantMap ROSCatkinToolsStep::toMap() const
@@ -233,43 +234,9 @@ QString ROSCatkinToolsStep::makeCommand() const
     return QLatin1String("catkin");
 }
 
-void ROSCatkinToolsStep::run(QFutureInterface<bool> &fi)
-{
-    AbstractProcessStep::run(fi);
-}
-
-void ROSCatkinToolsStep::processStarted()
-{
-    futureInterface()->setProgressRange(0, 100);
-    AbstractProcessStep::processStarted();
-}
-
-void ROSCatkinToolsStep::processFinished(int exitCode, QProcess::ExitStatus status)
-{
-    AbstractProcessStep::processFinished(exitCode, status);
-    futureInterface()->setProgressValue(100);
-}
-
-void ROSCatkinToolsStep::stdOutput(const QString &line)
-{
-    AbstractProcessStep::stdOutput(line);
-    if (m_percentProgress.indexIn(line, 0) != -1)
-    {
-        bool ok = false;
-        int percent = (m_percentProgress.cap(1).toDouble(&ok)/m_percentProgress.cap(2).toDouble(&ok)) * 100.0;
-        if (ok)
-            futureInterface()->setProgressValue(percent);
-    }
-}
-
 BuildStepConfigWidget *ROSCatkinToolsStep::createConfigWidget()
 {
     return new ROSCatkinToolsStepWidget(this);
-}
-
-bool ROSCatkinToolsStep::immutable() const
-{
-    return false;
 }
 
 ROSCatkinToolsStep::BuildTargets ROSCatkinToolsStep::buildTarget() const
@@ -297,7 +264,8 @@ void ROSCatkinToolsStep::setActiveProfile(const QString &profileName)
 //
 
 ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
-    : m_makeStep(makeStep)
+    : ProjectExplorer::BuildStepConfigWidget(makeStep)
+    , m_makeStep(makeStep)
 {
     m_ui = new Ui::ROSCatkinToolsStep;
     m_ui->setupUi(this);
