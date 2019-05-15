@@ -27,6 +27,7 @@
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/gnumakeparser.h>
 #include <projectexplorer/kitinformation.h>
+#include <projectexplorer/processparameters.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/toolchain.h>
@@ -94,7 +95,7 @@ ROSCatkinMakeStep::~ROSCatkinMakeStep()
 {
 }
 
-bool ROSCatkinMakeStep::init(QList<const BuildStep *> &earlierSteps)
+bool ROSCatkinMakeStep::init()
 {
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (!bc)
@@ -145,7 +146,7 @@ bool ROSCatkinMakeStep::init(QList<const BuildStep *> &earlierSteps)
 
     outputParser()->setWorkingDirectory(pp->effectiveWorkingDirectory());
 
-    return AbstractProcessStep::init(earlierSteps);
+    return AbstractProcessStep::init();
 }
 
 QVariantMap ROSCatkinMakeStep::toMap() const
@@ -206,45 +207,9 @@ QString ROSCatkinMakeStep::makeCommand() const
     return QLatin1String("catkin_make");
 }
 
-void ROSCatkinMakeStep::run(QFutureInterface<bool> &fi)
-{
-    AbstractProcessStep::run(fi);
-}
-
-void ROSCatkinMakeStep::processStarted()
-{
-    futureInterface()->setProgressRange(0, 100);
-    AbstractProcessStep::processStarted();
-}
-
-void ROSCatkinMakeStep::processFinished(int exitCode, QProcess::ExitStatus status)
-{
-    AbstractProcessStep::processFinished(exitCode, status);
-    futureInterface()->setProgressValue(100);
-}
-
-void ROSCatkinMakeStep::stdOutput(const QString &line)
-{
-    AbstractProcessStep::stdOutput(line);
-    int pos = 0;
-    while ((pos = m_percentProgress.indexIn(line, pos)) != -1) {
-        bool ok = false;
-        int percent = m_percentProgress.cap(1).toInt(&ok);
-        if (ok)
-            futureInterface()->setProgressValue(percent);
-
-        pos += m_percentProgress.matchedLength();
-    }
-}
-
 BuildStepConfigWidget *ROSCatkinMakeStep::createConfigWidget()
 {
     return new ROSCatkinMakeStepWidget(this);
-}
-
-bool ROSCatkinMakeStep::immutable() const
-{
-    return false;
 }
 
 ROSCatkinMakeStep::BuildTargets ROSCatkinMakeStep::buildTarget() const
@@ -262,7 +227,8 @@ void ROSCatkinMakeStep::setBuildTarget(const BuildTargets &target)
 //
 
 ROSCatkinMakeStepWidget::ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep)
-    : m_makeStep(makeStep)
+    : ProjectExplorer::BuildStepConfigWidget(makeStep)
+    , m_makeStep(makeStep)
 {
     m_ui = new Ui::ROSCatkinMakeStep;
     m_ui->setupUi(this);

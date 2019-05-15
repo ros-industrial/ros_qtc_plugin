@@ -47,7 +47,7 @@ namespace Internal {
 
 class ROSBuildConfigurationFactory;
 class ROSBuildSettingsWidget;
-class ROSBuildInfo;
+class ROSExtraBuildInfo;
 namespace Ui { class ROSBuildConfiguration; }
 
 class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
@@ -58,7 +58,7 @@ class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
 public:
     ROSBuildConfiguration(ProjectExplorer::Target *parent, Core::Id id);
 
-    void initialize(const ProjectExplorer::BuildInfo *info) override;
+    void initialize(const ProjectExplorer::BuildInfo &info) override;
 
     ProjectExplorer::NamedWidget *createConfigWidget() override;
     QList<ProjectExplorer::NamedWidget *> createSubConfigWidgets() override;
@@ -93,7 +93,7 @@ private:
 
 };
 
-class ROSBuildConfigurationFactory : public ProjectExplorer::IBuildConfigurationFactory
+class ROSBuildConfigurationFactory : public ProjectExplorer::BuildConfigurationFactory
 {
     Q_OBJECT
 
@@ -101,12 +101,12 @@ public:
     explicit ROSBuildConfigurationFactory();
     ~ROSBuildConfigurationFactory();
 
-    QList<ProjectExplorer::BuildInfo *> availableBuilds(const ProjectExplorer::Target *parent) const override;
-    QList<ProjectExplorer::BuildInfo *> availableSetups(const ProjectExplorer::Kit *k,
+    QList<ProjectExplorer::BuildInfo> availableBuilds(const ProjectExplorer::Target *parent) const override;
+    QList<ProjectExplorer::BuildInfo> availableSetups(const ProjectExplorer::Kit *k,
                                                         const QString &projectPath) const override;
 
 private:
-    ROSBuildInfo *createBuildInfo(const ProjectExplorer::Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const;
+    ProjectExplorer::BuildInfo createBuildInfo(const ProjectExplorer::Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const;
 };
 
 class ROSBuildSettingsWidget : public ProjectExplorer::NamedWidget
@@ -142,28 +142,6 @@ protected:
   ProjectExplorer::EnvironmentWidget *m_buildEnvironmentWidget;
   QCheckBox *m_clearSystemEnvironmentCheckBox;
   ProjectExplorer::BuildConfiguration *m_buildConfiguration;
-};
-
-class ROSBuildInfo : public ProjectExplorer::BuildInfo
-{
-public:
-    ROSBuildInfo(const ProjectExplorer::IBuildConfigurationFactory *f) :
-        ProjectExplorer::BuildInfo(f) { }
-
-    ROSBuildInfo(const Internal::ROSBuildConfiguration *bc) :
-        ProjectExplorer::BuildInfo(ProjectExplorer::IBuildConfigurationFactory::find(bc->target()))
-    {
-        displayName = bc->displayName();
-        buildDirectory = bc->buildDirectory();
-        kitId = bc->target()->kit()->id();
-        environment = bc->environment();
-        buildSystem = bc->buildSystem();
-        cmakeBuildType = bc->cmakeBuildType();
-    }
-
-    Utils::Environment environment;
-    ROSUtils::BuildSystem buildSystem;
-    ROSUtils::BuildType cmakeBuildType;
 };
 
 } // namespace Internal

@@ -45,6 +45,7 @@
 #include <projectexplorer/projectexplorer.h>
 #include <qtsupport/baseqtversion.h>
 #include <projectexplorer/customexecutablerunconfiguration.h>
+#include <qtsupport/qtcppkitinfo.h>
 #include <qtsupport/qtkitinformation.h>
 #include <utils/fileutils.h>
 #include <utils/qtcassert.h>
@@ -126,7 +127,7 @@ const int UPDATE_INTERVAL = 1000;
 
 ROSProject::ROSProject(const Utils::FileName &fileName) :
     ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName, [this]() { refresh(); }),
-    m_cppCodeModelUpdater(new CppTools::CppProjectUpdater(this)),
+    m_cppCodeModelUpdater(new CppTools::CppProjectUpdater),
     m_project_loaded(false),
     m_asyncUpdateFutureInterface(nullptr),
     m_asyncBuildCodeModelFutureInterface(nullptr)
@@ -552,21 +553,13 @@ void ROSProject::updateCppCodeModel()
 {
   if (m_futureBuildCodeModelWatcher.isFinished())
   {
-    const Kit *k = nullptr;
-
-    if (Target *target = activeTarget())
-        k = target->kit();
-    else
-        k = KitManager::defaultKit();
-
-    QTC_ASSERT(k, return);
-
-    ToolChain *cxxToolChain = ToolChainKitInformation::toolChain(k, ProjectExplorer::Constants::CXX_LANGUAGE_ID);
-
     m_wsPackageInfo = std::move(m_futureBuildCodeModelWatcher.result().wsPackageInfo);
     m_wsPackageBuildInfo = std::move(m_futureBuildCodeModelWatcher.result().wsPackageBuildInfo);
 
-    m_cppCodeModelUpdater->update({this, nullptr, cxxToolChain, k, std::move(m_futureBuildCodeModelWatcher.result().parts)});
+    QtSupport::CppKitInfo kitInfo(this);
+    QTC_ASSERT(kitInfo.isValid(), return);
+
+    m_cppCodeModelUpdater->update({this, kitInfo, std::move(m_futureBuildCodeModelWatcher.result().parts)});
 
     m_asyncBuildCodeModelFutureInterface->reportFinished();
     delete m_asyncBuildCodeModelFutureInterface;

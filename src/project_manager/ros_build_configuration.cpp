@@ -44,6 +44,21 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
+class ROSExtraBuildInfo
+{
+public:
+    ROSUtils::BuildSystem buildSystem;
+    ROSUtils::BuildType cmakeBuildType;
+};
+
+} // namespace Internal
+} // namespace ROSProjectManager
+
+Q_DECLARE_METATYPE(ROSProjectManager::Internal::ROSExtraBuildInfo)
+
+namespace ROSProjectManager {
+namespace Internal {
+
 const char ROS_BC_ID[] = "ROSProjectManager.ROSBuildConfiguration";
 const char ROS_BC_BUILD_SYSTEM[] = "ROSProjectManager.ROSBuildConfiguration.BuildSystem";
 const char ROS_BC_CMAKE_BUILD_TYPE[] = "ROSProjectManager.ROSBuildConfiguration.CMakeBuildType";
@@ -53,24 +68,24 @@ ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, Core::Id id)
 {
 }
 
-void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo *info)
+void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo &info)
 {
     BuildConfiguration::initialize(info);
 
-    ROSBuildInfo ros_info(*static_cast<const ROSBuildInfo *>(info));
+    auto extraInfo = info.extraInfo.value<ROSExtraBuildInfo>();
 
-    setDisplayName(ros_info.displayName);
-    setDefaultDisplayName(ros_info.displayName);
-    setBuildDirectory(ros_info.buildDirectory);
-    setBuildSystem(ros_info.buildSystem);
-    setCMakeBuildType(ros_info.cmakeBuildType);
+    setDisplayName(info.displayName);
+    setDefaultDisplayName(info.displayName);
+    setBuildDirectory(info.buildDirectory);
+    setBuildSystem(extraInfo.buildSystem);
+    setCMakeBuildType(extraInfo.cmakeBuildType);
 
     BuildStepList *buildSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
     BuildStepList *cleanSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_CLEAN);
     Q_ASSERT(buildSteps);
     Q_ASSERT(cleanSteps);
 
-    switch (ros_info.buildSystem)
+    switch (extraInfo.buildSystem)
     {
         case ROSUtils::CatkinMake:
         {
@@ -162,7 +177,7 @@ QList<NamedWidget *> ROSBuildConfiguration::createSubConfigWidgets()
 */
 
 ROSBuildConfigurationFactory::ROSBuildConfigurationFactory() :
-    IBuildConfigurationFactory()
+    BuildConfigurationFactory()
 {
     registerBuildConfiguration<ROSBuildConfiguration>(ROS_BC_ID);
 
@@ -174,32 +189,32 @@ ROSBuildConfigurationFactory::~ROSBuildConfigurationFactory()
 {
 }
 
-QList<BuildInfo *> ROSBuildConfigurationFactory::availableBuilds(const Target *parent) const
+QList<BuildInfo> ROSBuildConfigurationFactory::availableBuilds(const Target *parent) const
 {
-    QList<BuildInfo *> result;
+    QList<BuildInfo> result;
 
     // Need to create a ROS Setting widget where the user sets the default build system to use here.
     ROSUtils::BuildSystem buildSystem = static_cast<ROSProject *>(parent->project())->defaultBuildSystem();
 
     for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeUserDefined; ++type)
     {
-      ROSBuildInfo *info = createBuildInfo(parent->kit(), buildSystem, ROSUtils::BuildType(type));
+      ProjectExplorer::BuildInfo info = createBuildInfo(parent->kit(), buildSystem, ROSUtils::BuildType(type));
       result << info;
     }
 
     return result;
 }
 
-QList<BuildInfo *> ROSBuildConfigurationFactory::availableSetups(const Kit *k, const QString &projectPath) const
+QList<BuildInfo> ROSBuildConfigurationFactory::availableSetups(const Kit *k, const QString &projectPath) const
 {
-    QList<BuildInfo *> result;
+    QList<BuildInfo> result;
 
     // Need to create a ROS Setting widget where the user sets the default build system to use here.
     ROSUtils::ROSProjectFileContent projectFileContent;
     ROSUtils::parseQtCreatorWorkspaceFile(Utils::FileName::fromString(projectPath), projectFileContent);
 
     for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeUserDefined; ++type) {
-      ROSBuildInfo *info = createBuildInfo(k, projectFileContent.defaultBuildSystem, ROSUtils::BuildType(type));
+      ProjectExplorer::BuildInfo info = createBuildInfo(k, projectFileContent.defaultBuildSystem, ROSUtils::BuildType(type));
       result << info;
     }
 
@@ -207,12 +222,10 @@ QList<BuildInfo *> ROSBuildConfigurationFactory::availableSetups(const Kit *k, c
     return result;
 }
 
-ROSBuildInfo *ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const
+ProjectExplorer::BuildInfo ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const
 {
-    ROSBuildInfo *info = new ROSBuildInfo(this);
+    ProjectExplorer::BuildInfo *info = new ProjectExplorer::BuildInfo(this);
     info->kitId = k->id();
-    info->buildSystem = build_system;
-    info->cmakeBuildType = type;
     info->typeName = ROSUtils::buildTypeName(type);
     info->displayName = info->typeName;
 
@@ -234,7 +247,12 @@ ROSBuildInfo *ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const 
         break;
     }
 
-    return info;
+    ROSExtraBuildInfo extra;
+    extra.buildSystem = build_system;
+    extra.cmakeBuildType = type;
+    info->extraInfo = QVariant::fromValue(extra);
+
+    return *info;
 }
 
 BuildConfiguration::BuildType ROSBuildConfiguration::buildType() const
