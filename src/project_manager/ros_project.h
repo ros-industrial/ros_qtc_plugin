@@ -83,20 +83,20 @@ private:
     void asyncUpdateCppCodeModel(bool success);
     void updateEnvironment();
 
-    ROSUtils::ROSProjectFileContent m_projectFileContent = ROSUtils::ROSProjectFileContent();
-    ROSUtils::PackageInfoMap        m_wsPackageInfo = ROSUtils::PackageInfoMap();
-    ROSUtils::PackageBuildInfoMap   m_wsPackageBuildInfo = ROSUtils::PackageBuildInfoMap();
-    Utils::Environment              m_wsEnvironment = Utils::Environment();
+    ROSUtils::ROSProjectFileContent m_projectFileContent;
+    ROSUtils::PackageInfoMap        m_wsPackageInfo;
+    ROSUtils::PackageBuildInfoMap   m_wsPackageBuildInfo;
+    Utils::Environment              m_wsEnvironment;
 
     CppTools::CppProjectUpdater *m_cppCodeModelUpdater;
 
     // Watching Directories to keep Project Tree updated
     QTimer m_asyncUpdateTimer;
     QFileSystemWatcher m_watcher;
-    QHash<QString, ROSUtils::FolderContent> m_workspaceContent = QHash<QString, ROSUtils::FolderContent>();
-    QStringList m_workspaceFiles = QStringList();
-    QStringList m_workspaceDirectories = QStringList();
-    bool m_project_loaded = false;
+    QHash<QString, ROSUtils::FolderContent> m_workspaceContent;
+    QStringList m_workspaceFiles;
+    QStringList m_workspaceDirectories;
+    bool m_project_loaded;
 
 
     struct FutureWatcherResults
@@ -115,10 +115,10 @@ private:
       Utils::Environment wsEnvironment;
     };
 
-    QFutureInterface<FutureWatcherResults> *m_asyncUpdateFutureInterface = nullptr;
+    QFutureInterface<FutureWatcherResults> *m_asyncUpdateFutureInterface;
     QFutureWatcher<FutureWatcherResults> m_futureWatcher;
     // Parse Code Blocks Files and build Code Model
-    QFutureInterface<CppToolsFutureResults> *m_asyncBuildCodeModelFutureInterface = nullptr;
+    QFutureInterface<CppToolsFutureResults> *m_asyncBuildCodeModelFutureInterface;
     QFutureWatcher<CppToolsFutureResults> m_futureBuildCodeModelWatcher;
 
     static void buildProjectTree(const Utils::FileName projectFilePath,
