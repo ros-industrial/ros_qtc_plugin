@@ -123,7 +123,7 @@ static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
 // ROSProject
 //
 ////////////////////////////////////////////////////////////////////////////////////
-const int UPDATE_INTERVAL = 1000;
+const int UPDATE_INTERVAL = 300;
 
 ROSProject::ROSProject(const Utils::FileName &fileName) :
     ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName, [this]() { refresh(); }),
