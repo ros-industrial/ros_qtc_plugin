@@ -172,7 +172,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
                     return false;
 
                 process->setWorkingDirectory(workspaceInfo.sourcePath.toString());
-                process->start(QLatin1String("bash"), QStringList() << QStringList() << QLatin1String("-i") << QLatin1String("-c") << QLatin1String("catkin_init_workspace"));
+                process->start(QLatin1String("bash"), QStringList() << QStringList() << QLatin1String("-c") << QLatin1String("catkin_init_workspace"));
 
                 if( !process->waitForFinished() )
                     return false;
@@ -191,7 +191,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
                     return false;
 
                 process->setWorkingDirectory(workspace.path.toString());
-                process->start(QLatin1String("bash"), QStringList() << QLatin1String("-i") << QLatin1String("-c") << QLatin1String("catkin init"));
+                process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin init"));
 
                 if( !process->waitForFinished() )
                     return false;
@@ -216,14 +216,14 @@ bool ROSUtils::buildWorkspace(QProcess *process, const WorkspaceInfo &workspaceI
     case CatkinMake:
     {
         process->setWorkingDirectory(workspaceInfo.path.toString());
-        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-i") << QLatin1String("-c") << QLatin1String("catkin_make --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin_make --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
         process->waitForFinished();
         break;
     }
     case CatkinTools:
     {
         process->setWorkingDirectory(workspaceInfo.path.toString());
-        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-i") << QLatin1String("-c") << QLatin1String("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
         process->waitForFinished();
         break;
     }
@@ -253,7 +253,7 @@ bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
   QStringList env_list;
   QString cmd = QLatin1String("source ") + path + QLatin1String(" && env");
 
-  process->start(QLatin1String("bash"), QStringList() << QLatin1String("-i"));
+  process->start(QLatin1String("bash"));
   process->waitForStarted();
   process->write(cmd.toLatin1());
   process->closeWriteChannel();
@@ -713,7 +713,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   QStringList tmp;
 
   process.setEnvironment(env);
-  process.start(QLatin1String("bash"), QStringList() << QLatin1String("-i"));
+  process.start(QLatin1String("bash"));
   process.waitForStarted();
   QString cmd = QLatin1String("rospack list");
   process.write(cmd.toLatin1());
@@ -783,7 +783,7 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
   QMap<QString, QString> package_executables;
 
   process.setEnvironment(env);
-  process.start(QLatin1String("bash"), QStringList() << QLatin1String("-i"));
+  process.start(QLatin1String("bash"));
   process.waitForStarted();
   QString cmd = QLatin1String("catkin_find --without-underlays --libexec ") + packageName;
   process.write(cmd.toLatin1());
