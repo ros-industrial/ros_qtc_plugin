@@ -36,3 +36,9 @@ This can be for several reason.
 
 #. Sometime is persist event if you address the previous items, but if code following is working then it should be ignored.
 
+.. _faq4:
+
+Environment variables in .bashrc are not loaded by Qt Creator.
+--------------------------------------------------------------
+
+The .bashrc is loaded by bash terminals and is not used by applications. In order for applications to get user defined environment variable they must be added to the .profile file in the users home directory.
