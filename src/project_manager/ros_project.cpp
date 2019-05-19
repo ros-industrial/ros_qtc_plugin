@@ -122,11 +122,14 @@ static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
 // ROSProject
 //
 ////////////////////////////////////////////////////////////////////////////////////
-const int UPDATE_INTERVAL = 3000;
+const int UPDATE_INTERVAL = 300;
 
 ROSProject::ROSProject(const Utils::FileName &fileName) :
     ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName, [this]() { refresh(); }),
-    m_cppCodeModelUpdater(new CppTools::CppProjectUpdater(this))
+    m_cppCodeModelUpdater(new CppTools::CppProjectUpdater(this)),
+    m_project_loaded(false),
+    m_asyncUpdateFutureInterface(nullptr),
+    m_asyncBuildCodeModelFutureInterface(nullptr)
 {
     setId(Constants::ROS_PROJECT_ID);
     setProjectLanguages(Context(ProjectExplorer::Constants::CXX_LANGUAGE_ID));
@@ -454,8 +457,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
     const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(k);
 
     CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
-    if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(k))
-    {
+    if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(k)) {
         if (qtVersion->qtVersion() < QtSupport::QtVersionNumber(5,0,0))
             activeQtVersion = CppTools::ProjectPart::Qt4;
         else
@@ -463,11 +465,16 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
     }
 
     // Get all of the workspace includes directories
-    QStringList workspace_includes;
-    for (const auto& package : results.wsPackageBuildInfo)
-      for (const auto& target : package.targets)
-        workspace_includes.append(target.includes.filter(package.parent.path.toString()));
-    workspace_includes.removeDuplicates();
+    QStringList workspace_includes; // This should be the same as workspace_header_paths used for checking for duplicates
+    ProjectExplorer::HeaderPaths workspace_header_paths;
+    for (const auto& package : results.wsPackageInfo) {
+      Utils::FileName include_path = Utils::FileName::fromString(package.path.toString());
+      include_path.appendPath("include");
+      if (!workspace_includes.contains(include_path.toString())) {
+        workspace_includes.append(include_path.toString());
+        workspace_header_paths.append(ProjectExplorer::HeaderPath(include_path.toString(), ProjectExplorer::HeaderPathType::User));
+      }
+    }
 
     CppTools::RawProjectParts rpps;
 
@@ -486,12 +493,16 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
                             "|" + QRegularExpression::escape("hp") +
                             "|" + QRegularExpression::escape("hxx") + ")";
 
+    QStringList workspaceCppFiles = workspaceFiles.filter(QRegularExpression(pattern));
+
     int cnt = 0;
     double max = results.wsPackageBuildInfo.size();
     for (const ROSUtils::PackageBuildInfo& buildInfo : results.wsPackageBuildInfo)
     {
         QStringList packageFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
         QStringList packageCppFiles = packageFiles.filter(QRegularExpression(pattern));
+        ProjectExplorer::HeaderPaths packageHeaderPaths = workspace_header_paths;
+        QStringList package_includes = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
 
         for (const ROSUtils::PackageTargetInfo& targetInfo : buildInfo.targets)
         {
@@ -516,16 +527,16 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
                 toolChainIncludes.insert(hp.path);
             }
 
-            QStringList includePaths;
             for (const QString &i : targetInfo.includes) {
-                if (!toolChainIncludes.contains(i) && !i.startsWith(workspaceInfo.installPath.toString()) && !i.startsWith(workspaceInfo.develPath.toString()))
-                    includePaths.append(i);
+                if (!toolChainIncludes.contains(i) && !package_includes.contains(i)) {
+                    packageHeaderPaths.append(ProjectExplorer::HeaderPath(i, ProjectExplorer::HeaderPathType::System));
+                    package_includes.append(i);
+                }
             }
-            includePaths.append(workspace_includes);
 
-            rpp.setIncludePaths(includePaths);
             rpp.setFlagsForCxx({cxxToolChain, targetInfo.flags});
             rpp.setFiles(packageCppFiles);
+            rpp.setHeaderPaths(packageHeaderPaths);
             rpps.append(rpp);
         }
         cnt += 1;
@@ -542,8 +553,6 @@ void ROSProject::updateCppCodeModel()
 {
   if (m_futureBuildCodeModelWatcher.isFinished())
   {
-    updateEnvironment();
-
     const Kit *k = nullptr;
 
     if (Target *target = activeTarget())
@@ -564,6 +573,8 @@ void ROSProject::updateCppCodeModel()
     m_asyncBuildCodeModelFutureInterface->reportFinished();
     delete m_asyncBuildCodeModelFutureInterface;
     m_asyncBuildCodeModelFutureInterface = nullptr;
+
+    updateEnvironment();
   }
 
 }
