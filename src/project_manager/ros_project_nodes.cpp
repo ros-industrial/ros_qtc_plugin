@@ -75,6 +75,30 @@ bool ROSProjectNode::supportsAction(ProjectExplorer::ProjectAction action, const
     }
 }
 
+bool ROSProjectNode::addFiles(const QStringList &filePaths, QStringList *notAdded)
+{
+  ProjectExplorer::ProjectNode::addFiles(filePaths, notAdded);
+  return true;
+}
+
+bool ROSProjectNode::removeFiles(const QStringList &filePaths, QStringList *notRemoved)
+{
+  ProjectExplorer::ProjectNode::removeFiles(filePaths, notRemoved);
+  return true;
+}
+
+bool ROSProjectNode::deleteFiles(const QStringList &filePaths)
+{
+  ProjectExplorer::ProjectNode::deleteFiles(filePaths);
+  return true;
+}
+
+bool ROSProjectNode::renameFile(const QString &filePath, const QString &newFilePath)
+{
+  ProjectExplorer::ProjectNode::renameFile(filePath, newFilePath);
+  return true;
+}
+
 ROSFolderNode::ROSFolderNode(const Utils::FileName &folderPath, const QString  &displayName) : FolderNode(folderPath, ProjectExplorer::NodeType::Folder, displayName), m_repository(nullptr)
 {
     QString path = this->filePath().toString();
