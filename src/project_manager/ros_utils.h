@@ -26,6 +26,7 @@
 #include <QXmlStreamWriter>
 #include <QRegularExpression>
 #include <utils/fileutils.h>
+#include <utils/environment.h>
 #include "ros_project_constants.h"
 
 namespace ROSProjectManager {
@@ -133,15 +134,13 @@ public:
 
     /** @brief Contains a packages relavent build informations */
     struct PackageBuildInfo {
-        PackageBuildInfo(const PackageInfo packageInfo, const QStringList env)
+        PackageBuildInfo(const PackageInfo packageInfo)
         {
             parent = packageInfo;
-            environment = env;
         }
 
         Utils::FileName path;          /**< @brief Path to the Package's build directory */
         Utils::FileName cbpFile;       /**< @brief Path to the Package's CodeBlocks file */
-        QStringList environment;       /**< @brief Build Environment */
         PackageTargetInfoList targets; /**< @brief List of packages target's */
         PackageInfo parent;            /**< @brief Package information */
 
@@ -426,7 +425,7 @@ public:
      * @param rosDistribution ROS distribution (Hydro, Indigo, etc.)
      * @return QProcessEnvironment
      */
-    static QProcessEnvironment getWorkspaceEnvironment(const WorkspaceInfo &workspaceInfo);
+    static QProcessEnvironment getWorkspaceEnvironment(const WorkspaceInfo &workspaceInfo, const Utils::Environment &current_environment);
 
 private:
     /**

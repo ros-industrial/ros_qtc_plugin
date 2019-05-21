@@ -127,7 +127,7 @@ bool ROSCatkinToolsStep::init(QList<const BuildStep *> &earlierSteps)
     // Set Catkin Tools Active Profile
     ROSUtils::setCatkinToolsActiveProfile(bc->project()->projectDirectory(), activeProfile());
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
 
     bc->updateQtEnvironment(env); // TODO: Not sure if this is required here
 
@@ -396,7 +396,7 @@ void ROSCatkinToolsStepWidget::updateDetails()
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
 
     m_ui->catkinToolsWorkingDirWidget->setEnvironment(env);
 

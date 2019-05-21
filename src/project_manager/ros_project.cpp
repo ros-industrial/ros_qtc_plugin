@@ -334,7 +334,10 @@ void ROSProject::buildProjectTree(const Utils::FileName projectFilePath, const Q
 void ROSProject::updateEnvironment()
 {
   if (ROSBuildConfiguration *bc = rosBuildConfiguration())
-      bc->updateQtEnvironment(m_wsEnvironment);
+  {
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(projectDirectory(), bc->buildSystem(), distribution());
+    bc->updateQtEnvironment(Utils::Environment(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList()));
+  }
 }
 
 void ROSProject::fileSystemChanged(const QString &path)
@@ -413,6 +416,7 @@ void ROSProject::asyncUpdateCppCodeModel(bool success)
                                        Constants::ROS_RELOADING_BUILD_INFO);
 
         ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(projectDirectory(), rosBuildConfiguration()->buildSystem(), distribution());
+        Utils::Environment current_environment = rosBuildConfiguration()->environment();
 
         const Kit *k = nullptr;
 
@@ -448,11 +452,6 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
     CppToolsFutureResults results;
     results.wsPackageInfo = ROSUtils::getWorkspacePackageInfo(workspaceInfo, &wsPackageInfo);
     results.wsPackageBuildInfo = ROSUtils::getWorkspacePackageBuildInfo(workspaceInfo, results.wsPackageInfo, &wsPackageBuildInfo);
-
-    if (results.wsPackageBuildInfo.isEmpty())
-        results.wsEnvironment = Utils::Environment(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
-    else
-        results.wsEnvironment = Utils::Environment(results.wsPackageBuildInfo.first().environment);
 
     const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(k);
 
@@ -566,7 +565,6 @@ void ROSProject::updateCppCodeModel()
 
     m_wsPackageInfo = std::move(m_futureBuildCodeModelWatcher.result().wsPackageInfo);
     m_wsPackageBuildInfo = std::move(m_futureBuildCodeModelWatcher.result().wsPackageBuildInfo);
-    m_wsEnvironment = std::move(m_futureBuildCodeModelWatcher.result().wsEnvironment);
 
     m_cppCodeModelUpdater->update({this, nullptr, cxxToolChain, k, std::move(m_futureBuildCodeModelWatcher.result().parts)});
 

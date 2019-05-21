@@ -86,7 +86,6 @@ private:
     ROSUtils::ROSProjectFileContent m_projectFileContent;
     ROSUtils::PackageInfoMap        m_wsPackageInfo;
     ROSUtils::PackageBuildInfoMap   m_wsPackageBuildInfo;
-    Utils::Environment              m_wsEnvironment;
 
     CppTools::CppProjectUpdater *m_cppCodeModelUpdater;
 
@@ -112,7 +111,6 @@ private:
       CppTools::RawProjectParts parts;
       ROSUtils::PackageInfoMap wsPackageInfo;
       ROSUtils::PackageBuildInfoMap wsPackageBuildInfo;
-      Utils::Environment wsEnvironment;
     };
 
     QFutureInterface<FutureWatcherResults> *m_asyncUpdateFutureInterface;

@@ -119,7 +119,7 @@ bool ROSCatkinMakeStep::init(QList<const BuildStep *> &earlierSteps)
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
     pp->setWorkingDirectory(bc->project()->projectDirectory().toString());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
 
     bc->updateQtEnvironment(env); // TODO: Not sure if this is required here
 
@@ -317,7 +317,7 @@ void ROSCatkinMakeStepWidget::updateDetails()
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList());
+    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
