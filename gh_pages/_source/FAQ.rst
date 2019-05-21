@@ -41,4 +41,8 @@ This can be for several reason.
 Environment variables in .bashrc are not loaded by Qt Creator.
 --------------------------------------------------------------
 
-The .bashrc is loaded by bash terminals and is not used by applications. In order for applications to get user defined environment variable they must be added to the .profile file in the users home directory.
+The .bashrc is loaded by bash terminals and is not used by applications. In order for applications to get user defined environment variables you have the two known option below.
+
+#. The environment variables can be added to the build configuration in Qt Creator of the project. This will be required for every new project created in Qt Creator.
+
+#. The environment variables can be added to the .profile file in the users home directory. This is only required once.
