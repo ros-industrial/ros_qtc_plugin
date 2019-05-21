@@ -25,7 +25,6 @@
 #include "ros_project_plugin.h"
 
 #include <utils/fileutils.h>
-#include <utils/environment.h>
 #include <coreplugin/messagemanager.h>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
@@ -494,13 +493,14 @@ ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const WorkspaceInfo &
     return wsPackageInfo;
 }
 
-ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const WorkspaceInfo &workspaceInfo, const PackageInfoMap &packageInfo, const PackageBuildInfoMap *cachedPackageBuildInfo)
+ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const WorkspaceInfo &workspaceInfo,
+                                                                     const PackageInfoMap &packageInfo,
+                                                                     const PackageBuildInfoMap *cachedPackageBuildInfo)
 {
     PackageBuildInfoMap wsBuildInfo;
-    QStringList env = ROSUtils::getWorkspaceEnvironment(workspaceInfo).toStringList();
     for (const PackageInfo& package : packageInfo)
     {
-        PackageBuildInfo buildInfo(package, env);
+        PackageBuildInfo buildInfo(package);
         if (findPackageBuildDirectory(workspaceInfo, package, buildInfo.path))
         {
             // Get package's code block file
@@ -1086,9 +1086,12 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FileName &worksp
     return space;
 }
 
-QProcessEnvironment ROSUtils::getWorkspaceEnvironment(const WorkspaceInfo &workspaceInfo)
+QProcessEnvironment ROSUtils::getWorkspaceEnvironment(const WorkspaceInfo &workspaceInfo, const Utils::Environment& current_environment)
 {
     QProcess process;
+
+    process.setProcessEnvironment(current_environment.toProcessEnvironment());
+
     sourceWorkspace(&process, workspaceInfo);
 
     QProcessEnvironment env = process.processEnvironment();
