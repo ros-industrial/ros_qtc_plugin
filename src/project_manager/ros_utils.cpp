@@ -117,6 +117,13 @@ bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
 
         return false;
     }
+    case ROSUtils::Colcon:
+    {
+        if (workspaceInfo.sourcePath.exists())
+          return true;
+
+        return false;
+    }
     }
 
     return false;
@@ -197,6 +204,17 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
 
                 break;
             }
+            case Colcon:
+            {
+                workspace = ROSUtils::getWorkspaceInfo(workspace.path,
+                                                       workspace.buildSystem,
+                                                       workspace.rosDistribution);
+
+                if( !initializeWorkspaceFolders(workspace) )
+                    return false;
+
+                break;
+            }
          }
 
         if (process->exitStatus() != QProcess::CrashExit)
@@ -223,6 +241,13 @@ bool ROSUtils::buildWorkspace(QProcess *process, const WorkspaceInfo &workspaceI
     {
         process->setWorkingDirectory(workspaceInfo.path.toString());
         process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process->waitForFinished();
+        break;
+    }
+    case Colcon:
+    {
+        process->setWorkingDirectory(workspaceInfo.path.toString());
+        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("colcon build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
         process->waitForFinished();
         break;
     }
@@ -715,7 +740,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   process.setEnvironment(env);
   process.start(QLatin1String("bash"));
   process.waitForStarted();
-  QString cmd = QLatin1String("rospack list");
+  QString cmd = QLatin1String("rospack list"); // TODO: for ROS2 do 'ros2 pkg list'
   process.write(cmd.toLatin1());
   process.closeWriteChannel();
   process.waitForFinished();
@@ -1081,6 +1106,15 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FileName &worksp
         }
         break;
     }
+    case Colcon:
+    {
+        space.sourcePath = Utils::FileName(workspaceDir).appendPath("src");
+        space.buildPath = Utils::FileName(workspaceDir).appendPath("build");
+        space.installPath = Utils::FileName(workspaceDir).appendPath("install");
+        space.logPath = Utils::FileName(workspaceDir).appendPath("log");
+        space.install = false; //TODO: Need to find how best to determine if installing
+        break;
+    }
     }
 
     return space;
@@ -1113,6 +1147,12 @@ bool ROSUtils::findPackageBuildDirectory(const WorkspaceInfo &workspaceInfo, con
         break;
     }
     case CatkinTools:
+    {
+        packageBuildPath = workspaceInfo.buildPath;
+        packageBuildPath.appendPath(packageInfo.name);
+        break;
+    }
+    case Colcon:
     {
         packageBuildPath = workspaceInfo.buildPath;
         packageBuildPath.appendPath(packageInfo.name);

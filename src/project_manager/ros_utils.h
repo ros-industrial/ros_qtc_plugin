@@ -36,7 +36,7 @@ class ROSUtils {
 public:
     ROSUtils();
 
-    enum BuildSystem { CatkinMake = 0, CatkinTools = 1 };
+    enum BuildSystem { CatkinMake = 0, CatkinTools = 1, Colcon = 2 };
 
     enum BuildType {
         BuildTypeDebug = 0,
