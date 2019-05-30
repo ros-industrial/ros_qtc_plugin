@@ -89,7 +89,7 @@ public:
         Utils::FileName logPath;
         bool install = false;
 
-        QString rosDistribution;
+        Utils::FileName rosDistribution;
         BuildSystem buildSystem;
     };
 
@@ -156,7 +156,7 @@ public:
 
     /** @brief Contains project file information */
     struct ROSProjectFileContent {
-        QString distribution;                     /**< @brief ROS Distribution */
+        Utils::FileName distribution;                     /**< @brief ROS Distribution */
         ROSUtils::BuildSystem defaultBuildSystem; /**< @brief Default build system */
         QStringList watchDirectories;             /**< @brief Watch directories */
     };
@@ -174,7 +174,7 @@ public:
      * @param rosDistribution ROS distribution
      * @return True if successful, otherwise false
      */
-    static bool sourceROS(QProcess *process, const QString &rosDistribution);
+    static bool sourceROS(QProcess *process, const Utils::FileName &rosDistribution);
 
     /**
      * @brief Source Workspace
@@ -221,7 +221,7 @@ public:
      * @brief Gets a list of installed ROS Distributions
      * @return QStringList List of installed ROS distribution names
      */
-    static QStringList installedDistributions();
+    static QList<Utils::FileName> installedDistributions();
 
     /**
      * @brief Generates/Updates the Qt ROS Project File
@@ -279,7 +279,7 @@ public:
      */
     static WorkspaceInfo getWorkspaceInfo(const Utils::FileName &workspaceDir,
                                           const BuildSystem &buildSystem,
-                                          const QString &rosDistribution);
+                                          const Utils::FileName &rosDistribution);
 
     /**
      * @brief Get all of the workspace packages and its neccessary information.

@@ -194,7 +194,7 @@ bool ROSProject::saveProjectFile()
     return result;
 }
 
-QString ROSProject::distribution() const
+Utils::FileName ROSProject::distribution() const
 {
     return m_projectFileContent.distribution;
 }
