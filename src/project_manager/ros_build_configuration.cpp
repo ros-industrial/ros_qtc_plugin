@@ -22,6 +22,7 @@
 
 #include "ros_catkin_make_step.h"
 #include "ros_catkin_tools_step.h"
+#include "ros_colcon_step.h"
 #include "ros_project.h"
 #include "ros_project_constants.h"
 #include "ros_utils.h"
@@ -107,6 +108,17 @@ void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo &info)
             ROSCatkinToolsStep *cleanMakeStep = new ROSCatkinToolsStep(cleanSteps);
             cleanSteps->insertStep(0, cleanMakeStep);
             cleanMakeStep->setBuildTarget(ROSCatkinToolsStep::CLEAN);
+            break;
+        }
+        case ROSUtils::Colcon:
+        {
+            ROSColconStep *makeStep = new ROSColconStep(buildSteps);
+            buildSteps->insertStep(0, makeStep);
+            makeStep->setBuildTarget(ROSColconStep::BUILD);
+
+            ROSColconStep *cleanMakeStep = new ROSColconStep(cleanSteps);
+            cleanSteps->insertStep(0, cleanMakeStep);
+            cleanMakeStep->setBuildTarget(ROSColconStep::CLEAN);
             break;
         }
     }

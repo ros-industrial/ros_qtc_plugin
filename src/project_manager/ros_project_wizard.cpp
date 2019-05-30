@@ -84,7 +84,7 @@ QString ROSProjectWizardDialog::projectName() const
     return m_firstPage->projectName();
 }
 
-QString ROSProjectWizardDialog::distribution() const
+Utils::FileName ROSProjectWizardDialog::distribution() const
 {
     return m_firstPage->distribution();
 }
@@ -124,7 +124,12 @@ ROSImportWizardPage::ROSImportWizardPage(QWidget *parent) :
     d(new ROSImportWizardPagePrivate)
 {
     d->m_ui.setupUi(this);
-    d->m_ui.distributionComboBox->addItems(ROSUtils::installedDistributions());
+    QStringList dist_list;
+    for(auto entry : ROSUtils::installedDistributions())
+    {
+        dist_list.append(entry.toString());
+    }
+    d->m_ui.distributionComboBox->addItems(dist_list);
 
     QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
     int index = d->m_ui.distributionComboBox->findText(ros_settings->default_distribution, Qt::MatchExactly);
@@ -154,9 +159,9 @@ QString ROSImportWizardPage::projectName() const
     return d->m_ui.nameLineEdit->text();
 }
 
-QString ROSImportWizardPage::distribution() const
+Utils::FileName ROSImportWizardPage::distribution() const
 {
-    return d->m_ui.distributionComboBox->currentText();
+    return Utils::FileName::fromString(d->m_ui.distributionComboBox->currentText());
 }
 
 ROSUtils::BuildSystem ROSImportWizardPage::buildSystem() const

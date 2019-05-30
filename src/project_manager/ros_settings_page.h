@@ -46,6 +46,8 @@ struct ROSSettings
 
     QString default_code_style;
 
+    QString custom_dist_path;
+
     void toSettings(QSettings *) const;
     void fromSettings(QSettings *);
 

@@ -31,6 +31,7 @@
 #include "ros_project_constants.h"
 #include "ros_catkin_make_step.h"
 #include "ros_catkin_tools_step.h"
+#include "ros_colcon_step.h"
 #include "ros_project.h"
 #include "ros_utils.h"
 #include "ros_project_constants.h"
@@ -106,6 +107,7 @@ public:
     ROSBuildConfigurationFactory buildConfigFactory;
     ROSCatkinMakeStepFactory catkinMakeStepFactory;
     ROSCatkinToolsStepFactory catkinToolsStepFactory;
+    ROSColconStepFactory colconStepFactory;
 
     ROSTerminalPane terminalPane;
 

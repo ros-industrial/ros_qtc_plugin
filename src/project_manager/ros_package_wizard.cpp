@@ -340,7 +340,7 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   if (!m_wizard->maintainers().isEmpty())
       cmd += m_wizard->maintainers().join(QLatin1Literal(" -m ")).insert(0,QLatin1Literal(" -m "));
 
-  cmd += QString::fromLatin1(" --rosdistro \"%1\"").arg(project->distribution());
+  cmd += QString::fromLatin1(" --rosdistro \"%1\"").arg(project->distribution().fileName());
 
   // create package using ros command catkin_create_pkg
   Utils::FileName packagePath = Utils::FileName::fromString(m_wizard->packagePath());
