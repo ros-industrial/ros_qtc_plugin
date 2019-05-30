@@ -13,13 +13,10 @@ CONFIG += link_pkgconfig
 CONFIG += c++14
 PKGCONFIG += yaml-cpp
 
-HEADERS += $$files(*.h) \
-    ros_colcon_step.h
+HEADERS += $$files(*.h)
 
-SOURCES += $$files(*.cpp) \
-    ros_colcon_step.cpp
+SOURCES += $$files(*.cpp)
 
 RESOURCES += ros_project.qrc
 
-FORMS += $$files(*.ui) \
-    ros_colcon_step.ui
+FORMS += $$files(*.ui)
