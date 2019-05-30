@@ -59,11 +59,11 @@ QString ROSUtils::buildTypeName(const ROSUtils::BuildType &buildType)
     }
 }
 
-bool ROSUtils::sourceROS(QProcess *process, const QString &rosDistribution)
+bool ROSUtils::sourceROS(QProcess *process, const Utils::FileName &rosDistribution)
 {
-  bool results = sourceWorkspaceHelper(process, Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY)).appendPath(rosDistribution).appendPath(QLatin1String("setup.bash")).toString());
+  bool results = sourceWorkspaceHelper(process, Utils::FileName(rosDistribution).appendPath(QLatin1String("setup.bash")).toString());
   if (!results)
-    Core::MessageManager::write(QObject::tr("[ROS Warning] Faild to source ROS Distribution: %1.").arg(rosDistribution));
+    Core::MessageManager::write(QObject::tr("[ROS Warning] Faild to source ROS Distribution: %1.").arg(rosDistribution.toString()));
 
   return results;
 }
@@ -260,11 +260,32 @@ bool ROSUtils::buildWorkspace(QProcess *process, const WorkspaceInfo &workspaceI
     return false;
 }
 
-QStringList ROSUtils::installedDistributions()
+QList<Utils::FileName> ROSUtils::installedDistributions()
 {
+  QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
+  Utils::FileName custom_ros_path = Utils::FileName::fromString(ros_settings->custom_dist_path);
+  QList<Utils::FileName> distributions;
+  if(custom_ros_path.exists())
+  {
+      QDir custom_dir(custom_ros_path.toString());
+      custom_dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
+      for (auto entry : custom_dir.entryList())
+      {
+        Utils::FileName path(custom_ros_path);
+        path.appendPath(entry);
+        distributions.append(path);
+      }
+  }
   QDir ros_opt(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
+
   ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-  QStringList distributions = ros_opt.entryList();
+
+  for (auto entry : ros_opt.entryList())
+  {
+    Utils::FileName path = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
+    path.appendPath(entry);
+    distributions.append(path);
+  }
 
   if (distributions.isEmpty())
       Core::MessageManager::write(QObject::tr("[ROS Error] ROS Does not appear to be installed"));
@@ -302,7 +323,7 @@ bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const R
     xmlFile.writeStartElement(QLatin1String("Workspace"));
 
     xmlFile.writeStartElement(QLatin1String("Distribution"));
-    xmlFile.writeAttribute(QLatin1String("name"), content.distribution);
+    xmlFile.writeAttribute(QLatin1String("path"), content.distribution.toString());
     xmlFile.writeEndElement();
 
     xmlFile.writeStartElement(QLatin1String("DefaultBuildSystem"));
@@ -333,14 +354,14 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FileName &filePath, ROSP
         {
             if (workspaceXml.name() == QLatin1String("Distribution"))
             {
-                QStringList distributions = ROSUtils::installedDistributions();
+                QList<Utils::FileName> distributions = ROSUtils::installedDistributions();
                 QXmlStreamAttributes attributes = workspaceXml.attributes();
-                if (attributes.hasAttribute(QLatin1String("name")))
+                if (attributes.hasAttribute(QLatin1String("path")))
                 {
-                    content.distribution = attributes.value(QLatin1String("name")).toString();
-                    if (!distributions.isEmpty() && !distributions.contains(content.distribution))
+                    content.distribution = Utils::FileName::fromString(attributes.value(QLatin1String("path")).toString());
+                    if (!distributions.empty() && !distributions.contains(content.distribution))
                     {
-                        Core::MessageManager::write(QObject::tr("[ROS Error] Project file distribution [%1] is not installed. Setting to [%2], if incorrect modify project file [%3].").arg(content.distribution, distributions.first(), filePath.fileName()));
+                        Core::MessageManager::write(QObject::tr("[ROS Error] Project file distribution [%1] is not installed. Setting to [%2], if incorrect modify project file [%3].").arg(content.distribution.toString(), distributions.first().toString(), filePath.fileName()));
                         content.distribution = distributions.first();
                     }
                 }
@@ -1060,7 +1081,7 @@ QString ROSUtils::getCMakeBuildTypeArgument(ROSUtils::BuildType &buildType)
 
 ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FileName &workspaceDir,
                                                    const BuildSystem &buildSystem,
-                                                   const QString &rosDistribution)
+                                                   const Utils::FileName &rosDistribution)
 {
     WorkspaceInfo space;
     space.path = workspaceDir;

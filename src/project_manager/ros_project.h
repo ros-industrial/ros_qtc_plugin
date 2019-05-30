@@ -59,7 +59,7 @@ public:
 
     void refresh();
 
-    QString distribution() const;
+    Utils::FileName distribution() const;
     ROSUtils::BuildSystem defaultBuildSystem() const;
     ROSBuildConfiguration* rosBuildConfiguration() const;
 

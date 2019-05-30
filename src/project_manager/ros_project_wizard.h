@@ -48,7 +48,7 @@ public:
     explicit ROSProjectWizardDialog(const Core::BaseFileWizardFactory *factory, QWidget *parent = 0);
 
     QString projectName() const;
-    QString distribution() const;
+    Utils::FileName distribution() const;
     ROSUtils::BuildSystem buildSystem() const;
     Utils::FileName workspaceDirectory() const;
 
@@ -69,7 +69,7 @@ public:
     void setForceFirstCapitalLetterForFileName(bool b);
 
     QString projectName() const;
-    QString distribution() const;
+    Utils::FileName distribution() const;
     ROSUtils::BuildSystem buildSystem() const;
     Utils::FileName workspaceDirectory() const;
 

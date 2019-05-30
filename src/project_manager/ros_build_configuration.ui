@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>682</width>
-    <height>70</height>
+    <height>74</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,6 +42,11 @@
      <item>
       <property name="text">
        <string>CatkinTools</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Colcon</string>
       </property>
      </item>
     </widget>

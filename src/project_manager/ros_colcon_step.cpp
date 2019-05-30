@@ -175,6 +175,7 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
 
     switch(m_target) {
     case BUILD:
+        Utils::QtcProcess::addArgs(&args, QLatin1String("build"));
         Utils::QtcProcess::addArgs(&args, m_colconArguments);
         if (includeDefault)
             if (buildType == ROSUtils::BuildTypeUserDefined)
@@ -187,7 +188,7 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
 
         break;
     case CLEAN:
-        Utils::QtcProcess::addArgs(&args, QLatin1String("rm -r build/ install/ log/"));
+        Utils::QtcProcess::addArgs(&args, QLatin1String("-r build/ install/ log/"));
 
         break;
     }
@@ -200,7 +201,14 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
 
 QString ROSColconStep::makeCommand() const
 {
-    return QLatin1String("colcon build");
+    switch(m_target) {
+    case BUILD:
+        return QLatin1String("colcon");
+    case CLEAN:
+        return QLatin1String("rm");
+    default:
+        return QLatin1String("colcon");
+    }
 }
 
 void ROSColconStep::run(QFutureInterface<bool> &fi)

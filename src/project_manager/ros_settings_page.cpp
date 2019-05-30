@@ -36,6 +36,7 @@
 static const char DEFAULT_DISTRIBUTION_ID[] = "ROSProjectManager.ROSSettingsDefaultDistribution";
 static const char DEFAULT_BUILD_SYSTEM_ID[] = "ROSProjectManager.ROSSettingsDefaultBuildSystem";
 static const char DEFAULT_CODE_STYLE_ID[] = "ROSProjectManager.ROSSettingsDefaultCodeStyle";
+static const char CUSTOM_DISTRIBUTION_PATH_ID[] = "ROSProjectManager.ROSSettingsCustomDistributionPath";
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -51,15 +52,18 @@ void ROSSettings::toSettings(QSettings *s) const
     s->setValue(DEFAULT_DISTRIBUTION_ID, default_distribution);
     s->setValue(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(default_build_system));
     s->setValue(DEFAULT_CODE_STYLE_ID, default_code_style);
+    s->setValue(CUSTOM_DISTRIBUTION_PATH_ID, custom_dist_path);
+
     s->endGroup();
 }
 
 void ROSSettings::fromSettings(QSettings *s)
 {
     s->beginGroup(QLatin1String(Constants::ROS_SETTINGS_GROUP_ID));
-    default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, ROSUtils::installedDistributions().last()).toString();
+    default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, "").toString();
     default_build_system = static_cast<ROSUtils::BuildSystem>(s->value(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(ROSUtils::BuildSystem::CatkinTools)).toInt());
     default_code_style = s->value(DEFAULT_CODE_STYLE_ID, "ROS").toString();
+    custom_dist_path = s->value(CUSTOM_DISTRIBUTION_PATH_ID, "").toString();
     s->endGroup();
 }
 
@@ -67,7 +71,8 @@ bool ROSSettings::equals(const ROSSettings &rhs) const
 {
     return default_distribution == rhs.default_distribution
            && default_build_system == rhs.default_build_system
-           && default_code_style == rhs.default_code_style;
+           && default_code_style == rhs.default_code_style
+           && custom_dist_path == rhs.custom_dist_path;
 }
 
 // ------------------ ROSSettingsWidget
@@ -80,7 +85,12 @@ ROSSettingsWidget::ROSSettingsWidget(QWidget *parent) :
     m_ui->setupUi(this);
 
     // Add available ros distributions
-    m_ui->distributionComboBox->addItems(ROSUtils::installedDistributions());
+    QStringList installed_distributions;
+    for(auto entry : ROSUtils::installedDistributions())
+    {
+        installed_distributions.append(entry.toString());
+    }
+    m_ui->distributionComboBox->addItems(installed_distributions);
 
     // See ProjectExplorer::CodeStyleSettingsWidget and ProjectExplorer::EditorConfiguration as an example
     // TODO: Add python support
@@ -112,6 +122,7 @@ ROSSettings ROSSettingsWidget::settings() const
     rc.default_distribution = m_ui->distributionComboBox->currentText();
     rc.default_build_system = static_cast<ROSUtils::BuildSystem>(m_ui->buildSystemComboBox->currentIndex());
     rc.default_code_style = m_available_code_styles[m_ui->codeStyleComboBox->currentText()];
+    rc.custom_dist_path = m_ui->customDistributionPathChooser->path();
     return rc;
 }
 
@@ -129,6 +140,8 @@ void ROSSettingsWidget::setSettings(const ROSSettings &s)
             break;
         }
     }
+
+    m_ui->customDistributionPathChooser->setPath(s.custom_dist_path);
 }
 
 // --------------- ROSSettingsPage

@@ -2,6 +2,7 @@ blacklist: []
 build_space: build
 catkin_make_args: []
 cmake_args: []
+colcon_args: []
 devel_layout: linked
 devel_space: devel
 extend_path: null

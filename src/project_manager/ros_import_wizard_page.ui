@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>475</width>
-    <height>125</height>
+    <height>128</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -69,6 +69,11 @@
      <item>
       <property name="text">
        <string>CatkinTools</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Colcon</string>
       </property>
      </item>
     </widget>
