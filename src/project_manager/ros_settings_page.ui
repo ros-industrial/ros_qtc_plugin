@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>321</width>
+    <width>400</width>
     <height>300</height>
    </rect>
   </property>
@@ -47,7 +47,7 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>150</width>
+       <width>200</width>
        <height>0</height>
       </size>
      </property>
@@ -88,7 +88,7 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>150</width>
+       <width>200</width>
        <height>0</height>
       </size>
      </property>
@@ -138,21 +138,57 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>150</width>
+       <width>200</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="customDistributionLocaitonLabel">
+     <property name="text">
+      <string>Custom ROS Distros:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="Utils::PathChooser" name="customDistributionPathChooser" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>200</width>
        <height>0</height>
       </size>
      </property>
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QLabel" name="customDistributionLabel">
+    <widget class="QLabel" name="defaultDistributionLocationLabel">
      <property name="text">
-      <string>Custom ROS Dist.:</string>
+      <string>Default ROS Distros:</string>
      </property>
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="Utils::PathChooser" name="customDistributionPathChooser" native="true"/>
+    <widget class="Utils::PathChooser" name="defaultDistributionPathChooser" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>200</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

@@ -46,6 +46,8 @@ struct ROSSettings
 
     QString default_code_style;
 
+    QString default_dist_path;
+
     QString custom_dist_path;
 
     void toSettings(QSettings *) const;
@@ -54,6 +56,9 @@ struct ROSSettings
     bool equals(const ROSSettings &rhs) const;
     bool operator==(const ROSSettings &s) const { return equals(s); }
     bool operator!=(const ROSSettings &s) const { return !equals(s); }
+
+private:
+    QList<Utils::FileName> m_system_distributions;
 };
 
 class ROSSettingsWidget : public QWidget
