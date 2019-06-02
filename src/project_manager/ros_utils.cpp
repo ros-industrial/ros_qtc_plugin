@@ -267,28 +267,31 @@ QList<Utils::FileName> ROSUtils::installedDistributions()
   QList<Utils::FileName> distributions;
   if(custom_ros_path.exists())
   {
-      QDir custom_dir(custom_ros_path.toString());
-      custom_dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-      for (auto entry : custom_dir.entryList())
-      {
-        Utils::FileName path(custom_ros_path);
-        path.appendPath(entry);
-        distributions.append(path);
-      }
+    QDir custom_dir(custom_ros_path.toString());
+    custom_dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
+    for (auto entry : custom_dir.entryList())
+    {
+      Utils::FileName path(custom_ros_path);
+      path.appendPath(entry);
+      distributions.append(path);
+    }
   }
-  QDir ros_opt(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
 
-  ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-
-  for (auto entry : ros_opt.entryList())
+  Utils::FileName default_ros_path = Utils::FileName::fromString(ros_settings->default_dist_path);
+  if (default_ros_path.exists())
   {
-    Utils::FileName path = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
-    path.appendPath(entry);
-    distributions.append(path);
+    QDir ros_opt(default_ros_path.toString());
+    ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
+    for (auto entry : ros_opt.entryList())
+    {
+      Utils::FileName path = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
+      path.appendPath(entry);
+      distributions.append(path);
+    }
   }
 
   if (distributions.isEmpty())
-      Core::MessageManager::write(QObject::tr("[ROS Error] ROS Does not appear to be installed"));
+      Core::MessageManager::write(QObject::tr("[ROS Error] ROS Does not appear to be installed.\n Check ROS Settings page to verify that the install location is valid."));
 
   return distributions;
 }
@@ -1131,9 +1134,10 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FileName &worksp
     {
         space.sourcePath = Utils::FileName(workspaceDir).appendPath("src");
         space.buildPath = Utils::FileName(workspaceDir).appendPath("build");
+        space.develPath = Utils::FileName(workspaceDir).appendPath("install"); // Colcon does not have devel space setting to install
         space.installPath = Utils::FileName(workspaceDir).appendPath("install");
         space.logPath = Utils::FileName(workspaceDir).appendPath("log");
-        space.install = false; //TODO: Need to find how best to determine if installing
+        space.install = true; // Calcon always uses the install space.
         break;
     }
     }
