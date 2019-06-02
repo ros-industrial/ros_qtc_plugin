@@ -21,6 +21,8 @@
 #include "ros_settings_page.h"
 #include "ros_project_constants.h"
 #include "ui_ros_settings_page.h"
+#include "ros_project_constants.h"
+#include <QDir>
 
 #include <coreplugin/icore.h>
 
@@ -36,6 +38,7 @@
 static const char DEFAULT_DISTRIBUTION_ID[] = "ROSProjectManager.ROSSettingsDefaultDistribution";
 static const char DEFAULT_BUILD_SYSTEM_ID[] = "ROSProjectManager.ROSSettingsDefaultBuildSystem";
 static const char DEFAULT_CODE_STYLE_ID[] = "ROSProjectManager.ROSSettingsDefaultCodeStyle";
+static const char DEFAULT_DISTRIBUTION_PATH_ID[] = "ROSProjectManager.ROSSettingsDefaultDistributionPath";
 static const char CUSTOM_DISTRIBUTION_PATH_ID[] = "ROSProjectManager.ROSSettingsCustomDistributionPath";
 
 namespace ROSProjectManager {
@@ -43,7 +46,19 @@ namespace Internal {
 
 ROSSettings::ROSSettings()
 {
-
+  m_system_distributions.clear();
+  Utils::FileName ros_path = Utils::FileName::fromString(Constants::ROS_INSTALL_DIRECTORY);
+  if (ros_path.exists())
+  {
+    QDir ros_opt(ros_path.toString());
+    ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
+    for (auto entry : ros_opt.entryList())
+    {
+      Utils::FileName path = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
+      path.appendPath(entry);
+      m_system_distributions.append(path);
+    }
+  }
 }
 
 void ROSSettings::toSettings(QSettings *s) const
@@ -52,6 +67,7 @@ void ROSSettings::toSettings(QSettings *s) const
     s->setValue(DEFAULT_DISTRIBUTION_ID, default_distribution);
     s->setValue(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(default_build_system));
     s->setValue(DEFAULT_CODE_STYLE_ID, default_code_style);
+    s->setValue(DEFAULT_DISTRIBUTION_PATH_ID, default_dist_path);
     s->setValue(CUSTOM_DISTRIBUTION_PATH_ID, custom_dist_path);
 
     s->endGroup();
@@ -60,9 +76,15 @@ void ROSSettings::toSettings(QSettings *s) const
 void ROSSettings::fromSettings(QSettings *s)
 {
     s->beginGroup(QLatin1String(Constants::ROS_SETTINGS_GROUP_ID));
-    default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, "").toString();
+
+    if (m_system_distributions.empty())
+      default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, "").toString();
+    else
+      default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, m_system_distributions.first().toString()).toString();
+
     default_build_system = static_cast<ROSUtils::BuildSystem>(s->value(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(ROSUtils::BuildSystem::CatkinTools)).toInt());
     default_code_style = s->value(DEFAULT_CODE_STYLE_ID, "ROS").toString();
+    default_dist_path = s->value(CUSTOM_DISTRIBUTION_PATH_ID, Constants::ROS_INSTALL_DIRECTORY).toString();
     custom_dist_path = s->value(CUSTOM_DISTRIBUTION_PATH_ID, "").toString();
     s->endGroup();
 }
@@ -72,6 +94,7 @@ bool ROSSettings::equals(const ROSSettings &rhs) const
     return default_distribution == rhs.default_distribution
            && default_build_system == rhs.default_build_system
            && default_code_style == rhs.default_code_style
+           && default_dist_path == rhs.default_dist_path
            && custom_dist_path == rhs.custom_dist_path;
 }
 
@@ -87,9 +110,8 @@ ROSSettingsWidget::ROSSettingsWidget(QWidget *parent) :
     // Add available ros distributions
     QStringList installed_distributions;
     for(auto entry : ROSUtils::installedDistributions())
-    {
-        installed_distributions.append(entry.toString());
-    }
+      installed_distributions.append(entry.toString());
+
     m_ui->distributionComboBox->addItems(installed_distributions);
 
     // See ProjectExplorer::CodeStyleSettingsWidget and ProjectExplorer::EditorConfiguration as an example
@@ -122,6 +144,7 @@ ROSSettings ROSSettingsWidget::settings() const
     rc.default_distribution = m_ui->distributionComboBox->currentText();
     rc.default_build_system = static_cast<ROSUtils::BuildSystem>(m_ui->buildSystemComboBox->currentIndex());
     rc.default_code_style = m_available_code_styles[m_ui->codeStyleComboBox->currentText()];
+    rc.default_dist_path = m_ui->defaultDistributionPathChooser->path();
     rc.custom_dist_path = m_ui->customDistributionPathChooser->path();
     return rc;
 }
@@ -140,7 +163,7 @@ void ROSSettingsWidget::setSettings(const ROSSettings &s)
             break;
         }
     }
-
+    m_ui->defaultDistributionPathChooser->setPath(s.default_dist_path);
     m_ui->customDistributionPathChooser->setPath(s.custom_dist_path);
 }
 

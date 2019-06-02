@@ -120,6 +120,7 @@ public:
 private slots:
     void buildSystemChanged(int index);
     void buildTypeChanged(int index);
+    void buildSourceWorkspaceButtonClicked();
 
 private:
     Ui::ROSBuildConfiguration *m_ui;

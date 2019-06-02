@@ -283,6 +283,9 @@ ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
     connect(m_ui->buildTypeComboBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(buildTypeChanged(int)));
 
+    connect(m_ui->buildSourceWorkspaceButton, SIGNAL(clicked()),
+            this, SLOT(buildSourceWorkspaceButtonClicked()));
+
     setDisplayName(tr("ROS Manager"));
 }
 
@@ -350,6 +353,17 @@ void ROSBuildEnvironmentWidget::environmentChanged()
     m_buildEnvironmentWidget->setBaseEnvironment(m_buildConfiguration->baseEnvironment());
     m_buildEnvironmentWidget->setBaseEnvironmentText(m_buildConfiguration->baseEnvironmentText());
     m_buildEnvironmentWidget->setUserChanges(m_buildConfiguration->userEnvironmentChanges());
+}
+
+void ROSBuildSettingsWidget::buildSourceWorkspaceButtonClicked()
+{
+  ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(m_buildConfiguration->project()->projectDirectory(),
+                                                                     m_buildConfiguration->buildSystem(),
+                                                                     m_buildConfiguration->project()->distribution());
+
+  Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, m_buildConfiguration->environment()).toStringList());
+
+  m_buildConfiguration->updateQtEnvironment(env);
 }
 
 } // namespace Internal
