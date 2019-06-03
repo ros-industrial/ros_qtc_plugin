@@ -273,7 +273,13 @@ QList<Utils::FileName> ROSUtils::installedDistributions()
     {
       Utils::FileName path(custom_ros_path);
       path.appendPath(entry);
-      distributions.append(path);
+
+      Utils::FileName setup_file = path;
+      setup_file.appendString(QString("/setup.bash"));
+      if (setup_file.exists())
+      {
+        distributions.append(path);
+      }
     }
   }
 
