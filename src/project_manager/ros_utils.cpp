@@ -268,6 +268,7 @@ QList<Utils::FileName> ROSUtils::installedDistributions()
   if(custom_ros_path.exists())
   {
     QDir custom_dir(custom_ros_path.toString());
+
     custom_dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
     for (auto entry : custom_dir.entryList())
     {
@@ -276,6 +277,7 @@ QList<Utils::FileName> ROSUtils::installedDistributions()
 
       Utils::FileName setup_file = path;
       setup_file.appendString(QString("/setup.bash"));
+
       if (setup_file.exists())
       {
         distributions.append(path);
@@ -287,12 +289,20 @@ QList<Utils::FileName> ROSUtils::installedDistributions()
   if (default_ros_path.exists())
   {
     QDir ros_opt(default_ros_path.toString());
+
     ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
     for (auto entry : ros_opt.entryList())
     {
       Utils::FileName path = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
       path.appendPath(entry);
-      distributions.append(path);
+
+      Utils::FileName setup_file = path;
+      setup_file.appendString(QString("/setup.bash"));
+
+      if (setup_file.exists())
+      {
+        distributions.append(path);
+      }
     }
   }
 
