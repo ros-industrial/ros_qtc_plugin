@@ -67,7 +67,12 @@ void ROSSettings::toSettings(QSettings *s) const
     s->setValue(DEFAULT_DISTRIBUTION_ID, default_distribution);
     s->setValue(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(default_build_system));
     s->setValue(DEFAULT_CODE_STYLE_ID, default_code_style);
-    s->setValue(DEFAULT_DISTRIBUTION_PATH_ID, default_dist_path);
+
+    if (default_dist_path.isEmpty())
+      s->setValue(DEFAULT_DISTRIBUTION_PATH_ID, Constants::ROS_INSTALL_DIRECTORY);
+    else
+      s->setValue(DEFAULT_DISTRIBUTION_PATH_ID, default_dist_path);
+
     s->setValue(CUSTOM_DISTRIBUTION_PATH_ID, custom_dist_path);
 
     s->endGroup();
@@ -77,14 +82,18 @@ void ROSSettings::fromSettings(QSettings *s)
 {
     s->beginGroup(QLatin1String(Constants::ROS_SETTINGS_GROUP_ID));
 
-    if (m_system_distributions.empty())
-      default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, "").toString();
-    else
-      default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, m_system_distributions.first().toString()).toString();
+    default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, "").toString();
+
+    if (default_distribution.isEmpty() && !m_system_distributions.empty())
+      default_distribution = m_system_distributions.first().toString();
 
     default_build_system = static_cast<ROSUtils::BuildSystem>(s->value(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(ROSUtils::BuildSystem::CatkinTools)).toInt());
     default_code_style = s->value(DEFAULT_CODE_STYLE_ID, "ROS").toString();
     default_dist_path = s->value(CUSTOM_DISTRIBUTION_PATH_ID, Constants::ROS_INSTALL_DIRECTORY).toString();
+
+    if (default_dist_path.isEmpty())
+      default_dist_path = Constants::ROS_INSTALL_DIRECTORY;
+
     custom_dist_path = s->value(CUSTOM_DISTRIBUTION_PATH_ID, "").toString();
     s->endGroup();
 }
@@ -114,6 +123,9 @@ ROSSettingsWidget::ROSSettingsWidget(QWidget *parent) :
 
     m_ui->distributionComboBox->addItems(installed_distributions);
 
+    if (!installed_distributions.empty())
+      m_ui->distributionComboBox->setCurrentIndex(0);
+
     // See ProjectExplorer::CodeStyleSettingsWidget and ProjectExplorer::EditorConfiguration as an example
     // TODO: Add python support
     TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppTools::Constants::CPP_SETTINGS_ID);
@@ -131,6 +143,7 @@ ROSSettingsWidget::ROSSettingsWidget(QWidget *parent) :
 
     m_available_code_style_names->setStringList(m_available_code_styles.keys());
     m_ui->codeStyleComboBox->setModel(m_available_code_style_names);
+    m_ui->defaultDistributionPathChooser->setPath(Constants::ROS_INSTALL_DIRECTORY);
 }
 
 ROSSettingsWidget::~ROSSettingsWidget()
@@ -145,6 +158,10 @@ ROSSettings ROSSettingsWidget::settings() const
     rc.default_build_system = static_cast<ROSUtils::BuildSystem>(m_ui->buildSystemComboBox->currentIndex());
     rc.default_code_style = m_available_code_styles[m_ui->codeStyleComboBox->currentText()];
     rc.default_dist_path = m_ui->defaultDistributionPathChooser->path();
+
+    if (rc.default_dist_path.isEmpty())
+      rc.default_dist_path = Constants::ROS_INSTALL_DIRECTORY;
+
     rc.custom_dist_path = m_ui->customDistributionPathChooser->path();
     return rc;
 }
@@ -163,7 +180,12 @@ void ROSSettingsWidget::setSettings(const ROSSettings &s)
             break;
         }
     }
-    m_ui->defaultDistributionPathChooser->setPath(s.default_dist_path);
+
+    if (s.default_dist_path.isEmpty())
+      m_ui->defaultDistributionPathChooser->setPath(Constants::ROS_INSTALL_DIRECTORY);
+    else
+      m_ui->defaultDistributionPathChooser->setPath(s.default_dist_path);
+
     m_ui->customDistributionPathChooser->setPath(s.custom_dist_path);
 }
 

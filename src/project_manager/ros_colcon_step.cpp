@@ -27,6 +27,7 @@
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/gnumakeparser.h>
 #include <projectexplorer/kitinformation.h>
+#include <projectexplorer/processparameters.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/toolchain.h>
@@ -94,7 +95,7 @@ ROSColconStep::~ROSColconStep()
 {
 }
 
-bool ROSColconStep::init(QList<const BuildStep *> &earlierSteps)
+bool ROSColconStep::init()
 {
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (!bc)
@@ -145,7 +146,7 @@ bool ROSColconStep::init(QList<const BuildStep *> &earlierSteps)
 
     outputParser()->setWorkingDirectory(pp->effectiveWorkingDirectory());
 
-    return AbstractProcessStep::init(earlierSteps);
+    return AbstractProcessStep::init();
 }
 
 QVariantMap ROSColconStep::toMap() const
@@ -211,45 +212,9 @@ QString ROSColconStep::makeCommand() const
     }
 }
 
-void ROSColconStep::run(QFutureInterface<bool> &fi)
-{
-    AbstractProcessStep::run(fi);
-}
-
-void ROSColconStep::processStarted()
-{
-    futureInterface()->setProgressRange(0, 100);
-    AbstractProcessStep::processStarted();
-}
-
-void ROSColconStep::processFinished(int exitCode, QProcess::ExitStatus status)
-{
-    AbstractProcessStep::processFinished(exitCode, status);
-    futureInterface()->setProgressValue(100);
-}
-
-void ROSColconStep::stdOutput(const QString &line)
-{
-    AbstractProcessStep::stdOutput(line);
-    int pos = 0;
-    while ((pos = m_percentProgress.indexIn(line, pos)) != -1) {
-        bool ok = false;
-        int percent = m_percentProgress.cap(1).toInt(&ok);
-        if (ok)
-            futureInterface()->setProgressValue(percent);
-
-        pos += m_percentProgress.matchedLength();
-    }
-}
-
 BuildStepConfigWidget *ROSColconStep::createConfigWidget()
 {
     return new ROSColconStepWidget(this);
-}
-
-bool ROSColconStep::immutable() const
-{
-    return false;
 }
 
 ROSColconStep::BuildTargets ROSColconStep::buildTarget() const
@@ -267,7 +232,8 @@ void ROSColconStep::setBuildTarget(const BuildTargets &target)
 //
 
 ROSColconStepWidget::ROSColconStepWidget(ROSColconStep *makeStep)
-    : m_makeStep(makeStep)
+    : ProjectExplorer::BuildStepConfigWidget(makeStep)
+    , m_makeStep(makeStep)
 {
     m_ui = new Ui::ROSColconStep;
     m_ui->setupUi(this);
