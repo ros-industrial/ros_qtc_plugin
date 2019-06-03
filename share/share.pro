@@ -6,6 +6,8 @@ STATIC_BASE = $$PWD
 STATIC_OUTPUT_BASE = $$IDE_DATA_PATH
 STATIC_INSTALL_BASE = $$INSTALL_DATA_PATH
 
+createDirs.commands = $$QMAKE_MKDIR $$IDE_DATA_PATH/ros_basic_client_node
+
 DATA_DIRS = \
     templates \
     styles \

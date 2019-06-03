@@ -54,7 +54,7 @@ public:
     enum BuildTargets {BUILD = 0, CLEAN = 1};
 
     ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent);
-    ~ROSCatkinToolsStep();
+    ~ROSCatkinToolsStep() override;
 
     bool init() override;
     ProjectExplorer::BuildStepConfigWidget *createConfigWidget() override;
@@ -69,7 +69,7 @@ public:
     QString allArguments(ROSUtils::BuildType buildType, bool includeDefault = true) const;
     QString makeCommand() const;
 
-    QVariantMap toMap() const;
+    QVariantMap toMap() const override;
 
 protected:
     ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, Core::Id id);

@@ -46,29 +46,24 @@ public:
     enum BuildTargets {BUILD = 0, CLEAN = 1};
 
     ROSColconStep(ProjectExplorer::BuildStepList *parent);
-    ~ROSColconStep();
+    ~ROSColconStep() override;
 
-    bool init(QList<const BuildStep *> &earlierSteps) override;
-    void run(QFutureInterface<bool> &fi) override;
+    bool init() override;
     ProjectExplorer::BuildStepConfigWidget *createConfigWidget() override;
-    bool immutable() const override;
 
     ROSBuildConfiguration *rosBuildConfiguration() const;
     BuildTargets buildTarget() const;
     void setBuildTarget(const BuildTargets &target);
+
     QString allArguments(ROSUtils::BuildType buildType, bool includeDefault = true) const;
     QString makeCommand() const;
 
-    QVariantMap toMap() const;
+    QVariantMap toMap() const override;
 
 protected:
     ROSColconStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     QStringList automaticallyAddedArguments() const;
     bool fromMap(const QVariantMap &map) override;
-
-    void stdOutput(const QString &line) override;
-    void processStarted() override;
-    void processFinished(int exitCode, QProcess::ExitStatus status) override;
 
 private:
     void ctor();

@@ -7,7 +7,7 @@
 message("== ros_qtc_plugin.pri Enviroment")
 QTCREATOR_SOURCES = $$(QTC_SOURCE)
 isEmpty(QTCREATOR_SOURCES):QTCREATOR_SOURCES=$$PWD/../qt-creator
-message("==  QTCREATOR_SOURCES: $$QTCREATOR_SOURCES")
+message("== QTCREATOR_SOURCES: $$QTCREATOR_SOURCES")
 
 ## set the QTC_BUILD environment variable to override the setting here
 IDE_BUILD_TREE = $$(QTC_BUILD)
