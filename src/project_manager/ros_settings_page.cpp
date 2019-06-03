@@ -89,7 +89,7 @@ void ROSSettings::fromSettings(QSettings *s)
 
     default_build_system = static_cast<ROSUtils::BuildSystem>(s->value(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(ROSUtils::BuildSystem::CatkinTools)).toInt());
     default_code_style = s->value(DEFAULT_CODE_STYLE_ID, "ROS").toString();
-    default_dist_path = s->value(CUSTOM_DISTRIBUTION_PATH_ID, Constants::ROS_INSTALL_DIRECTORY).toString();
+    default_dist_path = s->value(DEFAULT_DISTRIBUTION_PATH_ID, Constants::ROS_INSTALL_DIRECTORY).toString();
 
     if (default_dist_path.isEmpty())
       default_dist_path = Constants::ROS_INSTALL_DIRECTORY;
