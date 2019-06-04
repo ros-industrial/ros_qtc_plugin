@@ -4,9 +4,9 @@ Setup Qt Creator for ROS
 Setup Ubuntu to allow debugging/ptrace
 --------------------------------------
 
-#. Open file: :code:`sudo gedit /etc/rc.local`
-#. Add this line before the exit 0 line: :code:`echo 0 | tee /proc/sys/kernel/yama/ptrace_scope`
-#. Reboot computer
+#. Open file: :code:`sudo gedit /etc/sysctl.d/10-ptrace.conf`
+#. Change the value of :code:`kernel.yama.ptrace_scope` to 0
+#. Reload the kernel configuration with :code:`sudo systemctl restart procps.service`
 
 Set Theme
 ---------
