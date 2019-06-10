@@ -234,6 +234,18 @@ QString ROSCatkinToolsStep::makeCommand() const
     return QLatin1String("catkin");
 }
 
+void ROSCatkinToolsStep::stdOutput(const QString &line)
+{
+    AbstractProcessStep::stdOutput(line);
+    if (m_percentProgress.indexIn(line, 0) != -1)
+    {
+        bool ok = false;
+        int percent = (m_percentProgress.cap(1).toDouble(&ok)/m_percentProgress.cap(2).toDouble(&ok)) * 100.0;
+        if (ok)
+          emit progress(percent, QString());
+    }
+}
+
 BuildStepConfigWidget *ROSCatkinToolsStep::createConfigWidget()
 {
     return new ROSCatkinToolsStepWidget(this);

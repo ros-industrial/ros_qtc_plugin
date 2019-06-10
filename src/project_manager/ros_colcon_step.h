@@ -57,6 +57,7 @@ public:
 
     QString allArguments(ROSUtils::BuildType buildType, bool includeDefault = true) const;
     QString makeCommand() const;
+    void stdOutput(const QString &line) override;
 
     QVariantMap toMap() const override;
 
