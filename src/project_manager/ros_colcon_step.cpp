@@ -74,7 +74,7 @@ void ROSColconStep::ctor()
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSColconStep",
                                                       ROS_COLCON_STEP_DISPLAY_NAME));
 
-    m_percentProgress = QRegExp(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
+    m_percentProgress = QRegExp(QLatin1String(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
 
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (bc->buildSystem() != ROSUtils::Colcon)
@@ -209,6 +209,18 @@ QString ROSColconStep::makeCommand() const
         return QLatin1String("rm");
     default:
         return QLatin1String("colcon");
+    }
+}
+
+void ROSColconStep::stdOutput(const QString &line)
+{
+    AbstractProcessStep::stdOutput(line);
+    if (m_percentProgress.indexIn(line, 0) != -1)
+    {
+        bool ok = false;
+        int percent = (m_percentProgress.cap(1).toDouble(&ok)/m_percentProgress.cap(2).toDouble(&ok)) * 100.0;
+        if (ok)
+          emit progress(percent, QString());
     }
 }
 
