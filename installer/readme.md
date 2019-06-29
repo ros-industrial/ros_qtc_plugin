@@ -3,7 +3,7 @@
 
 ## First you need to install all necessary version of Qt Libraries
 
-   Download the version from [here](https://download.qt.io/official_releases/qt/) into your home directory.
+   Download the version from [here](https://download.qt.io/official_releases/qt/) into your home directory. When deploying remember to not install QtWebEngin because it cause Qt Creator to crash when clicking help.
 
 ## Next you need to install Qt Installer frame work.
  
