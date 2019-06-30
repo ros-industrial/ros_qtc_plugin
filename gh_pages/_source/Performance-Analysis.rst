@@ -8,9 +8,16 @@ There is a tool called `perf`_ that can collect data of the system. This can be 
 
 Setup
 =====
-1. Clone the repo in a workspace.
+1. Allow to run perf system wide by running. If is the first time, reboot:
+
+.. code-block:: shell
+
+    echo -e "kernel.perf_event_paranoid=-1\nkernel.kptr_restrict=0" | sudo tee /etc/sysctl.d/10-perf.conf
+
+If by running `cat /proc/sys/kernel/kptr_restrict` the result is 0, the permissions are set right.
+
 2. Install Qt Creator with the ROS plugin by `dowloading the latest version`_.
-3. Setup the workspace in QtCreator. For that follow the [original wiki](https://ros-qtc-plugin.readthedocs.io/en/latest/).
+3. Setup the workspace in QtCreator
 4. Compile (Shortcut with Ctrl+B)
 5. Add the custom executable. With catkin, all executables are outputed under *<workspace>/devel/lib/<my_package>*. We will create a configuration in QtCreator so it can use it. We will rename the custom executable to make it easier to find and use afterwards.
 
