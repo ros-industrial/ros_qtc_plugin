@@ -33,6 +33,7 @@ Users Help
    Setup Qt Creator for ROS <_source/Setup-Qt-Creator-for-ROS.rst>
    Import ROS Workspace <_source/Import-ROS-Workspace.rst>
    Debugging Catkin Workspace <_source/Debugging-Catkin-Workspace.rst>
+   Performance Analysis <_source/Performance-Analysis.rst>
 
 Tutorial Videos
 ---------------
