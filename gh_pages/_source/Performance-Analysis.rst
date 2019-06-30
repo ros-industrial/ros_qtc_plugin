@@ -5,10 +5,15 @@ There is a tool called `perf`_ that can collect data of the system. This can be 
 
 	.. image:: ../_static/flame_graph.png
 
+System setup
+============
+1. Install perf. In Ubuntu like systems:
 
-Setup
-=====
-1. Allow to run perf system wide by running. If is the first time, reboot:
+.. code-block:: shell
+
+	sudo apt install linux-tools-common linux-tools-generic
+
+2. Allow to run perf system wide by running. If is the first time, reboot:
 
 .. code-block:: shell
 
@@ -16,10 +21,12 @@ Setup
 
 If by running `cat /proc/sys/kernel/kptr_restrict` the result is 0, the permissions are set right.
 
-2. Install Qt Creator with the ROS plugin by `dowloading the latest version`_.
-3. Setup the workspace in QtCreator
-4. Compile (Shortcut with Ctrl+B)
-5. Add the custom executable. With catkin, all executables are outputed under *<workspace>/devel/lib/<my_package>*. We will create a configuration in QtCreator so it can use it. We will rename the custom executable to make it easier to find and use afterwards.
+QtCreator Setup
+===============
+1. Install Qt Creator with the ROS plugin by `dowloading the latest version`_.
+2. Setup the workspace in QtCreator
+3. Compile (Shortcut with Ctrl+B)
+4. Add the custom executable. With catkin, all executables are outputed under *<workspace>/devel/lib/<my_package>*. We will create a configuration in QtCreator so it can use it. We will rename the custom executable to make it easier to find and use afterwards.
 
 	.. image:: ../_static/custom_executable.gif
 
