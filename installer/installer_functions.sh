@@ -379,6 +379,7 @@ function packageROSPlugin {
     cd $BASE_PATH/qtcreator_ros_plugin/$INSTALL_DIR/share/qtcreator
     cp -r $BASE_PATH/ros_qtc_plugin/share/styles .
     cp -r $BASE_PATH/ros_qtc_plugin/share/templates .
+    cp -r $BASE_PATH/ros_qtc_plugin/share/generic-highlighter .
     
     ## Add qtermwidget files
     cd $BASE_PATH/qtcreator_ros_plugin/$INSTALL_DIR/lib/qtcreator
