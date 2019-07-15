@@ -7,18 +7,13 @@
     <glob pattern="*.workspace"/>
   </mime-type>
 
-  <mime-type type="application/ros.xml">
+  <mime-type type="application/ros+xml">
     <sub-class-of type="application/xml"/>
     <comment>ROS xml file types</comment>
     <glob pattern="*.launch;*.xacro;*.urdf"/>
-    <magic priority="50">
-       <match value="&lt;launch" type="string" offset="0:2000"/>
-       <match value="&lt;robot " type="string" offset="0:2000"/>
-       <match value="&lt;xacro " type="string" offset="0:2000"/>
-    </magic>
   </mime-type>
 
-  <mime-type type="application/ros.text">
+  <mime-type type="application/ros+text">
     <sub-class-of type="text/plain"/>
     <comment>ROS message/service file types</comment>
     <glob pattern="*.srv;*.msg"/>
