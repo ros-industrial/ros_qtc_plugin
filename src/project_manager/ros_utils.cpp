@@ -572,6 +572,15 @@ ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const Works
             buildInfo.cbpFile = buildInfo.path;
             buildInfo.cbpFile.appendPath(QString("%1.cbp").arg(package.name));
 
+            // If does not exist for default Project.cbp file
+            if (!buildInfo.cbpFile.exists())
+            {
+              Utils::FileName temp = buildInfo.path;
+              temp.appendPath("Project.cbp");
+              if (temp.exists())
+                  buildInfo.cbpFile = temp;
+            }
+
             if (buildInfo.cbpFile.exists())
             {
                 if (ROSUtils::parseCodeBlocksFile(workspaceInfo, buildInfo))
@@ -612,6 +621,7 @@ ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const Works
 
 bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils::PackageBuildInfo &buildInfo)
 {
+  QMap<QString, PackageTargetInfo*> targetMap;
 
   // Parse CodeBlocks Project File
   // Need to search for all of the tags <Add directory="include path" />
@@ -643,6 +653,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
       if(cbpXml.name() == QLatin1String("Target"))
       {
         QString targetName;
+        QString targetWorkingDir = buildInfo.path.toString();
         QStringList targetLocalIncludes;
         QStringList targetSystemIncludes;
         TargetType targetType = UtilityType;
@@ -684,6 +695,11 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
                         else
                             targetType = UtilityType;
                     }
+
+                    if (cbpXml.attributes().hasAttribute("working_dir"))
+                    {
+                        targetWorkingDir = cbpXml.attributes().value("working_dir").toString();
+                    }
                 }
 
                 if(cbpXml.name() == QLatin1String("Add"))
@@ -714,13 +730,53 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
             PackageTargetInfo targetInfo;
             targetInfo.name = targetName;
             targetInfo.type = targetType;
-            targetInfo.flagsFile = Utils::FileName(buildInfo.path).appendPath("CMakeFiles").appendPath(QString("%1.dir").arg(targetName)).appendPath("flags.make");
+            targetInfo.flagsFile = Utils::FileName::fromString(targetWorkingDir).appendPath("CMakeFiles").appendPath(QString("%1.dir").arg(targetName)).appendPath("flags.make");
+            if (!targetInfo.flagsFile.exists())
+            {
+                QDirIterator it(buildInfo.path.toString(), QStringList() << QString("%1.dir").arg(targetName), QDir::NoFilter, QDirIterator::Subdirectories);
+                while (it.hasNext())
+                {
+                    Utils::FileName found_path = Utils::FileName::fromString(it.next()).appendPath("flags.make");
+                    if (found_path.exists())
+                    {
+                      targetInfo.flagsFile = found_path;
+                      break;
+                    }
+                }
+            }
 
             // The order matters so it will order local first then system
             targetInfo.includes = targetLocalIncludes;
             targetInfo.includes.append(targetSystemIncludes);
 
             buildInfo.targets.append(targetInfo);
+            targetMap[targetName] = &(buildInfo.targets.back());
+        }
+      }
+      else if(cbpXml.name() == QLatin1String("Unit"))
+      {
+        QString filename;
+        if (cbpXml.attributes().hasAttribute("filename"))
+        {
+            filename = cbpXml.attributes().value("filename").toString();
+        }
+        cbpXml.readNext();
+        while (cbpXml.name() != QLatin1String("Unit"))
+        {
+            if(cbpXml.isStartElement())
+            {
+                if(cbpXml.name() == QLatin1String("Option"))
+                {
+                    if (cbpXml.attributes().hasAttribute("target"))
+                    {
+                        QString temp = cbpXml.attributes().value("target").toString();
+                        auto it = targetMap.find(temp);
+                        if (it != targetMap.end())
+                          it.value()->source_files.append(filename);
+                    }
+                }
+            }
+            cbpXml.readNext();
         }
       }
     }
@@ -756,9 +812,13 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
               if (line.startsWith("CXX_FLAGS ="))
                   it->flags = line.mid(11).trimmed().split(' ', QString::SkipEmptyParts);
 
+              QStringList defines;
               if (line.startsWith("CXX_DEFINES ="))
-                  it->defines = line.mid(13).trimmed().split(' ', QString::SkipEmptyParts);
+                  defines = line.mid(13).trimmed().split(' ', QString::SkipEmptyParts);
 
+              // Need to remove -D from the define and escaped quotes
+              for (auto& d : defines)
+                  it->defines.push_back(d.trimmed().mid(2).remove('\\'));
           }
       }
       else

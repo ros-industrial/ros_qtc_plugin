@@ -98,6 +98,7 @@ public:
         TargetType type;           /**< @brief Target type */
         Utils::FileName flagsFile; /**< @brief Path to the Target's flags.cmake file */
         QStringList includes;      /**< @brief Target's include directories */
+        QStringList source_files;  /**< @brief Target's source files */
         QStringList flags;         /**< @brief Target's cxx build flags */
         QStringList defines;       /**< @brief Target's defines build flags */
     };
