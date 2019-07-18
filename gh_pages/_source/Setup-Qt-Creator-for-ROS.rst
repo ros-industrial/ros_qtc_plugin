@@ -38,13 +38,13 @@ Set ROS Code Format
 Setup Clang Formatting
 ----------------------
 
-#. Install Clang `sudo apt-get install clang-format-3.6`
+#. Install Clang `sudo apt-get install clang-format-6.0`
 #. Goto: :kbd:`Tools` > :kbd:`Options` > :kbd:`Environment` > :kbd:`External Tools`
 #. Select: :kbd:`Add` > :kbd:`Add Tool`
 #. Fill in the information below.
 
    * Description: Clang Cpp Format
-   * Executable: /usr/bin/clang-format-3.6
+   * Executable: /usr/bin/clang-format-6.0
    * Arguments::
 
      -style="{Language: Cpp, AccessModifierOffset: -2, AlignAfterOpenBracket: true, AlignEscapedNewlinesLeft: false, AlignOperands:   true, AlignTrailingComments: true, AllowAllParametersOfDeclarationOnNextLine: true, AllowShortBlocksOnASingleLine: false, AllowShortCaseLabelsOnASingleLine: false, AllowShortIfStatementsOnASingleLine: false, AllowShortLoopsOnASingleLine: false, AllowShortFunctionsOnASingleLine: All, AlwaysBreakAfterDefinitionReturnType: false, AlwaysBreakTemplateDeclarations: false, AlwaysBreakBeforeMultilineStrings: false, BreakBeforeBinaryOperators: None, BreakBeforeTernaryOperators: true, BreakConstructorInitializersBeforeComma: false, BinPackParameters: true, BinPackArguments: true, ColumnLimit:     80, ConstructorInitializerAllOnOneLineOrOnePerLine: false, ConstructorInitializerIndentWidth: 4, DerivePointerAlignment: false, ExperimentalAutoDetectBinPacking: false, IndentCaseLabels: false, IndentWrappedFunctionNames: false, IndentFunctionDeclarationAfterType: false, MaxEmptyLinesToKeep: 1, KeepEmptyLinesAtTheStartOfBlocks: true, NamespaceIndentation: None, ObjCBlockIndentWidth: 2, ObjCSpaceAfterProperty: false, ObjCSpaceBeforeProtocolList: true, PenaltyBreakBeforeFirstCallParameter: 19, PenaltyBreakComment: 300, PenaltyBreakString: 1000, PenaltyBreakFirstLessLess: 120, PenaltyExcessCharacter: 1000000, PenaltyReturnTypeOnItsOwnLine: 60, PointerAlignment: Left , SpacesBeforeTrailingComments: 1, Cpp11BracedListStyle: true, Standard: Cpp11, IndentWidth: 2, TabWidth: 8, UseTab: Never, BreakBeforeBraces: Allman, SpacesInParentheses: false, SpacesInSquareBrackets: false, SpacesInAngles:  false, SpaceInEmptyParentheses: false, SpacesInCStyleCastParentheses: false, SpaceAfterCStyleCast: false, SpacesInContainerLiterals: true, SpaceBeforeAssignmentOperators: true, ContinuationIndentWidth: 4, CommentPragmas:  '^ IWYU pragma:', ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ], SpaceBeforeParens: ControlStatements, DisableFormat:   false}" -i %{CurrentDocument:FilePath}
