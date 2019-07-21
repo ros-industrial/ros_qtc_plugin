@@ -376,13 +376,12 @@ void ROSCatkinToolsStepWidget::updateDetails()
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
 
-    m_ui->catkinToolsWorkingDirWidget->setEnvironment(env);
+    m_ui->catkinToolsWorkingDirWidget->setEnvironment(bc->environment());
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
-    param.setEnvironment(env);
+    param.setEnvironment(bc->environment());
     param.setWorkingDirectory(m_makeStep->m_catkinToolsWorkingDir);
     param.setCommand(m_makeStep->makeCommand());
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));

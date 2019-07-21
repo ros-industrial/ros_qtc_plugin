@@ -300,12 +300,11 @@ void ROSColconStepWidget::updateDetails()
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
     param.setWorkingDirectory(workspaceInfo.buildPath.toString());
-    param.setEnvironment(env);
+    param.setEnvironment(bc->environment());
     param.setCommand(m_makeStep->makeCommand());
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));
     m_summaryText = param.summary(displayName());
