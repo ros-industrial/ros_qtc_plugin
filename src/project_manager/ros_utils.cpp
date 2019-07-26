@@ -80,6 +80,7 @@ bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspace
     bash.appendPath(QLatin1String("setup.bash"));
     if (bash.exists())
     {
+        Core::MessageManager::write(QObject::tr("[ROS Debug] Sourced workspace: %1.").arg(bash.toString()));
         if (sourceWorkspaceHelper(process, bash.toString()))
             return true;
     }
