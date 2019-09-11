@@ -32,7 +32,7 @@
 #include <QProcess>
 
 namespace Utils {
-class FileName;
+using FileName = class Utils::FilePath;
 } // namespace Utils
 
 namespace ROSProjectManager {

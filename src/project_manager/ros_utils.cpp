@@ -61,7 +61,7 @@ QString ROSUtils::buildTypeName(const ROSUtils::BuildType &buildType)
 
 bool ROSUtils::sourceROS(QProcess *process, const Utils::FileName &rosDistribution)
 {
-  bool results = sourceWorkspaceHelper(process, Utils::FileName(rosDistribution).appendPath(QLatin1String("setup.bash")).toString());
+  bool results = sourceWorkspaceHelper(process, Utils::FileName(rosDistribution).pathAppended(QLatin1String("setup.bash")).toString());
   if (!results)
     Core::MessageManager::write(QObject::tr("[ROS Warning] Faild to source ROS Distribution: %1.").arg(rosDistribution.toString()));
 
@@ -77,7 +77,7 @@ bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspace
     if (workspaceInfo.install)
       bash = Utils::FileName(workspaceInfo.installPath);
 
-    bash.appendPath(QLatin1String("setup.bash"));
+    bash = bash.pathAppended(QLatin1String("setup.bash"));
     if (bash.exists())
     {
         Core::MessageManager::write(QObject::tr("[ROS Debug] Sourced workspace: %1.").arg(bash.toString()));
@@ -100,9 +100,9 @@ bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
     case ROSUtils::CatkinMake:
     {
         Utils::FileName topCMake(workspaceInfo.sourcePath);
-        topCMake.appendPath(QLatin1String("CMakeLists.txt"));
+        topCMake = topCMake.pathAppended(QLatin1String("CMakeLists.txt"));
         Utils::FileName catkin_workspace(workspaceInfo.path);
-        catkin_workspace.appendPath(QLatin1String(".catkin_workspace"));
+        catkin_workspace = catkin_workspace.pathAppended(QLatin1String(".catkin_workspace"));
 
         if (topCMake.exists() && catkin_workspace.exists() && workspaceInfo.sourcePath.exists())
           return true;
@@ -112,7 +112,7 @@ bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
     case ROSUtils::CatkinTools:
     {
         Utils::FileName catkin_tools(workspaceInfo.path);
-        catkin_tools.appendPath(QLatin1String(".catkin_tools"));
+        catkin_tools = catkin_tools.pathAppended(QLatin1String(".catkin_tools"));
         if (catkin_tools.exists() && workspaceInfo.sourcePath.exists())
           return true;
 
@@ -274,10 +274,9 @@ QList<Utils::FileName> ROSUtils::installedDistributions()
     for (auto entry : custom_dir.entryList())
     {
       Utils::FileName path(custom_ros_path);
-      path.appendPath(entry);
+      path = path.pathAppended(entry);
 
-      Utils::FileName setup_file = path;
-      setup_file.appendString(QString("/setup.bash"));
+      Utils::FileName setup_file = path.pathAppended(QLatin1String("setup.bash"));
 
       if (setup_file.exists())
       {
@@ -295,10 +294,9 @@ QList<Utils::FileName> ROSUtils::installedDistributions()
     for (auto entry : ros_opt.entryList())
     {
       Utils::FileName path = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
-      path.appendPath(entry);
+      path = path.pathAppended(entry);
 
-      Utils::FileName setup_file = path;
-      setup_file.appendString(QString("/setup.bash"));
+      Utils::FileName setup_file = path.pathAppended(QLatin1String("setup.bash"));
 
       if (setup_file.exists())
       {
@@ -533,7 +531,7 @@ ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const WorkspaceInfo &
     while (it.hasNext())
     {
         it.next();
-        Utils::FileName pkgXml = Utils::FileName::fromString(it.value()).appendPath("package.xml");
+        Utils::FileName pkgXml = Utils::FileName::fromString(it.value()).pathAppended("package.xml");
         ROSUtils::PackageInfo packageInfo;
         ROSPackageXmlParser pkgParser;
         if (pkgParser.parsePackageXml(pkgXml, packageInfo))
@@ -570,14 +568,12 @@ ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const Works
         if (findPackageBuildDirectory(workspaceInfo, package, buildInfo.path))
         {
             // Get package's code block file
-            buildInfo.cbpFile = buildInfo.path;
-            buildInfo.cbpFile.appendPath(QString("%1.cbp").arg(package.name));
+            buildInfo.cbpFile = buildInfo.path.pathAppended(QString("%1.cbp").arg(package.name));
 
             // If does not exist for default Project.cbp file
             if (!buildInfo.cbpFile.exists())
             {
-              Utils::FileName temp = buildInfo.path;
-              temp.appendPath("Project.cbp");
+              Utils::FileName temp = buildInfo.path.pathAppended("Project.cbp");
               if (temp.exists())
                   buildInfo.cbpFile = temp;
             }
@@ -643,7 +639,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
   if (workspaceInfo.install)
     buildtimeInclude = Utils::FileName(workspaceInfo.installPath);
 
-  buildtimeInclude = buildtimeInclude.appendPath(QLatin1String("include"));
+  buildtimeInclude = buildtimeInclude.pathAppended(QLatin1String("include"));
 
   cbpXml.setDevice(&cbpFile);
   cbpXml.readNext();
@@ -731,13 +727,13 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
             PackageTargetInfo targetInfo;
             targetInfo.name = targetName;
             targetInfo.type = targetType;
-            targetInfo.flagsFile = Utils::FileName::fromString(targetWorkingDir).appendPath("CMakeFiles").appendPath(QString("%1.dir").arg(targetName)).appendPath("flags.make");
+            targetInfo.flagsFile = Utils::FileName::fromString(targetWorkingDir).pathAppended("CMakeFiles").pathAppended(QString("%1.dir").arg(targetName)).pathAppended("flags.make");
             if (!targetInfo.flagsFile.exists())
             {
                 QDirIterator it(buildInfo.path.toString(), QStringList() << QString("%1.dir").arg(targetName), QDir::NoFilter, QDirIterator::Subdirectories);
                 while (it.hasNext())
                 {
-                    Utils::FileName found_path = Utils::FileName::fromString(it.next()).appendPath("flags.make");
+                    Utils::FileName found_path = Utils::FileName::fromString(it.next()).pathAppended("flags.make");
                     if (found_path.exists())
                     {
                       targetInfo.flagsFile = found_path;
@@ -942,15 +938,15 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
 Utils::FileName ROSUtils::getCatkinToolsProfilesPath(const Utils::FileName &workspaceDir)
 {
     Utils::FileName profiles(workspaceDir);
-    profiles.appendPath(QLatin1String(".catkin_tools"));
-    profiles.appendPath(QLatin1String("profiles"));
+    profiles = profiles.pathAppended(QLatin1String(".catkin_tools"));
+    profiles = profiles.pathAppended(QLatin1String("profiles"));
     return profiles;
 }
 
 Utils::FileName ROSUtils::getCatkinToolsProfilesYamlFile(const Utils::FileName &workspaceDir)
 {
     Utils::FileName profiles = getCatkinToolsProfilesPath(workspaceDir);
-    profiles.appendPath(QLatin1String("profiles.yaml"));
+    profiles = profiles.pathAppended(QLatin1String("profiles.yaml"));
     return profiles;
 }
 
@@ -979,14 +975,14 @@ bool ROSUtils::setCatkinToolsProfilesYamlFile(const Utils::FileName &workspaceDi
 Utils::FileName ROSUtils::getCatkinToolsProfilePath(const Utils::FileName &workspaceDir, const QString &profileName)
 {
     Utils::FileName profile = getCatkinToolsProfilesPath(workspaceDir);
-    profile.appendPath(profileName);
+    profile = profile.pathAppended(profileName);
     return profile;
 }
 
 Utils::FileName ROSUtils::getCatkinToolsProfileConfigFile(const Utils::FileName &workspaceDir, const QString &profileName)
 {
     Utils::FileName profile = getCatkinToolsProfilePath(workspaceDir, profileName);
-    profile.appendPath("config.yaml");
+    profile = profile.pathAppended("config.yaml");
     return profile;
 }
 
@@ -1171,11 +1167,11 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FileName &worksp
     switch(buildSystem) {
     case CatkinMake:
     {
-        space.sourcePath = Utils::FileName(workspaceDir).appendPath("src");
-        space.buildPath = Utils::FileName(workspaceDir).appendPath("build");
-        space.develPath = Utils::FileName(workspaceDir).appendPath("devel");
-        space.installPath = Utils::FileName(workspaceDir).appendPath("install");
-        space.logPath = Utils::FileName(workspaceDir).appendPath("logs");
+        space.sourcePath = Utils::FileName(workspaceDir).pathAppended("src");
+        space.buildPath = Utils::FileName(workspaceDir).pathAppended("build");
+        space.develPath = Utils::FileName(workspaceDir).pathAppended("devel");
+        space.installPath = Utils::FileName(workspaceDir).pathAppended("install");
+        space.logPath = Utils::FileName(workspaceDir).pathAppended("logs");
         space.install = false; //TODO: Need to find how best to determine if installing
         break;
     }
@@ -1191,11 +1187,11 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FileName &worksp
               createCatkinToolsProfile(workspaceDir, activeProfile, true);
 
             config = YAML::LoadFile(configPath.toString().toStdString());
-            space.sourcePath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString(config["source_space"].as<std::string>()));
-            space.buildPath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString(config["build_space"].as<std::string>()));
-            space.develPath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString(config["devel_space"].as<std::string>()));
-            space.installPath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString(config["install_space"].as<std::string>()));
-            space.logPath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString(config["log_space"].as<std::string>()));
+            space.sourcePath = Utils::FileName(workspaceDir).pathAppended(QString::fromStdString(config["source_space"].as<std::string>()));
+            space.buildPath = Utils::FileName(workspaceDir).pathAppended(QString::fromStdString(config["build_space"].as<std::string>()));
+            space.develPath = Utils::FileName(workspaceDir).pathAppended(QString::fromStdString(config["devel_space"].as<std::string>()));
+            space.installPath = Utils::FileName(workspaceDir).pathAppended(QString::fromStdString(config["install_space"].as<std::string>()));
+            space.logPath = Utils::FileName(workspaceDir).pathAppended(QString::fromStdString(config["log_space"].as<std::string>()));
             space.install = config["install"].as<bool>();
         }
         else
@@ -1203,17 +1199,17 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FileName &worksp
             // TODO: This is temporary fix since at time of CatkinTools.workspace creation
             // <Directory>.</Directory> is created instead of <Directory>src</Directory>
             // which causes random crash in file watcher reading "." instead of "src"
-            space.sourcePath = Utils::FileName(workspaceDir).appendPath(QString::fromStdString("src"));
+            space.sourcePath = Utils::FileName(workspaceDir).pathAppended(QString::fromStdString("src"));
         }
         break;
     }
     case Colcon:
     {
-        space.sourcePath = Utils::FileName(workspaceDir).appendPath("src");
-        space.buildPath = Utils::FileName(workspaceDir).appendPath("build");
-        space.develPath = Utils::FileName(workspaceDir).appendPath("install"); // Colcon does not have devel space setting to install
-        space.installPath = Utils::FileName(workspaceDir).appendPath("install");
-        space.logPath = Utils::FileName(workspaceDir).appendPath("log");
+        space.sourcePath = Utils::FileName(workspaceDir).pathAppended("src");
+        space.buildPath = Utils::FileName(workspaceDir).pathAppended("build");
+        space.develPath = Utils::FileName(workspaceDir).pathAppended("install"); // Colcon does not have devel space setting to install
+        space.installPath = Utils::FileName(workspaceDir).pathAppended("install");
+        space.logPath = Utils::FileName(workspaceDir).pathAppended("log");
         space.install = true; // Calcon always uses the install space.
         break;
     }
@@ -1245,19 +1241,17 @@ bool ROSUtils::findPackageBuildDirectory(const WorkspaceInfo &workspaceInfo, con
     {
         QString diff = packageInfo.path.toString();
         diff.remove(workspaceInfo.sourcePath.toString());
-        packageBuildPath.appendString(diff);
+        packageBuildPath = packageBuildPath.stringAppended(diff);
         break;
     }
     case CatkinTools:
     {
-        packageBuildPath = workspaceInfo.buildPath;
-        packageBuildPath.appendPath(packageInfo.name);
+        packageBuildPath = workspaceInfo.buildPath.pathAppended(packageInfo.name);
         break;
     }
     case Colcon:
     {
-        packageBuildPath = workspaceInfo.buildPath;
-        packageBuildPath.appendPath(packageInfo.name);
+        packageBuildPath = workspaceInfo.buildPath.pathAppended(packageInfo.name);
         break;
     }
     }

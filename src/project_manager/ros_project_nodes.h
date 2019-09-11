@@ -61,7 +61,7 @@ typedef std::unique_ptr<ROSProjectNode> ROSProjectNodeUPtr;
 class ROSFolderNode: public ProjectExplorer::FolderNode
 {
 public:
-    explicit ROSFolderNode(const Utils::FileName &folderPath, const QString  &displayName);
+    explicit ROSFolderNode(const Utils::FileName &folderPath);
 
     QString displayName() const override;
 

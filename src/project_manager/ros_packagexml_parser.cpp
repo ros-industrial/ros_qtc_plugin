@@ -31,8 +31,7 @@ bool ROSPackageXmlParser::parsePackageXml(const Utils::FileName &filepath)
 {
     m_packageInfo.path = filepath.parentDir();
     m_packageInfo.filepath = filepath;
-    m_packageInfo.buildFile = m_packageInfo.path;
-    m_packageInfo.buildFile.appendPath("CMakeLists.txt");
+    m_packageInfo.buildFile = m_packageInfo.path.pathAppended("CMakeLists.txt");
 
     QFile pkgFile(filepath.toString());
     if (pkgFile.exists() && pkgFile.open(QFile::ReadOnly)) {

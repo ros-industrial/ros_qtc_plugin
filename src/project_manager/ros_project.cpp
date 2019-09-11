@@ -103,7 +103,7 @@ static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
 
     ProjectExplorer::FolderNode *parent = folder;
     foreach (const QString &part, parts) {
-        path.appendPath(part);
+        path = path.pathAppended(part);
         // Find folder in subFolders
         FolderNode *next = folderNode(parent, path);
         if (!next) {
@@ -280,16 +280,16 @@ void ROSProject::buildProjectTree(const Utils::FileName projectFilePath, const Q
     FutureWatcherResults results;
 
     for (const QString& dir : watchDirectories) {
-        Utils::FileName addedDir = projectFilePath.parentDir().appendPath(dir);
+        Utils::FileName addedDir = projectFilePath.parentDir().pathAppended(dir);
         QHash<QString, ROSUtils::FolderContent> newDirContent = ROSUtils::getFolderContentRecurisve(addedDir, results.files, results.directories);
         results.workspaceContent.unite(newDirContent);
     }
 
     ROSProjectNode* project_node(new ROSProjectNode(projectFilePath.parentDir()));
-    std::unique_ptr<FileNode> root_node(new FileNode(projectFilePath, FileType::Project, false));
+    std::unique_ptr<FileNode> root_node(new FileNode(projectFilePath, ProjectExplorer::FileType::Project));
     project_node->addNode(std::move(root_node));
 
-    const ProjectExplorer::FolderNode::FolderNodeFactory &factory = [](const Utils::FileName &fn) { return std::make_unique<ROSFolderNode>(fn, fn.fileName()); };
+    const ProjectExplorer::FolderNode::FolderNodeFactory &factory = [](const Utils::FileName &fn) { return std::make_unique<ROSFolderNode>(fn); };
 
     std::vector<std::unique_ptr<ProjectExplorer::FileNode>> childNodes;
     QHashIterator<QString, ROSUtils::FolderContent> item(results.workspaceContent);
@@ -315,7 +315,7 @@ void ROSProject::buildProjectTree(const Utils::FileName projectFilePath, const Q
           if (Constants::HEADER_FILE_EXTENSIONS.contains(fileInfo.suffix()))
             fileType = ProjectExplorer::FileType::Header;
 
-          std::unique_ptr<ProjectExplorer::FileNode> fileNode(new ProjectExplorer::FileNode(Utils::FileName::fromString(fileInfo.absoluteFilePath()), fileType, /*generated = */ false));
+          std::unique_ptr<ProjectExplorer::FileNode> fileNode(new ProjectExplorer::FileNode(Utils::FileName::fromString(fileInfo.absoluteFilePath()), fileType));
           childNodes.emplace_back(std::move(fileNode));
         }
       }
@@ -454,10 +454,10 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
     results.wsPackageInfo = ROSUtils::getWorkspacePackageInfo(workspaceInfo, &wsPackageInfo);
     results.wsPackageBuildInfo = ROSUtils::getWorkspacePackageBuildInfo(workspaceInfo, results.wsPackageInfo, &wsPackageBuildInfo);
 
-    const Utils::FileName sysRoot = SysRootKitInformation::sysRoot(k);
+    const Utils::FileName sysRoot = SysRootKitAspect::sysRoot(k);
 
     CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
-    if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(k)) {
+    if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitAspect::qtVersion(k)) {
         if (qtVersion->qtVersion() < QtSupport::QtVersionNumber(5,0,0))
             activeQtVersion = CppTools::ProjectPart::Qt4;
         else
@@ -469,7 +469,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
     ProjectExplorer::HeaderPaths workspace_header_paths;
     for (const auto& package : results.wsPackageInfo) {
       Utils::FileName include_path = Utils::FileName::fromString(package.path.toString());
-      include_path.appendPath("include");
+      include_path = include_path.pathAppended("include");
       if (!workspace_includes.contains(include_path.toString())) {
         workspace_includes.append(include_path.toString());
         workspace_header_paths.append(ProjectExplorer::HeaderPath(include_path.toString(), ProjectExplorer::HeaderPathType::User));
@@ -478,7 +478,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
     CppTools::RawProjectParts rpps;
 
-    ToolChain *cxxToolChain = ToolChainKitInformation::toolChain(k, ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+    ToolChain *cxxToolChain = ToolChainKitAspect::toolChain(k, ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
     QString pattern = "^.*\\.(" + QRegularExpression::escape("c") +
                             "|" + QRegularExpression::escape("cc") +

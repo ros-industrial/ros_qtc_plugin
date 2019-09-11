@@ -115,7 +115,7 @@ bool ROSCatkinToolsStep::init()
     if (!bc)
         emit addTask(Task::buildConfigurationMissingTask());
 
-    ToolChain *tc = ToolChainKitInformation::toolChain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+    ToolChain *tc = ToolChainKitAspect::toolChain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
     if (!tc)
         emit addTask(Task::compilerMissingTask());
@@ -134,13 +134,13 @@ bool ROSCatkinToolsStep::init()
 
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
-    pp->setWorkingDirectory(m_catkinToolsWorkingDir);
+    pp->setWorkingDirectory(Utils::FileName::fromString(m_catkinToolsWorkingDir));
 
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
     pp->setEnvironment(env);
-    pp->setCommand(makeCommand());
+    pp->setCommand(Utils::FileName::fromString(makeCommand()));
     pp->setArguments(allArguments(bc->cmakeBuildType()));
     pp->resolveAll();
 
@@ -382,8 +382,8 @@ void ROSCatkinToolsStepWidget::updateDetails()
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
     param.setEnvironment(bc->environment());
-    param.setWorkingDirectory(m_makeStep->m_catkinToolsWorkingDir);
-    param.setCommand(m_makeStep->makeCommand());
+    param.setWorkingDirectory(Utils::FileName::fromString(m_makeStep->m_catkinToolsWorkingDir));
+    param.setCommand(Utils::FileName::fromString(m_makeStep->makeCommand()));
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));
     m_summaryText = param.summary(displayName());
     emit updateSummary();
