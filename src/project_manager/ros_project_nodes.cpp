@@ -60,19 +60,19 @@ bool ROSProjectNode::showInSimpleTree() const
 
 bool ROSProjectNode::supportsAction(ProjectExplorer::ProjectAction action, const Node *node) const
 {
-    switch (node->nodeType())
+    if(node->isProjectNodeType())
     {
-        case NodeType::File:
-            return action == ProjectAction::Rename
-                || action == ProjectAction::RemoveFile;
-        case NodeType::Folder:
-        case NodeType::Project:
-            return action == ProjectAction::AddNewFile
-                || action == ProjectAction::RemoveFile
-                || action == ProjectAction::AddExistingFile;
-        default:
-            return ProjectNode::supportsAction(action, node);
+        return action == ProjectAction::AddNewFile
+            || action == ProjectAction::RemoveFile
+            || action == ProjectAction::AddExistingFile;
     }
+    else if(!node->isFolderNodeType() && !node->isProjectNodeType() && !node->isVirtualFolderType())
+    {
+        return action == ProjectAction::Rename
+            || action == ProjectAction::RemoveFile;
+    }
+
+    return ProjectNode::supportsAction(action, node);
 }
 
 bool ROSProjectNode::addFiles(const QStringList &filePaths, QStringList *notAdded)
@@ -99,7 +99,7 @@ bool ROSProjectNode::renameFile(const QString &filePath, const QString &newFileP
   return true;
 }
 
-ROSFolderNode::ROSFolderNode(const Utils::FileName &folderPath, const QString  &displayName) : FolderNode(folderPath, ProjectExplorer::NodeType::Folder, displayName), m_repository(nullptr)
+ROSFolderNode::ROSFolderNode(const Utils::FileName &folderPath) : FolderNode(folderPath), m_repository(nullptr)
 {
     QString path = this->filePath().toString();
 

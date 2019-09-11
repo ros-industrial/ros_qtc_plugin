@@ -95,6 +95,8 @@ public:
       settingsPage(new ROSSettingsPage(settings))
     {
       settings->fromSettings(ICore::settings());
+
+      runDebugWorkerFactory.addSupportedRunMode(ProjectExplorer::Constants::DEBUG_RUN_MODE);
     }
 
     ROSRunConfigurationFactory runConfigFactory;
@@ -103,6 +105,9 @@ public:
     ROSAttachStepFactory rosAttachStepFactory;
     ROSTestStepFactory rosTestStepFactory;
     ROSCatkinTestResultsStepFactory rosCatkinTestResultsStepFactory;
+
+    SimpleRunWorkerFactory<ROSRunWorker, ROSRunConfiguration> runWorkerFactory;
+    SimpleRunWorkerFactory<ROSDebugRunWorker, ROSRunConfiguration> runDebugWorkerFactory;
 
     ROSBuildConfigurationFactory buildConfigFactory;
     ROSCatkinMakeStepFactory catkinMakeStepFactory;
@@ -256,9 +261,9 @@ void ROSProjectPlugin::reloadProjectBuildInfo()
 
 void ROSProjectPlugin::removeProjectDirectory()
 {
-  ProjectExplorer::Node *currentNode = ProjectExplorer::ProjectTree::findCurrentNode();
+  ProjectExplorer::Node *currentNode = ProjectExplorer::ProjectTree::currentNode();
 
-  QTC_ASSERT(currentNode && currentNode->nodeType() == ProjectExplorer::NodeType::Folder, return);
+  QTC_ASSERT(currentNode && currentNode->isFolderNodeType(), return);
 
   QString filePath = currentNode->filePath().toString();
   RemoveDirectoryDialog removeDirectoryDialog(filePath, ICore::mainWindow());

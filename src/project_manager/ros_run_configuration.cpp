@@ -133,10 +133,6 @@ ROSRunConfigurationFactory::ROSRunConfigurationFactory() :
   registerRunConfiguration<ROSRunConfiguration>(ROS_RC_ID);
   addSupportedProjectType(Constants::ROS_PROJECT_ID);
   addSupportedTargetDeviceType(ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE);
-
-//  addRunWorkerFactory<SimpleTargetRunner>(ProjectExplorer::Constants::NORMAL_RUN_MODE);
-  addRunWorkerFactory<ROSRunWorker>(ProjectExplorer::Constants::NORMAL_RUN_MODE);
-  addRunWorkerFactory<ROSDebugRunWorker>(ProjectExplorer::Constants::DEBUG_RUN_MODE);
 }
 
 ROSRunConfigurationFactory::~ROSRunConfigurationFactory()

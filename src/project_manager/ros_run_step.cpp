@@ -62,7 +62,7 @@ bool RunStepFactory::canHandle(RunStepList *rsl) const
     if (!m_supportedDeviceTypes.isEmpty()) {
         ProjectExplorer::Target *target = rsl->target();
         QTC_ASSERT(target, return false);
-        Core::Id deviceType = ProjectExplorer::DeviceTypeKitInformation::deviceTypeId(target->kit());
+        Core::Id deviceType = ProjectExplorer::DeviceTypeKitAspect::deviceTypeId(target->kit());
         if (!m_supportedDeviceTypes.contains(deviceType))
             return false;
     }

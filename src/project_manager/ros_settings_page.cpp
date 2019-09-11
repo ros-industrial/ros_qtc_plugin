@@ -55,7 +55,7 @@ ROSSettings::ROSSettings()
     for (auto entry : ros_opt.entryList())
     {
       Utils::FileName path = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
-      path.appendPath(entry);
+      path = path.pathAppended(entry);
       m_system_distributions.append(path);
     }
   }

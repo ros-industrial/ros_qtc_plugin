@@ -104,7 +104,7 @@ bool ROSColconStep::init()
         emit addTask(Task::buildConfigurationMissingTask());
 
 
-    ToolChain *tc = ToolChainKitInformation::toolChain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+    ToolChain *tc = ToolChainKitAspect::toolChain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
     if (!tc)
         emit addTask(Task::compilerMissingTask());
@@ -119,7 +119,7 @@ bool ROSColconStep::init()
 
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
-    pp->setWorkingDirectory(bc->project()->projectDirectory().toString());
+    pp->setWorkingDirectory(bc->project()->projectDirectory());
     Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
 
     bc->updateQtEnvironment(env); // TODO: Not sure if this is required here
@@ -128,7 +128,7 @@ bool ROSColconStep::init()
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
     pp->setEnvironment(env);
-    pp->setCommand(makeCommand());
+    pp->setCommand(Utils::FileName::fromString(makeCommand()));
     pp->setArguments(allArguments(bc->cmakeBuildType()));
     pp->resolveAll();
 
@@ -303,9 +303,9 @@ void ROSColconStepWidget::updateDetails()
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
-    param.setWorkingDirectory(workspaceInfo.buildPath.toString());
+    param.setWorkingDirectory(workspaceInfo.buildPath);
     param.setEnvironment(bc->environment());
-    param.setCommand(m_makeStep->makeCommand());
+    param.setCommand(Utils::FileName::fromString(m_makeStep->makeCommand()));
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));
     m_summaryText = param.summary(displayName());
     emit updateSummary();

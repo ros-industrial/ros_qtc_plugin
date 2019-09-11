@@ -333,7 +333,7 @@ ROSBuildEnvironmentWidget::ROSBuildEnvironmentWidget(BuildConfiguration *bc)
     m_clearSystemEnvironmentCheckBox = new QCheckBox(this);
     m_clearSystemEnvironmentCheckBox->setText(tr("Clear system environment"));
 
-    m_buildEnvironmentWidget = new EnvironmentWidget(this, m_clearSystemEnvironmentCheckBox);
+    m_buildEnvironmentWidget = new EnvironmentWidget(this, ProjectExplorer::EnvironmentWidget::TypeLocal, m_clearSystemEnvironmentCheckBox);
     vbox->addWidget(m_buildEnvironmentWidget);
 
     connect(m_buildEnvironmentWidget, SIGNAL(userChangesChanged()),

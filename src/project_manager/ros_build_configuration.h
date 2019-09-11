@@ -38,7 +38,7 @@
 #include <QMenu>
 
 namespace Utils {
-class FileName;
+using FileName = class Utils::FilePath;
 class PathChooser;
 } // namespace Utils
 
