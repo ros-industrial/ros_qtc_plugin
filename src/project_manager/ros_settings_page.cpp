@@ -47,14 +47,14 @@ namespace Internal {
 ROSSettings::ROSSettings()
 {
   m_system_distributions.clear();
-  Utils::FileName ros_path = Utils::FileName::fromString(Constants::ROS_INSTALL_DIRECTORY);
+  Utils::FilePath ros_path = Utils::FilePath::fromString(Constants::ROS_INSTALL_DIRECTORY);
   if (ros_path.exists())
   {
     QDir ros_opt(ros_path.toString());
     ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
     for (auto entry : ros_opt.entryList())
     {
-      Utils::FileName path = Utils::FileName::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
+      Utils::FilePath path = Utils::FilePath::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
       path = path.pathAppended(entry);
       m_system_distributions.append(path);
     }

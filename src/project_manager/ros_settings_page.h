@@ -58,7 +58,7 @@ struct ROSSettings
     bool operator!=(const ROSSettings &s) const { return !equals(s); }
 
 private:
-    QList<Utils::FileName> m_system_distributions;
+    QList<Utils::FilePath> m_system_distributions;
 };
 
 class ROSSettingsWidget : public QWidget

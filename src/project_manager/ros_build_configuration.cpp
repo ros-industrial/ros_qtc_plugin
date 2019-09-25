@@ -223,7 +223,7 @@ QList<BuildInfo> ROSBuildConfigurationFactory::availableSetups(const Kit *k, con
 
     // Need to create a ROS Setting widget where the user sets the default build system to use here.
     ROSUtils::ROSProjectFileContent projectFileContent;
-    ROSUtils::parseQtCreatorWorkspaceFile(Utils::FileName::fromString(projectPath), projectFileContent);
+    ROSUtils::parseQtCreatorWorkspaceFile(Utils::FilePath::fromString(projectPath), projectFileContent);
 
     for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeUserDefined; ++type) {
       ProjectExplorer::BuildInfo info = createBuildInfo(k, projectFileContent.defaultBuildSystem, ROSUtils::BuildType(type));

@@ -27,7 +27,7 @@
 namespace ROSProjectManager {
 namespace Internal {
 
-bool ROSPackageXmlParser::parsePackageXml(const Utils::FileName &filepath)
+bool ROSPackageXmlParser::parsePackageXml(const Utils::FilePath &filepath)
 {
     m_packageInfo.path = filepath.parentDir();
     m_packageInfo.filepath = filepath;
@@ -53,7 +53,7 @@ bool ROSPackageXmlParser::parsePackageXml(const Utils::FileName &filepath)
     return false;
 }
 
-bool ROSPackageXmlParser::parsePackageXml(const Utils::FileName &filepath, ROSUtils::PackageInfo &packageInfo)
+bool ROSPackageXmlParser::parsePackageXml(const Utils::FilePath &filepath, ROSUtils::PackageInfo &packageInfo)
 {
     bool result = parsePackageXml(filepath);
     packageInfo = m_packageInfo;

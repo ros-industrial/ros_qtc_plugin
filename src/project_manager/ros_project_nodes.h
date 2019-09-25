@@ -39,7 +39,7 @@ namespace Internal {
 class ROSProjectNode : public ProjectExplorer::ProjectNode
 {
 public:
-    explicit ROSProjectNode(const Utils::FileName &projectFilePath);
+    explicit ROSProjectNode(const Utils::FilePath &projectFilePath);
 
     bool showInSimpleTree() const override;
 
@@ -54,14 +54,14 @@ public:
     bool renameFile(const QString &filePath, const QString &newFilePath) override;
 
 private:
-    static ProjectExplorer::FileNode *findFileNode(FolderNode *folder_node, const Utils::FileName &filePaths);
+    static ProjectExplorer::FileNode *findFileNode(FolderNode *folder_node, const Utils::FilePath &filePaths);
 };
 typedef std::unique_ptr<ROSProjectNode> ROSProjectNodeUPtr;
 
 class ROSFolderNode: public ProjectExplorer::FolderNode
 {
 public:
-    explicit ROSFolderNode(const Utils::FileName &folderPath);
+    explicit ROSFolderNode(const Utils::FilePath &folderPath);
 
     QString displayName() const override;
 

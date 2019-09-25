@@ -31,10 +31,6 @@
 
 #include <QProcess>
 
-namespace Utils {
-using FileName = class Utils::FilePath;
-} // namespace Utils
-
 namespace ROSProjectManager {
 namespace Internal {
 class ROSImportWizardPage;
@@ -48,9 +44,9 @@ public:
     explicit ROSProjectWizardDialog(const Core::BaseFileWizardFactory *factory, QWidget *parent = 0);
 
     QString projectName() const;
-    Utils::FileName distribution() const;
+    Utils::FilePath distribution() const;
     ROSUtils::BuildSystem buildSystem() const;
-    Utils::FileName workspaceDirectory() const;
+    Utils::FilePath workspaceDirectory() const;
 
     ROSImportWizardPage *m_firstPage;
 };
@@ -69,9 +65,9 @@ public:
     void setForceFirstCapitalLetterForFileName(bool b);
 
     QString projectName() const;
-    Utils::FileName distribution() const;
+    Utils::FilePath distribution() const;
     ROSUtils::BuildSystem buildSystem() const;
-    Utils::FileName workspaceDirectory() const;
+    Utils::FilePath workspaceDirectory() const;
 
     // Validate a base name entry field (potentially containing extension)
     static bool validateBaseName(const QString &name, QString *errorMessage = 0);

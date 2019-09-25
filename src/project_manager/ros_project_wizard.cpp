@@ -84,7 +84,7 @@ QString ROSProjectWizardDialog::projectName() const
     return m_firstPage->projectName();
 }
 
-Utils::FileName ROSProjectWizardDialog::distribution() const
+Utils::FilePath ROSProjectWizardDialog::distribution() const
 {
     return m_firstPage->distribution();
 }
@@ -94,7 +94,7 @@ ROSUtils::BuildSystem ROSProjectWizardDialog::buildSystem() const
     return m_firstPage->buildSystem();
 }
 
-Utils::FileName ROSProjectWizardDialog::workspaceDirectory() const
+Utils::FilePath ROSProjectWizardDialog::workspaceDirectory() const
 {
     return m_firstPage->workspaceDirectory();
 }
@@ -159,9 +159,9 @@ QString ROSImportWizardPage::projectName() const
     return d->m_ui.nameLineEdit->text();
 }
 
-Utils::FileName ROSImportWizardPage::distribution() const
+Utils::FilePath ROSImportWizardPage::distribution() const
 {
-    return Utils::FileName::fromString(d->m_ui.distributionComboBox->currentText());
+    return Utils::FilePath::fromString(d->m_ui.distributionComboBox->currentText());
 }
 
 ROSUtils::BuildSystem ROSImportWizardPage::buildSystem() const
@@ -184,9 +184,9 @@ void ROSImportWizardPage::setForceFirstCapitalLetterForFileName(bool b)
     d->m_ui.nameLineEdit->setForceFirstCapitalLetter(b);
 }
 
-Utils::FileName ROSImportWizardPage::workspaceDirectory() const
+Utils::FilePath ROSImportWizardPage::workspaceDirectory() const
 {
-  return Utils::FileName::fromString(d->m_ui.pathChooser->path());
+  return Utils::FilePath::fromString(d->m_ui.pathChooser->path());
 }
 
 void ROSImportWizardPage::slotProjectNameValidChanged()
