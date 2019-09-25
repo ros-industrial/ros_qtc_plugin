@@ -134,13 +134,13 @@ bool ROSCatkinToolsStep::init()
 
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
-    pp->setWorkingDirectory(Utils::FileName::fromString(m_catkinToolsWorkingDir));
+    pp->setWorkingDirectory(Utils::FilePath::fromString(m_catkinToolsWorkingDir));
 
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
     pp->setEnvironment(env);
-    pp->setCommand(Utils::FileName::fromString(makeCommand()));
+    pp->setCommand(Utils::FilePath::fromString(makeCommand()));
     pp->setArguments(allArguments(bc->cmakeBuildType()));
     pp->resolveAll();
 
@@ -382,8 +382,8 @@ void ROSCatkinToolsStepWidget::updateDetails()
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
     param.setEnvironment(bc->environment());
-    param.setWorkingDirectory(Utils::FileName::fromString(m_makeStep->m_catkinToolsWorkingDir));
-    param.setCommand(Utils::FileName::fromString(m_makeStep->makeCommand()));
+    param.setWorkingDirectory(Utils::FilePath::fromString(m_makeStep->m_catkinToolsWorkingDir));
+    param.setCommand(Utils::FilePath::fromString(m_makeStep->makeCommand()));
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));
     m_summaryText = param.summary(displayName());
     emit updateSummary();
@@ -474,7 +474,7 @@ void ROSCatkinToolsStepWidget::renameProfile(const QString profileName)
 
 void ROSCatkinToolsStepWidget::editProfile(const QString profileName)
 {
-    Utils::FileName profile = ROSUtils::getCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
+    Utils::FilePath profile = ROSUtils::getCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
 
     ROSCatkinToolsProfileEditorDialog *editor = new ROSCatkinToolsProfileEditorDialog(profile);
     editor->show();
@@ -706,7 +706,7 @@ ROSCatkinToolsConfigEditorWidget::~ROSCatkinToolsConfigEditorWidget()
     delete m_editor;
 }
 
-bool ROSCatkinToolsConfigEditorWidget::parseProfileConfig(Utils::FileName filePath)
+bool ROSCatkinToolsConfigEditorWidget::parseProfileConfig(Utils::FilePath filePath)
 {
     m_profileConfigPath = filePath;
     if (!m_profileConfigPath.exists())
@@ -882,7 +882,7 @@ bool ROSCatkinToolsConfigEditorWidget::isValid() const
 // ROSCatkinToolsProfileEditorDialog
 //
 
-ROSCatkinToolsProfileEditorDialog::ROSCatkinToolsProfileEditorDialog(Utils::FileName filePath) : QDialog()
+ROSCatkinToolsProfileEditorDialog::ROSCatkinToolsProfileEditorDialog(Utils::FilePath filePath) : QDialog()
 {
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::Dialog);
     QVBoxLayout *vlayout = new QVBoxLayout();

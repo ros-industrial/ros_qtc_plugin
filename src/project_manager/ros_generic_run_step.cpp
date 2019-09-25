@@ -79,12 +79,12 @@ void ROSGenericRunStep::run()
   ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(rp->projectDirectory(), rp->rosBuildConfiguration()->buildSystem(), rp->distribution());
   ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
   Utils::Environment env = bc->environment();
-  Utils::FileName shell = Utils::FileName::fromString(env.value("SHELL"));
+  Utils::FilePath shell = Utils::FilePath::fromString(env.value("SHELL"));
   QString source_cmd;
 
-  Utils::FileName sourcePath(workspaceInfo.develPath);
+  Utils::FilePath sourcePath(workspaceInfo.develPath);
   if (workspaceInfo.install)
-    sourcePath = Utils::FileName(workspaceInfo.installPath);
+    sourcePath = Utils::FilePath(workspaceInfo.installPath);
 
   if (shell.fileName() == "bash")
       source_cmd = QString("source %1\n").arg(sourcePath.pathAppended("setup.bash").toString());

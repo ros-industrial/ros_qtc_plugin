@@ -129,7 +129,7 @@ class ROSCatkinToolsProfileEditorDialog : public QDialog
 {
     Q_OBJECT
 public:
-    ROSCatkinToolsProfileEditorDialog(Utils::FileName filePath);
+    ROSCatkinToolsProfileEditorDialog(Utils::FilePath filePath);
 
 };
 
@@ -185,7 +185,7 @@ public:
     ROSCatkinToolsConfigEditorWidget();
     ~ROSCatkinToolsConfigEditorWidget();
 
-    bool parseProfileConfig(Utils::FileName filePath);
+    bool parseProfileConfig(Utils::FilePath filePath);
     bool saveProfileConfig();
     bool isModified() const;
     bool isValid() const;
@@ -204,7 +204,7 @@ private:
     ROSCatkinToolsListEditorWidget *m_editor;
     bool m_modified;
     bool m_parsing;
-    Utils::FileName m_profileConfigPath;
+    Utils::FilePath m_profileConfigPath;
     YAML::Node m_profile_original;
     YAML::Node m_profile_current;
 };

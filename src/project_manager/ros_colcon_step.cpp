@@ -128,7 +128,7 @@ bool ROSColconStep::init()
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
     pp->setEnvironment(env);
-    pp->setCommand(Utils::FileName::fromString(makeCommand()));
+    pp->setCommand(Utils::FilePath::fromString(makeCommand()));
     pp->setArguments(allArguments(bc->cmakeBuildType()));
     pp->resolveAll();
 
@@ -305,7 +305,7 @@ void ROSColconStepWidget::updateDetails()
     param.setMacroExpander(bc->macroExpander());
     param.setWorkingDirectory(workspaceInfo.buildPath);
     param.setEnvironment(bc->environment());
-    param.setCommand(Utils::FileName::fromString(m_makeStep->makeCommand()));
+    param.setCommand(Utils::FilePath::fromString(m_makeStep->makeCommand()));
     param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));
     m_summaryText = param.summary(displayName());
     emit updateSummary();

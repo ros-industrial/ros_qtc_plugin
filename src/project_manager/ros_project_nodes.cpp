@@ -32,12 +32,12 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
-ROSProjectNode::ROSProjectNode(const Utils::FileName &projectFilePath) : ProjectNode(projectFilePath)
+ROSProjectNode::ROSProjectNode(const Utils::FilePath &projectFilePath) : ProjectNode(projectFilePath)
 {
     setDisplayName(projectFilePath.toFileInfo().completeBaseName());
 }
 
-FileNode *ROSProjectNode::findFileNode(FolderNode *folder_node, const Utils::FileName &filePaths)
+FileNode *ROSProjectNode::findFileNode(FolderNode *folder_node, const Utils::FilePath &filePaths)
 {
   FileNode* file_node = folder_node->fileNode(filePaths);
   if (file_node)
@@ -99,7 +99,7 @@ bool ROSProjectNode::renameFile(const QString &filePath, const QString &newFileP
   return true;
 }
 
-ROSFolderNode::ROSFolderNode(const Utils::FileName &folderPath) : FolderNode(folderPath), m_repository(nullptr)
+ROSFolderNode::ROSFolderNode(const Utils::FilePath &folderPath) : FolderNode(folderPath), m_repository(nullptr)
 {
     QString path = this->filePath().toString();
 
@@ -117,7 +117,7 @@ QString ROSFolderNode::displayName() const
     if (m_repository)
     {
         QString path = this->filePath().toString();
-        QString name = Utils::FileName::fromString(path).fileName();
+        QString name = Utils::FilePath::fromString(path).fileName();
         return QString::fromLatin1("%1 [%2]").arg(name, m_repository->vcsTopic(path));
     }
     else

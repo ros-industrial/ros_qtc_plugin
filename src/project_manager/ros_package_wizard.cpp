@@ -284,8 +284,8 @@ Core::GeneratedFiles ROSPackageWizard::generateFiles(const QWizard *w,
     Q_UNUSED(errorMessage);
 
     QString package;
-    Utils::FileName packagePath = Utils::FileName::fromString(m_wizard->packagePath());
-    Utils::FileName cmakelistPath = Utils::FileName::fromString(m_wizard->packagePath());
+    Utils::FilePath packagePath = Utils::FilePath::fromString(m_wizard->packagePath());
+    Utils::FilePath cmakelistPath = Utils::FilePath::fromString(m_wizard->packagePath());
 
     packagePath = packagePath.pathAppended(m_wizard->packageName()).pathAppended(QLatin1String("package.xml"));
     cmakelistPath = cmakelistPath.pathAppended(m_wizard->packageName()).pathAppended(QLatin1String("CMakeLists.txt"));
@@ -343,7 +343,7 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   cmd += QString::fromLatin1(" --rosdistro \"%1\"").arg(project->distribution().fileName());
 
   // create package using ros command catkin_create_pkg
-  Utils::FileName packagePath = Utils::FileName::fromString(m_wizard->packagePath());
+  Utils::FilePath packagePath = Utils::FilePath::fromString(m_wizard->packagePath());
   catkin_create_pkg->setWorkingDirectory(packagePath.toString());
 
   ROSUtils::sourceROS(catkin_create_pkg, project->distribution());

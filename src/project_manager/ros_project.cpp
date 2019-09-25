@@ -66,7 +66,7 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
-static FolderNode *folderNode(const FolderNode *folder, const Utils::FileName &directory)
+static FolderNode *folderNode(const FolderNode *folder, const Utils::FilePath &directory)
 {
     return static_cast<FolderNode *>(Utils::findOrDefault(folder->folderNodes(),
                                                           [&directory](const FolderNode *fn) {
@@ -75,13 +75,13 @@ static FolderNode *folderNode(const FolderNode *folder, const Utils::FileName &d
 }
 
 static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
-                                                   const Utils::FileName &directory,
-                                                   const Utils::FileName &overrideBaseDir,
+                                                   const Utils::FilePath &directory,
+                                                   const Utils::FilePath &overrideBaseDir,
                                                    const FolderNode::FolderNodeFactory &factory)
 {
-    Utils::FileName path = overrideBaseDir.isEmpty() ? folder->filePath() : overrideBaseDir;
+    Utils::FilePath path = overrideBaseDir.isEmpty() ? folder->filePath() : overrideBaseDir;
 
-    Utils::FileName directoryWithoutPrefix;
+    Utils::FilePath directoryWithoutPrefix;
     bool isRelative = false;
 
     if (path.isEmpty() || path.toFileInfo().isRoot()) {
@@ -125,7 +125,7 @@ static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
 ////////////////////////////////////////////////////////////////////////////////////
 const int UPDATE_INTERVAL = 300;
 
-ROSProject::ROSProject(const Utils::FileName &fileName) :
+ROSProject::ROSProject(const Utils::FilePath &fileName) :
     ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName, [this]() { refresh(); }),
     m_cppCodeModelUpdater(new CppTools::CppProjectUpdater),
     m_project_loaded(false),
@@ -195,7 +195,7 @@ bool ROSProject::saveProjectFile()
     return result;
 }
 
-Utils::FileName ROSProject::distribution() const
+Utils::FilePath ROSProject::distribution() const
 {
     return m_projectFileContent.distribution;
 }
@@ -273,14 +273,14 @@ void ROSProject::updateProjectTree()
   emitParsingFinished(true);
 }
 
-void ROSProject::buildProjectTree(const Utils::FileName projectFilePath, const QStringList watchDirectories, QFutureInterface<FutureWatcherResults> &fi)
+void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath, const QStringList watchDirectories, QFutureInterface<FutureWatcherResults> &fi)
 {
     fi.reportStarted();
 
     FutureWatcherResults results;
 
     for (const QString& dir : watchDirectories) {
-        Utils::FileName addedDir = projectFilePath.parentDir().pathAppended(dir);
+        Utils::FilePath addedDir = projectFilePath.parentDir().pathAppended(dir);
         QHash<QString, ROSUtils::FolderContent> newDirContent = ROSUtils::getFolderContentRecurisve(addedDir, results.files, results.directories);
         results.workspaceContent.unite(newDirContent);
     }
@@ -289,7 +289,7 @@ void ROSProject::buildProjectTree(const Utils::FileName projectFilePath, const Q
     std::unique_ptr<FileNode> root_node(new FileNode(projectFilePath, ProjectExplorer::FileType::Project));
     project_node->addNode(std::move(root_node));
 
-    const ProjectExplorer::FolderNode::FolderNodeFactory &factory = [](const Utils::FileName &fn) { return std::make_unique<ROSFolderNode>(fn); };
+    const ProjectExplorer::FolderNode::FolderNodeFactory &factory = [](const Utils::FilePath &fn) { return std::make_unique<ROSFolderNode>(fn); };
 
     std::vector<std::unique_ptr<ProjectExplorer::FileNode>> childNodes;
     QHashIterator<QString, ROSUtils::FolderContent> item(results.workspaceContent);
@@ -301,8 +301,8 @@ void ROSProject::buildProjectTree(const Utils::FileName projectFilePath, const Q
 
       if (item.value().files.empty()) {
         // This is required so empty directories show up in project tree
-        Utils::FileName empty_directory = Utils::FileName::fromString(item.key());
-        recursiveFindOrCreateFolderNode(project_node, empty_directory, Utils::FileName(), factory);
+        Utils::FilePath empty_directory = Utils::FilePath::fromString(item.key());
+        recursiveFindOrCreateFolderNode(project_node, empty_directory, Utils::FilePath(), factory);
       }
       else {
         // Add all files in the directory node
@@ -315,7 +315,7 @@ void ROSProject::buildProjectTree(const Utils::FileName projectFilePath, const Q
           if (Constants::HEADER_FILE_EXTENSIONS.contains(fileInfo.suffix()))
             fileType = ProjectExplorer::FileType::Header;
 
-          std::unique_ptr<ProjectExplorer::FileNode> fileNode(new ProjectExplorer::FileNode(Utils::FileName::fromString(fileInfo.absoluteFilePath()), fileType));
+          std::unique_ptr<ProjectExplorer::FileNode> fileNode(new ProjectExplorer::FileNode(Utils::FilePath::fromString(fileInfo.absoluteFilePath()), fileType));
           childNodes.emplace_back(std::move(fileNode));
         }
       }
@@ -324,7 +324,7 @@ void ROSProject::buildProjectTree(const Utils::FileName projectFilePath, const Q
       fi.setProgressValue(static_cast<int>(100.0 * static_cast<double>(cnt) / max));
     }
 
-    project_node->addNestedNodes(std::move(childNodes), Utils::FileName(), factory);
+    project_node->addNestedNodes(std::move(childNodes), Utils::FilePath(), factory);
     results.node = project_node;
 
     fi.setProgressValue(fi.progressMaximum());
@@ -443,7 +443,7 @@ void ROSProject::asyncUpdateCppCodeModel(bool success)
 }
 
 void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
-                                   const Utils::FileName projectFilePath,
+                                   const Utils::FilePath projectFilePath,
                                    const QStringList workspaceFiles,
                                    const Kit *k,
                                    const ROSUtils::PackageInfoMap wsPackageInfo,
@@ -454,7 +454,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
     results.wsPackageInfo = ROSUtils::getWorkspacePackageInfo(workspaceInfo, &wsPackageInfo);
     results.wsPackageBuildInfo = ROSUtils::getWorkspacePackageBuildInfo(workspaceInfo, results.wsPackageInfo, &wsPackageBuildInfo);
 
-    const Utils::FileName sysRoot = SysRootKitAspect::sysRoot(k);
+    const Utils::FilePath sysRoot = SysRootKitAspect::sysRoot(k);
 
     CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
     if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitAspect::qtVersion(k)) {
@@ -468,7 +468,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
     QStringList workspace_includes; // This should be the same as workspace_header_paths used for checking for duplicates
     ProjectExplorer::HeaderPaths workspace_header_paths;
     for (const auto& package : results.wsPackageInfo) {
-      Utils::FileName include_path = Utils::FileName::fromString(package.path.toString());
+      Utils::FilePath include_path = Utils::FilePath::fromString(package.path.toString());
       include_path = include_path.pathAppended("include");
       if (!workspace_includes.contains(include_path.toString())) {
         workspace_includes.append(include_path.toString());

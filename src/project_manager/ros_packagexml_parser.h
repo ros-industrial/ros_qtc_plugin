@@ -34,9 +34,9 @@ class ROSPackageXmlParser : public QXmlStreamReader
 public:
     ROSPackageXmlParser() {}
 
-    bool parsePackageXml(const Utils::FileName &filepath);
+    bool parsePackageXml(const Utils::FilePath &filepath);
 
-    bool parsePackageXml(const Utils::FileName &filepath,
+    bool parsePackageXml(const Utils::FilePath &filepath,
                          ROSUtils::PackageInfo &packageInfo);
 
     ROSUtils::PackageInfo getInfo() const;

@@ -54,12 +54,12 @@ class ROSProject : public ProjectExplorer::Project
     friend class ROSProjectPlugin;
 
 public:
-    ROSProject(const Utils::FileName &filename);
+    ROSProject(const Utils::FilePath &filename);
     ~ROSProject() override;
 
     void refresh();
 
-    Utils::FileName distribution() const;
+    Utils::FilePath distribution() const;
     ROSUtils::BuildSystem defaultBuildSystem() const;
     ROSBuildConfiguration* rosBuildConfiguration() const;
 
@@ -119,12 +119,12 @@ private:
     QFutureInterface<CppToolsFutureResults> *m_asyncBuildCodeModelFutureInterface;
     QFutureWatcher<CppToolsFutureResults> m_futureBuildCodeModelWatcher;
 
-    static void buildProjectTree(const Utils::FileName projectFilePath,
+    static void buildProjectTree(const Utils::FilePath projectFilePath,
                                  const QStringList watchDirectories,
                                  QFutureInterface<FutureWatcherResults> &fi);
 
     static void buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
-                                  const Utils::FileName projectFilePath,
+                                  const Utils::FilePath projectFilePath,
                                   const QStringList workspaceFiles,
                                   const ProjectExplorer::Kit *k,
                                   const ROSUtils::PackageInfoMap wsPackageInfo,
