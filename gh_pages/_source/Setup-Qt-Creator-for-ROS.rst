@@ -78,17 +78,15 @@ Preventing Qt Creator form stepping into Boost, Eigen, etc.
 
       skip pending on
       python
-      for root, dirs, files in os.walk("/usr/include/boost/"):
-        for file in files:
-          if file.endswith(".hpp"):
-            cmd = "skip file " + os.path.join(root, file)
-            gdb.execute(cmd, True)
+      # Add libs here
+      LIB_PATHS = ["/usr/include/boost/", "/usr/include/eigen3/Eigen/"]
 
-      for root, dirs, files in os.walk("/usr/include/eigen3/Eigen/"):
-        for file in files:
-          if file.endswith(".hpp"):
-            cmd = "skip file " + os.path.join(root, file)
-            gdb.execute(cmd, True)
+      for lib_path in LIB_PATHS:
+        for root, dirs, files in os.walk(lib_path):
+          for file in files:
+            if file.endswith(".hpp") or file.endswith(".h"):
+              cmd = "skip file " + os.path.join(root, file)
+              gdb.execute(cmd, True)
       end
       skip enable
 
