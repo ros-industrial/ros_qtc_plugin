@@ -182,7 +182,6 @@ public:
     RunStep *at(int position);
 
     ProjectExplorer::Target *target() const;
-    ProjectExplorer::Project *project() const override;
 
     virtual QVariantMap toMap() const override;
     bool fromMap(const QVariantMap &map) override;
