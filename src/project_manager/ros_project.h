@@ -23,6 +23,7 @@
 
 #include "ros_project_plugin.h"
 #include "ros_utils.h"
+#include "ros_build_system.h"
 
 #include <projectexplorer/project.h>
 #include <projectexplorer/projectnodes.h>
@@ -96,6 +97,7 @@ private:
     QStringList m_workspaceFiles;
     QStringList m_workspaceDirectories;
     bool m_project_loaded;
+    ROSBuildSystem *m_build_system;
 
 
     struct FutureWatcherResults
