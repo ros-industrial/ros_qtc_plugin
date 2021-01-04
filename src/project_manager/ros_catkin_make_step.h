@@ -55,7 +55,7 @@ public:
     BuildTargets buildTarget() const;
     void setBuildTarget(const BuildTargets &target);
     QString allArguments(ROSUtils::BuildType buildType, bool includeDefault = true) const;
-    QString makeCommand() const;
+    Utils::CommandLine makeCommand(const QString &args) const;
     void stdOutput(const QString &line) override;
 
     QVariantMap toMap() const override;

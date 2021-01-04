@@ -128,8 +128,7 @@ bool ROSColconStep::init()
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
     pp->setEnvironment(env);
-    pp->setCommand(Utils::FilePath::fromString(makeCommand()));
-    pp->setArguments(allArguments(bc->cmakeBuildType()));
+    pp->setCommandLine(makeCommand(allArguments(bc->cmakeBuildType())));
     pp->resolveAll();
 
     // If we are cleaning, then make can fail with an error code, but that doesn't mean
@@ -200,16 +199,24 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
     return args;
 }
 
-QString ROSColconStep::makeCommand() const
+Utils::CommandLine ROSColconStep::makeCommand(const QString &args) const
 {
+    QLatin1String exec;
     switch(m_target) {
     case BUILD:
-        return QLatin1String("colcon");
+        exec = QLatin1String("colcon");
+        break;
     case CLEAN:
-        return QLatin1String("rm");
+        exec = QLatin1String("rm");
+        break;
     default:
-        return QLatin1String("colcon");
+        exec = QLatin1String("colcon");
+        break;
     }
+
+    Utils::CommandLine cmd(exec);
+    cmd.addArgs(args, Utils::CommandLine::RawType::Raw);
+    return cmd;
 }
 
 void ROSColconStep::stdOutput(const QString &line)
@@ -305,8 +312,7 @@ void ROSColconStepWidget::updateDetails()
     param.setMacroExpander(bc->macroExpander());
     param.setWorkingDirectory(workspaceInfo.buildPath);
     param.setEnvironment(bc->environment());
-    param.setCommand(Utils::FilePath::fromString(m_makeStep->makeCommand()));
-    param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));
+    param.setCommandLine(m_makeStep->makeCommand(m_makeStep->allArguments(bc->cmakeBuildType(), false)));
     m_summaryText = param.summary(displayName());
     emit updateSummary();
 }
