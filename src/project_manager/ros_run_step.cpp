@@ -430,10 +430,5 @@ ProjectExplorer::Target *RunStepList::target() const
     return 0;
 }
 
-ProjectExplorer::Project *RunStepList::project() const
-{
-    return target()->project();
-}
-
 } // namespace Internal
 } // namespace ROSProjectManager
