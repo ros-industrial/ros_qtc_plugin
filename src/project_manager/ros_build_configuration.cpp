@@ -198,29 +198,17 @@ ROSBuildConfigurationFactory::~ROSBuildConfigurationFactory()
 {
 }
 
-QList<BuildInfo> ROSBuildConfigurationFactory::availableBuilds(const Target *parent) const
+QList<BuildInfo> ROSBuildConfigurationFactory::availableBuilds(const Kit *k,
+                                                               const Utils::FilePath &projectPath,
+                                                               bool forSetup) const
 {
-    QList<BuildInfo> result;
+    Q_UNUSED(forSetup);
 
-    // Need to create a ROS Setting widget where the user sets the default build system to use here.
-    ROSUtils::BuildSystem buildSystem = static_cast<ROSProject *>(parent->project())->defaultBuildSystem();
-
-    for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeUserDefined; ++type)
-    {
-      ProjectExplorer::BuildInfo info = createBuildInfo(parent->kit(), buildSystem, ROSUtils::BuildType(type));
-      result << info;
-    }
-
-    return result;
-}
-
-QList<BuildInfo> ROSBuildConfigurationFactory::availableSetups(const Kit *k, const QString &projectPath) const
-{
     QList<BuildInfo> result;
 
     // Need to create a ROS Setting widget where the user sets the default build system to use here.
     ROSUtils::ROSProjectFileContent projectFileContent;
-    ROSUtils::parseQtCreatorWorkspaceFile(Utils::FilePath::fromString(projectPath), projectFileContent);
+    ROSUtils::parseQtCreatorWorkspaceFile(projectPath, projectFileContent);
 
     for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeUserDefined; ++type) {
       ProjectExplorer::BuildInfo info = createBuildInfo(k, projectFileContent.defaultBuildSystem, ROSUtils::BuildType(type));
