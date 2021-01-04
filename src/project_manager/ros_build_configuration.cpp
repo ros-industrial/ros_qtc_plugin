@@ -69,24 +69,21 @@ ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, Core::Id id)
 {
 }
 
-void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo &info)
+void ROSBuildConfiguration::initialize()
 {
-    BuildConfiguration::initialize(info);
+    BuildConfiguration::initialize();
 
-    auto extraInfo = info.extraInfo.value<ROSExtraBuildInfo>();
+    const ROSExtraBuildInfo extra_info = extraInfo().value<ROSExtraBuildInfo>();
 
-    setDisplayName(info.displayName);
-    setDefaultDisplayName(info.displayName);
-    setBuildDirectory(info.buildDirectory);
-    setBuildSystem(extraInfo.buildSystem);
-    setCMakeBuildType(extraInfo.cmakeBuildType);
+    setBuildSystem(extra_info.buildSystem);
+    setCMakeBuildType(extra_info.cmakeBuildType);
 
     BuildStepList *buildSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
     BuildStepList *cleanSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_CLEAN);
     Q_ASSERT(buildSteps);
     Q_ASSERT(cleanSteps);
 
-    switch (extraInfo.buildSystem)
+    switch (extra_info.buildSystem)
     {
         case ROSUtils::CatkinMake:
         {
