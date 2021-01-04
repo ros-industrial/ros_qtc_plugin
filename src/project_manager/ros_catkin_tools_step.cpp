@@ -140,8 +140,7 @@ bool ROSCatkinToolsStep::init()
     // addToEnvironment() to not screw up the users run environment.
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
     pp->setEnvironment(env);
-    pp->setCommand(Utils::FilePath::fromString(makeCommand()));
-    pp->setArguments(allArguments(bc->cmakeBuildType()));
+    pp->setCommandLine(makeCommand(allArguments(bc->cmakeBuildType())));
     pp->resolveAll();
 
     // If we are cleaning, then make can fail with an error code, but that doesn't mean
@@ -229,9 +228,11 @@ QString ROSCatkinToolsStep::allArguments(ROSUtils::BuildType buildType, bool inc
     return args;
 }
 
-QString ROSCatkinToolsStep::makeCommand() const
+Utils::CommandLine ROSCatkinToolsStep::makeCommand(const QString &args) const
 {
-    return QLatin1String("catkin");
+    Utils::CommandLine cmd(QLatin1String("catkin"));
+    cmd.addArgs(args, Utils::CommandLine::RawType::Raw);
+    return cmd;
 }
 
 void ROSCatkinToolsStep::stdOutput(const QString &line)
@@ -383,8 +384,7 @@ void ROSCatkinToolsStepWidget::updateDetails()
     param.setMacroExpander(bc->macroExpander());
     param.setEnvironment(bc->environment());
     param.setWorkingDirectory(Utils::FilePath::fromString(m_makeStep->m_catkinToolsWorkingDir));
-    param.setCommand(Utils::FilePath::fromString(m_makeStep->makeCommand()));
-    param.setArguments(m_makeStep->allArguments(bc->cmakeBuildType(), false));
+    param.setCommandLine(m_makeStep->makeCommand(m_makeStep->allArguments(bc->cmakeBuildType(), false)));
     m_summaryText = param.summary(displayName());
     emit updateSummary();
 }
