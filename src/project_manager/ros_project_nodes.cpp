@@ -81,12 +81,6 @@ bool ROSProjectNode::addFiles(const QStringList &filePaths, QStringList *notAdde
   return true;
 }
 
-bool ROSProjectNode::removeFiles(const QStringList &filePaths, QStringList *notRemoved)
-{
-  ProjectExplorer::ProjectNode::removeFiles(filePaths, notRemoved);
-  return true;
-}
-
 bool ROSProjectNode::deleteFiles(const QStringList &filePaths)
 {
   ProjectExplorer::ProjectNode::deleteFiles(filePaths);
