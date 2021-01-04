@@ -456,12 +456,12 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
     const Utils::FilePath sysRoot = SysRootKitAspect::sysRoot(k);
 
-    CppTools::ProjectPart::QtVersion activeQtVersion = CppTools::ProjectPart::NoQt;
+    Utils::QtVersion activeQtVersion = Utils::QtVersion::None;
     if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitAspect::qtVersion(k)) {
         if (qtVersion->qtVersion() < QtSupport::QtVersionNumber(5,0,0))
-            activeQtVersion = CppTools::ProjectPart::Qt4;
+            activeQtVersion = Utils::QtVersion::Qt4;
         else
-            activeQtVersion = CppTools::ProjectPart::Qt5;
+            activeQtVersion = Utils::QtVersion::Qt5;
     }
 
     // Get all of the workspace includes directories
