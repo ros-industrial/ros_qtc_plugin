@@ -433,11 +433,11 @@ void ROSProject::asyncUpdateCppCodeModel(bool success)
         // TODO: Figure out why running this async causes segfaults
         if (async)
         {
-          Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority, [this, workspaceInfo, k]() { ROSProject::buildCppCodeModel(workspaceInfo, projectFilePath(), m_workspaceFiles, k, m_wsPackageInfo, m_wsPackageBuildInfo, *m_asyncBuildCodeModelFutureInterface); });
+          Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority, [this, workspaceInfo, k, current_environment]() { ROSProject::buildCppCodeModel(workspaceInfo, projectFilePath(), m_workspaceFiles, k, current_environment, m_wsPackageInfo, m_wsPackageBuildInfo, *m_asyncBuildCodeModelFutureInterface); });
         }
         else
         {
-          ROSProject::buildCppCodeModel(workspaceInfo, projectFilePath(), m_workspaceFiles, k, m_wsPackageInfo, m_wsPackageBuildInfo, *m_asyncBuildCodeModelFutureInterface);
+          ROSProject::buildCppCodeModel(workspaceInfo, projectFilePath(), m_workspaceFiles, k, current_environment, m_wsPackageInfo, m_wsPackageBuildInfo, *m_asyncBuildCodeModelFutureInterface);
         }
     }
 }
@@ -446,6 +446,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
                                    const Utils::FilePath projectFilePath,
                                    const QStringList workspaceFiles,
                                    const Kit *k,
+                                   const Utils::Environment &env,
                                    const ROSUtils::PackageInfoMap wsPackageInfo,
                                    const ROSUtils::PackageBuildInfoMap wsPackageBuildInfo,
                                    QFutureInterface<CppToolsFutureResults> &fi)
@@ -523,7 +524,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
             rpp.setMacros(ProjectExplorer::Macro::toMacros(defineArg.toUtf8()));
 
             QSet<QString> toolChainIncludes;
-            for (const HeaderPath &hp : cxxToolChain->builtInHeaderPaths(targetInfo.flags, sysRoot)) {
+            for (const HeaderPath &hp : cxxToolChain->builtInHeaderPaths(targetInfo.flags, sysRoot, env)) {
                 toolChainIncludes.insert(hp.path);
             }
 
