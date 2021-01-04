@@ -30,7 +30,7 @@
 #include <projectexplorer/toolchain.h>
 #include <projectexplorer/buildconfiguration.h>
 #include <coreplugin/idocument.h>
-#include <cpptools/cpprawprojectpart.h>
+#include <projectexplorer/rawprojectpart.h>
 
 #include <QFuture>
 #include <QFutureWatcher>
@@ -108,7 +108,7 @@ private:
 
     struct CppToolsFutureResults
     {
-      CppTools::RawProjectParts parts;
+      ProjectExplorer::RawProjectParts parts;
       ROSUtils::PackageInfoMap wsPackageInfo;
       ROSUtils::PackageBuildInfoMap wsPackageBuildInfo;
     };

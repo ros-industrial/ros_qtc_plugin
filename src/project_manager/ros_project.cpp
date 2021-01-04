@@ -476,7 +476,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
       }
     }
 
-    CppTools::RawProjectParts rpps;
+    ProjectExplorer::RawProjectParts rpps;
 
     ToolChain *cxxToolChain = ToolChainKitAspect::toolChain(k, ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
@@ -506,7 +506,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
         for (const ROSUtils::PackageTargetInfo& targetInfo : buildInfo.targets)
         {
-            CppTools::RawProjectPart rpp;
+            ProjectExplorer::RawProjectPart rpp;
             const QString defineArg
                     = Utils::transform(targetInfo.defines, [](const QString &s) -> QString {
                         QString result = QString::fromLatin1("#define ") + s;
