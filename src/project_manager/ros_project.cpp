@@ -126,7 +126,7 @@ static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
 const int UPDATE_INTERVAL = 300;
 
 ROSProject::ROSProject(const Utils::FilePath &fileName) :
-    ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName, [this]() { refresh(); }),
+    ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName),
     m_cppCodeModelUpdater(new CppTools::CppProjectUpdater),
     m_project_loaded(false),
     m_asyncUpdateFutureInterface(nullptr),
