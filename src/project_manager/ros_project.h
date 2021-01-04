@@ -127,6 +127,7 @@ private:
                                   const Utils::FilePath projectFilePath,
                                   const QStringList workspaceFiles,
                                   const ProjectExplorer::Kit *k,
+                                  const Utils::Environment &env,
                                   const ROSUtils::PackageInfoMap wsPackageInfo,
                                   const ROSUtils::PackageBuildInfoMap  wsPackageBuildInfo,
                                   QFutureInterface<CppToolsFutureResults> &fi);
