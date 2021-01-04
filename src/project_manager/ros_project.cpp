@@ -559,7 +559,7 @@ void ROSProject::updateCppCodeModel()
     QtSupport::CppKitInfo kitInfo(this);
     QTC_ASSERT(kitInfo.isValid(), return);
 
-    m_cppCodeModelUpdater->update({this, kitInfo, std::move(m_futureBuildCodeModelWatcher.result().parts)});
+    m_cppCodeModelUpdater->update({this, kitInfo, rosBuildConfiguration()->environment(), m_futureBuildCodeModelWatcher.result().parts});
 
     m_asyncBuildCodeModelFutureInterface->reportFinished();
     delete m_asyncBuildCodeModelFutureInterface;
