@@ -578,7 +578,7 @@ Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *erro
 
       Kit *defaultKit = KitManager::defaultKit();
       if (!activeTarget() && defaultKit)
-          addTarget(createTarget(defaultKit));
+          addTargetForKit(defaultKit);
 
       // Sanity check: We need both a buildconfiguration and a runconfiguration!
       QList<Target *> targetList = targets();
