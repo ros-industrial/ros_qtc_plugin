@@ -244,7 +244,7 @@ void ROSDebugRunWorker::pidFound(ProjectExplorer::DeviceProcessItem process)
     m_timer.stop();
     setAttachPid(Utils::ProcessHandle(process.pid));
     setId(tr("Process %1").arg(process.pid));
-    setInferiorExecutable(process.exe);
+    setInferiorExecutable(Utils::FilePath::fromString(process.exe));
     setStartMode(Debugger::AttachExternal);
     setCloseMode(Debugger::DetachAtClose);
     setContinueAfterAttach(m_debugContinueOnAttach);
