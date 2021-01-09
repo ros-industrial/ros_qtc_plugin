@@ -561,7 +561,7 @@ void ROSProject::updateCppCodeModel()
     m_wsPackageInfo = std::move(m_futureBuildCodeModelWatcher.result().wsPackageInfo);
     m_wsPackageBuildInfo = std::move(m_futureBuildCodeModelWatcher.result().wsPackageBuildInfo);
 
-    QtSupport::CppKitInfo kitInfo(this);
+    QtSupport::CppKitInfo kitInfo(this->activeTarget()->kit());
     QTC_ASSERT(kitInfo.isValid(), return);
 
     m_cppCodeModelUpdater->update({this, kitInfo, rosBuildConfiguration()->environment(), m_futureBuildCodeModelWatcher.result().parts});
