@@ -53,7 +53,6 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
-const char ROS_CTS_ID[] = "ROSProjectManager.ROSCatkinToolsStep";
 const char ROS_CTS_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("ROSProjectManager::Internal::ROSCatkinToolsStep",
                                                      "CatkinTools Step");
 const char ROS_CTS_TARGET_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.Target";
@@ -64,22 +63,11 @@ const char ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToo
 const char ROS_CTS_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.CMakeArguments";
 const char ROS_CTS_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.MakeArguments";
 
-ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent) :
-    AbstractProcessStep(parent, Id(ROS_CTS_ID))
-{
-   m_catkinToolsWorkingDir = Constants::ROS_DEFAULT_WORKING_DIR;
-   ctor();
-}
-
 ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, const Id id) :
     AbstractProcessStep(parent, id)
 {
     m_catkinToolsWorkingDir = Constants::ROS_DEFAULT_WORKING_DIR;
-    ctor();
-}
 
-void ROSCatkinToolsStep::ctor()
-{
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinToolsStep",
                                                       ROS_CTS_DISPLAY_NAME));
 

@@ -35,6 +35,8 @@ class ROSColconStepWidget;
 class ROSColconStepFactory;
 namespace Ui { class ROSColconStep; }
 
+static const char ROS_COLCON_STEP_ID[] = "ROSProjectManager.ROSColconStep";
+
 class ROSColconStep : public ProjectExplorer::AbstractProcessStep
 {
     Q_OBJECT
@@ -45,7 +47,7 @@ class ROSColconStep : public ProjectExplorer::AbstractProcessStep
 public:
     enum BuildTargets {BUILD = 0, CLEAN = 1};
 
-    ROSColconStep(ProjectExplorer::BuildStepList *parent);
+    ROSColconStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     ~ROSColconStep() override;
 
     bool init() override;
@@ -62,12 +64,10 @@ public:
     QVariantMap toMap() const override;
 
 protected:
-    ROSColconStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     QStringList automaticallyAddedArguments() const;
     bool fromMap(const QVariantMap &map) override;
 
 private:
-    void ctor();
     ROSBuildConfiguration *targetsActiveBuildConfiguration() const;
 
     BuildTargets m_target;

@@ -35,6 +35,8 @@ class ROSCatkinMakeStepWidget;
 class ROSCatkinMakeStepFactory;
 namespace Ui { class ROSCatkinMakeStep; }
 
+static const char ROS_CMS_ID[] = "ROSProjectManager.ROSCatkinMakeStep";
+
 class ROSCatkinMakeStep : public ProjectExplorer::AbstractProcessStep
 {
     Q_OBJECT
@@ -45,7 +47,7 @@ class ROSCatkinMakeStep : public ProjectExplorer::AbstractProcessStep
 public:
     enum BuildTargets {BUILD = 0, CLEAN = 1};
 
-    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent);
+    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     ~ROSCatkinMakeStep() override;
 
     bool init() override;
@@ -61,12 +63,10 @@ public:
     QVariantMap toMap() const override;
 
 protected:
-    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     QStringList automaticallyAddedArguments() const;
     bool fromMap(const QVariantMap &map) override;
 
 private:
-    void ctor();
     ROSBuildConfiguration *targetsActiveBuildConfiguration() const;
 
     BuildTargets m_target;
