@@ -55,13 +55,7 @@ public:
     // RunConfiguration
     QString disabledReason() const override;
 
-    QVariantMap toMap() const override;
-
     RunStepList *stepList() const;
-
-protected:
-
-    virtual bool fromMap(const QVariantMap &map) override;
 
 private:
 
