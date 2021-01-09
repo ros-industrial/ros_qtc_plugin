@@ -77,7 +77,7 @@ void ROSColconStep::ctor()
     m_percentProgress = QRegExp(QLatin1String(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
 
     ROSBuildConfiguration *bc = rosBuildConfiguration();
-    if (bc->buildSystem() != ROSUtils::Colcon)
+    if (bc->rosBuildSystem() != ROSUtils::Colcon)
         setEnabled(false);
 }
 
@@ -115,7 +115,7 @@ bool ROSColconStep::init()
     }
 
     // TODO: Need to get build data (build directory, environment, etc.) based on build System
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
 
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
@@ -306,7 +306,7 @@ void ROSColconStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
@@ -325,7 +325,7 @@ void ROSColconStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSy
 void ROSColconStepWidget::enabledChanged()
 {
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    if(m_makeStep->enabled() && (bc->buildSystem() != ROSUtils::Colcon))
+    if(m_makeStep->enabled() && (bc->rosBuildSystem() != ROSUtils::Colcon))
         m_makeStep->setEnabled(false);
 }
 

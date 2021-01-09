@@ -76,7 +76,7 @@ void ROSGenericRunStep::run()
            m_target,
            m_arguments);
 
-  ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(rp->projectDirectory(), rp->rosBuildConfiguration()->buildSystem(), rp->distribution());
+  ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(rp->projectDirectory(), rp->rosBuildConfiguration()->rosBuildSystem(), rp->distribution());
   ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
   Utils::Environment env = bc->environment();
   Utils::FilePath shell = Utils::FilePath::fromString(env.value("SHELL"));

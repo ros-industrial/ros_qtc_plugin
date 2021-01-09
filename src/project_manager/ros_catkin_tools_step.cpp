@@ -89,7 +89,7 @@ void ROSCatkinToolsStep::ctor()
     m_percentProgress = QRegExp(QLatin1String(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
 
     ROSBuildConfiguration *bc = rosBuildConfiguration();
-    if (bc->buildSystem() != ROSUtils::CatkinTools)
+    if (bc->rosBuildSystem() != ROSUtils::CatkinTools)
         setEnabled(false);
 }
 
@@ -127,7 +127,7 @@ bool ROSCatkinToolsStep::init()
 
     // Set Catkin Tools Active Profile
     ROSUtils::setCatkinToolsActiveProfile(bc->project()->projectDirectory(), activeProfile());
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
     Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
 
     bc->updateQtEnvironment(env); // TODO: Not sure if this is required here
@@ -376,7 +376,7 @@ void ROSCatkinToolsStepWidget::updateDetails()
     m_makeStep->m_catkinToolsWorkingDir = m_ui->catkinToolsWorkingDirWidget->rawPath();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
 
     m_ui->catkinToolsWorkingDirWidget->setEnvironment(bc->environment());
 
@@ -397,7 +397,7 @@ void ROSCatkinToolsStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &bu
 void ROSCatkinToolsStepWidget::enabledChanged()
 {
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    if(m_makeStep->enabled() && (bc->buildSystem() != ROSUtils::CatkinTools))
+    if(m_makeStep->enabled() && (bc->rosBuildSystem() != ROSUtils::CatkinTools))
         m_makeStep->setEnabled(false);
 }
 

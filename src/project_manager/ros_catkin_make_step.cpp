@@ -77,7 +77,7 @@ void ROSCatkinMakeStep::ctor()
     m_percentProgress = QRegExp(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
 
     ROSBuildConfiguration *bc = rosBuildConfiguration();
-    if (bc->buildSystem() != ROSUtils::CatkinMake)
+    if (bc->rosBuildSystem() != ROSUtils::CatkinMake)
         setEnabled(false);
 }
 
@@ -115,7 +115,7 @@ bool ROSCatkinMakeStep::init()
     }
 
     // TODO: Need to get build data (build directory, environment, etc.) based on build System
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
 
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
@@ -297,7 +297,7 @@ void ROSCatkinMakeStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->buildSystem(), bc->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
@@ -316,7 +316,7 @@ void ROSCatkinMakeStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &bui
 void ROSCatkinMakeStepWidget::enabledChanged()
 {
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    if(m_makeStep->enabled() && (bc->buildSystem() != ROSUtils::CatkinMake))
+    if(m_makeStep->enabled() && (bc->rosBuildSystem() != ROSUtils::CatkinMake))
         m_makeStep->setEnabled(false);
 }
 
