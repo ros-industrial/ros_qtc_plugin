@@ -43,14 +43,6 @@ public:
 
     bool showInSimpleTree() const override;
 
-    bool supportsAction(ProjectExplorer::ProjectAction action, const Node *node) const override;
-
-    bool addFiles(const QStringList &filePaths, QStringList *notAdded = nullptr) override;
-
-    bool deleteFiles(const QStringList &filePaths) override;
-
-    bool renameFile(const QString &filePath, const QString &newFilePath) override;
-
 private:
     static ProjectExplorer::FileNode *findFileNode(FolderNode *folder_node, const Utils::FilePath &filePaths);
 };
