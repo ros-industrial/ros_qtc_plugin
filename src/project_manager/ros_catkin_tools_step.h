@@ -43,6 +43,8 @@ namespace Ui {class ROSCatkinToolsStep;
               class ROSCatkinToolsListEditor;
               class ROSCatkinToolsConfigEditor;}
 
+static const char ROS_CTS_ID[] = "ROSProjectManager.ROSCatkinToolsStep";
+
 class ROSCatkinToolsStep : public ProjectExplorer::AbstractProcessStep
 {
     Q_OBJECT
@@ -53,7 +55,7 @@ class ROSCatkinToolsStep : public ProjectExplorer::AbstractProcessStep
 public:
     enum BuildTargets {BUILD = 0, CLEAN = 1};
 
-    ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent);
+    ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     ~ROSCatkinToolsStep() override;
 
     bool init() override;
@@ -73,12 +75,10 @@ public:
     QVariantMap toMap() const override;
 
 protected:
-    ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
     QStringList automaticallyAddedArguments() const;
     bool fromMap(const QVariantMap &map) override;
 
 private:
-    void ctor();
     ROSBuildConfiguration *targetsActiveBuildConfiguration() const;
 
     BuildTargets m_target;

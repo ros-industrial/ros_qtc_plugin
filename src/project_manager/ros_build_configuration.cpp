@@ -92,33 +92,33 @@ void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo &info)
     {
         case ROSUtils::CatkinMake:
         {
-            ROSCatkinMakeStep *makeStep = new ROSCatkinMakeStep(bs);
+            ROSCatkinMakeStep *makeStep = new ROSCatkinMakeStep(bs, ROS_CMS_ID);
             bs->insertStep(0, makeStep);
             makeStep->setBuildTarget(ROSCatkinMakeStep::BUILD);
 
-            ROSCatkinMakeStep *cleanMakeStep = new ROSCatkinMakeStep(cs);
+            ROSCatkinMakeStep *cleanMakeStep = new ROSCatkinMakeStep(cs, ROS_CMS_ID);
             cs->insertStep(0, cleanMakeStep);
             cleanMakeStep->setBuildTarget(ROSCatkinMakeStep::CLEAN);
             break;
         }
         case ROSUtils::CatkinTools:
         {
-            ROSCatkinToolsStep *makeStep = new ROSCatkinToolsStep(bs);
+            ROSCatkinToolsStep *makeStep = new ROSCatkinToolsStep(bs, ROS_CTS_ID);
             bs->insertStep(0, makeStep);
             makeStep->setBuildTarget(ROSCatkinToolsStep::BUILD);
 
-            ROSCatkinToolsStep *cleanMakeStep = new ROSCatkinToolsStep(cs);
+            ROSCatkinToolsStep *cleanMakeStep = new ROSCatkinToolsStep(cs, ROS_CTS_ID);
             cs->insertStep(0, cleanMakeStep);
             cleanMakeStep->setBuildTarget(ROSCatkinToolsStep::CLEAN);
             break;
         }
         case ROSUtils::Colcon:
         {
-            ROSColconStep *makeStep = new ROSColconStep(bs);
+            ROSColconStep *makeStep = new ROSColconStep(bs, ROS_COLCON_STEP_ID);
             bs->insertStep(0, makeStep);
             makeStep->setBuildTarget(ROSColconStep::BUILD);
 
-            ROSColconStep *cleanMakeStep = new ROSColconStep(cs);
+            ROSColconStep *cleanMakeStep = new ROSColconStep(cs, ROS_COLCON_STEP_ID);
             cs->insertStep(0, cleanMakeStep);
             cleanMakeStep->setBuildTarget(ROSColconStep::CLEAN);
             break;

@@ -48,7 +48,6 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
-const char ROS_COLCON_STEP_ID[] = "ROSProjectManager.ROSColconStep";
 const char ROS_COLCON_STEP_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("ROSProjectManager::Internal::ROSColconStep",
                                                      "Colcon Step");
 
@@ -57,19 +56,8 @@ const char ROS_COLCON_STEP_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.Co
 const char ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.CMakeArguments";
 const char ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.MakeArguments";
 
-ROSColconStep::ROSColconStep(BuildStepList *parent) :
-    AbstractProcessStep(parent, Id(ROS_COLCON_STEP_ID))
-{
-    ctor();
-}
-
 ROSColconStep::ROSColconStep(BuildStepList *parent, const Id id) :
     AbstractProcessStep(parent, id)
-{
-    ctor();
-}
-
-void ROSColconStep::ctor()
 {
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSColconStep",
                                                       ROS_COLCON_STEP_DISPLAY_NAME));

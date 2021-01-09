@@ -48,7 +48,6 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
-const char ROS_CMS_ID[] = "ROSProjectManager.ROSCatkinMakeStep";
 const char ROS_CMS_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("ROSProjectManager::Internal::ROSCatkinMakeStep",
                                                      "CatkinMake Step");
 
@@ -57,19 +56,8 @@ const char ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMak
 const char ROS_CMS_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.CMakeArguments";
 const char ROS_CMS_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.MakeArguments";
 
-ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent) :
-    AbstractProcessStep(parent, Id(ROS_CMS_ID))
-{
-    ctor();
-}
-
 ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, const Id id) :
     AbstractProcessStep(parent, id)
-{
-    ctor();
-}
-
-void ROSCatkinMakeStep::ctor()
 {
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep",
                                                       ROS_CMS_DISPLAY_NAME));
