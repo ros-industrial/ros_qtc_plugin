@@ -376,7 +376,7 @@ void ROSProject::fileSystemChanged(const QString &path)
 void ROSProject::asyncUpdate()
 {
   if (!m_build_system) {
-      m_build_system = new ROSBuildSystem(this);
+      m_build_system = new ROSBuildSystem(rosBuildConfiguration());
       m_build_system->requestParse();
   }
 
