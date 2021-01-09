@@ -197,6 +197,8 @@ ROSBuildConfigurationFactory::ROSBuildConfigurationFactory() :
 
     setSupportedProjectType(Constants::ROS_PROJECT_ID);
     setSupportedProjectMimeTypeName(Constants::ROS_MIME_TYPE);
+
+    setBuildGenerator(std::bind(&ROSBuildConfigurationFactory::availableBuilds, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 ROSBuildConfigurationFactory::~ROSBuildConfigurationFactory()
@@ -226,35 +228,35 @@ QList<BuildInfo> ROSBuildConfigurationFactory::availableBuilds(const Kit *k,
 
 ProjectExplorer::BuildInfo ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const
 {
-    ProjectExplorer::BuildInfo *info = new ProjectExplorer::BuildInfo(this);
-    info->kitId = k->id();
-    info->typeName = ROSUtils::buildTypeName(type);
-    info->displayName = info->typeName;
+    ProjectExplorer::BuildInfo info;
+    info.kitId = k->id();
+    info.typeName = ROSUtils::buildTypeName(type);
+    info.displayName = info.typeName;
 
     switch (type) {
     case ROSUtils::BuildTypeDebug:
-        info->buildType = BuildConfiguration::Debug;
+        info.buildType = BuildConfiguration::Debug;
         break;
     case ROSUtils::BuildTypeMinSizeRel:
-        info->buildType = BuildConfiguration::Release;
+        info.buildType = BuildConfiguration::Release;
         break;
     case ROSUtils::BuildTypeRelWithDebInfo:
-        info->buildType = BuildConfiguration::Profile;
+        info.buildType = BuildConfiguration::Profile;
         break;
     case ROSUtils::BuildTypeRelease:
-        info->buildType = BuildConfiguration::Release;
+        info.buildType = BuildConfiguration::Release;
         break;
     default:
-        info->buildType = BuildConfiguration::Unknown;
+        info.buildType = BuildConfiguration::Unknown;
         break;
     }
 
     ROSExtraBuildInfo extra;
     extra.buildSystem = build_system;
     extra.cmakeBuildType = type;
-    info->extraInfo = QVariant::fromValue(extra);
+    info.extraInfo = QVariant::fromValue(extra);
 
-    return *info;
+    return info;
 }
 
 BuildConfiguration::BuildType ROSBuildConfiguration::buildType() const

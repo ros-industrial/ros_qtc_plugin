@@ -102,7 +102,7 @@ public:
 
     QList<ProjectExplorer::BuildInfo> availableBuilds(const ProjectExplorer::Kit *k,
                                                       const Utils::FilePath &projectPath,
-                                                      bool forSetup) const override;
+                                                      bool forSetup) const;
 
 private:
     ProjectExplorer::BuildInfo createBuildInfo(const ProjectExplorer::Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const;
