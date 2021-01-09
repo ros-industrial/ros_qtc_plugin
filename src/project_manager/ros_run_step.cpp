@@ -212,11 +212,6 @@ ProjectExplorer::Project *RunStep::project() const
     return target()->project();
 }
 
-bool RunStep::isActive() const
-{
-    return projectConfiguration()->isActive();
-}
-
 /*!
     If this function returns \c true, the user cannot delete this build step for
     this target and the user is prevented from changing the order in which
@@ -311,11 +306,6 @@ bool RunStepList::enabled() const
             return true;
     }
     return false;
-}
-
-bool RunStepList::isActive() const
-{
-    return qobject_cast<ProjectConfiguration *>(parent())->isActive();
 }
 
 bool RunStepList::fromMap(const QVariantMap &map)

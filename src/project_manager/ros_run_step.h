@@ -66,8 +66,6 @@ public:
     ProjectExplorer::Target *target() const;
     ProjectExplorer::Project *project() const;
 
-    bool isActive() const override;
-
 signals:
     void finished();
     void enabledChanged();
@@ -185,8 +183,6 @@ public:
 
     virtual QVariantMap toMap() const override;
     bool fromMap(const QVariantMap &map) override;
-
-    bool isActive() const override;
 
 signals:
     void stepInserted(int position);
