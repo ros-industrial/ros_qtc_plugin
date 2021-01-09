@@ -291,7 +291,7 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     m_ui->catkinToolsWorkingDirWidget->setPath(m_makeStep->m_catkinToolsWorkingDir);
     m_ui->catkinToolsWorkingDirWidget->setHistoryCompleter(QLatin1String("Qt.WorkingDir.History"));
     m_ui->catkinToolsWorkingDirWidget->setExpectedKind(Utils::PathChooser::Directory);
-    m_ui->catkinToolsWorkingDirWidget->setBaseFileName(makeStep->rosBuildConfiguration()->project()->projectDirectory());
+    m_ui->catkinToolsWorkingDirWidget->setFileName(makeStep->rosBuildConfiguration()->project()->projectDirectory());
 
     setProfile(m_makeStep->m_activeProfile);
 
