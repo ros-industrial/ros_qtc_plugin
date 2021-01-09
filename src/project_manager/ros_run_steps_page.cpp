@@ -187,7 +187,7 @@ RunStepsWidgetData::~RunStepsWidgetData()
 }
 
 RunStepListWidget::RunStepListWidget(QWidget *parent) :
-    NamedWidget(parent)
+    NamedWidget(tr("Steps"), parent)
 {
 }
 
@@ -262,8 +262,6 @@ void RunStepListWidget::init(RunStepList *rsl)
     m_runStepsData.clear();
 
     m_runStepList = rsl;
-    //: %1 is the name returned by BuildStepList::displayName
-    setDisplayName(tr("%1 Steps").arg(m_runStepList->displayName()));
 
     for (int i = 0; i < rsl->count(); ++i) {
         addRunStep(i);
@@ -441,7 +439,7 @@ void RunStepListWidget::updateRunStepButtonsState()
 }
 
 RunStepsPage::RunStepsPage(ROSRunConfiguration *rc, Core::Id id) :
-    NamedWidget(),
+    NamedWidget(tr("ROS Run Steps")),
     m_id(id),
     m_widget(new RunStepListWidget(this))
 {
@@ -451,7 +449,6 @@ RunStepsPage::RunStepsPage(ROSRunConfiguration *rc, Core::Id id) :
     layout->addWidget(m_widget);
 
     m_widget->init(rc->stepList());
-    setDisplayName(tr("ROS Run Steps"));
 }
 
 } // namespace Internal
