@@ -57,7 +57,7 @@ class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
 public:
     ROSBuildConfiguration(ProjectExplorer::Target *parent, Core::Id id);
 
-    void initialize() override;
+    void initialize(const ProjectExplorer::BuildInfo &info);
 
     ProjectExplorer::NamedWidget *createConfigWidget() override;
     QList<ProjectExplorer::NamedWidget *> createSubConfigWidgets() override;
