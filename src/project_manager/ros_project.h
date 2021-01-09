@@ -97,7 +97,6 @@ private:
     QStringList m_workspaceFiles;
     QStringList m_workspaceDirectories;
     bool m_project_loaded;
-    ROSBuildSystem *m_build_system;
 
 
     struct FutureWatcherResults

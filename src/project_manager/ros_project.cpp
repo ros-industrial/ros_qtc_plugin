@@ -129,7 +129,6 @@ ROSProject::ROSProject(const Utils::FilePath &fileName) :
     ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName),
     m_cppCodeModelUpdater(new CppTools::CppProjectUpdater),
     m_project_loaded(false),
-    m_build_system(nullptr),
     m_asyncUpdateFutureInterface(nullptr),
     m_asyncBuildCodeModelFutureInterface(nullptr)
 {
@@ -270,10 +269,6 @@ void ROSProject::updateProjectTree()
       asyncUpdateCppCodeModel(true);
     }
   }
-
-  // delete the build system and its parse guard to notify that parsing finished
-  delete m_build_system;
-  m_build_system = nullptr;
 }
 
 void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath, const QStringList watchDirectories, QFutureInterface<FutureWatcherResults> &fi)
@@ -375,10 +370,7 @@ void ROSProject::fileSystemChanged(const QString &path)
 
 void ROSProject::asyncUpdate()
 {
-  if (!m_build_system) {
-      m_build_system = new ROSBuildSystem(rosBuildConfiguration());
-      m_build_system->requestParse();
-  }
+  rosBuildConfiguration()->buildSystem()->requestParse();
 
   m_futureWatcher.waitForFinished();
 
