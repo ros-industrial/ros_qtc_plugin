@@ -5,7 +5,7 @@
 namespace ROSProjectManager {
 namespace Internal {
 
-class ROSProject;
+class ROSBuildConfiguration;
 
 // --------------------------------------------------------------------
 // ROSBuildSystem:
@@ -16,11 +16,9 @@ class ROSBuildSystem : public ProjectExplorer::BuildSystem
     Q_OBJECT
 
 public:
-    explicit ROSBuildSystem(ROSProject *project);
+    explicit ROSBuildSystem(ROSBuildConfiguration *bc);
 
-protected:
-    bool validateParsingContext(const ParsingContext &ctx) final;
-    void parseProject(ParsingContext &&ctx) final;
+    void triggerParsing() final;
 };
 
 } // namespace Internal
