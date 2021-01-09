@@ -57,6 +57,8 @@ class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
 public:
     ROSBuildConfiguration(ProjectExplorer::Target *parent, Core::Id id);
 
+    ~ROSBuildConfiguration();
+
     void initialize(const ProjectExplorer::BuildInfo &info);
 
     ProjectExplorer::NamedWidget *createConfigWidget() override;
@@ -68,6 +70,8 @@ public:
 
     ROSUtils::BuildSystem rosBuildSystem() const;
     void setBuildSystem(const ROSUtils::BuildSystem &buildSystem);
+
+    ProjectExplorer::BuildSystem *buildSystem() const override;
 
     ROSUtils::BuildType cmakeBuildType() const;
     void setCMakeBuildType(const ROSUtils::BuildType &buildType);
@@ -87,6 +91,7 @@ protected:
 
 private:
     ROSUtils::BuildSystem m_buildSystem;
+    ROSBuildSystem *m_build_system;
     ROSUtils::BuildType m_cmakeBuildType;
     ProjectExplorer::NamedWidget *m_buildEnvironmentWidget;
 

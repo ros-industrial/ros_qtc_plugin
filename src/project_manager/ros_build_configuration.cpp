@@ -68,6 +68,13 @@ ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, Core::Id id)
     : BuildConfiguration(parent, id)
 {
     setInitializer(std::bind(&ROSBuildConfiguration::initialize, this, std::placeholders::_1));
+
+    m_build_system = new ROSBuildSystem(this);
+}
+
+ROSBuildConfiguration::~ROSBuildConfiguration()
+{
+    delete m_build_system;
 }
 
 void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo &info)
@@ -145,6 +152,11 @@ bool ROSBuildConfiguration::fromMap(const QVariantMap &map)
 ROSUtils::BuildSystem ROSBuildConfiguration::rosBuildSystem() const
 {
     return m_buildSystem;
+}
+
+BuildSystem *ROSBuildConfiguration::buildSystem() const
+{
+    return m_build_system;
 }
 
 void ROSBuildConfiguration::setBuildSystem(const ROSUtils::BuildSystem &buildSystem)
