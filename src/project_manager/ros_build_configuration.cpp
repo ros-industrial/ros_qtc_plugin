@@ -67,54 +67,59 @@ const char ROS_BC_CMAKE_BUILD_TYPE[] = "ROSProjectManager.ROSBuildConfiguration.
 ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, Core::Id id)
     : BuildConfiguration(parent, id)
 {
+    setInitializer(std::bind(&ROSBuildConfiguration::initialize, this, std::placeholders::_1));
 }
 
-void ROSBuildConfiguration::initialize()
+void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo &info)
 {
-    BuildConfiguration::initialize();
+    auto extraInfo = info.extraInfo.value<ROSExtraBuildInfo>();
 
-    const ROSExtraBuildInfo extra_info = extraInfo().value<ROSExtraBuildInfo>();
+    setDisplayName(info.displayName);
+    setDefaultDisplayName(info.displayName);
+    setBuildDirectory(info.buildDirectory);
+    setBuildSystem(extraInfo.buildSystem);
+    setCMakeBuildType(extraInfo.cmakeBuildType);
 
-    setBuildSystem(extra_info.buildSystem);
-    setCMakeBuildType(extra_info.cmakeBuildType);
+    BuildStepList *bs = buildSteps();
+    BuildStepList *cs = cleanSteps();
+    Q_ASSERT(bs);
+    Q_ASSERT(cs);
 
-    BuildStepList *buildSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
-    BuildStepList *cleanSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_CLEAN);
-    Q_ASSERT(buildSteps);
-    Q_ASSERT(cleanSteps);
+    bs->appendStep(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
+    cs->appendStep(ProjectExplorer::Constants::BUILDSTEPS_CLEAN);
 
-    switch (extra_info.buildSystem)
+    switch (extraInfo.buildSystem)
     {
         case ROSUtils::CatkinMake:
         {
-            ROSCatkinMakeStep *makeStep = new ROSCatkinMakeStep(buildSteps);
-            buildSteps->insertStep(0, makeStep);
+            ROSCatkinMakeStep *makeStep = new ROSCatkinMakeStep(bs);
+            bs->insertStep(0, makeStep);
             makeStep->setBuildTarget(ROSCatkinMakeStep::BUILD);
 
-            ROSCatkinMakeStep *cleanMakeStep = new ROSCatkinMakeStep(cleanSteps);
-            cleanSteps->insertStep(0, cleanMakeStep);
+            ROSCatkinMakeStep *cleanMakeStep = new ROSCatkinMakeStep(cs);
+            cs->insertStep(0, cleanMakeStep);
             cleanMakeStep->setBuildTarget(ROSCatkinMakeStep::CLEAN);
             break;
         }
         case ROSUtils::CatkinTools:
         {
-            ROSCatkinToolsStep *makeStep = new ROSCatkinToolsStep(buildSteps);
-            buildSteps->insertStep(0, makeStep);
+            ROSCatkinToolsStep *makeStep = new ROSCatkinToolsStep(bs);
+            bs->insertStep(0, makeStep);
             makeStep->setBuildTarget(ROSCatkinToolsStep::BUILD);
 
-            ROSCatkinToolsStep *cleanMakeStep = new ROSCatkinToolsStep(cleanSteps);
-            cleanSteps->insertStep(0, cleanMakeStep);
+            ROSCatkinToolsStep *cleanMakeStep = new ROSCatkinToolsStep(cs);
+            cs->insertStep(0, cleanMakeStep);
             cleanMakeStep->setBuildTarget(ROSCatkinToolsStep::CLEAN);
             break;
         }
         case ROSUtils::Colcon:
         {
-            ROSColconStep *makeStep = new ROSColconStep(buildSteps);
-            buildSteps->insertStep(0, makeStep);
+            ROSColconStep *makeStep = new ROSColconStep(bs);
+            bs->insertStep(0, makeStep);
             makeStep->setBuildTarget(ROSColconStep::BUILD);
 
-            ROSColconStep *cleanMakeStep = new ROSColconStep(cleanSteps);
-            cleanSteps->insertStep(0, cleanMakeStep);
+            ROSColconStep *cleanMakeStep = new ROSColconStep(cs);
+            cs->insertStep(0, cleanMakeStep);
             cleanMakeStep->setBuildTarget(ROSColconStep::CLEAN);
             break;
         }
