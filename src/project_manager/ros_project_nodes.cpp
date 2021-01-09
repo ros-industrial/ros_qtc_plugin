@@ -58,41 +58,6 @@ bool ROSProjectNode::showInSimpleTree() const
     return true;
 }
 
-bool ROSProjectNode::supportsAction(ProjectExplorer::ProjectAction action, const Node *node) const
-{
-    if(node->isProjectNodeType())
-    {
-        return action == ProjectAction::AddNewFile
-            || action == ProjectAction::RemoveFile
-            || action == ProjectAction::AddExistingFile;
-    }
-    else if(!node->isFolderNodeType() && !node->isProjectNodeType() && !node->isVirtualFolderType())
-    {
-        return action == ProjectAction::Rename
-            || action == ProjectAction::RemoveFile;
-    }
-
-    return ProjectNode::supportsAction(action, node);
-}
-
-bool ROSProjectNode::addFiles(const QStringList &filePaths, QStringList *notAdded)
-{
-  ProjectExplorer::ProjectNode::addFiles(filePaths, notAdded);
-  return true;
-}
-
-bool ROSProjectNode::deleteFiles(const QStringList &filePaths)
-{
-  ProjectExplorer::ProjectNode::deleteFiles(filePaths);
-  return true;
-}
-
-bool ROSProjectNode::renameFile(const QString &filePath, const QString &newFilePath)
-{
-  ProjectExplorer::ProjectNode::renameFile(filePath, newFilePath);
-  return true;
-}
-
 ROSFolderNode::ROSFolderNode(const Utils::FilePath &folderPath) : FolderNode(folderPath), m_repository(nullptr)
 {
     QString path = this->filePath().toString();
