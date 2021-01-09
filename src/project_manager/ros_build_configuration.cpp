@@ -278,7 +278,8 @@ BuildConfiguration::BuildType ROSBuildConfiguration::buildType() const
 ////////////////////////////////////////////////////////////////////////////////////
 
 ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
-    : m_buildConfiguration(bc)
+    : NamedWidget(tr("ROS Manager")),
+      m_buildConfiguration(bc)
 {
     m_ui = new Ui::ROSBuildConfiguration;
     m_ui->setupUi(this);
@@ -293,8 +294,6 @@ ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
 
     connect(m_ui->buildSourceWorkspaceButton, SIGNAL(clicked()),
             this, SLOT(buildSourceWorkspaceButtonClicked()));
-
-    setDisplayName(tr("ROS Manager"));
 }
 
 ROSBuildSettingsWidget::~ROSBuildSettingsWidget()
@@ -317,6 +316,7 @@ void ROSBuildSettingsWidget::buildTypeChanged(int index)
 ////////////////////////////////////////////////////////////////////////////////////
 
 ROSBuildEnvironmentWidget::ROSBuildEnvironmentWidget(BuildConfiguration *bc)
+    : NamedWidget(tr("Build Environment"))
 {
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->setMargin(0);
@@ -340,8 +340,6 @@ ROSBuildEnvironmentWidget::ROSBuildEnvironmentWidget(BuildConfiguration *bc)
     m_buildEnvironmentWidget->setBaseEnvironment(m_buildConfiguration->baseEnvironment());
     m_buildEnvironmentWidget->setBaseEnvironmentText(m_buildConfiguration->baseEnvironmentText());
     m_buildEnvironmentWidget->setUserChanges(m_buildConfiguration->userEnvironmentChanges());
-
-    setDisplayName(tr("Build Environment"));
 }
 
 void ROSBuildEnvironmentWidget::environmentModelUserChangesChanged()
