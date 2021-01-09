@@ -86,33 +86,6 @@ QString ROSRunConfiguration::disabledReason() const
   return output;
 }
 
-QVariantMap ROSRunConfiguration::toMap() const
-{
-    QVariantMap map(RunConfiguration::toMap());
-    map.insert(Constants::ROS_RUN_STEP_LIST_ID, m_stepList->toMap());
-
-    return map;
-}
-
-bool ROSRunConfiguration::fromMap(const QVariantMap &map)
-{
-    QVariantMap data = map.value(Constants::ROS_RUN_STEP_LIST_ID).toMap();
-    if (data.isEmpty()) {
-        Core::MessageManager::write(tr("[ROS Warning] No data for ROS run step list found!"));
-        return false;
-    }
-    RunStepList *list = new RunStepList(this, Constants::ROS_RUN_STEP_LIST_ID);
-    if (!list->fromMap(data)) {
-        Core::MessageManager::write(tr("[ROS Warning] Failed to restore ROS run step list!"));
-        delete list;
-        return false;
-    }
-
-    m_stepList = list;
-
-    return RunConfiguration::fromMap(map);
-}
-
 RunStepList* ROSRunConfiguration::stepList() const
 {
   return m_stepList;
