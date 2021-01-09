@@ -259,7 +259,7 @@ Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent, const Core::Wiza
     if( bc )
     {
         ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(),
-                                                                           bc->buildSystem(),
+                                                                           bc->rosBuildSystem(),
                                                                            bc->project()->distribution());
 
         if( defaultPath ==  workspaceInfo.path.toString() )

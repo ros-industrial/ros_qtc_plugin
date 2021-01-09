@@ -137,7 +137,7 @@ bool ROSBuildConfiguration::fromMap(const QVariantMap &map)
   return BuildConfiguration::fromMap(map);
 }
 
-ROSUtils::BuildSystem ROSBuildConfiguration::buildSystem() const
+ROSUtils::BuildSystem ROSBuildConfiguration::rosBuildSystem() const
 {
     return m_buildSystem;
 }
@@ -277,7 +277,7 @@ ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
 {
     m_ui = new Ui::ROSBuildConfiguration;
     m_ui->setupUi(this);
-    m_ui->buildSystemComboBox->setCurrentIndex(bc->buildSystem());
+    m_ui->buildSystemComboBox->setCurrentIndex(bc->rosBuildSystem());
     m_ui->buildTypeComboBox->setCurrentIndex(bc->cmakeBuildType());
 
     connect(m_ui->buildSystemComboBox, SIGNAL(currentIndexChanged(int)),
@@ -361,7 +361,7 @@ void ROSBuildEnvironmentWidget::environmentChanged()
 void ROSBuildSettingsWidget::buildSourceWorkspaceButtonClicked()
 {
   ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(m_buildConfiguration->project()->projectDirectory(),
-                                                                     m_buildConfiguration->buildSystem(),
+                                                                     m_buildConfiguration->rosBuildSystem(),
                                                                      m_buildConfiguration->project()->distribution());
 
   Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, m_buildConfiguration->environment()).toStringList());

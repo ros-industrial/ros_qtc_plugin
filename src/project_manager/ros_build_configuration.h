@@ -66,7 +66,7 @@ public:
 
     QVariantMap toMap() const override;
 
-    ROSUtils::BuildSystem buildSystem() const;
+    ROSUtils::BuildSystem rosBuildSystem() const;
     void setBuildSystem(const ROSUtils::BuildSystem &buildSystem);
 
     ROSUtils::BuildType cmakeBuildType() const;
