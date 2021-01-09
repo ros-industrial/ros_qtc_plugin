@@ -86,11 +86,6 @@ QString ROSRunConfiguration::disabledReason() const
   return output;
 }
 
-QWidget *ROSRunConfiguration::createConfigurationWidget()
-{
-    return new RunStepsPage(this, Constants::ROS_RUN_STEPS_PAGE_ID);
-}
-
 QVariantMap ROSRunConfiguration::toMap() const
 {
     QVariantMap map(RunConfiguration::toMap());

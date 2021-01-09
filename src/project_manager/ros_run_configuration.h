@@ -55,8 +55,6 @@ public:
     // RunConfiguration
     QString disabledReason() const override;
 
-    virtual QWidget *createConfigurationWidget() override;
-
     QVariantMap toMap() const override;
 
     RunStepList *stepList() const;
