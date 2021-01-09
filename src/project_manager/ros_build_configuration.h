@@ -94,8 +94,6 @@ private:
 
 class ROSBuildConfigurationFactory : public ProjectExplorer::BuildConfigurationFactory
 {
-    Q_OBJECT
-
 public:
     explicit ROSBuildConfigurationFactory();
     ~ROSBuildConfigurationFactory();
