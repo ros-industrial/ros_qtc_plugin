@@ -87,9 +87,6 @@ bool ROSColconStep::init()
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (!bc)
         bc = targetsActiveBuildConfiguration();
-    if (!bc)
-        emit addTask(Task::buildConfigurationMissingTask());
-
 
     ToolChain *tc = ToolChainKitAspect::toolChain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
