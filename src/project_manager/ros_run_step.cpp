@@ -169,10 +169,7 @@ const char STEPS_PREFIX[] = "ProjectExplorer.RunStepList.Step.";
 RunStep::RunStep(RunStepList *rsl, Utils::Id id) :
     ProjectConfiguration(rsl, id)
 {
-  Utils::MacroExpander *expander = macroExpander();
-  expander->setDisplayName(tr("Run Step"));
-  expander->setAccumulating(true);
-  expander->registerSubProvider([this] { return projectConfiguration()->macroExpander(); });
+    //
 }
 
 bool RunStep::fromMap(const QVariantMap &map)
