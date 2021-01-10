@@ -51,6 +51,7 @@ public:
     ~ROSCatkinMakeStep() override;
 
     bool init() override;
+    void setupOutputFormatter(Utils::OutputFormatter *formatter) override;
     ProjectExplorer::BuildStepConfigWidget *createConfigWidget() override;
 
     ROSBuildConfiguration *rosBuildConfiguration() const;

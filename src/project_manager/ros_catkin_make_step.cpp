@@ -123,16 +123,22 @@ bool ROSCatkinMakeStep::init()
     // That is mostly so that rebuild works on an already clean project
     setIgnoreReturnValue(m_target == CLEAN);
 
-    setOutputParser(new GnuMakeParser());
-    setOutputParser(new CMakeProjectManager::CMakeParser());
-
-    IOutputParser *parser = target()->kit()->createOutputParser();
-    if (parser)
-        appendOutputParser(parser);
-
-    outputParser()->setWorkingDirectory(pp->effectiveWorkingDirectory());
-
     return AbstractProcessStep::init();
+}
+
+void ROSCatkinMakeStep::setupOutputFormatter(Utils::OutputFormatter *formatter)
+{
+    formatter->addLineParser(new GnuMakeParser);
+    formatter->addLineParser(new CMakeProjectManager::CMakeParser);
+
+    QList<Utils::OutputLineParser *> parsers = target()->kit()->createOutputParsers();
+
+    if (!parsers.empty())
+        formatter->addLineParsers(parsers);
+
+    formatter->addSearchDir(processParameters()->effectiveWorkingDirectory());
+
+    AbstractProcessStep::setupOutputFormatter(formatter);
 }
 
 QVariantMap ROSCatkinMakeStep::toMap() const
