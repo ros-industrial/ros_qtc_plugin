@@ -55,7 +55,7 @@ class ROSCatkinToolsStep : public ProjectExplorer::AbstractProcessStep
 public:
     enum BuildTargets {BUILD = 0, CLEAN = 1};
 
-    ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
+    ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, Utils::Id id);
     ~ROSCatkinToolsStep() override;
 
     bool init() override;

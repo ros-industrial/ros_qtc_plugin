@@ -57,7 +57,6 @@
 #include <QDebug>
 #include <QMessageBox>
 
-using namespace Core;
 using namespace ProjectExplorer;
 
 namespace ROSProjectManager {
@@ -65,7 +64,7 @@ namespace Internal {
 
 const char ROS_RC_ID[] = "ROSProjectManager.ROSRunConfiguration";
 
-ROSRunConfiguration::ROSRunConfiguration(Target *parent, Id id) :
+ROSRunConfiguration::ROSRunConfiguration(Target *parent, Utils::Id id) :
     RunConfiguration(parent, id),
     m_stepList(new RunStepList(this, Constants::ROS_RUN_STEP_LIST_ID))
 {

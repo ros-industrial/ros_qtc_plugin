@@ -42,7 +42,6 @@
 #include <QComboBox>
 #include <QLabel>
 
-using namespace Core;
 using namespace ProjectExplorer;
 
 namespace ROSProjectManager {
@@ -56,7 +55,7 @@ const char ROS_COLCON_STEP_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.Co
 const char ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.CMakeArguments";
 const char ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.MakeArguments";
 
-ROSColconStep::ROSColconStep(BuildStepList *parent, const Id id) :
+ROSColconStep::ROSColconStep(BuildStepList *parent, const Utils::Id id) :
     AbstractProcessStep(parent, id)
 {
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSColconStep",
@@ -332,7 +331,7 @@ ROSColconStepFactory::ROSColconStepFactory() : BuildStepFactory()
   setFlags(BuildStepInfo::Flags::UniqueStep);
   setDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSColconStep", ROS_COLCON_STEP_DISPLAY_NAME));
   setSupportedProjectType(Constants::ROS_PROJECT_ID);
-  setSupportedStepLists(QList<Core::Id>({ProjectExplorer::Constants::BUILDSTEPS_BUILD, ProjectExplorer::Constants::BUILDSTEPS_CLEAN}));
+  setSupportedStepLists(QList<Utils::Id>({ProjectExplorer::Constants::BUILDSTEPS_BUILD, ProjectExplorer::Constants::BUILDSTEPS_CLEAN}));
 }
 
 } // namespace Internal

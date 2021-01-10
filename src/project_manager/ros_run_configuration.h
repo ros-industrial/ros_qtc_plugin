@@ -50,7 +50,7 @@ class ROSRunConfiguration : public ProjectExplorer::RunConfiguration
     friend class ROSRunConfigurationFactory;
 
 public:
-    ROSRunConfiguration(ProjectExplorer::Target *parent, Core::Id id);
+    ROSRunConfiguration(ProjectExplorer::Target *parent, Utils::Id id);
 
     // RunConfiguration
     QString disabledReason() const override;

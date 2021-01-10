@@ -64,7 +64,7 @@ const char ROS_BC_ID[] = "ROSProjectManager.ROSBuildConfiguration";
 const char ROS_BC_BUILD_SYSTEM[] = "ROSProjectManager.ROSBuildConfiguration.BuildSystem";
 const char ROS_BC_CMAKE_BUILD_TYPE[] = "ROSProjectManager.ROSBuildConfiguration.CMakeBuildType";
 
-ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, Core::Id id)
+ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, Utils::Id id)
     : BuildConfiguration(parent, id)
 {
     setInitializer(std::bind(&ROSBuildConfiguration::initialize, this, std::placeholders::_1));

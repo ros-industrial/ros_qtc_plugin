@@ -280,7 +280,7 @@ void RunStepListWidget::init(RunStepList *rsl)
 
 void RunStepListWidget::updateAddRunStepMenu()
 {
-  QMap<QString, QPair<Core::Id, RunStepFactory *> > map;
+  QMap<QString, QPair<Utils::Id, RunStepFactory *> > map;
   //Build up a list of possible steps and save map the display names to the (internal) name and factories.
   for (RunStepFactory *factory : RunStepFactory::allRunStepFactories()) {
       if (factory->canHandle(m_runStepList)) {
@@ -297,12 +297,12 @@ void RunStepListWidget::updateAddRunStepMenu()
   QMenu *menu = m_addButton->menu();
   menu->clear();
   if (!map.isEmpty()) {
-      QMap<QString, QPair<Core::Id, RunStepFactory *> >::const_iterator it, end;
+      QMap<QString, QPair<Utils::Id, RunStepFactory *> >::const_iterator it, end;
       end = map.constEnd();
       for (it = map.constBegin(); it != end; ++it) {
           QAction *action = menu->addAction(it.key());
           RunStepFactory *factory = it.value().second;
-          Core::Id id = it.value().first;
+          Utils::Id id = it.value().first;
 
           connect(action, &QAction::triggered, [id, factory, this]() {
               RunStep *newStep = factory->create(m_runStepList, id);
@@ -438,7 +438,7 @@ void RunStepListWidget::updateRunStepButtonsState()
     }
 }
 
-RunStepsPage::RunStepsPage(ROSRunConfiguration *rc, Core::Id id) :
+RunStepsPage::RunStepsPage(ROSRunConfiguration *rc, Utils::Id id) :
     NamedWidget(tr("ROS Run Steps")),
     m_id(id),
     m_widget(new RunStepListWidget(this))

@@ -37,7 +37,7 @@ public:
   ROSLaunchStep(RunStepList *rsl);
 
 protected:
-  ROSLaunchStep(RunStepList *rsl, Core::Id id);
+  ROSLaunchStep(RunStepList *rsl, Utils::Id id);
 
   void ctor();
 

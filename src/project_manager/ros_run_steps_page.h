@@ -130,10 +130,10 @@ class RunStepsPage : public ProjectExplorer::NamedWidget
     Q_OBJECT
 
 public:
-    RunStepsPage(ROSRunConfiguration *rc, Core::Id id);
+    RunStepsPage(ROSRunConfiguration *rc, Utils::Id id);
 
 private:
-    Core::Id m_id;
+    Utils::Id m_id;
     RunStepListWidget *m_widget = nullptr;
 };
 

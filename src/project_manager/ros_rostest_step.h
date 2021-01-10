@@ -37,7 +37,7 @@ public:
   ROSTestStep(RunStepList *rsl);
 
 protected:
-  ROSTestStep(RunStepList *rsl, Core::Id id);
+  ROSTestStep(RunStepList *rsl, Utils::Id id);
 
   void ctor();
 

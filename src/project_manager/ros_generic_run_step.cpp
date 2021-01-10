@@ -39,7 +39,7 @@ const char ROS_GENERIC_TARGET_PATH_KEY[] = "ROSProjectManager.ROSGenericStep.Tar
 const char ROS_GENERIC_ARGUMENTS_KEY[] = "ROSProjectManager.ROSGenericStep.Arguments";
 const char ROS_GENERIC_DEBUG_CONTINUE_ON_ATTACH_KEY[] = "ROSProjectManager.ROSGenericStep.DebugContinueOnAttach";
 
-ROSGenericRunStep::ROSGenericRunStep(RunStepList *rsl, Core::Id id) : RunStep(rsl, id)
+ROSGenericRunStep::ROSGenericRunStep(RunStepList *rsl, Utils::Id id) : RunStep(rsl, id)
 {
 }
 

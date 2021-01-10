@@ -47,7 +47,6 @@
 #include <QDir>
 #include <QInputDialog>
 
-using namespace Core;
 using namespace ProjectExplorer;
 
 namespace ROSProjectManager {
@@ -63,7 +62,7 @@ const char ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToo
 const char ROS_CTS_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.CMakeArguments";
 const char ROS_CTS_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinToolsStep.MakeArguments";
 
-ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, const Id id) :
+ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, const Utils::Id id) :
     AbstractProcessStep(parent, id)
 {
     m_catkinToolsWorkingDir = Constants::ROS_DEFAULT_WORKING_DIR;

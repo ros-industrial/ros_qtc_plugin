@@ -39,7 +39,7 @@ public:
   void run() override;
 
 protected:
-  ROSAttachStep(RunStepList *rsl, Core::Id id);
+  ROSAttachStep(RunStepList *rsl, Utils::Id id);
 
   void ctor();
 

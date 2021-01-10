@@ -30,7 +30,7 @@ ROSLaunchStep::ROSLaunchStep(RunStepList *rsl) : ROSGenericRunStep(rsl, Constant
   ctor();
 }
 
-ROSLaunchStep::ROSLaunchStep(RunStepList *rsl, Core::Id id) : ROSGenericRunStep(rsl, id)
+ROSLaunchStep::ROSLaunchStep(RunStepList *rsl, Utils::Id id) : ROSGenericRunStep(rsl, id)
 {
   ctor();
 }

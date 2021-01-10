@@ -31,7 +31,7 @@ ROSCatkinTestResultsStep::ROSCatkinTestResultsStep(RunStepList *rsl) : ROSGeneri
   ctor();
 }
 
-ROSCatkinTestResultsStep::ROSCatkinTestResultsStep(RunStepList *rsl, Core::Id id) : ROSGenericRunStep(rsl, id)
+ROSCatkinTestResultsStep::ROSCatkinTestResultsStep(RunStepList *rsl, Utils::Id id) : ROSGenericRunStep(rsl, id)
 {
   ctor();
 }

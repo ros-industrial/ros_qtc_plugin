@@ -55,7 +55,7 @@ class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
     friend class ROSBuildConfigurationFactory;
 
 public:
-    ROSBuildConfiguration(ProjectExplorer::Target *parent, Core::Id id);
+    ROSBuildConfiguration(ProjectExplorer::Target *parent, Utils::Id id);
 
     ~ROSBuildConfiguration();
 

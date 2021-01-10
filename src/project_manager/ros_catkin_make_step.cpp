@@ -42,7 +42,6 @@
 #include <QComboBox>
 #include <QLabel>
 
-using namespace Core;
 using namespace ProjectExplorer;
 
 namespace ROSProjectManager {
@@ -56,7 +55,7 @@ const char ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMak
 const char ROS_CMS_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.CMakeArguments";
 const char ROS_CMS_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.MakeArguments";
 
-ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, const Id id) :
+ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, const Utils::Id id) :
     AbstractProcessStep(parent, id)
 {
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep",
@@ -323,7 +322,7 @@ ROSCatkinMakeStepFactory::ROSCatkinMakeStepFactory() : BuildStepFactory()
   setFlags(BuildStepInfo::Flags::UniqueStep);
   setDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep", ROS_CMS_DISPLAY_NAME));
   setSupportedProjectType(Constants::ROS_PROJECT_ID);
-  setSupportedStepLists(QList<Core::Id>({ProjectExplorer::Constants::BUILDSTEPS_BUILD, ProjectExplorer::Constants::BUILDSTEPS_CLEAN}));
+  setSupportedStepLists(QList<Utils::Id>({ProjectExplorer::Constants::BUILDSTEPS_BUILD, ProjectExplorer::Constants::BUILDSTEPS_CLEAN}));
 }
 
 } // namespace Internal

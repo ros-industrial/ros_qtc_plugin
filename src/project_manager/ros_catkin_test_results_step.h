@@ -37,7 +37,7 @@ public:
   ROSCatkinTestResultsStep(RunStepList *rsl);
 
 protected:
-  ROSCatkinTestResultsStep(RunStepList *rsl, Core::Id id);
+  ROSCatkinTestResultsStep(RunStepList *rsl, Utils::Id id);
 
   void ctor();
 

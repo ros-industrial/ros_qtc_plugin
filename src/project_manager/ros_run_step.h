@@ -42,7 +42,7 @@ class RunStep : public ProjectExplorer::ProjectConfiguration
 
 protected:
     friend class RunStepFactory;
-    explicit RunStep(RunStepList *rsl, Core::Id id);
+    explicit RunStep(RunStepList *rsl, Utils::Id id);
 
 public:
     virtual bool init(QList<const RunStep *> &earlierSteps) = 0;
@@ -84,7 +84,7 @@ public:
 
     using RunStepCreator = std::function<RunStep *(RunStepList *)>;
 
-    Core::Id id;
+    Utils::Id id;
     QString displayName;
     Flags flags = Flags();
     RunStepCreator creator;
@@ -99,8 +99,8 @@ public:
     static const QList<RunStepFactory *> allRunStepFactories();
 
     RunStepInfo stepInfo() const;
-    Core::Id stepId() const;
-    RunStep *create(RunStepList *parent, Core::Id id);
+    Utils::Id stepId() const;
+    RunStep *create(RunStepList *parent, Utils::Id id);
     RunStep *restore(RunStepList *parent, const QVariantMap &map);
 
     bool canHandle(RunStepList *rsl) const;
@@ -110,19 +110,19 @@ protected:
     RunStepFactory &operator=(const RunStepFactory &) = delete;
 
     template <class RunStepType>
-    void registerStep(Core::Id id)
+    void registerStep(Utils::Id id)
     {
         QTC_CHECK(!m_info.creator);
         m_info.id = id;
         m_info.creator = [](RunStepList *rsl) { return new RunStepType(rsl); };
     }
 
-    void setSupportedStepList(Core::Id id);
-    void setSupportedStepLists(const QList<Core::Id> &ids);
-    void setSupportedConfiguration(Core::Id id);
-    void setSupportedProjectType(Core::Id id);
-    void setSupportedDeviceType(Core::Id id);
-    void setSupportedDeviceTypes(const QList<Core::Id> &ids);
+    void setSupportedStepList(Utils::Id id);
+    void setSupportedStepLists(const QList<Utils::Id> &ids);
+    void setSupportedConfiguration(Utils::Id id);
+    void setSupportedProjectType(Utils::Id id);
+    void setSupportedDeviceType(Utils::Id id);
+    void setSupportedDeviceTypes(const QList<Utils::Id> &ids);
     void setRepeatable(bool on) { m_isRepeatable = on; }
     void setDisplayName(const QString &displayName);
     void setFlags(RunStepInfo::Flags flags);
@@ -130,10 +130,10 @@ protected:
 private:
     RunStepInfo m_info;
 
-    Core::Id m_supportedProjectType;
-    QList<Core::Id> m_supportedDeviceTypes;
-    QList<Core::Id> m_supportedStepLists;
-    Core::Id m_supportedConfiguration;
+    Utils::Id m_supportedProjectType;
+    QList<Utils::Id> m_supportedDeviceTypes;
+    QList<Utils::Id> m_supportedStepLists;
+    Utils::Id m_supportedConfiguration;
     bool m_isRepeatable = true;
 };
 
@@ -142,7 +142,7 @@ class RunStepList : public ProjectExplorer::ProjectConfiguration
     Q_OBJECT
 
 public:
-    RunStepList(QObject *parent, Core::Id id);
+    RunStepList(QObject *parent, Utils::Id id);
     ~RunStepList() override;
 
     void clear();
@@ -170,7 +170,7 @@ public:
     }
     int count() const;
     bool isEmpty() const;
-    bool contains(Core::Id id) const;
+    bool contains(Utils::Id id) const;
     bool enabled() const;
 
     void insertStep(int position, RunStep *step);

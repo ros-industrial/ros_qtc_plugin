@@ -36,7 +36,7 @@ class ROSGenericRunStep : public RunStep
     friend class ROSGenericRunStepConfigWidget;
 
 public:
-    ROSGenericRunStep(RunStepList *rsl, Core::Id id);
+    ROSGenericRunStep(RunStepList *rsl, Utils::Id id);
     ~ROSGenericRunStep();
 
     bool init(QList<const RunStep *> &earlierSteps) override;

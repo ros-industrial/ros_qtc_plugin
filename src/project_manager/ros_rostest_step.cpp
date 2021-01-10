@@ -31,7 +31,7 @@ ROSTestStep::ROSTestStep(RunStepList *rsl) : ROSGenericRunStep(rsl, Constants::R
   ctor();
 }
 
-ROSTestStep::ROSTestStep(RunStepList *rsl, Core::Id id) : ROSGenericRunStep(rsl, id)
+ROSTestStep::ROSTestStep(RunStepList *rsl, Utils::Id id) : ROSGenericRunStep(rsl, id)
 {
   ctor();
 }

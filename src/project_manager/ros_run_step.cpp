@@ -62,7 +62,7 @@ bool RunStepFactory::canHandle(RunStepList *rsl) const
     if (!m_supportedDeviceTypes.isEmpty()) {
         ProjectExplorer::Target *target = rsl->target();
         QTC_ASSERT(target, return false);
-        Core::Id deviceType = ProjectExplorer::DeviceTypeKitAspect::deviceTypeId(target->kit());
+        Utils::Id deviceType = ProjectExplorer::DeviceTypeKitAspect::deviceTypeId(target->kit());
         if (!m_supportedDeviceTypes.contains(deviceType))
             return false;
     }
@@ -70,7 +70,7 @@ bool RunStepFactory::canHandle(RunStepList *rsl) const
     if (m_supportedProjectType.isValid()) {
         if (!config)
             return false;
-        Core::Id projectId = config->project()->id();
+        Utils::Id projectId = config->project()->id();
         if (projectId != m_supportedProjectType)
             return false;
     }
@@ -81,7 +81,7 @@ bool RunStepFactory::canHandle(RunStepList *rsl) const
     if (m_supportedConfiguration.isValid()) {
         if (!config)
             return false;
-        Core::Id configId = config->id();
+        Utils::Id configId = config->id();
         if (configId != m_supportedConfiguration)
             return false;
     }
@@ -99,32 +99,32 @@ void RunStepFactory::setFlags(RunStepInfo::Flags flags)
     m_info.flags = flags;
 }
 
-void RunStepFactory::setSupportedStepList(Core::Id id)
+void RunStepFactory::setSupportedStepList(Utils::Id id)
 {
     m_supportedStepLists = {id};
 }
 
-void RunStepFactory::setSupportedStepLists(const QList<Core::Id> &ids)
+void RunStepFactory::setSupportedStepLists(const QList<Utils::Id> &ids)
 {
     m_supportedStepLists = ids;
 }
 
-void RunStepFactory::setSupportedConfiguration(Core::Id id)
+void RunStepFactory::setSupportedConfiguration(Utils::Id id)
 {
     m_supportedConfiguration = id;
 }
 
-void RunStepFactory::setSupportedProjectType(Core::Id id)
+void RunStepFactory::setSupportedProjectType(Utils::Id id)
 {
     m_supportedProjectType = id;
 }
 
-void RunStepFactory::setSupportedDeviceType(Core::Id id)
+void RunStepFactory::setSupportedDeviceType(Utils::Id id)
 {
     m_supportedDeviceTypes = {id};
 }
 
-void RunStepFactory::setSupportedDeviceTypes(const QList<Core::Id> &ids)
+void RunStepFactory::setSupportedDeviceTypes(const QList<Utils::Id> &ids)
 {
     m_supportedDeviceTypes = ids;
 }
@@ -134,12 +134,12 @@ RunStepInfo RunStepFactory::stepInfo() const
     return m_info;
 }
 
-Core::Id RunStepFactory::stepId() const
+Utils::Id RunStepFactory::stepId() const
 {
     return m_info.id;
 }
 
-RunStep *RunStepFactory::create(RunStepList *parent, Core::Id id)
+RunStep *RunStepFactory::create(RunStepList *parent, Utils::Id id)
 {
     RunStep *rs = nullptr;
     if (id == m_info.id)
@@ -166,7 +166,7 @@ const char STEPS_PREFIX[] = "ProjectExplorer.RunStepList.Step.";
 }
 
 
-RunStep::RunStep(RunStepList *rsl, Core::Id id) :
+RunStep::RunStep(RunStepList *rsl, Utils::Id id) :
     ProjectConfiguration(rsl, id)
 {
   Utils::MacroExpander *expander = macroExpander();
@@ -252,7 +252,7 @@ bool RunStep::enabled() const
     return m_enabled;
 }
 
-RunStepList::RunStepList(QObject *parent, Core::Id id) :
+RunStepList::RunStepList(QObject *parent, Utils::Id id) :
     ProjectConfiguration(parent, id)
 {
     Q_ASSERT(parent);
@@ -292,7 +292,7 @@ bool RunStepList::isEmpty() const
     return m_steps.isEmpty();
 }
 
-bool RunStepList::contains(Core::Id id) const
+bool RunStepList::contains(Utils::Id id) const
 {
     return Utils::anyOf(steps(), [id](RunStep *rs){
         return rs->id() == id;
@@ -325,7 +325,7 @@ bool RunStepList::fromMap(const QVariantMap &map)
             continue;
         }
         bool handled = false;
-        Core::Id stepId = ProjectExplorer::idFromMap(rsData);
+        Utils::Id stepId = ProjectExplorer::idFromMap(rsData);
         for (RunStepFactory *factory : factories) {
             if (factory->stepId() == stepId) {
                 if (factory->canHandle(this)) {

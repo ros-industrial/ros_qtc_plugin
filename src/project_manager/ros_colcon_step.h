@@ -47,7 +47,7 @@ class ROSColconStep : public ProjectExplorer::AbstractProcessStep
 public:
     enum BuildTargets {BUILD = 0, CLEAN = 1};
 
-    ROSColconStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
+    ROSColconStep(ProjectExplorer::BuildStepList *parent, Utils::Id id);
     ~ROSColconStep() override;
 
     bool init() override;

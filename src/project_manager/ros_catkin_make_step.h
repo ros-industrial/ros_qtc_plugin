@@ -47,7 +47,7 @@ class ROSCatkinMakeStep : public ProjectExplorer::AbstractProcessStep
 public:
     enum BuildTargets {BUILD = 0, CLEAN = 1};
 
-    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent, Core::Id id);
+    ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent, Utils::Id id);
     ~ROSCatkinMakeStep() override;
 
     bool init() override;
