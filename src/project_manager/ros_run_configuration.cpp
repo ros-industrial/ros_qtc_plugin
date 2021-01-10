@@ -111,7 +111,6 @@ ROSRunConfigurationFactory::availableCreators(ProjectExplorer::Target */*parent*
 {
   RunConfigurationCreationInfo rci;
   rci.factory = this;
-  rci.id = runConfigurationBaseId();
   rci.buildKey = "This is a test";
   rci.displayName = "ROS Run Configuration";
   rci.creationMode = RunConfigurationCreationInfo::ManualCreationOnly;
