@@ -113,7 +113,6 @@ bool ROSCatkinMakeStep::init()
     env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
     pp->setEnvironment(env);
     pp->setCommandLine(makeCommand(allArguments(bc->cmakeBuildType())));
-    pp->resolveAll();
 
     // If we are cleaning, then make can fail with an error code, but that doesn't mean
     // we should stop the clean queue
