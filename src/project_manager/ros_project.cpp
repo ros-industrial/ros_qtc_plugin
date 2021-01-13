@@ -475,7 +475,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
     ProjectExplorer::RawProjectParts rpps;
 
-    ToolChain *cxxToolChain = ToolChainKitAspect::toolChain(k, ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+    const ToolChain *cxxToolChain = ToolChainKitAspect::cxxToolChain(k);
 
     QString pattern = "^.*\\.(" + QRegularExpression::escape("c") +
                             "|" + QRegularExpression::escape("cc") +
@@ -520,7 +520,10 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
             rpp.setMacros(ProjectExplorer::Macro::toMacros(defineArg.toUtf8()));
 
             QSet<QString> toolChainIncludes;
-            for (const HeaderPath &hp : cxxToolChain->builtInHeaderPaths(targetInfo.flags, sysRoot, env)) {
+            const HeaderPaths header_paths = \
+                    cxxToolChain->createBuiltInHeaderPathsRunner(env)\
+                    (targetInfo.flags, sysRoot.toString(), QString());
+            for (const HeaderPath &hp : header_paths) {
                 toolChainIncludes.insert(hp.path);
             }
 
