@@ -237,11 +237,6 @@ void ROSCatkinToolsStep::stdOutput(const QString &line)
     }
 }
 
-BuildStepConfigWidget *ROSCatkinToolsStep::createConfigWidget()
-{
-    return new ROSCatkinToolsStepWidget(this);
-}
-
 ROSCatkinToolsStep::BuildTargets ROSCatkinToolsStep::buildTarget() const
 {
     return m_target;
@@ -267,8 +262,7 @@ void ROSCatkinToolsStep::setActiveProfile(const QString &profileName)
 //
 
 ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
-    : ProjectExplorer::BuildStepConfigWidget(makeStep)
-    , m_makeStep(makeStep)
+    : m_makeStep(makeStep)
 {
     m_ui = new Ui::ROSCatkinToolsStep;
     m_ui->setupUi(this);
@@ -376,7 +370,6 @@ void ROSCatkinToolsStepWidget::updateDetails()
     param.setWorkingDirectory(Utils::FilePath::fromString(m_makeStep->m_catkinToolsWorkingDir));
     param.setCommandLine(m_makeStep->makeCommand(m_makeStep->allArguments(bc->cmakeBuildType(), false)));
     m_summaryText = param.summary(displayName());
-    emit updateSummary();
 }
 
 void ROSCatkinToolsStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSystem)

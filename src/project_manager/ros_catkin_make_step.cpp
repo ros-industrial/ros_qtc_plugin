@@ -211,11 +211,6 @@ void ROSCatkinMakeStep::stdOutput(const QString &line)
     }
 }
 
-BuildStepConfigWidget *ROSCatkinMakeStep::createConfigWidget()
-{
-    return new ROSCatkinMakeStepWidget(this);
-}
-
 ROSCatkinMakeStep::BuildTargets ROSCatkinMakeStep::buildTarget() const
 {
     return m_target;
@@ -231,8 +226,7 @@ void ROSCatkinMakeStep::setBuildTarget(const BuildTargets &target)
 //
 
 ROSCatkinMakeStepWidget::ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep)
-    : ProjectExplorer::BuildStepConfigWidget(makeStep)
-    , m_makeStep(makeStep)
+    : m_makeStep(makeStep)
 {
     m_ui = new Ui::ROSCatkinMakeStep;
     m_ui->setupUi(this);
@@ -294,7 +288,6 @@ void ROSCatkinMakeStepWidget::updateDetails()
     param.setEnvironment(bc->environment());
     param.setCommandLine(m_makeStep->makeCommand(m_makeStep->allArguments(bc->cmakeBuildType(), false)));
     m_summaryText = param.summary(displayName());
-    emit updateSummary();
 }
 
 void ROSCatkinMakeStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSystem)
