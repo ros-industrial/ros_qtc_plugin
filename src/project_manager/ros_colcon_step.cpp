@@ -220,11 +220,6 @@ void ROSColconStep::stdOutput(const QString &line)
     }
 }
 
-BuildStepConfigWidget *ROSColconStep::createConfigWidget()
-{
-    return new ROSColconStepWidget(this);
-}
-
 ROSColconStep::BuildTargets ROSColconStep::buildTarget() const
 {
     return m_target;
@@ -240,8 +235,7 @@ void ROSColconStep::setBuildTarget(const BuildTargets &target)
 //
 
 ROSColconStepWidget::ROSColconStepWidget(ROSColconStep *makeStep)
-    : ProjectExplorer::BuildStepConfigWidget(makeStep)
-    , m_makeStep(makeStep)
+    : m_makeStep(makeStep)
 {
     m_ui = new Ui::ROSColconStep;
     m_ui->setupUi(this);
@@ -303,7 +297,6 @@ void ROSColconStepWidget::updateDetails()
     param.setEnvironment(bc->environment());
     param.setCommandLine(m_makeStep->makeCommand(m_makeStep->allArguments(bc->cmakeBuildType(), false)));
     m_summaryText = param.summary(displayName());
-    emit updateSummary();
 }
 
 void ROSColconStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSystem)

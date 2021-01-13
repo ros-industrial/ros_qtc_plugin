@@ -52,7 +52,6 @@ public:
 
     bool init() override;
     void setupOutputFormatter(Utils::OutputFormatter *formatter) override;
-    ProjectExplorer::BuildStepConfigWidget *createConfigWidget() override;
 
     ROSBuildConfiguration *rosBuildConfiguration() const;
     BuildTargets buildTarget() const;
@@ -77,7 +76,7 @@ private:
     QRegExp m_percentProgress;
 };
 
-class ROSCatkinMakeStepWidget : public ProjectExplorer::BuildStepConfigWidget
+class ROSCatkinMakeStepWidget : public QWidget
 {
     Q_OBJECT
 
