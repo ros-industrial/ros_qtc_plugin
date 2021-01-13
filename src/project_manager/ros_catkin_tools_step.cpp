@@ -40,7 +40,7 @@
 #include <utils/qtcassert.h>
 #include <utils/qtcprocess.h>
 #include <cmakeprojectmanager/cmakeparser.h>
-#include <coreplugin/variablechooser.h>
+#include <utils/variablechooser.h>
 #include <coreplugin/messagemanager.h>
 
 #include <fstream>
@@ -338,7 +338,7 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
             this, SLOT(updateDetails()));
 
-    Core::VariableChooser::addSupportForChildWidgets(this, makeStep->rosBuildConfiguration()->macroExpander());
+    Utils::VariableChooser::addSupportForChildWidgets(this, makeStep->rosBuildConfiguration()->macroExpander());
 }
 
 ROSCatkinToolsStepWidget::~ROSCatkinToolsStepWidget()
