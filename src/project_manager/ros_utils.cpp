@@ -527,11 +527,9 @@ ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const WorkspaceInfo &
     PackageInfoMap wsPackageInfo;
     QMap<QString, QString> packages =  ROSUtils::getWorkspacePackagePaths(workspaceInfo);
 
-    QMapIterator<QString, QString> it(packages);
-    while (it.hasNext())
+    for(const auto& it : packages)
     {
-        it.next();
-        Utils::FilePath pkgXml = Utils::FilePath::fromString(it.value()).pathAppended("package.xml");
+        Utils::FilePath pkgXml = Utils::FilePath::fromString(it).pathAppended("package.xml");
         ROSUtils::PackageInfo packageInfo;
         ROSPackageXmlParser pkgParser;
         if (pkgParser.parsePackageXml(pkgXml, packageInfo))
