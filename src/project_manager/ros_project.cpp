@@ -295,13 +295,11 @@ void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath, const Q
     const ProjectExplorer::FolderNode::FolderNodeFactory &factory = [](const Utils::FilePath &fn) { return std::make_unique<ROSFolderNode>(fn); };
 
     std::vector<std::unique_ptr<ProjectExplorer::FileNode>> childNodes;
-    QHashIterator<QString, ROSUtils::FolderContent> item(results.workspaceContent);
+    QHash<QString, ROSUtils::FolderContent>::const_iterator item = results.workspaceContent.constBegin();
     int cnt = 0;
     double max = results.workspaceContent.size();
-    while (item.hasNext())
+    while(item != results.workspaceContent.constEnd())
     {
-      item.next();
-
       if (item.value().files.empty()) {
         // This is required so empty directories show up in project tree
         Utils::FilePath empty_directory = Utils::FilePath::fromString(item.key());
@@ -325,6 +323,7 @@ void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath, const Q
 
       cnt += 1;
       fi.setProgressValue(static_cast<int>(100.0 * static_cast<double>(cnt) / max));
+      ++item;
     }
 
     project_node->addNestedNodes(std::move(childNodes), Utils::FilePath(), factory);
