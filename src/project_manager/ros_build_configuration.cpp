@@ -92,9 +92,6 @@ void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo &info)
     Q_ASSERT(bs);
     Q_ASSERT(cs);
 
-    bs->appendStep(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
-    cs->appendStep(ProjectExplorer::Constants::BUILDSTEPS_CLEAN);
-
     switch (extraInfo.buildSystem)
     {
         case ROSUtils::CatkinMake:
