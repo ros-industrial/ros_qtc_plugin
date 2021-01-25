@@ -21,8 +21,8 @@
 #ifndef ROSRUNSTEPSPAGE_H
 #define ROSRUNSTEPSPAGE_H
 
-#include "ros_run_step.h"
 #include "ros_run_configuration.h"
+#include "ros_run_step.h"
 
 #include <projectexplorer/buildstep.h>
 #include <projectexplorer/namedwidget.h>
@@ -37,9 +37,13 @@ class QSignalMapper;
 class QGraphicsOpacityEffect;
 QT_END_NAMESPACE
 
-namespace Utils { class DetailsWidget; }
+namespace Utils {
+class DetailsWidget;
+}
 
-namespace ProjectExplorer { class Target; }
+namespace ProjectExplorer {
+class Target;
+}
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -123,7 +127,9 @@ private:
     QPushButton *m_addButton = nullptr;
 };
 
-namespace Ui { class RunStepsPage; }
+namespace Ui {
+class RunStepsPage;
+}
 
 class RunStepsPage : public ProjectExplorer::NamedWidget
 {
@@ -137,7 +143,7 @@ private:
     RunStepListWidget *m_widget = nullptr;
 };
 
-} // Internal
-} // ROSProjectManager
+} // namespace Internal
+} // namespace ROSProjectManager
 
 #endif // ROSRUNSTEPSPAGE_H

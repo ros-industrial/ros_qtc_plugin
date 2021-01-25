@@ -19,44 +19,43 @@
  * limitations under the License.
  */
 #include "ros_project_wizard.h"
-#include "ui_ros_import_wizard_page.h"
 #include "ros_project_constants.h"
 #include "ros_project_plugin.h"
 #include "ros_settings_page.h"
+#include "ui_ros_import_wizard_page.h"
 
 #include <coreplugin/icore.h>
-#include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/customwizard/customwizard.h>
-#include <projectexplorer/projecttree.h>
 #include <projectexplorer/editorconfiguration.h>
 #include <projectexplorer/project.h>
+#include <projectexplorer/projectexplorerconstants.h>
+#include <projectexplorer/projecttree.h>
 
 #include <cpptools/cppcodestylepreferences.h>
 #include <cpptools/cpptoolsconstants.h>
 
+#include <texteditor/codestylepool.h>
 #include <texteditor/icodestylepreferences.h>
 #include <texteditor/texteditorsettings.h>
-#include <texteditor/codestylepool.h>
 
 #include <utils/filewizardpage.h>
+#include <utils/icon.h>
 #include <utils/mimetypes/mimedatabase.h>
 #include <utils/wizard.h>
-#include <utils/icon.h>
 
 #include <QApplication>
+#include <QBitmap>
 #include <QDebug>
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
+#include <QMessageBox>
 #include <QPainter>
 #include <QPixmap>
-#include <QStyle>
-#include <QProcess>
-#include <QXmlStreamReader>
 #include <QPlainTextEdit>
-#include <QMessageBox>
-#include <QBitmap>
-
+#include <QProcess>
+#include <QStyle>
+#include <QXmlStreamReader>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -67,8 +66,9 @@ namespace Internal {
 //
 //////////////////////////////////////////////////////////////////////////////
 
-ROSProjectWizardDialog::ROSProjectWizardDialog(const Core::BaseFileWizardFactory *factory, QWidget *parent) :
-    Core::BaseFileWizard(factory, QVariantMap(), parent)
+ROSProjectWizardDialog::ROSProjectWizardDialog(const Core::BaseFileWizardFactory *factory,
+                                               QWidget *parent)
+    : Core::BaseFileWizard(factory, QVariantMap(), parent)
 {
     setWindowTitle(tr("Creates New ROS Project"));
 
@@ -110,43 +110,48 @@ public:
     ROSImportWizardPagePrivate();
     Ui::ROSImportWizardPage m_ui;
     bool m_complete;
-
 };
 
-ROSImportWizardPagePrivate::ROSImportWizardPagePrivate() :
-    m_complete(false)
-{
-}
+ROSImportWizardPagePrivate::ROSImportWizardPagePrivate()
+    : m_complete(false)
+{}
 
-
-ROSImportWizardPage::ROSImportWizardPage(QWidget *parent) :
-    WizardPage(parent),
-    d(new ROSImportWizardPagePrivate)
+ROSImportWizardPage::ROSImportWizardPage(QWidget *parent)
+    : WizardPage(parent)
+    , d(new ROSImportWizardPagePrivate)
 {
     d->m_ui.setupUi(this);
     QStringList dist_list;
-    for(auto entry : ROSUtils::installedDistributions())
-    {
+    for (auto entry : ROSUtils::installedDistributions()) {
         dist_list.append(entry.toString());
     }
     d->m_ui.distributionComboBox->addItems(dist_list);
 
     QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
-    int index = d->m_ui.distributionComboBox->findText(ros_settings->default_distribution, Qt::MatchExactly);
+    int index = d->m_ui.distributionComboBox->findText(ros_settings->default_distribution,
+                                                       Qt::MatchExactly);
     d->m_ui.distributionComboBox->setCurrentIndex(index);
 
-    d->m_ui.buildSystemComboBox->setCurrentIndex(static_cast<int>(ros_settings->default_build_system));
+    d->m_ui.buildSystemComboBox->setCurrentIndex(
+        static_cast<int>(ros_settings->default_build_system));
 
-    connect(d->m_ui.pathChooser, &Utils::PathChooser::validChanged,
-            this, &ROSImportWizardPage::slotProjectPathValidChanged);
-    connect(d->m_ui.nameLineEdit, &Utils::FancyLineEdit::validChanged,
-            this, &ROSImportWizardPage::slotProjectNameValidChanged);
+    connect(d->m_ui.pathChooser,
+            &Utils::PathChooser::validChanged,
+            this,
+            &ROSImportWizardPage::slotProjectPathValidChanged);
+    connect(d->m_ui.nameLineEdit,
+            &Utils::FancyLineEdit::validChanged,
+            this,
+            &ROSImportWizardPage::slotProjectNameValidChanged);
 
-    connect(d->m_ui.pathChooser, &Utils::PathChooser::returnPressed,
-            this, &ROSImportWizardPage::slotActivated);
-    connect(d->m_ui.nameLineEdit, &Utils::FancyLineEdit::validReturnPressed,
-            this, &ROSImportWizardPage::slotActivated);
-
+    connect(d->m_ui.pathChooser,
+            &Utils::PathChooser::returnPressed,
+            this,
+            &ROSImportWizardPage::slotActivated);
+    connect(d->m_ui.nameLineEdit,
+            &Utils::FancyLineEdit::validReturnPressed,
+            this,
+            &ROSImportWizardPage::slotActivated);
 }
 
 ROSImportWizardPage::~ROSImportWizardPage()
@@ -186,19 +191,18 @@ void ROSImportWizardPage::setForceFirstCapitalLetterForFileName(bool b)
 
 Utils::FilePath ROSImportWizardPage::workspaceDirectory() const
 {
-  return Utils::FilePath::fromString(d->m_ui.pathChooser->path());
+    return Utils::FilePath::fromString(d->m_ui.pathChooser->path());
 }
 
 void ROSImportWizardPage::slotProjectNameValidChanged()
 {
-  validChangedHelper();
+    validChangedHelper();
 }
 
 void ROSImportWizardPage::slotProjectPathValidChanged()
 {
-  validChangedHelper();
+    validChangedHelper();
 }
-
 
 void ROSImportWizardPage::validChangedHelper()
 {
@@ -220,7 +224,6 @@ bool ROSImportWizardPage::validateBaseName(const QString &name, QString *errorMe
     return Utils::FileNameValidatingLineEdit::validateFileName(name, false, errorMessage);
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 //
 // ROSProjectWizard
@@ -229,17 +232,21 @@ bool ROSImportWizardPage::validateBaseName(const QString &name, QString *errorMe
 
 ROSProjectWizard::ROSProjectWizard()
 {
-    setSupportedProjectTypes({ Constants::ROS_PROJECT_ID });
-    setIcon(Utils::Icon({{":rosproject/ros_icon.png", Utils::Theme::PanelTextColorDark}}, Utils::Icon::Tint).icon());
+    setSupportedProjectTypes({Constants::ROS_PROJECT_ID});
+    setIcon(Utils::Icon({{":rosproject/ros_icon.png", Utils::Theme::PanelTextColorDark}},
+                        Utils::Icon::Tint)
+                .icon());
     setDisplayName(tr("ROS Workspace"));
     setId("Z.ROSIndustrial");
     setDescription(tr("Create ROS Workspace"));
     setCategory(QLatin1String(ProjectExplorer::Constants::QT_PROJECT_WIZARD_CATEGORY));
-    setDisplayCategory(QLatin1String(ProjectExplorer::Constants::QT_PROJECT_WIZARD_CATEGORY_DISPLAY));
+    setDisplayCategory(
+        QLatin1String(ProjectExplorer::Constants::QT_PROJECT_WIZARD_CATEGORY_DISPLAY));
     setFlags(Core::IWizardFactory::PlatformIndependent);
 }
 
-Core::BaseFileWizard *ROSProjectWizard::create(QWidget *parent, const Core::WizardDialogParameters &parameters) const
+Core::BaseFileWizard *ROSProjectWizard::create(QWidget *parent,
+                                               const Core::WizardDialogParameters &parameters) const
 {
     Q_UNUSED(parameters);
     ROSProjectWizardDialog *wizard = new ROSProjectWizardDialog(this, parent);
@@ -258,12 +265,16 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w, QString *
     const QDir wsDir(wizard->workspaceDirectory().toString());
 
     const QString projectName = wizard->projectName();
-    const QString workspaceFileName = QFileInfo(wsDir, projectName + QLatin1String(".workspace")).absoluteFilePath();
+    const QString workspaceFileName = QFileInfo(wsDir, projectName + QLatin1String(".workspace"))
+                                          .absoluteFilePath();
     ROSUtils::ROSProjectFileContent projectFileContent;
     projectFileContent.defaultBuildSystem = wizard->buildSystem();
     projectFileContent.distribution = wizard->distribution();
 
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(wizard->workspaceDirectory(), projectFileContent.defaultBuildSystem, wizard->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo
+        = ROSUtils::getWorkspaceInfo(wizard->workspaceDirectory(),
+                                     projectFileContent.defaultBuildSystem,
+                                     wizard->distribution());
     projectFileContent.watchDirectories.append(QDir(workspaceInfo.sourcePath.toString()).dirName());
 
     Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
@@ -279,7 +290,9 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w, QString *
     return files;
 }
 
-bool ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l, QString *errorMessage) const
+bool ROSProjectWizard::postGenerateFiles(const QWizard *w,
+                                         const Core::GeneratedFiles &l,
+                                         QString *errorMessage) const
 {
     Q_UNUSED(w);
 
@@ -291,12 +304,15 @@ bool ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core::Generated
 
     // Set the Cpp code style for the project.
     QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
-    TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppTools::Constants::CPP_SETTINGS_ID);
+    TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(
+        CppTools::Constants::CPP_SETTINGS_ID);
 
-    for (const auto& code_style : code_style_pool->codeStyles()) {
+    for (const auto &code_style : code_style_pool->codeStyles()) {
         if (ros_settings->default_code_style == code_style->displayName()) {
-            ProjectExplorer::EditorConfiguration *editorConfiguration = project->editorConfiguration();
-            TextEditor::ICodeStylePreferences *codeStylePreferences = editorConfiguration->codeStyle(CppTools::Constants::CPP_SETTINGS_ID);
+            ProjectExplorer::EditorConfiguration *editorConfiguration = project
+                                                                            ->editorConfiguration();
+            TextEditor::ICodeStylePreferences *codeStylePreferences = editorConfiguration->codeStyle(
+                CppTools::Constants::CPP_SETTINGS_ID);
             codeStylePreferences->setCurrentDelegate(code_style->id());
             break;
         }

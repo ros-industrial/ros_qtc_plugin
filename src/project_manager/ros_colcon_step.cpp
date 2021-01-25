@@ -19,10 +19,11 @@
  * limitations under the License.
  */
 #include "ros_colcon_step.h"
-#include "ros_project_constants.h"
 #include "ros_project.h"
+#include "ros_project_constants.h"
 #include "ui_ros_colcon_step.h"
 
+#include <cmakeprojectmanager/cmakeparser.h>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/gnumakeparser.h>
@@ -31,15 +32,14 @@
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/toolchain.h>
-#include <qtsupport/qtkitinformation.h>
-#include <qtsupport/qtparser.h>
-#include <utils/stringutils.h>
 #include <utils/qtcassert.h>
 #include <utils/qtcprocess.h>
-#include <cmakeprojectmanager/cmakeparser.h>
+#include <utils/stringutils.h>
+#include <qtsupport/qtkitinformation.h>
+#include <qtsupport/qtparser.h>
 
-#include <QDir>
 #include <QComboBox>
+#include <QDir>
 #include <QLabel>
 
 using namespace ProjectExplorer;
@@ -47,21 +47,22 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
-const char ROS_COLCON_STEP_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("ROSProjectManager::Internal::ROSColconStep",
-                                                     "Colcon Step");
+const char ROS_COLCON_STEP_DISPLAY_NAME[]
+    = QT_TRANSLATE_NOOP("ROSProjectManager::Internal::ROSColconStep", "Colcon Step");
 
 const char ROS_COLCON_STEP[] = "ROSProjectManager.ROSColconStep.Target";
 const char ROS_COLCON_STEP_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.ColconArguments";
 const char ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.CMakeArguments";
 const char ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.MakeArguments";
 
-ROSColconStep::ROSColconStep(BuildStepList *parent, const Utils::Id id) :
-    AbstractProcessStep(parent, id)
+ROSColconStep::ROSColconStep(BuildStepList *parent, const Utils::Id id)
+    : AbstractProcessStep(parent, id)
 {
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSColconStep",
                                                       ROS_COLCON_STEP_DISPLAY_NAME));
 
-    m_percentProgress = QRegExp(QLatin1String(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
+    m_percentProgress = QRegExp(
+        QLatin1String(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
 
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (bc->rosBuildSystem() != ROSUtils::Colcon)
@@ -78,9 +79,7 @@ ROSBuildConfiguration *ROSColconStep::targetsActiveBuildConfiguration() const
     return static_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
 }
 
-ROSColconStep::~ROSColconStep()
-{
-}
+ROSColconStep::~ROSColconStep() {}
 
 bool ROSColconStep::init()
 {
@@ -88,7 +87,8 @@ bool ROSColconStep::init()
     if (!bc)
         bc = targetsActiveBuildConfiguration();
 
-    ToolChain *tc = ToolChainKitAspect::toolChain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+    ToolChain *tc = ToolChainKitAspect::toolChain(target()->kit(),
+                                                  ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
     if (!tc)
         emit addTask(Task::compilerMissingTask());
@@ -99,12 +99,16 @@ bool ROSColconStep::init()
     }
 
     // TODO: Need to get build data (build directory, environment, etc.) based on build System
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo
+        = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(),
+                                     bc->rosBuildSystem(),
+                                     bc->project()->distribution());
 
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
     pp->setWorkingDirectory(bc->project()->projectDirectory());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
+    Utils::Environment env(
+        ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
 
     bc->updateQtEnvironment(env); // TODO: Not sure if this is required here
 
@@ -150,7 +154,7 @@ QVariantMap ROSColconStep::toMap() const
 
 bool ROSColconStep::fromMap(const QVariantMap &map)
 {
-    m_target = (BuildTargets)map.value(QLatin1String(ROS_COLCON_STEP)).toInt();
+    m_target = (BuildTargets) map.value(QLatin1String(ROS_COLCON_STEP)).toInt();
     m_colconArguments = map.value(QLatin1String(ROS_COLCON_STEP_ARGUMENTS_KEY)).toString();
     m_cmakeArguments = map.value(QLatin1String(ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY)).toString();
     m_makeArguments = map.value(QLatin1String(ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY)).toString();
@@ -162,18 +166,23 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
 {
     QString args;
 
-    switch(m_target) {
+    switch (m_target) {
     case BUILD:
         Utils::QtcProcess::addArgs(&args, QLatin1String("build"));
         Utils::QtcProcess::addArgs(&args, m_colconArguments);
         if (includeDefault)
             if (buildType == ROSUtils::BuildTypeUserDefined)
-                Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(m_cmakeArguments));
+                Utils::QtcProcess::addArgs(&args,
+                                           QString(
+                                               "--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1")
+                                               .arg(m_cmakeArguments));
             else
-                Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments));
-        else
-            if (!m_cmakeArguments.isEmpty())
-                Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
+                Utils::QtcProcess::addArgs(
+                    &args,
+                    QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2")
+                        .arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments));
+        else if (!m_cmakeArguments.isEmpty())
+            Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
 
         break;
     case CLEAN:
@@ -191,7 +200,7 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
 Utils::CommandLine ROSColconStep::makeCommand(const QString &args) const
 {
     QLatin1String exec;
-    switch(m_target) {
+    switch (m_target) {
     case BUILD:
         exec = QLatin1String("colcon");
         break;
@@ -211,12 +220,13 @@ Utils::CommandLine ROSColconStep::makeCommand(const QString &args) const
 void ROSColconStep::stdOutput(const QString &line)
 {
     AbstractProcessStep::stdOutput(line);
-    if (m_percentProgress.indexIn(line, 0) != -1)
-    {
+    if (m_percentProgress.indexIn(line, 0) != -1) {
         bool ok = false;
-        int percent = (m_percentProgress.cap(1).toDouble(&ok)/m_percentProgress.cap(2).toDouble(&ok)) * 100.0;
+        int percent = (m_percentProgress.cap(1).toDouble(&ok)
+                       / m_percentProgress.cap(2).toDouble(&ok))
+                      * 100.0;
         if (ok)
-          emit progress(percent, QString());
+            emit progress(percent, QString());
     }
 }
 
@@ -246,30 +256,43 @@ ROSColconStepWidget::ROSColconStepWidget(ROSColconStep *makeStep)
 
     updateDetails();
 
-    connect(m_ui->colconArgumentsLineEdit, &QLineEdit::textEdited,
-            this, &ROSColconStepWidget::updateDetails);
+    connect(m_ui->colconArgumentsLineEdit,
+            &QLineEdit::textEdited,
+            this,
+            &ROSColconStepWidget::updateDetails);
 
-    connect(m_ui->cmakeArgumentsLineEdit, &QLineEdit::textEdited,
-            this, &ROSColconStepWidget::updateDetails);
+    connect(m_ui->cmakeArgumentsLineEdit,
+            &QLineEdit::textEdited,
+            this,
+            &ROSColconStepWidget::updateDetails);
 
-    connect(m_ui->makeArgumentsLineEdit, &QLineEdit::textEdited,
-            this, &ROSColconStepWidget::updateDetails);
+    connect(m_ui->makeArgumentsLineEdit,
+            &QLineEdit::textEdited,
+            this,
+            &ROSColconStepWidget::updateDetails);
 
-    connect(m_makeStep, SIGNAL(enabledChanged()),
-            this, SLOT(enabledChanged()));
+    connect(m_makeStep, SIGNAL(enabledChanged()), this, SLOT(enabledChanged()));
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    connect(bc, SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
-            this, SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
+    connect(bc,
+            SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
+            this,
+            SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
 
-    connect(bc, &ROSBuildConfiguration::cmakeBuildTypeChanged,
-            this, &ROSColconStepWidget::updateDetails);
+    connect(bc,
+            &ROSBuildConfiguration::cmakeBuildTypeChanged,
+            this,
+            &ROSColconStepWidget::updateDetails);
 
-    connect(bc, &ROSBuildConfiguration::environmentChanged,
-            this, &ROSColconStepWidget::updateDetails);
+    connect(bc,
+            &ROSBuildConfiguration::environmentChanged,
+            this,
+            &ROSColconStepWidget::updateDetails);
 
-    connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
-            this, SLOT(updateDetails()));
+    connect(ProjectExplorerPlugin::instance(),
+            SIGNAL(settingsChanged()),
+            this,
+            SLOT(updateDetails()));
 }
 
 ROSColconStepWidget::~ROSColconStepWidget()
@@ -289,13 +312,17 @@ void ROSColconStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo
+        = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(),
+                                     bc->rosBuildSystem(),
+                                     bc->project()->distribution());
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
     param.setWorkingDirectory(workspaceInfo.buildPath);
     param.setEnvironment(bc->environment());
-    param.setCommandLine(m_makeStep->makeCommand(m_makeStep->allArguments(bc->cmakeBuildType(), false)));
+    param.setCommandLine(
+        m_makeStep->makeCommand(m_makeStep->allArguments(bc->cmakeBuildType(), false)));
     m_summaryText = param.summary(displayName());
 }
 
@@ -307,7 +334,7 @@ void ROSColconStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSy
 void ROSColconStepWidget::enabledChanged()
 {
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    if(m_makeStep->enabled() && (bc->rosBuildSystem() != ROSUtils::Colcon))
+    if (m_makeStep->enabled() && (bc->rosBuildSystem() != ROSUtils::Colcon))
         m_makeStep->setEnabled(false);
 }
 
@@ -320,13 +347,16 @@ QString ROSColconStepWidget::summaryText() const
 // ROSColconStepFactory
 //
 
-ROSColconStepFactory::ROSColconStepFactory() : BuildStepFactory()
+ROSColconStepFactory::ROSColconStepFactory()
+    : BuildStepFactory()
 {
-  registerStep<ROSColconStep>(ROS_COLCON_STEP_ID);
-  setFlags(BuildStepInfo::Flags::UniqueStep);
-  setDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSColconStep", ROS_COLCON_STEP_DISPLAY_NAME));
-  setSupportedProjectType(Constants::ROS_PROJECT_ID);
-  setSupportedStepLists(QList<Utils::Id>({ProjectExplorer::Constants::BUILDSTEPS_BUILD, ProjectExplorer::Constants::BUILDSTEPS_CLEAN}));
+    registerStep<ROSColconStep>(ROS_COLCON_STEP_ID);
+    setFlags(BuildStepInfo::Flags::UniqueStep);
+    setDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSColconStep",
+                                               ROS_COLCON_STEP_DISPLAY_NAME));
+    setSupportedProjectType(Constants::ROS_PROJECT_ID);
+    setSupportedStepLists(QList<Utils::Id>({ProjectExplorer::Constants::BUILDSTEPS_BUILD,
+                                            ProjectExplorer::Constants::BUILDSTEPS_CLEAN}));
 }
 
 } // namespace Internal

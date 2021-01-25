@@ -19,12 +19,12 @@
  * limitations under the License.
  */
 #include "ros_generic_run_step.h"
-#include "ros_project.h"
 #include "ros_build_configuration.h"
+#include "ros_project.h"
 #include "ui_ros_generic_configuration.h"
 
-#include <projectexplorer/buildmanager.h>
 #include <coreplugin/messagemanager.h>
+#include <projectexplorer/buildmanager.h>
 
 #include <QStringListModel>
 
@@ -37,29 +37,26 @@ const char ROS_GENERIC_PACKAGE_PATH_KEY[] = "ROSProjectManager.ROSGenericStep.Pa
 const char ROS_GENERIC_TARGET_KEY[] = "ROSProjectManager.ROSGenericStep.Target";
 const char ROS_GENERIC_TARGET_PATH_KEY[] = "ROSProjectManager.ROSGenericStep.TargetPath";
 const char ROS_GENERIC_ARGUMENTS_KEY[] = "ROSProjectManager.ROSGenericStep.Arguments";
-const char ROS_GENERIC_DEBUG_CONTINUE_ON_ATTACH_KEY[] = "ROSProjectManager.ROSGenericStep.DebugContinueOnAttach";
+const char ROS_GENERIC_DEBUG_CONTINUE_ON_ATTACH_KEY[]
+    = "ROSProjectManager.ROSGenericStep.DebugContinueOnAttach";
 
-ROSGenericRunStep::ROSGenericRunStep(RunStepList *rsl, Utils::Id id) : RunStep(rsl, id)
-{
-}
+ROSGenericRunStep::ROSGenericRunStep(RunStepList *rsl, Utils::Id id)
+    : RunStep(rsl, id)
+{}
 
-ROSGenericRunStep::~ROSGenericRunStep()
-{
-}
+ROSGenericRunStep::~ROSGenericRunStep() {}
 
 bool ROSGenericRunStep::init(QList<const RunStep *> &earlierSteps)
 {
     Q_UNUSED(earlierSteps);
 
     ROSRunConfiguration *rc = rosRunConfiguration();
-    if (!rc)
-    {
-      rc = targetsActiveRunConfiguration();
+    if (!rc) {
+        rc = targetsActiveRunConfiguration();
 
-      if (!rc)
-      {
-          return false;
-      }
+        if (!rc) {
+            return false;
+        }
     }
 
     return true;
@@ -67,47 +64,49 @@ bool ROSGenericRunStep::init(QList<const RunStep *> &earlierSteps)
 
 void ROSGenericRunStep::run()
 {
-  ROSProject *rp = qobject_cast<ROSProject *>(target()->project());
+    ROSProject *rp = qobject_cast<ROSProject *>(target()->project());
 
-  QString command;
-  command = QString("%1 %2 %3 %4\n")
-      .arg(m_command,
-           m_package,
-           m_target,
-           m_arguments);
+    QString command;
+    command = QString("%1 %2 %3 %4\n").arg(m_command, m_package, m_target, m_arguments);
 
-  ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(rp->projectDirectory(), rp->rosBuildConfiguration()->rosBuildSystem(), rp->distribution());
-  ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
-  Utils::Environment env = bc->environment();
-  Utils::FilePath shell = Utils::FilePath::fromString(env.value("SHELL"));
-  QString source_cmd;
+    ROSUtils::WorkspaceInfo workspaceInfo
+        = ROSUtils::getWorkspaceInfo(rp->projectDirectory(),
+                                     rp->rosBuildConfiguration()->rosBuildSystem(),
+                                     rp->distribution());
+    ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(
+        target()->activeBuildConfiguration());
+    Utils::Environment env = bc->environment();
+    Utils::FilePath shell = Utils::FilePath::fromString(env.value("SHELL"));
+    QString source_cmd;
 
-  Utils::FilePath sourcePath(workspaceInfo.develPath);
-  if (workspaceInfo.install)
-    sourcePath = Utils::FilePath(workspaceInfo.installPath);
+    Utils::FilePath sourcePath(workspaceInfo.develPath);
+    if (workspaceInfo.install)
+        sourcePath = Utils::FilePath(workspaceInfo.installPath);
 
-  if (shell.fileName() == "bash")
-      source_cmd = QString("source %1\n").arg(sourcePath.pathAppended("setup.bash").toString());
-  else if (shell.fileName() == "sh")
-      source_cmd = QString("source %1\n").arg(sourcePath.pathAppended("setup.sh").toString());
-  else if (shell.fileName() == "zsh")
-       source_cmd = QString("source %1\n").arg(sourcePath.pathAppended("setup.zsh").toString());
-  else
-       Core::MessageManager::write(tr("[ROS Error] The shell: %1 is currently not supported (Use bash, sh, or zsh)!").arg(shell.toString()));
+    if (shell.fileName() == "bash")
+        source_cmd = QString("source %1\n").arg(sourcePath.pathAppended("setup.bash").toString());
+    else if (shell.fileName() == "sh")
+        source_cmd = QString("source %1\n").arg(sourcePath.pathAppended("setup.sh").toString());
+    else if (shell.fileName() == "zsh")
+        source_cmd = QString("source %1\n").arg(sourcePath.pathAppended("setup.zsh").toString());
+    else
+        Core::MessageManager::write(
+            tr("[ROS Error] The shell: %1 is currently not supported (Use bash, sh, or zsh)!")
+                .arg(shell.toString()));
 
-  //create terminal without starting shell
-  QTermWidget &terminal = ROSProjectPlugin::instance()->startTerminal(0, command);
+    //create terminal without starting shell
+    QTermWidget &terminal = ROSProjectPlugin::instance()->startTerminal(0, command);
 
-  terminal.setWorkingDirectory(rp->projectDirectory().toString());
+    terminal.setWorkingDirectory(rp->projectDirectory().toString());
 
-  //start bash now that everything is setup
-  terminal.startShellProgram();
+    //start bash now that everything is setup
+    terminal.startShellProgram();
 
-  // source workspace (This is a hack because the setEnvironment is not working as I expected)
-  terminal.sendText(source_cmd);
+    // source workspace (This is a hack because the setEnvironment is not working as I expected)
+    terminal.sendText(source_cmd);
 
-  //send roslaunch command
-  terminal.sendText(command);
+    //send roslaunch command
+    terminal.sendText(command);
 }
 
 QVariantMap ROSGenericRunStep::toMap() const
@@ -155,32 +154,32 @@ RunStepConfigWidget *ROSGenericRunStep::createConfigWidget()
 
 QString ROSGenericRunStep::getCommand() const
 {
-  return m_command;
+    return m_command;
 }
 
 QString ROSGenericRunStep::getPackage() const
 {
-  return m_package;
+    return m_package;
 }
 
 QString ROSGenericRunStep::getPackagePath() const
 {
-  return m_package_path;
+    return m_package_path;
 }
 
 QString ROSGenericRunStep::getTarget() const
 {
-  return m_target;
+    return m_target;
 }
 
 QString ROSGenericRunStep::getTargetPath() const
 {
-  return m_targetPath;
+    return m_targetPath;
 }
 
 QString ROSGenericRunStep::getArguments() const
 {
-  return m_arguments;
+    return m_arguments;
 }
 
 bool ROSGenericRunStep::getDebugContinueOnAttach() const
@@ -190,110 +189,111 @@ bool ROSGenericRunStep::getDebugContinueOnAttach() const
 
 void ROSGenericRunStep::setCommand(const QString &command)
 {
-  m_command = command;
+    m_command = command;
 }
 
 void ROSGenericRunStep::setPackage(const QString &package)
 {
-  m_package = package;
+    m_package = package;
 }
 
 void ROSGenericRunStep::setPackagePath(const QString &package)
 {
-  m_package_path = package;
+    m_package_path = package;
 }
 
 void ROSGenericRunStep::setTarget(const QString &target)
 {
-  m_target = target;
+    m_target = target;
 }
 
 void ROSGenericRunStep::setTargetPath(const QString &targetPath)
 {
-  m_targetPath = targetPath;
+    m_targetPath = targetPath;
 }
 
 void ROSGenericRunStep::setArguments(const QString &arguments)
 {
-  m_arguments = arguments;
+    m_arguments = arguments;
 }
 
 void ROSGenericRunStep::setDebugContinueOnAttach(const bool &contOnAttach)
 {
-  m_debugContinueOnAttach = contOnAttach;
+    m_debugContinueOnAttach = contOnAttach;
 }
 
 //
 // ROSGenericRunStepConfigWidget
 //
 
-ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *genericStep, bool packages_show, bool args_show, bool debug_show)
-    : m_rosGenericStep(genericStep),
-      m_packageNames(new QStringListModel()),
-      m_targetNames(new QStringListModel())
+ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *genericStep,
+                                                             bool packages_show,
+                                                             bool args_show,
+                                                             bool debug_show)
+    : m_rosGenericStep(genericStep)
+    , m_packageNames(new QStringListModel())
+    , m_targetNames(new QStringListModel())
 {
     m_ui = new Ui::ROSGenericStep();
     m_ui->setupUi(this);
 
-
-    if (!packages_show)
-    {
+    if (!packages_show) {
         m_ui->packageLabel->hide();
         m_ui->packageComboBox->hide();
 
         m_ui->targetLabel->hide();
         m_ui->targetComboBox->hide();
+    } else {
+        m_ui->packageComboBox->setStyleSheet(tr("combobox-popup: 0;"));
+        m_ui->packageComboBox->setModel(m_packageNames);
+        m_ui->targetComboBox->setStyleSheet(tr("combobox-popup: 0;"));
+        m_ui->targetComboBox->setModel(m_targetNames);
+
+        int idx;
+        updateAvailablePackages();
+        idx = m_ui->packageComboBox->findText(genericStep->getPackage(), Qt::MatchExactly);
+        m_ui->packageComboBox->setCurrentIndex(idx);
+
+        updateAvailableTargets();
+        idx = m_ui->targetComboBox->findText(genericStep->getTarget(), Qt::MatchExactly);
+        m_ui->targetComboBox->setCurrentIndex(idx);
+
+        connect(m_ui->packageComboBox,
+                SIGNAL(currentIndexChanged(QString)),
+                this,
+                SLOT(packageComboBox_currentIndexChanged(QString)));
+
+        connect(m_ui->targetComboBox,
+                SIGNAL(currentIndexChanged(QString)),
+                this,
+                SLOT(targetComboBox_currentIndexChanged(QString)));
     }
-    else
-    {
-      m_ui->packageComboBox->setStyleSheet(tr("combobox-popup: 0;"));
-      m_ui->packageComboBox->setModel(m_packageNames);
-      m_ui->targetComboBox->setStyleSheet(tr("combobox-popup: 0;"));
-      m_ui->targetComboBox->setModel(m_targetNames);
 
-      int idx;
-      updateAvailablePackages();
-      idx = m_ui->packageComboBox->findText(genericStep->getPackage(), Qt::MatchExactly);
-      m_ui->packageComboBox->setCurrentIndex(idx);
-
-      updateAvailableTargets();
-      idx = m_ui->targetComboBox->findText(genericStep->getTarget(), Qt::MatchExactly);
-      m_ui->targetComboBox->setCurrentIndex(idx);
-
-      connect(m_ui->packageComboBox, SIGNAL(currentIndexChanged(QString)),
-              this, SLOT(packageComboBox_currentIndexChanged(QString)));
-
-      connect(m_ui->targetComboBox, SIGNAL(currentIndexChanged(QString)),
-              this, SLOT(targetComboBox_currentIndexChanged(QString)));
-    }
-
-    if (!args_show)
-    {
+    if (!args_show) {
         m_ui->argumentsLabel->hide();
         m_ui->argumentsLineEdit->hide();
-    }
-    else
-    {
+    } else {
         m_ui->argumentsLineEdit->setText(genericStep->getArguments());
 
-        connect(m_ui->argumentsLineEdit, SIGNAL(textChanged(QString)),
-                this, SLOT(argumentsLineEdit_textChanged(QString)));
+        connect(m_ui->argumentsLineEdit,
+                SIGNAL(textChanged(QString)),
+                this,
+                SLOT(argumentsLineEdit_textChanged(QString)));
     }
 
     if (!debug_show) //Note this only used for Attach to Node Run Step
     {
         m_ui->debugLabel->hide();
         m_ui->debugCheckBox->hide();
-    }
-    else
-    {
+    } else {
         m_ui->debugCheckBox->setChecked(genericStep->getDebugContinueOnAttach());
-        connect(m_ui->debugCheckBox, SIGNAL(toggled(bool)),
-                this, SLOT(debugCheckBox_toggled(bool)));
+        connect(m_ui->debugCheckBox, SIGNAL(toggled(bool)), this, SLOT(debugCheckBox_toggled(bool)));
     }
 
-    connect(ProjectExplorer::BuildManager::instance(), &ProjectExplorer::BuildManager::buildQueueFinished,
-            this, &ROSGenericRunStepConfigWidget::updateAvailablePackages);
+    connect(ProjectExplorer::BuildManager::instance(),
+            &ProjectExplorer::BuildManager::buildQueueFinished,
+            this,
+            &ROSGenericRunStepConfigWidget::updateAvailablePackages);
 }
 
 ROSGenericRunStepConfigWidget::~ROSGenericRunStepConfigWidget()
@@ -306,7 +306,8 @@ void ROSGenericRunStepConfigWidget::updateAvailablePackages()
     QString cachePkgName = m_ui->packageComboBox->currentText();
     QString cachePkgTarget = m_ui->targetComboBox->currentText();
 
-    ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(m_rosGenericStep->target()->activeBuildConfiguration());
+    ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(
+        m_rosGenericStep->target()->activeBuildConfiguration());
     m_availablePackages = ROSUtils::getROSPackages(bc->environment().toStringList());
     m_packageNames->setStringList(m_availablePackages.keys());
 
@@ -321,13 +322,13 @@ QString ROSGenericRunStepConfigWidget::displayName() const
 
 QString ROSGenericRunStepConfigWidget::summaryText() const
 {
-  //this is causing a the plugin to crash
-  return QString("<b>%1:</b> %2 %3 %4 %5")
-          .arg(displayName(),
-               m_rosGenericStep->getCommand(),
-               m_rosGenericStep->getPackage(),
-               m_rosGenericStep->getTarget(),
-               m_rosGenericStep->getArguments());
+    //this is causing a the plugin to crash
+    return QString("<b>%1:</b> %2 %3 %4 %5")
+        .arg(displayName(),
+             m_rosGenericStep->getCommand(),
+             m_rosGenericStep->getPackage(),
+             m_rosGenericStep->getTarget(),
+             m_rosGenericStep->getArguments());
 }
 
 void ROSGenericRunStepConfigWidget::debugCheckBox_toggled(const bool &arg1)
@@ -337,25 +338,25 @@ void ROSGenericRunStepConfigWidget::debugCheckBox_toggled(const bool &arg1)
 
 void ROSGenericRunStepConfigWidget::packageComboBox_currentIndexChanged(const QString &arg1)
 {
-  m_rosGenericStep->setPackage(arg1);
-  m_rosGenericStep->setPackagePath(m_availablePackages[arg1]);
-  m_ui->targetComboBox->clear();
-  updateAvailableTargets();
+    m_rosGenericStep->setPackage(arg1);
+    m_rosGenericStep->setPackagePath(m_availablePackages[arg1]);
+    m_ui->targetComboBox->clear();
+    updateAvailableTargets();
 
-  emit updateSummary();
+    emit updateSummary();
 }
 
 void ROSGenericRunStepConfigWidget::targetComboBox_currentIndexChanged(const QString &arg1)
 {
-  m_rosGenericStep->setTarget(arg1);
-  m_rosGenericStep->setTargetPath(m_availableTargets[arg1]);
-  emit updateSummary();
+    m_rosGenericStep->setTarget(arg1);
+    m_rosGenericStep->setTargetPath(m_availableTargets[arg1]);
+    emit updateSummary();
 }
 
 void ROSGenericRunStepConfigWidget::argumentsLineEdit_textChanged(const QString &arg1)
 {
-  m_rosGenericStep->setArguments(arg1);
-  emit updateSummary();
+    m_rosGenericStep->setArguments(arg1);
+    emit updateSummary();
 }
 
 void ROSGenericRunStepConfigWidget::updateAvailableTargets()

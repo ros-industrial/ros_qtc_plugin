@@ -21,8 +21,8 @@
 #ifndef ROSCATKINMAKESTEP_H
 #define ROSCATKINMAKESTEP_H
 
-#include <projectexplorer/abstractprocessstep.h>
 #include "ros_build_configuration.h"
+#include <projectexplorer/abstractprocessstep.h>
 
 QT_BEGIN_NAMESPACE
 class QListWidgetItem;
@@ -33,7 +33,9 @@ namespace Internal {
 
 class ROSCatkinMakeStepWidget;
 class ROSCatkinMakeStepFactory;
-namespace Ui { class ROSCatkinMakeStep; }
+namespace Ui {
+class ROSCatkinMakeStep;
+}
 
 static const char ROS_CMS_ID[] = "ROSProjectManager.ROSCatkinMakeStep";
 
@@ -45,7 +47,7 @@ class ROSCatkinMakeStep : public ProjectExplorer::AbstractProcessStep
     friend class ROSCatkinMakeStepFactory;
 
 public:
-    enum BuildTargets {BUILD = 0, CLEAN = 1};
+    enum BuildTargets { BUILD = 0, CLEAN = 1 };
 
     ROSCatkinMakeStep(ProjectExplorer::BuildStepList *parent, Utils::Id id);
     ~ROSCatkinMakeStep() override;

@@ -21,18 +21,19 @@
 #ifndef ROSUTILS_H
 #define ROSUTILS_H
 
+#include "ros_project_constants.h"
+#include <utils/environment.h>
+#include <utils/fileutils.h>
 #include <QProcess>
 #include <QProcessEnvironment>
-#include <QXmlStreamWriter>
 #include <QRegularExpression>
-#include <utils/fileutils.h>
-#include <utils/environment.h>
-#include "ros_project_constants.h"
+#include <QXmlStreamWriter>
 
 namespace ROSProjectManager {
 namespace Internal {
 
-class ROSUtils {
+class ROSUtils
+{
 public:
     ROSUtils();
 
@@ -54,33 +55,33 @@ public:
     };
 
     /** @brief The FolderContent struct used to store file and folder information */
-    struct FolderContent {
+    struct FolderContent
+    {
         QStringList files;       /**< @brief Directory Files */
         QStringList directories; /**< @brief Directory Subdirectories */
 
         void removeDirectories(const QStringList &filters)
         {
-            for (const QString& filter : filters)
-            {
+            for (const QString &filter : filters) {
                 QStringList remove_dirs = directories.filter(QRegularExpression(filter));
-                for (auto& d : remove_dirs)
+                for (auto &d : remove_dirs)
                     directories.removeAll(d);
             }
         }
 
         void removeFiles(const QStringList &filters)
         {
-            for (const QString& filter : filters)
-            {
+            for (const QString &filter : filters) {
                 QStringList remove_files = files.filter(QRegularExpression(filter));
-                for (auto& f : remove_files)
+                for (auto &f : remove_files)
                     files.removeAll(f);
             }
         }
     };
 
     /** @brief Contains relavent workspace information */
-    struct WorkspaceInfo {
+    struct WorkspaceInfo
+    {
         Utils::FilePath path;
         Utils::FilePath sourcePath;
         Utils::FilePath buildPath;
@@ -93,7 +94,8 @@ public:
         BuildSystem buildSystem;
     };
 
-    struct PackageTargetInfo {
+    struct PackageTargetInfo
+    {
         QString name;              /**< @brief Target name */
         TargetType type;           /**< @brief Target type */
         Utils::FilePath flagsFile; /**< @brief Path to the Target's flags.cmake file */
@@ -105,10 +107,11 @@ public:
     typedef QList<PackageTargetInfo> PackageTargetInfoList;
 
     /** @brief Contains all relavent package information */
-    struct PackageInfo {
-        Utils::FilePath path;           /**< @brief Package directory path */
-        Utils::FilePath filepath;       /**< @brief Package package.xml filepath */
-        Utils::FilePath buildFile;      /**< @brief Package CMakeLists.txt filepath */
+    struct PackageInfo
+    {
+        Utils::FilePath path;      /**< @brief Package directory path */
+        Utils::FilePath filepath;  /**< @brief Package package.xml filepath */
+        Utils::FilePath buildFile; /**< @brief Package CMakeLists.txt filepath */
 
         QString name;                   /**< @brief Package Name */
         QString version;                /**< @brief Package Version */
@@ -124,7 +127,9 @@ public:
         bool metapackage;               /**< @brief Package is a metapackage if true */
 
         // Constructor
-        PackageInfo() : metapackage(false) {}
+        PackageInfo()
+            : metapackage(false)
+        {}
 
         /**
          * @brief Check if package exists.
@@ -134,11 +139,9 @@ public:
     };
 
     /** @brief Contains a packages relavent build informations */
-    struct PackageBuildInfo {
-        PackageBuildInfo(const PackageInfo packageInfo)
-        {
-            parent = packageInfo;
-        }
+    struct PackageBuildInfo
+    {
+        PackageBuildInfo(const PackageInfo packageInfo) { parent = packageInfo; }
 
         Utils::FilePath path;          /**< @brief Path to the Package's build directory */
         Utils::FilePath cbpFile;       /**< @brief Path to the Package's CodeBlocks file */
@@ -156,8 +159,9 @@ public:
     typedef QMap<QString, PackageInfo> PackageInfoMap;
 
     /** @brief Contains project file information */
-    struct ROSProjectFileContent {
-        Utils::FilePath distribution;                     /**< @brief ROS Distribution */
+    struct ROSProjectFileContent
+    {
+        Utils::FilePath distribution;             /**< @brief ROS Distribution */
         ROSUtils::BuildSystem defaultBuildSystem; /**< @brief Default build system */
         QStringList watchDirectories;             /**< @brief Watch directories */
     };
@@ -183,8 +187,7 @@ public:
      * @param workspaceInfo Workspace information
      * @return True if successful
      */
-    static bool sourceWorkspace(QProcess *process,
-                                const WorkspaceInfo &workspaceInfo);
+    static bool sourceWorkspace(QProcess *process, const WorkspaceInfo &workspaceInfo);
 
     /**
      * @brief Check whether the provided workspace has been initialized
@@ -199,8 +202,7 @@ public:
      * @param workspaceInfo Workspace information
      * @return True if successfully executed, otherwise false
      */
-    static bool initializeWorkspace(QProcess *process,
-                                    const WorkspaceInfo &workspaceInfo);
+    static bool initializeWorkspace(QProcess *process, const WorkspaceInfo &workspaceInfo);
 
     /**
      * @brief Initialize workspace folders
@@ -215,8 +217,7 @@ public:
      * @param workspaceInfo Workspace information
      * @return True if successfully executed, otherwise false
      */
-    static bool buildWorkspace(QProcess *process,
-                               const WorkspaceInfo &workspaceInfo);
+    static bool buildWorkspace(QProcess *process, const WorkspaceInfo &workspaceInfo);
 
     /**
      * @brief Gets a list of installed ROS Distributions
@@ -241,15 +242,13 @@ public:
     static bool parseQtCreatorWorkspaceFile(const Utils::FilePath &filePath,
                                             ROSProjectFileContent &content);
 
-
     /**
      * @brief Get the default folder content filters used when building the project tree
      * @param folderNameFilters Return the default folder to be filtered
      * @param fileNameFilters Return the default files to be filtered
      */
-    static void getDefaultFolderContentFilters(QStringList& folderNameFilters,
-                                               QStringList& fileNameFilters);
-
+    static void getDefaultFolderContentFilters(QStringList &folderNameFilters,
+                                               QStringList &fileNameFilters);
 
     /**
      * @brief Get folder content for a given folder
@@ -257,8 +256,8 @@ public:
      * @return FolderContent FolderContent
      */
     static FolderContent getFolderContent(const QString &folderPath,
-                                          const QStringList& folderNameFilters,
-                                          const QStringList& fileNameFilters);
+                                          const QStringList &folderNameFilters,
+                                          const QStringList &fileNameFilters);
 
     /**
      * @brief Gets all fo the files in a given folder
@@ -298,9 +297,10 @@ public:
      * @param cachedPackageBuildInfo Cached Package build information if it fails
      * @return PackageBuildInfo
      */
-    static PackageBuildInfoMap getWorkspacePackageBuildInfo(const WorkspaceInfo &workspaceInfo,
-                                                            const PackageInfoMap &packageInfo,
-                                                            const PackageBuildInfoMap *cachedPackageBuildInfo = NULL);
+    static PackageBuildInfoMap getWorkspacePackageBuildInfo(
+        const WorkspaceInfo &workspaceInfo,
+        const PackageInfoMap &packageInfo,
+        const PackageBuildInfoMap *cachedPackageBuildInfo = NULL);
 
     /**
      * @brief Executes the bash command "rospack list" and returns a map of QMap(Package Name, Path
@@ -330,7 +330,8 @@ public:
      * @param env ROS Workspace Environment
      * @return QStringList of executables
      */
-    static QMap<QString, QString> getROSPackageExecutables(const QString &packageName, const QStringList &env);
+    static QMap<QString, QString> getROSPackageExecutables(const QString &packageName,
+                                                           const QStringList &env);
 
     /**
      * @brief Remove catkin tools profile
@@ -426,7 +427,8 @@ public:
      * @param rosDistribution ROS distribution (Hydro, Indigo, etc.)
      * @return QProcessEnvironment
      */
-    static QProcessEnvironment getWorkspaceEnvironment(const WorkspaceInfo &workspaceInfo, const Utils::Environment &current_environment);
+    static QProcessEnvironment getWorkspaceEnvironment(
+        const WorkspaceInfo &workspaceInfo, const Utils::Environment &current_environment);
 
 private:
     /**
@@ -444,8 +446,7 @@ private:
      * @param package Package Info Objects
      * @return True if successful, otherwise false.
      */
-    static bool parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo,
-                                    PackageBuildInfo &package);
+    static bool parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, PackageBuildInfo &package);
 
     /**
      * @brief Get path to the profiles directory
@@ -496,7 +497,7 @@ private:
      * @param configPath Path to profiles config.yaml file
      * @return False if the file does not exist or if the contents of the yaml file are not valid.
      */
-    static bool isCatkinToolsProfileConfigValid(const Utils::FilePath& configPath);
+    static bool isCatkinToolsProfileConfigValid(const Utils::FilePath &configPath);
 
     /**
      * @brief Find a given packages build directory

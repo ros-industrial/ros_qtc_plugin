@@ -21,21 +21,21 @@
 #ifndef ROSBUILDCONFIGURATION_H
 #define ROSBUILDCONFIGURATION_H
 
-#include "ros_utils.h"
 #include "ros_project.h"
+#include "ros_utils.h"
 
 #include <projectexplorer/buildconfiguration.h>
-#include <projectexplorer/namedwidget.h>
 #include <projectexplorer/buildinfo.h>
-#include <projectexplorer/kit.h>
-#include <projectexplorer/target.h>
-#include <projectexplorer/project.h>
 #include <projectexplorer/environmentwidget.h>
+#include <projectexplorer/kit.h>
+#include <projectexplorer/namedwidget.h>
+#include <projectexplorer/project.h>
+#include <projectexplorer/target.h>
 #include <utils/environment.h>
 #include <utils/qtcassert.h>
 #include <QCheckBox>
-#include <QProcess>
 #include <QMenu>
+#include <QProcess>
 
 namespace Utils {
 class PathChooser;
@@ -47,7 +47,9 @@ namespace Internal {
 class ROSBuildConfigurationFactory;
 class ROSBuildSettingsWidget;
 class ROSExtraBuildInfo;
-namespace Ui { class ROSBuildConfiguration; }
+namespace Ui {
+class ROSBuildConfiguration;
+}
 
 class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
 {
@@ -94,7 +96,6 @@ private:
     ROSBuildSystem *m_build_system;
     ROSUtils::BuildType m_cmakeBuildType;
     ProjectExplorer::NamedWidget *m_buildEnvironmentWidget;
-
 };
 
 class ROSBuildConfigurationFactory : public ProjectExplorer::BuildConfigurationFactory
@@ -108,7 +109,9 @@ public:
                                                       bool forSetup) const;
 
 private:
-    ProjectExplorer::BuildInfo createBuildInfo(const ProjectExplorer::Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const;
+    ProjectExplorer::BuildInfo createBuildInfo(const ProjectExplorer::Kit *k,
+                                               const ROSUtils::BuildSystem &build_system,
+                                               const ROSUtils::BuildType &type) const;
 };
 
 class ROSBuildSettingsWidget : public ProjectExplorer::NamedWidget
@@ -131,20 +134,20 @@ private:
 
 class ROSBuildEnvironmentWidget : public ProjectExplorer::NamedWidget
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  ROSBuildEnvironmentWidget(ProjectExplorer::BuildConfiguration *bc);
+    ROSBuildEnvironmentWidget(ProjectExplorer::BuildConfiguration *bc);
 
 private slots:
-  void environmentModelUserChangesChanged();
-  void clearSystemEnvironmentCheckBoxClicked(bool checked);
-  void environmentChanged();
+    void environmentModelUserChangesChanged();
+    void clearSystemEnvironmentCheckBoxClicked(bool checked);
+    void environmentChanged();
 
 protected:
-  ProjectExplorer::EnvironmentWidget *m_buildEnvironmentWidget;
-  QCheckBox *m_clearSystemEnvironmentCheckBox;
-  ProjectExplorer::BuildConfiguration *m_buildConfiguration;
+    ProjectExplorer::EnvironmentWidget *m_buildEnvironmentWidget;
+    QCheckBox *m_clearSystemEnvironmentCheckBox;
+    ProjectExplorer::BuildConfiguration *m_buildConfiguration;
 };
 
 } // namespace Internal

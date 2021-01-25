@@ -30,8 +30,6 @@
 
 static const char runStepEnabledKey[] = "ProjectExplorer.RunStep.Enabled";
 
-
-
 namespace ROSProjectManager {
 namespace Internal {
 
@@ -163,11 +161,10 @@ RunStep *RunStepFactory::restore(RunStepList *parent, const QVariantMap &map)
 namespace {
 const char STEPS_COUNT_KEY[] = "ProjectExplorer.RunStepList.StepsCount";
 const char STEPS_PREFIX[] = "ProjectExplorer.RunStepList.Step.";
-}
+} // namespace
 
-
-RunStep::RunStep(RunStepList *rsl, Utils::Id id) :
-    ProjectConfiguration(rsl, id)
+RunStep::RunStep(RunStepList *rsl, Utils::Id id)
+    : ProjectConfiguration(rsl, id)
 {
     //
 }
@@ -189,7 +186,7 @@ ProjectExplorer::RunConfiguration *RunStep::runConfiguration() const
 {
     auto config = qobject_cast<ProjectExplorer::RunConfiguration *>(parent()->parent());
     if (config)
-      return config;
+        return config;
 
     return target()->activeRunConfiguration();
 }
@@ -249,13 +246,12 @@ bool RunStep::enabled() const
     return m_enabled;
 }
 
-RunStepList::RunStepList(QObject *parent, Utils::Id id) :
-    ProjectConfiguration(parent, id)
+RunStepList::RunStepList(QObject *parent, Utils::Id id)
+    : ProjectConfiguration(parent, id)
 {
     Q_ASSERT(parent);
     setDefaultDisplayName(tr("Run"));
 }
-
 
 RunStepList::~RunStepList()
 {
@@ -291,9 +287,7 @@ bool RunStepList::isEmpty() const
 
 bool RunStepList::contains(Utils::Id id) const
 {
-    return Utils::anyOf(steps(), [id](RunStep *rs){
-        return rs->id() == id;
-    });
+    return Utils::anyOf(steps(), [id](RunStep *rs) { return rs->id() == id; });
 }
 
 bool RunStepList::enabled() const
@@ -316,9 +310,11 @@ bool RunStepList::fromMap(const QVariantMap &map)
     const QList<RunStepFactory *> factories = RunStepFactory::allRunStepFactories();
     int maxSteps = map.value(QString::fromLatin1(STEPS_COUNT_KEY), 0).toInt();
     for (int i = 0; i < maxSteps; ++i) {
-        QVariantMap rsData(map.value(QString::fromLatin1(STEPS_PREFIX) + QString::number(i)).toMap());
+        QVariantMap rsData(
+            map.value(QString::fromLatin1(STEPS_PREFIX) + QString::number(i)).toMap());
         if (rsData.isEmpty()) {
-            Core::MessageManager::write(tr("[ROS Warning] No step data found for step %1 (continuing).").arg(i));
+            Core::MessageManager::write(
+                tr("[ROS Warning] No step data found for step %1 (continuing).").arg(i));
             continue;
         }
         bool handled = false;
@@ -330,7 +326,8 @@ bool RunStepList::fromMap(const QVariantMap &map)
                         appendStep(rs);
                         handled = true;
                     } else {
-                        Core::MessageManager::write(tr("[ROS Warning] Restoration of step %1 failed (continuing).").arg(i));
+                        Core::MessageManager::write(
+                            tr("[ROS Warning] Restoration of step %1 failed (continuing).").arg(i));
                     }
                 }
             }
@@ -342,12 +339,10 @@ bool RunStepList::fromMap(const QVariantMap &map)
 
 void RunStepList::runStep_enabledChanged(RunStep *step)
 {
-    if (step->enabled() == true)
-    {
-        for (RunStep *rs : m_steps)
-        {
-            if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID && rs != step)
-            {
+    if (step->enabled() == true) {
+        for (RunStep *rs : m_steps) {
+            if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID
+                && rs != step) {
                 rs->setEnabled(false);
             }
         }
@@ -359,27 +354,24 @@ QList<RunStep *> RunStepList::steps() const
     return m_steps;
 }
 
-QList<RunStep *> RunStepList::steps(const std::function<bool (const RunStep *)> &filter) const
+QList<RunStep *> RunStepList::steps(const std::function<bool(const RunStep *)> &filter) const
 {
     return Utils::filtered(steps(), filter);
 }
 
 void RunStepList::insertStep(int position, RunStep *step)
 {
-    if (step->id() == Constants::ROS_ATTACH_TO_NODE_ID)
-    {
-        if (step->enabled() == true)
-        {
-            for (RunStep *rs : m_steps)
-            {
-                if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID)
-                {
+    if (step->id() == Constants::ROS_ATTACH_TO_NODE_ID) {
+        if (step->enabled() == true) {
+            for (RunStep *rs : m_steps) {
+                if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID) {
                     rs->setEnabled(false);
                 }
             }
         }
-        connect(step, &RunStep::enabledChanged,
-                this, [this, step] () {runStep_enabledChanged(step);});
+        connect(step, &RunStep::enabledChanged, this, [this, step]() {
+            runStep_enabledChanged(step);
+        });
     }
     m_steps.insert(position, step);
     emit stepInserted(position);
@@ -410,9 +402,10 @@ RunStep *RunStepList::at(int position)
 ProjectExplorer::Target *RunStepList::target() const
 {
     Q_ASSERT(parent());
-    ProjectExplorer::RunConfiguration *rc = qobject_cast<ProjectExplorer::RunConfiguration *>(parent());
+    ProjectExplorer::RunConfiguration *rc = qobject_cast<ProjectExplorer::RunConfiguration *>(
+        parent());
     if (rc)
-      return rc->target();
+        return rc->target();
 
     return 0;
 }

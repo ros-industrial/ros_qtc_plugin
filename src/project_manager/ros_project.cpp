@@ -19,44 +19,44 @@
  * limitations under the License.
  */
 #include "ros_project.h"
-#include "ros_project_nodes.h"
 #include "ros_build_configuration.h"
 #include "ros_catkin_make_step.h"
 #include "ros_project_constants.h"
+#include "ros_project_nodes.h"
 #include "ros_utils.h"
 
 #include <coreplugin/documentmanager.h>
 #include <coreplugin/icontext.h>
 #include <coreplugin/icore.h>
-#include <coreplugin/vcsmanager.h>
-#include <coreplugin/progressmanager/progressmanager.h>
 #include <coreplugin/messagemanager.h>
-#include <cpptools/cpptoolsconstants.h>
+#include <coreplugin/progressmanager/progressmanager.h>
+#include <coreplugin/vcsmanager.h>
 #include <cpptools/cppmodelmanager.h>
+#include <cpptools/cpptoolsconstants.h>
 #include <cpptools/projectinfo.h>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/abi.h>
+#include <projectexplorer/buildmanager.h>
 #include <projectexplorer/buildsteplist.h>
+#include <projectexplorer/customexecutablerunconfiguration.h>
 #include <projectexplorer/headerpath.h>
 #include <projectexplorer/kitinformation.h>
 #include <projectexplorer/kitmanager.h>
-#include <projectexplorer/projectexplorerconstants.h>
-#include <projectexplorer/buildmanager.h>
 #include <projectexplorer/projectexplorer.h>
-#include <qtsupport/baseqtversion.h>
-#include <projectexplorer/customexecutablerunconfiguration.h>
-#include <qtsupport/qtcppkitinfo.h>
-#include <qtsupport/qtkitinformation.h>
+#include <projectexplorer/projectexplorerconstants.h>
+#include <utils/algorithm.h>
 #include <utils/fileutils.h>
 #include <utils/qtcassert.h>
-#include <utils/algorithm.h>
 #include <utils/runextensions.h>
+#include <qtsupport/baseqtversion.h>
+#include <qtsupport/qtcppkitinfo.h>
+#include <qtsupport/qtkitinformation.h>
 
 #include <QDir>
 #include <QProcessEnvironment>
-#include <QtXml/QDomDocument>
-#include <QtConcurrentRun>
 #include <QRegularExpression>
+#include <QtConcurrentRun>
+#include <QtXml/QDomDocument>
 
 #include <cpptools/cppprojectupdater.h>
 
@@ -68,10 +68,10 @@ namespace Internal {
 
 static FolderNode *folderNode(const FolderNode *folder, const Utils::FilePath &directory)
 {
-    return static_cast<FolderNode *>(Utils::findOrDefault(folder->folderNodes(),
-                                                          [&directory](const FolderNode *fn) {
-        return fn && fn->filePath() == directory;
-    }));
+    return static_cast<FolderNode *>(
+        Utils::findOrDefault(folder->folderNodes(), [&directory](const FolderNode *fn) {
+            return fn && fn->filePath() == directory;
+        }));
 }
 
 static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
@@ -125,12 +125,12 @@ static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
 ////////////////////////////////////////////////////////////////////////////////////
 const int UPDATE_INTERVAL = 300;
 
-ROSProject::ROSProject(const Utils::FilePath &fileName) :
-    ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName),
-    m_cppCodeModelUpdater(new CppTools::CppProjectUpdater),
-    m_project_loaded(false),
-    m_asyncUpdateFutureInterface(nullptr),
-    m_asyncBuildCodeModelFutureInterface(nullptr)
+ROSProject::ROSProject(const Utils::FilePath &fileName)
+    : ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName)
+    , m_cppCodeModelUpdater(new CppTools::CppProjectUpdater)
+    , m_project_loaded(false)
+    , m_asyncUpdateFutureInterface(nullptr)
+    , m_asyncBuildCodeModelFutureInterface(nullptr)
 {
     setId(Constants::ROS_PROJECT_ID);
     setProjectLanguages(Context(ProjectExplorer::Constants::CXX_LANGUAGE_ID));
@@ -143,15 +143,22 @@ ROSProject::ROSProject(const Utils::FilePath &fileName) :
     refresh();
 
     // Setup signal/slot connections
-    connect(ProjectExplorer::BuildManager::instance(), SIGNAL(buildQueueFinished(bool)),
-            this, SLOT(buildQueueFinished(bool)));
+    connect(ProjectExplorer::BuildManager::instance(),
+            SIGNAL(buildQueueFinished(bool)),
+            this,
+            SLOT(buildQueueFinished(bool)));
 
-    connect(&m_futureWatcher, &QFutureWatcher<FutureWatcherResults>::finished, this, &ROSProject::updateProjectTree);
+    connect(&m_futureWatcher,
+            &QFutureWatcher<FutureWatcherResults>::finished,
+            this,
+            &ROSProject::updateProjectTree);
 
-    connect(&m_futureBuildCodeModelWatcher, &QFutureWatcher<CppToolsFutureResults>::finished, this, &ROSProject::updateCppCodeModel);
+    connect(&m_futureBuildCodeModelWatcher,
+            &QFutureWatcher<CppToolsFutureResults>::finished,
+            this,
+            &ROSProject::updateCppCodeModel);
 
-    connect(&m_watcher, SIGNAL(directoryChanged(QString)),
-            this, SLOT(fileSystemChanged(QString)));
+    connect(&m_watcher, SIGNAL(directoryChanged(QString)), this, SLOT(fileSystemChanged(QString)));
 }
 
 ROSProject::~ROSProject()
@@ -184,11 +191,10 @@ bool ROSProject::saveProjectFile()
     // Make sure we can open the file for writing
 
     Utils::FileSaver saver(projectFilePath().toString(), QIODevice::Text);
-    if (!saver.hasError())
-    {
-      QXmlStreamWriter workspaceXml(saver.file());
-      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_projectFileContent);
-      saver.setResult(&workspaceXml);
+    if (!saver.hasError()) {
+        QXmlStreamWriter workspaceXml(saver.file());
+        ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_projectFileContent);
+        saver.setResult(&workspaceXml);
     }
     bool result = saver.finalize(ICore::mainWindow());
     DocumentManager::unexpectFileChange(projectFilePath().toString());
@@ -205,12 +211,12 @@ ROSUtils::BuildSystem ROSProject::defaultBuildSystem() const
     return m_projectFileContent.defaultBuildSystem;
 }
 
-ROSBuildConfiguration* ROSProject::rosBuildConfiguration() const
+ROSBuildConfiguration *ROSProject::rosBuildConfiguration() const
 {
     if (activeTarget() != nullptr)
-      return static_cast<ROSBuildConfiguration *>(activeTarget()->activeBuildConfiguration());
+        return static_cast<ROSBuildConfiguration *>(activeTarget()->activeBuildConfiguration());
     else
-      return nullptr;
+        return nullptr;
 }
 
 ROSUtils::PackageInfoMap ROSProject::getPackageInfo() const
@@ -234,91 +240,101 @@ void ROSProject::refresh()
 
 void ROSProject::updateProjectTree()
 {
-  if (m_futureWatcher.isFinished())
-  {
-    std::unique_ptr<ProjectExplorer::ProjectNode> pn(m_futureWatcher.result().node);
-    if (!pn)
-    {
-        Core::MessageManager::write("[ROS Warning] Update Project Tree Failed, Results returned null pointer.");
-        return;
+    if (m_futureWatcher.isFinished()) {
+        std::unique_ptr<ProjectExplorer::ProjectNode> pn(m_futureWatcher.result().node);
+        if (!pn) {
+            Core::MessageManager::write(
+                "[ROS Warning] Update Project Tree Failed, Results returned null pointer.");
+            return;
+        }
+        setRootProjectNode(std::move(pn));
+
+        if (!m_asyncUpdateFutureInterface) {
+            Core::MessageManager::write(
+                "[ROS Warning] Update Project Tree Failed, Async Futur Interface was null.");
+            // TODO Need to print warning
+            return;
+        }
+
+        m_workspaceContent = std::move(m_futureWatcher.result().workspaceContent);
+        m_workspaceFiles = std::move(m_futureWatcher.result().files);
+        m_workspaceDirectories = std::move(m_futureWatcher.result().directories);
+
+        m_asyncUpdateFutureInterface->reportFinished();
+        delete m_asyncUpdateFutureInterface;
+        m_asyncUpdateFutureInterface = nullptr;
+        m_watcher.addPaths(m_workspaceDirectories);
+
+        connect(&m_watcher,
+                SIGNAL(directoryChanged(QString)),
+                this,
+                SLOT(fileSystemChanged(QString)));
+
+        if (!m_project_loaded) {
+            m_project_loaded = true;
+            asyncUpdateCppCodeModel(true);
+        }
     }
-    setRootProjectNode(std::move(pn));
-
-    if (!m_asyncUpdateFutureInterface)
-    {
-        Core::MessageManager::write("[ROS Warning] Update Project Tree Failed, Async Futur Interface was null.");
-        // TODO Need to print warning
-        return;
-    }
-
-    m_workspaceContent = std::move(m_futureWatcher.result().workspaceContent);
-    m_workspaceFiles = std::move(m_futureWatcher.result().files);
-    m_workspaceDirectories = std::move(m_futureWatcher.result().directories);
-
-    m_asyncUpdateFutureInterface->reportFinished();
-    delete m_asyncUpdateFutureInterface;
-    m_asyncUpdateFutureInterface = nullptr;
-    m_watcher.addPaths(m_workspaceDirectories);
-
-    connect(&m_watcher, SIGNAL(directoryChanged(QString)),
-            this, SLOT(fileSystemChanged(QString)));
-
-    if (!m_project_loaded)
-    {
-      m_project_loaded = true;
-      asyncUpdateCppCodeModel(true);
-    }
-  }
 }
 
-void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath, const QStringList watchDirectories, QFutureInterface<FutureWatcherResults> &fi)
+void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath,
+                                  const QStringList watchDirectories,
+                                  QFutureInterface<FutureWatcherResults> &fi)
 {
     fi.reportStarted();
 
     FutureWatcherResults results;
 
-    for (const QString& dir : watchDirectories) {
+    for (const QString &dir : watchDirectories) {
         Utils::FilePath addedDir = projectFilePath.parentDir().pathAppended(dir);
-        QHash<QString, ROSUtils::FolderContent> newDirContent = ROSUtils::getFolderContentRecurisve(addedDir, results.files, results.directories);
+        QHash<QString, ROSUtils::FolderContent> newDirContent
+            = ROSUtils::getFolderContentRecurisve(addedDir, results.files, results.directories);
         results.workspaceContent.unite(newDirContent);
     }
 
-    ROSProjectNode* project_node(new ROSProjectNode(projectFilePath.parentDir()));
-    std::unique_ptr<FileNode> root_node(new FileNode(projectFilePath, ProjectExplorer::FileType::Project));
+    ROSProjectNode *project_node(new ROSProjectNode(projectFilePath.parentDir()));
+    std::unique_ptr<FileNode> root_node(
+        new FileNode(projectFilePath, ProjectExplorer::FileType::Project));
     project_node->addNode(std::move(root_node));
 
-    const ProjectExplorer::FolderNode::FolderNodeFactory &factory = [](const Utils::FilePath &fn) { return std::make_unique<ROSFolderNode>(fn); };
+    const ProjectExplorer::FolderNode::FolderNodeFactory &factory = [](const Utils::FilePath &fn) {
+        return std::make_unique<ROSFolderNode>(fn);
+    };
 
     std::vector<std::unique_ptr<ProjectExplorer::FileNode>> childNodes;
-    QHash<QString, ROSUtils::FolderContent>::const_iterator item = results.workspaceContent.constBegin();
+    QHash<QString, ROSUtils::FolderContent>::const_iterator item = results.workspaceContent
+                                                                       .constBegin();
     int cnt = 0;
     double max = results.workspaceContent.size();
-    while(item != results.workspaceContent.constEnd())
-    {
-      if (item.value().files.empty()) {
-        // This is required so empty directories show up in project tree
-        Utils::FilePath empty_directory = Utils::FilePath::fromString(item.key());
-        recursiveFindOrCreateFolderNode(project_node, empty_directory, Utils::FilePath(), factory);
-      }
-      else {
-        // Add all files in the directory node
-        for (const QString& file : item.value().files)
-        {
-          QFileInfo fileInfo(QDir(item.key()), file);
+    while (item != results.workspaceContent.constEnd()) {
+        if (item.value().files.empty()) {
+            // This is required so empty directories show up in project tree
+            Utils::FilePath empty_directory = Utils::FilePath::fromString(item.key());
+            recursiveFindOrCreateFolderNode(project_node,
+                                            empty_directory,
+                                            Utils::FilePath(),
+                                            factory);
+        } else {
+            // Add all files in the directory node
+            for (const QString &file : item.value().files) {
+                QFileInfo fileInfo(QDir(item.key()), file);
 
-          ProjectExplorer::FileType fileType = ProjectExplorer::FileType::Source;
+                ProjectExplorer::FileType fileType = ProjectExplorer::FileType::Source;
 
-          if (Constants::HEADER_FILE_EXTENSIONS.contains(fileInfo.suffix()))
-            fileType = ProjectExplorer::FileType::Header;
+                if (Constants::HEADER_FILE_EXTENSIONS.contains(fileInfo.suffix()))
+                    fileType = ProjectExplorer::FileType::Header;
 
-          std::unique_ptr<ProjectExplorer::FileNode> fileNode(new ProjectExplorer::FileNode(Utils::FilePath::fromString(fileInfo.absoluteFilePath()), fileType));
-          childNodes.emplace_back(std::move(fileNode));
+                std::unique_ptr<ProjectExplorer::FileNode> fileNode(
+                    new ProjectExplorer::FileNode(Utils::FilePath::fromString(
+                                                      fileInfo.absoluteFilePath()),
+                                                  fileType));
+                childNodes.emplace_back(std::move(fileNode));
+            }
         }
-      }
 
-      cnt += 1;
-      fi.setProgressValue(static_cast<int>(100.0 * static_cast<double>(cnt) / max));
-      ++item;
+        cnt += 1;
+        fi.setProgressValue(static_cast<int>(100.0 * static_cast<double>(cnt) / max));
+        ++item;
     }
 
     project_node->addNestedNodes(std::move(childNodes), Utils::FilePath(), factory);
@@ -331,73 +347,84 @@ void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath, const Q
 
 void ROSProject::updateEnvironment()
 {
-  if (ROSBuildConfiguration *bc = rosBuildConfiguration())
-  {
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(projectDirectory(), bc->rosBuildSystem(), distribution());
-    bc->updateQtEnvironment(Utils::Environment(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList()));
-  }
+    if (ROSBuildConfiguration *bc = rosBuildConfiguration()) {
+        ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(projectDirectory(),
+                                                                           bc->rosBuildSystem(),
+                                                                           distribution());
+        bc->updateQtEnvironment(Utils::Environment(
+            ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList()));
+    }
 }
 
 void ROSProject::fileSystemChanged(const QString &path)
 {
-  const ROSUtils::FolderContent& pre_content = m_workspaceContent[path];
+    const ROSUtils::FolderContent &pre_content = m_workspaceContent[path];
 
-  QStringList folderNameFilters, fileNameFilters;
-  ROSUtils::getDefaultFolderContentFilters(folderNameFilters, fileNameFilters);
-  const ROSUtils::FolderContent& cur_content = ROSUtils::getFolderContent(path, folderNameFilters, fileNameFilters);
+    QStringList folderNameFilters, fileNameFilters;
+    ROSUtils::getDefaultFolderContentFilters(folderNameFilters, fileNameFilters);
+    const ROSUtils::FolderContent &cur_content = ROSUtils::getFolderContent(path,
+                                                                            folderNameFilters,
+                                                                            fileNameFilters);
 
-  QSet<QString> pre_content_files = QSet<QString>::fromList(pre_content.files);
-  QSet<QString> pre_content_dirs = QSet<QString>::fromList(pre_content.directories);
+    QSet<QString> pre_content_files = QSet<QString>::fromList(pre_content.files);
+    QSet<QString> pre_content_dirs = QSet<QString>::fromList(pre_content.directories);
 
-  QSet<QString> cur_content_files = QSet<QString>::fromList(cur_content.files);
-  QSet<QString> cur_content_dirs = QSet<QString>::fromList(cur_content.directories);
+    QSet<QString> cur_content_files = QSet<QString>::fromList(cur_content.files);
+    QSet<QString> cur_content_dirs = QSet<QString>::fromList(cur_content.directories);
 
-  // Content that has been added
-  QSet<QString> files_added = cur_content_files - pre_content_files;
-  QSet<QString> dirs_added = cur_content_dirs - pre_content_dirs;
+    // Content that has been added
+    QSet<QString> files_added = cur_content_files - pre_content_files;
+    QSet<QString> dirs_added = cur_content_dirs - pre_content_dirs;
 
-  // Content that has been removed
-  QSet<QString> files_removed = pre_content_files - cur_content_files;
-  QSet<QString> dirs_removed = pre_content_dirs - cur_content_dirs;
+    // Content that has been removed
+    QSet<QString> files_removed = pre_content_files - cur_content_files;
+    QSet<QString> dirs_removed = pre_content_dirs - cur_content_dirs;
 
-  // This is to check if untracked dirs or files were added. If so do not start timer.
-  if (files_added.empty() && dirs_added.empty() && files_removed.empty() && dirs_removed.empty())
-    return;  
+    // This is to check if untracked dirs or files were added. If so do not start timer.
+    if (files_added.empty() && dirs_added.empty() && files_removed.empty() && dirs_removed.empty())
+        return;
 
-  m_asyncUpdateTimer.setInterval(UPDATE_INTERVAL);
-  m_asyncUpdateTimer.start();
+    m_asyncUpdateTimer.setInterval(UPDATE_INTERVAL);
+    m_asyncUpdateTimer.start();
 }
 
 void ROSProject::asyncUpdate()
 {
-  rosBuildConfiguration()->buildSystem()->requestParse();
+    rosBuildConfiguration()->buildSystem()->requestParse();
 
-  m_futureWatcher.waitForFinished();
+    m_futureWatcher.waitForFinished();
 
-  Q_ASSERT(!m_asyncUpdateFutureInterface);
+    Q_ASSERT(!m_asyncUpdateFutureInterface);
 
-  m_asyncUpdateFutureInterface = new QFutureInterface<FutureWatcherResults>();
+    m_asyncUpdateFutureInterface = new QFutureInterface<FutureWatcherResults>();
 
-  disconnect(&m_watcher, SIGNAL(directoryChanged(QString)),
-             this, SLOT(fileSystemChanged(QString)));
+    disconnect(&m_watcher,
+               SIGNAL(directoryChanged(QString)),
+               this,
+               SLOT(fileSystemChanged(QString)));
 
-  if (!m_watcher.directories().empty())
-    m_watcher.removePaths(m_watcher.directories());
+    if (!m_watcher.directories().empty())
+        m_watcher.removePaths(m_watcher.directories());
 
-  m_asyncUpdateFutureInterface->setProgressRange(0, 100);
-  Core::ProgressManager::addTask(m_asyncUpdateFutureInterface->future(),
-                                 tr("Reading Project \"%1\"").arg(displayName()),
-                                 Constants::ROS_READING_PROJECT);
+    m_asyncUpdateFutureInterface->setProgressRange(0, 100);
+    Core::ProgressManager::addTask(m_asyncUpdateFutureInterface->future(),
+                                   tr("Reading Project \"%1\"").arg(displayName()),
+                                   Constants::ROS_READING_PROJECT);
 
-  m_futureWatcher.setFuture(m_asyncUpdateFutureInterface->future());
+    m_futureWatcher.setFuture(m_asyncUpdateFutureInterface->future());
 
-  Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority, [this]() { ROSProject::buildProjectTree(projectFilePath(), m_projectFileContent.watchDirectories, *m_asyncUpdateFutureInterface); });
+    Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(),
+                    QThread::LowestPriority,
+                    [this]() {
+                        ROSProject::buildProjectTree(projectFilePath(),
+                                                     m_projectFileContent.watchDirectories,
+                                                     *m_asyncUpdateFutureInterface);
+                    });
 }
 
 void ROSProject::asyncUpdateCppCodeModel(bool success)
 {
-    if (success && !m_workspaceFiles.empty() && (rosBuildConfiguration() != nullptr))
-    {
+    if (success && !m_workspaceFiles.empty() && (rosBuildConfiguration() != nullptr)) {
         bool async = false;
 
         m_cppCodeModelUpdater->cancel();
@@ -409,10 +436,14 @@ void ROSProject::asyncUpdateCppCodeModel(bool success)
 
         m_asyncBuildCodeModelFutureInterface->setProgressRange(0, 100);
         Core::ProgressManager::addTask(m_asyncBuildCodeModelFutureInterface->future(),
-                                       tr("Parsing Build Files for Project \"%1\"").arg(displayName()),
+                                       tr("Parsing Build Files for Project \"%1\"")
+                                           .arg(displayName()),
                                        Constants::ROS_RELOADING_BUILD_INFO);
 
-        ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(projectDirectory(), rosBuildConfiguration()->rosBuildSystem(), distribution());
+        ROSUtils::WorkspaceInfo workspaceInfo
+            = ROSUtils::getWorkspaceInfo(projectDirectory(),
+                                         rosBuildConfiguration()->rosBuildSystem(),
+                                         distribution());
         Utils::Environment current_environment = rosBuildConfiguration()->environment();
 
         const Kit *k = nullptr;
@@ -422,18 +453,33 @@ void ROSProject::asyncUpdateCppCodeModel(bool success)
         else
             k = KitManager::defaultKit();
 
-        QTC_ASSERT(k, return);
+        QTC_ASSERT(k, return );
 
         m_futureBuildCodeModelWatcher.setFuture(m_asyncBuildCodeModelFutureInterface->future());
 
         // TODO: Figure out why running this async causes segfaults
-        if (async)
-        {
-          Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority, [this, workspaceInfo, k, current_environment]() { ROSProject::buildCppCodeModel(workspaceInfo, projectFilePath(), m_workspaceFiles, k, current_environment, m_wsPackageInfo, m_wsPackageBuildInfo, *m_asyncBuildCodeModelFutureInterface); });
-        }
-        else
-        {
-          ROSProject::buildCppCodeModel(workspaceInfo, projectFilePath(), m_workspaceFiles, k, current_environment, m_wsPackageInfo, m_wsPackageBuildInfo, *m_asyncBuildCodeModelFutureInterface);
+        if (async) {
+            Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(),
+                            QThread::LowestPriority,
+                            [this, workspaceInfo, k, current_environment]() {
+                                ROSProject::buildCppCodeModel(workspaceInfo,
+                                                              projectFilePath(),
+                                                              m_workspaceFiles,
+                                                              k,
+                                                              current_environment,
+                                                              m_wsPackageInfo,
+                                                              m_wsPackageBuildInfo,
+                                                              *m_asyncBuildCodeModelFutureInterface);
+                            });
+        } else {
+            ROSProject::buildCppCodeModel(workspaceInfo,
+                                          projectFilePath(),
+                                          m_workspaceFiles,
+                                          k,
+                                          current_environment,
+                                          m_wsPackageInfo,
+                                          m_wsPackageBuildInfo,
+                                          *m_asyncBuildCodeModelFutureInterface);
         }
     }
 }
@@ -449,87 +495,90 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 {
     CppToolsFutureResults results;
     results.wsPackageInfo = ROSUtils::getWorkspacePackageInfo(workspaceInfo, &wsPackageInfo);
-    results.wsPackageBuildInfo = ROSUtils::getWorkspacePackageBuildInfo(workspaceInfo, results.wsPackageInfo, &wsPackageBuildInfo);
+    results.wsPackageBuildInfo = ROSUtils::getWorkspacePackageBuildInfo(workspaceInfo,
+                                                                        results.wsPackageInfo,
+                                                                        &wsPackageBuildInfo);
 
     const Utils::FilePath sysRoot = SysRootKitAspect::sysRoot(k);
 
     Utils::QtVersion activeQtVersion = Utils::QtVersion::None;
     if (QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitAspect::qtVersion(k)) {
-        if (qtVersion->qtVersion() < QtSupport::QtVersionNumber(5,0,0))
+        if (qtVersion->qtVersion() < QtSupport::QtVersionNumber(5, 0, 0))
             activeQtVersion = Utils::QtVersion::Qt4;
         else
             activeQtVersion = Utils::QtVersion::Qt5;
     }
 
     // Get all of the workspace includes directories
-    QStringList workspace_includes; // This should be the same as workspace_header_paths used for checking for duplicates
+    QStringList
+        workspace_includes; // This should be the same as workspace_header_paths used for checking for duplicates
     ProjectExplorer::HeaderPaths workspace_header_paths;
-    for (const auto& package : results.wsPackageInfo) {
-      Utils::FilePath include_path = Utils::FilePath::fromString(package.path.toString());
-      include_path = include_path.pathAppended("include");
-      if (!workspace_includes.contains(include_path.toString())) {
-        workspace_includes.append(include_path.toString());
-        workspace_header_paths.append(ProjectExplorer::HeaderPath(include_path.toString(), ProjectExplorer::HeaderPathType::User));
-      }
+    for (const auto &package : results.wsPackageInfo) {
+        Utils::FilePath include_path = Utils::FilePath::fromString(package.path.toString());
+        include_path = include_path.pathAppended("include");
+        if (!workspace_includes.contains(include_path.toString())) {
+            workspace_includes.append(include_path.toString());
+            workspace_header_paths.append(
+                ProjectExplorer::HeaderPath(include_path.toString(),
+                                            ProjectExplorer::HeaderPathType::User));
+        }
     }
 
     ProjectExplorer::RawProjectParts rpps;
 
     const ToolChain *cxxToolChain = ToolChainKitAspect::cxxToolChain(k);
 
-    QString pattern = "^.*\\.(" + QRegularExpression::escape("c") +
-                            "|" + QRegularExpression::escape("cc") +
-                            "|" + QRegularExpression::escape("cpp") +
-                            "|" + QRegularExpression::escape("c++") +
-                            "|" + QRegularExpression::escape("cp") +
-                            "|" + QRegularExpression::escape("cxx") +
-                            "|" + QRegularExpression::escape("h") +
-                            "|" + QRegularExpression::escape("hh") +
-                            "|" + QRegularExpression::escape("hpp") +
-                            "|" + QRegularExpression::escape("h++") +
-                            "|" + QRegularExpression::escape("hp") +
-                            "|" + QRegularExpression::escape("hxx") + ")";
+    QString pattern = "^.*\\.(" + QRegularExpression::escape("c") + "|"
+                      + QRegularExpression::escape("cc") + "|" + QRegularExpression::escape("cpp")
+                      + "|" + QRegularExpression::escape("c++") + "|"
+                      + QRegularExpression::escape("cp") + "|" + QRegularExpression::escape("cxx")
+                      + "|" + QRegularExpression::escape("h") + "|"
+                      + QRegularExpression::escape("hh") + "|" + QRegularExpression::escape("hpp")
+                      + "|" + QRegularExpression::escape("h++") + "|"
+                      + QRegularExpression::escape("hp") + "|" + QRegularExpression::escape("hxx")
+                      + ")";
 
     QStringList workspaceCppFiles = workspaceFiles.filter(QRegularExpression(pattern));
 
     int cnt = 0;
     double max = results.wsPackageBuildInfo.size();
-    for (const ROSUtils::PackageBuildInfo& buildInfo : results.wsPackageBuildInfo)
-    {
-        QStringList packageFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
+    for (const ROSUtils::PackageBuildInfo &buildInfo : results.wsPackageBuildInfo) {
+        QStringList packageFiles = workspaceFiles.filter(buildInfo.parent.path.toString()
+                                                         + QDir::separator());
         QStringList packageCppFiles = packageFiles.filter(QRegularExpression(pattern));
         ProjectExplorer::HeaderPaths packageHeaderPaths = workspace_header_paths;
-        QStringList package_includes = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
+        QStringList package_includes
+            = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
 
-        for (const ROSUtils::PackageTargetInfo& targetInfo : buildInfo.targets)
-        {
+        for (const ROSUtils::PackageTargetInfo &targetInfo : buildInfo.targets) {
             ProjectExplorer::RawProjectPart rpp;
             const QString defineArg
-                    = Utils::transform(targetInfo.defines, [](const QString &s) -> QString {
-                        QString result = QString::fromLatin1("#define ") + s;
-                        int assignIndex = result.indexOf('=');
-                        if (assignIndex != -1)
-                            result[assignIndex] = ' ';
-                        return result;
-                    }).join('\n');
+                = Utils::transform(targetInfo.defines, [](const QString &s) -> QString {
+                      QString result = QString::fromLatin1("#define ") + s;
+                      int assignIndex = result.indexOf('=');
+                      if (assignIndex != -1)
+                          result[assignIndex] = ' ';
+                      return result;
+                  }).join('\n');
 
             rpp.setProjectFileLocation(projectFilePath.toString());
-            rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo.name + '|' + projectFilePath.toString());
+            rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo.name + '|'
+                                     + projectFilePath.toString());
             rpp.setDisplayName(buildInfo.parent.name + '|' + targetInfo.name);
             rpp.setQtVersion(activeQtVersion);
             rpp.setMacros(ProjectExplorer::Macro::toMacros(defineArg.toUtf8()));
 
             QSet<QString> toolChainIncludes;
-            const HeaderPaths header_paths = \
-                    cxxToolChain->createBuiltInHeaderPathsRunner(env)\
-                    (targetInfo.flags, sysRoot.toString(), QString());
+            const HeaderPaths header_paths = cxxToolChain->createBuiltInHeaderPathsRunner(
+                env)(targetInfo.flags, sysRoot.toString(), QString());
             for (const HeaderPath &hp : header_paths) {
                 toolChainIncludes.insert(hp.path);
             }
 
             for (const QString &i : targetInfo.includes) {
                 if (!toolChainIncludes.contains(i) && !package_includes.contains(i)) {
-                    packageHeaderPaths.append(ProjectExplorer::HeaderPath(i, ProjectExplorer::HeaderPathType::System));
+                    packageHeaderPaths.append(
+                        ProjectExplorer::HeaderPath(i, ProjectExplorer::HeaderPathType::System));
                     package_includes.append(i);
                 }
             }
@@ -551,51 +600,52 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
 void ROSProject::updateCppCodeModel()
 {
-  if (m_futureBuildCodeModelWatcher.isFinished())
-  {
-    m_wsPackageInfo = std::move(m_futureBuildCodeModelWatcher.result().wsPackageInfo);
-    m_wsPackageBuildInfo = std::move(m_futureBuildCodeModelWatcher.result().wsPackageBuildInfo);
+    if (m_futureBuildCodeModelWatcher.isFinished()) {
+        m_wsPackageInfo = std::move(m_futureBuildCodeModelWatcher.result().wsPackageInfo);
+        m_wsPackageBuildInfo = std::move(m_futureBuildCodeModelWatcher.result().wsPackageBuildInfo);
 
-    QtSupport::CppKitInfo kitInfo(this->activeTarget()->kit());
-    QTC_ASSERT(kitInfo.isValid(), return);
+        QtSupport::CppKitInfo kitInfo(this->activeTarget()->kit());
+        QTC_ASSERT(kitInfo.isValid(), return );
 
-    m_cppCodeModelUpdater->update({this, kitInfo, rosBuildConfiguration()->environment(), m_futureBuildCodeModelWatcher.result().parts});
+        m_cppCodeModelUpdater->update({this,
+                                       kitInfo,
+                                       rosBuildConfiguration()->environment(),
+                                       m_futureBuildCodeModelWatcher.result().parts});
 
-    m_asyncBuildCodeModelFutureInterface->reportFinished();
-    delete m_asyncBuildCodeModelFutureInterface;
-    m_asyncBuildCodeModelFutureInterface = nullptr;
+        m_asyncBuildCodeModelFutureInterface->reportFinished();
+        delete m_asyncBuildCodeModelFutureInterface;
+        m_asyncBuildCodeModelFutureInterface = nullptr;
 
-    updateEnvironment();
-  }
-
+        updateEnvironment();
+    }
 }
 
 Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *errorMessage)
 {
-      RestoreResult result = Project::fromMap(map, errorMessage);
-      if (result != RestoreResult::Ok)
-          return result;
+    RestoreResult result = Project::fromMap(map, errorMessage);
+    if (result != RestoreResult::Ok)
+        return result;
 
-      Kit *defaultKit = KitManager::defaultKit();
-      if (!activeTarget() && defaultKit)
-          addTargetForKit(defaultKit);
+    Kit *defaultKit = KitManager::defaultKit();
+    if (!activeTarget() && defaultKit)
+        addTargetForKit(defaultKit);
 
-      // Sanity check: We need both a buildconfiguration and a runconfiguration!
-      QList<Target *> targetList = targets();
-      if (targetList.isEmpty())
-          return RestoreResult::Error;
+    // Sanity check: We need both a buildconfiguration and a runconfiguration!
+    QList<Target *> targetList = targets();
+    if (targetList.isEmpty())
+        return RestoreResult::Error;
 
-      for (Target *t : targetList) {
-          if (!t->activeBuildConfiguration()) {
-              removeTarget(t);
-              continue;
-          }
-          if (!t->activeRunConfiguration())
-              t->addRunConfiguration(new ProjectExplorer::CustomExecutableRunConfiguration(t));
-      }
+    for (Target *t : targetList) {
+        if (!t->activeBuildConfiguration()) {
+            removeTarget(t);
+            continue;
+        }
+        if (!t->activeRunConfiguration())
+            t->addRunConfiguration(new ProjectExplorer::CustomExecutableRunConfiguration(t));
+    }
 
-      asyncUpdateCppCodeModel(true);
-      return RestoreResult::Ok;
+    asyncUpdateCppCodeModel(true);
+    return RestoreResult::Ok;
 }
 
 void ROSProject::buildQueueFinished(bool success)
@@ -604,4 +654,4 @@ void ROSProject::buildQueueFinished(bool success)
 }
 
 } // namespace Internal
-} // namespace GenericProjectManager
+} // namespace ROSProjectManager

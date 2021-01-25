@@ -24,9 +24,9 @@
 
 using namespace Core;
 
-RemoveDirectoryDialog::RemoveDirectoryDialog(const QString &filePath, QWidget *parent) :
-    QDialog(parent),
-    m_ui(new Ui::RemoveDirectoryDialog)
+RemoveDirectoryDialog::RemoveDirectoryDialog(const QString &filePath, QWidget *parent)
+    : QDialog(parent)
+    , m_ui(new Ui::RemoveDirectoryDialog)
 {
     m_ui->setupUi(this);
     m_ui->directoryNameLabel->setText(QDir::toNativeSeparators(filePath));

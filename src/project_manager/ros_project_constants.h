@@ -26,10 +26,10 @@ namespace ROSProjectManager {
 namespace Constants {
 
 // Project
-const char ROS_PROJECT_ID[]  = "ROSProjectManager.ROSProject";
+const char ROS_PROJECT_ID[] = "ROSProjectManager.ROSProject";
 const char ROS_PROJECT_CONTEXT[] = "ROSProject.ProjectContext";
 const char ROS_PROJECT_FILE_ID[] = "ROSProject.ProjectFile";
-const char ROS_MIME_TYPE[]    = "application/ros.project";
+const char ROS_MIME_TYPE[] = "application/ros.project";
 const char ROS_DEFAULT_WORKING_DIR[] = "%{CurrentProject:Path}";
 
 // Tasks
@@ -58,27 +58,25 @@ const char ROS_TEST_ID[] = "ROSProjectManager.ROSTestStep";
 const char ROS_CATKIN_TEST_RESULTS_ID[] = "ROSProjectManager.ROSCatkinTestResultsStep";
 
 // Project Exclude Extension
-const QStringList ROS_EXCLUDE_FILE_EXTENSION = QStringList() << QLatin1Literal("*.autosave") << QLatin1Literal("*.workspace");
+const QStringList ROS_EXCLUDE_FILE_EXTENSION = QStringList() << QLatin1Literal("*.autosave")
+                                                             << QLatin1Literal("*.workspace");
 
 // ROS Cpp Code Style ID
 const char ROS_CPP_CODE_STYLE_ID[] = "ROSProject.CppCodeStyle";
 
 // ROS C++ constants
-const char SOURCE_HEADER_FILE_FILTER[] = "*.c; *.cc; *.cpp; *.c++; *.cp; *.cxx; *.h; *.hh; *.hpp; *.h++; *.hp; *.hxx;";
+const char SOURCE_HEADER_FILE_FILTER[]
+    = "*.c; *.cc; *.cpp; *.c++; *.cp; *.cxx; *.h; *.hh; *.hpp; *.h++; *.hp; *.hxx;";
 
-const QStringList SOURCE_FILE_EXTENSIONS = QStringList() << QLatin1Literal("c")
-                                                         << QLatin1Literal("cc")
-                                                         << QLatin1Literal("cpp")
-                                                         << QLatin1Literal("c++")
-                                                         << QLatin1Literal("cp")
-                                                         << QLatin1Literal("cxx");
+const QStringList SOURCE_FILE_EXTENSIONS = QStringList()
+                                           << QLatin1Literal("c") << QLatin1Literal("cc")
+                                           << QLatin1Literal("cpp") << QLatin1Literal("c++")
+                                           << QLatin1Literal("cp") << QLatin1Literal("cxx");
 
-const QStringList HEADER_FILE_EXTENSIONS = QStringList() << QLatin1Literal("h")
-                                                         << QLatin1Literal("hh")
-                                                         << QLatin1Literal("hpp")
-                                                         << QLatin1Literal("h++")
-                                                         << QLatin1Literal("hp")
-                                                         << QLatin1Literal("hxx");
+const QStringList HEADER_FILE_EXTENSIONS = QStringList()
+                                           << QLatin1Literal("h") << QLatin1Literal("hh")
+                                           << QLatin1Literal("hpp") << QLatin1Literal("h++")
+                                           << QLatin1Literal("hp") << QLatin1Literal("hxx");
 
 // ROS Settings Widgets
 const char ROS_SETTINGS_GROUP_ID[] = "ROSProjectManager.ROSSettingsGroup";

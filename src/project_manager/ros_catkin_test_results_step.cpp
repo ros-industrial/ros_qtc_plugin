@@ -20,40 +20,42 @@
  */
 
 #include "ros_catkin_test_results_step.h"
-#include "ros_utils.h"
 #include "ros_build_configuration.h"
+#include "ros_utils.h"
 
 namespace ROSProjectManager {
 namespace Internal {
 
-ROSCatkinTestResultsStep::ROSCatkinTestResultsStep(RunStepList *rsl) : ROSGenericRunStep(rsl, Constants::ROS_CATKIN_TEST_RESULTS_ID)
+ROSCatkinTestResultsStep::ROSCatkinTestResultsStep(RunStepList *rsl)
+    : ROSGenericRunStep(rsl, Constants::ROS_CATKIN_TEST_RESULTS_ID)
 {
-  ctor();
+    ctor();
 }
 
-ROSCatkinTestResultsStep::ROSCatkinTestResultsStep(RunStepList *rsl, Utils::Id id) : ROSGenericRunStep(rsl, id)
+ROSCatkinTestResultsStep::ROSCatkinTestResultsStep(RunStepList *rsl, Utils::Id id)
+    : ROSGenericRunStep(rsl, id)
 {
-  ctor();
+    ctor();
 }
 
 void ROSCatkinTestResultsStep::ctor()
 {
-  setCommand("catkin_test_results");
+    setCommand("catkin_test_results");
 }
 
 RunStepConfigWidget *ROSCatkinTestResultsStep::createConfigWidget()
 {
-  return new ROSGenericRunStepConfigWidget(this, false, true, false);
+    return new ROSGenericRunStepConfigWidget(this, false, true, false);
 }
 
-ROSCatkinTestResultsStepFactory::ROSCatkinTestResultsStepFactory() :
-    RunStepFactory()
+ROSCatkinTestResultsStepFactory::ROSCatkinTestResultsStepFactory()
+    : RunStepFactory()
 {
-  registerStep<ROSCatkinTestResultsStep>(Constants::ROS_CATKIN_TEST_RESULTS_ID);
-  setDisplayName("ROS Catkin Test Results Step");
-  setFlags(RunStepInfo::Flags::UniqueStep);
-  setSupportedProjectType(Constants::ROS_PROJECT_ID);
-  setSupportedStepList(Constants::ROS_RUN_STEP_LIST_ID);
+    registerStep<ROSCatkinTestResultsStep>(Constants::ROS_CATKIN_TEST_RESULTS_ID);
+    setDisplayName("ROS Catkin Test Results Step");
+    setFlags(RunStepInfo::Flags::UniqueStep);
+    setSupportedProjectType(Constants::ROS_PROJECT_ID);
+    setSupportedStepList(Constants::ROS_RUN_STEP_LIST_ID);
 }
 
 } // namespace Internal

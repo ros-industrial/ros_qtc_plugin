@@ -25,9 +25,9 @@
 
 #include <coreplugin/basefilewizard.h>
 #include <coreplugin/basefilewizardfactory.h>
+#include <utils/fileutils.h>
 #include <utils/wizard.h>
 #include <utils/wizardpage.h>
-#include <utils/fileutils.h>
 
 #include <QProcess>
 
@@ -35,7 +35,9 @@ namespace ROSProjectManager {
 namespace Internal {
 class ROSImportWizardPage;
 class ROSImportWizardPagePrivate;
-namespace Ui{ class ROSImportWizardPage;}
+namespace Ui {
+class ROSImportWizardPage;
+}
 class ROSProjectWizardDialog : public Core::BaseFileWizard
 {
     Q_OBJECT
@@ -79,15 +81,14 @@ private slots:
     void slotProjectNameValidChanged();
     void slotProjectPathValidChanged();
     void slotActivated();
-//    void slotUpdateStdError();
-//    void slotUpdateStdText();
+    //    void slotUpdateStdError();
+    //    void slotUpdateStdText();
 
 private:
     ROSImportWizardPagePrivate *d;
 
     void validChangedHelper();
 };
-
 
 class ROSProjectWizard : public Core::BaseFileWizardFactory
 {
@@ -97,9 +98,11 @@ public:
     ROSProjectWizard();
 
 protected:
-    Core::BaseFileWizard *create(QWidget *parent, const Core::WizardDialogParameters &parameters) const override;
+    Core::BaseFileWizard *create(QWidget *parent,
+                                 const Core::WizardDialogParameters &parameters) const override;
     Core::GeneratedFiles generateFiles(const QWizard *w, QString *errorMessage) const override;
-    bool postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l,
+    bool postGenerateFiles(const QWizard *w,
+                           const Core::GeneratedFiles &l,
                            QString *errorMessage) const override;
 };
 

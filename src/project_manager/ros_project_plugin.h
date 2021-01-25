@@ -21,14 +21,14 @@
 #ifndef ROSPROJECTPLUGIN_H
 #define ROSPROJECTPLUGIN_H
 #include <extensionsystem/iplugin.h>
-#include <QObject>
 #include <QAction>
+#include <QObject>
 #include <qtermwidget5/qtermwidget.h>
 
 namespace ProjectExplorer {
 class Project;
 class Node;
-}
+} // namespace ProjectExplorer
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -82,14 +82,12 @@ private slots:
     void renameFile();
 
 private:
-
     /**
      * @brief This creates a built-in ROS Cpp code style.
      */
     void createCppCodeStyle();
 
     class ROSProjectPluginPrivate *d = nullptr;
-
 };
 
 } // namespace Internal

@@ -25,9 +25,9 @@
 
 #include <coreplugin/dialogs/ioptionspage.h>
 
-#include <QWidget>
 #include <QPointer>
 #include <QStringListModel>
+#include <QWidget>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -63,26 +63,25 @@ private:
 
 class ROSSettingsWidget : public QWidget
 {
-  Q_OBJECT
+    Q_OBJECT
 
 public:
-  explicit ROSSettingsWidget(QWidget *parent = 0);
-  ~ROSSettingsWidget();
+    explicit ROSSettingsWidget(QWidget *parent = 0);
+    ~ROSSettingsWidget();
 
-  ROSSettings settings() const;
-  void setSettings(const ROSSettings &settings);
+    ROSSettings settings() const;
+    void setSettings(const ROSSettings &settings);
 
 private:
-  Ui::ROSSettingsPage *m_ui;
-  QStringListModel *m_available_code_style_names;
-  QMap<QString, QString> m_available_code_styles;
+    Ui::ROSSettingsPage *m_ui;
+    QStringListModel *m_available_code_style_names;
+    QMap<QString, QString> m_available_code_styles;
 };
 
 class ROSSettingsPage : public Core::IOptionsPage
 {
 public:
-    explicit ROSSettingsPage(QSharedPointer<ROSSettings> &settings,
-                             QObject *parent = nullptr);
+    explicit ROSSettingsPage(QSharedPointer<ROSSettings> &settings, QObject *parent = nullptr);
 
     QWidget *widget();
     void apply();

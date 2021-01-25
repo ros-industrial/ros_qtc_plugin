@@ -19,43 +19,43 @@
  * limitations under the License.
  */
 #include "ros_run_configuration.h"
+#include "ros_generic_run_step.h"
 #include "ros_project.h"
 #include "ros_run_steps_page.h"
-#include "ros_generic_run_step.h"
 #include "ui_ros_run_configuration.h"
 
+#include <coreplugin/coreicons.h>
 #include <coreplugin/editormanager/editormanager.h>
 #include <coreplugin/editormanager/ieditor.h>
-#include <coreplugin/coreicons.h>
 #include <coreplugin/icore.h>
 #include <coreplugin/idocument.h>
 #include <coreplugin/messagemanager.h>
-#include <projectexplorer/target.h>
+#include <debugger/debuggerengine.h>
+#include <projectexplorer/buildstepspage.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorericons.h>
-#include <projectexplorer/buildstepspage.h>
-#include <debugger/debuggerengine.h>
+#include <projectexplorer/target.h>
 
 #include <qtsupport/qtkitinformation.h>
 #include <qtsupport/qtoutputformatter.h>
 #include <qtsupport/qtsupportconstants.h>
- 
+
+#include <utils/detailswidget.h>
 #include <utils/fileutils.h>
 #include <utils/mimetypes/mimedatabase.h>
 #include <utils/qtcprocess.h>
+#include <utils/utilsicons.h>
 #include <utils/winutils.h>
 #include <qmljstools/qmljstoolsconstants.h>
-#include <utils/detailswidget.h>
-#include <utils/utilsicons.h>
 
-#include <QLineEdit>
 #include <QComboBox>
+#include <QDebug>
 #include <QFormLayout>
 #include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
-#include <QDebug>
-#include <QMessageBox>
 
 using namespace ProjectExplorer;
 
@@ -64,75 +64,71 @@ namespace Internal {
 
 const char ROS_RC_ID[] = "ROSProjectManager.ROSRunConfiguration";
 
-ROSRunConfiguration::ROSRunConfiguration(Target *parent, Utils::Id id) :
-    RunConfiguration(parent, id),
-    m_stepList(new RunStepList(this, Constants::ROS_RUN_STEP_LIST_ID))
-{
-}
-
+ROSRunConfiguration::ROSRunConfiguration(Target *parent, Utils::Id id)
+    : RunConfiguration(parent, id)
+    , m_stepList(new RunStepList(this, Constants::ROS_RUN_STEP_LIST_ID))
+{}
 
 QString ROSRunConfiguration::disabledReason() const
 {
-  QString output;
-  output = RunConfiguration::disabledReason();
+    QString output;
+    output = RunConfiguration::disabledReason();
 
-  if (output.isEmpty())
-  {
-    if (!isEnabled())
-        output = tr("No ROS run step for active project.");
-  }
+    if (output.isEmpty()) {
+        if (!isEnabled())
+            output = tr("No ROS run step for active project.");
+    }
 
-  return output;
+    return output;
 }
 
-RunStepList* ROSRunConfiguration::stepList() const
+RunStepList *ROSRunConfiguration::stepList() const
 {
-  return m_stepList;
+    return m_stepList;
 }
 
 /*!
   \class ROSRunConfigurationFactory
 */
 
-ROSRunConfigurationFactory::ROSRunConfigurationFactory() :
-    ProjectExplorer::RunConfigurationFactory()
+ROSRunConfigurationFactory::ROSRunConfigurationFactory()
+    : ProjectExplorer::RunConfigurationFactory()
 {
-  registerRunConfiguration<ROSRunConfiguration>(ROS_RC_ID);
-  addSupportedProjectType(Constants::ROS_PROJECT_ID);
-  addSupportedTargetDeviceType(ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE);
+    registerRunConfiguration<ROSRunConfiguration>(ROS_RC_ID);
+    addSupportedProjectType(Constants::ROS_PROJECT_ID);
+    addSupportedTargetDeviceType(ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE);
 }
 
-ROSRunConfigurationFactory::~ROSRunConfigurationFactory()
-{
-}
+ROSRunConfigurationFactory::~ROSRunConfigurationFactory() {}
 
-QList<ProjectExplorer::RunConfigurationCreationInfo>
-ROSRunConfigurationFactory::availableCreators(ProjectExplorer::Target */*parent*/) const
+QList<ProjectExplorer::RunConfigurationCreationInfo> ROSRunConfigurationFactory::availableCreators(
+    ProjectExplorer::Target * /*parent*/) const
 {
-  RunConfigurationCreationInfo rci;
-  rci.factory = this;
-  rci.buildKey = "This is a test";
-  rci.displayName = "ROS Run Configuration";
-  rci.creationMode = RunConfigurationCreationInfo::ManualCreationOnly;
-  rci.useTerminal = false;
+    RunConfigurationCreationInfo rci;
+    rci.factory = this;
+    rci.buildKey = "This is a test";
+    rci.displayName = "ROS Run Configuration";
+    rci.creationMode = RunConfigurationCreationInfo::ManualCreationOnly;
+    rci.useTerminal = false;
 
-  return {rci};
+    return {rci};
 }
 
 ////////////////////////////////////
 /// ROSRunWorker
 ////////////////////////////////////
-ROSRunWorker::ROSRunWorker(RunControl *runControl) : RunWorker(runControl)
+ROSRunWorker::ROSRunWorker(RunControl *runControl)
+    : RunWorker(runControl)
 {
     setId("RosRunWorker");
 }
 
 void ROSRunWorker::start()
 {
-    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
-    {
-        if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
-        {
+    for (RunStep *rs :
+         qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps()) {
+        if (rs->enabled() == true
+            && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID) {
             rs->run();
         }
     }
@@ -142,64 +138,59 @@ void ROSRunWorker::start()
 /// ROSDebugRunWorker
 ////////////////////////////////////
 
-ROSDebugRunWorker::ROSDebugRunWorker(RunControl *runControl) : Debugger::DebuggerRunTool(runControl)
+ROSDebugRunWorker::ROSDebugRunWorker(RunControl *runControl)
+    : Debugger::DebuggerRunTool(runControl)
 {
     setId("RosDebugRunWorker");
 
-    connect(&m_timer, &QTimer::timeout,
-    this, &ROSDebugRunWorker::findProcess);
+    connect(&m_timer, &QTimer::timeout, this, &ROSDebugRunWorker::findProcess);
 
-    connect(this, &ROSDebugRunWorker::stopped,
-            &m_timer, &QTimer::stop);
+    connect(this, &ROSDebugRunWorker::stopped, &m_timer, &QTimer::stop);
 }
 
 void ROSDebugRunWorker::start()
 {
     bool found = false;
-    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
-    {
-        if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID)
-        {
+    for (RunStep *rs :
+         qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps()) {
+        if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID) {
             found = true;
-            m_debugContinueOnAttach = qobject_cast<ROSGenericRunStep *>(rs)->getDebugContinueOnAttach();
+            m_debugContinueOnAttach = qobject_cast<ROSGenericRunStep *>(rs)
+                                          ->getDebugContinueOnAttach();
             m_debugTargetPath = qobject_cast<ROSGenericRunStep *>(rs)->getTargetPath();
-            if (QFileInfo(m_debugTargetPath).exists())
-            {
+            if (QFileInfo(m_debugTargetPath).exists()) {
                 m_timeElapsed = 0;
                 m_timer.start(10);
-            }
-            else
-            {
+            } else {
                 QMessageBox msg;
                 msg.setWindowTitle("Debugging Catkin Workspace");
                 msg.setTextFormat(Qt::RichText);
                 msg.setWindowFlags(Qt::WindowStaysOnTopHint);
-                msg.setText("The <b><i>ROS Attach to Node</b></i> Run Step is not complete! Please verify information and try again.");
+                msg.setText("The <b><i>ROS Attach to Node</b></i> Run Step is not complete! Please "
+                            "verify information and try again.");
                 msg.exec();
                 return;
             }
-
         }
     }
 
-    if (found)
-    {
+    if (found) {
         // Now that the watcher is started run all of the other steps
-        for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
-        {
-            if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
-            {
+        for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())
+                               ->stepList()
+                               ->steps()) {
+            if (rs->enabled() == true
+                && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID) {
                 rs->run();
             }
         }
-    }
-    else
-    {
+    } else {
         QMessageBox msg;
         msg.setWindowTitle("Debugging Catkin Workspace");
         msg.setTextFormat(Qt::RichText);
         msg.setWindowFlags(Qt::WindowStaysOnTopHint);
-        msg.setText("In order to debug a ROS Node the <b><i>ROS Attach to Node</b></i> Run Step must be added and enabled!");
+        msg.setText("In order to debug a ROS Node the <b><i>ROS Attach to Node</b></i> Run Step "
+                    "must be added and enabled!");
         msg.exec();
         return;
     }
@@ -222,7 +213,8 @@ void ROSDebugRunWorker::findProcess()
     m_timeElapsed += 10;
     const QString &appName = Utils::FileUtils::normalizePathName(m_debugTargetPath);
     ProjectExplorer::DeviceProcessItem fallback;
-    for (const ProjectExplorer::DeviceProcessItem &p : ProjectExplorer::DeviceProcessList::localProcesses()) {
+    for (const ProjectExplorer::DeviceProcessItem &p :
+         ProjectExplorer::DeviceProcessList::localProcesses()) {
         if (Utils::FileUtils::normalizePathName(p.exe) == appName) {
             Core::MessageManager::write(tr("[ROS] Attaching to process: %1.").arg(appName));
             pidFound(p);
@@ -235,8 +227,7 @@ void ROSDebugRunWorker::findProcess()
         pidFound(fallback);
 
     // Make sure this does not run indefinitely. Allow 30sec to start the process.
-    if (m_timeElapsed >= 30000)
-    {
+    if (m_timeElapsed >= 30000) {
         m_timer.stop();
         Core::MessageManager::write(tr("[ROS Error] Unable to find process: %1.").arg(appName));
     }
@@ -244,5 +235,3 @@ void ROSDebugRunWorker::findProcess()
 
 } // namespace Internal
 } // namespace ROSProjectManager
-
-

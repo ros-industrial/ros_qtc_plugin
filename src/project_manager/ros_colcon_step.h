@@ -21,8 +21,8 @@
 #ifndef ROSCOLCONSTEP_H
 #define ROSCOLCONSTEP_H
 
-#include <projectexplorer/abstractprocessstep.h>
 #include "ros_build_configuration.h"
+#include <projectexplorer/abstractprocessstep.h>
 
 QT_BEGIN_NAMESPACE
 class QListWidgetItem;
@@ -33,7 +33,9 @@ namespace Internal {
 
 class ROSColconStepWidget;
 class ROSColconStepFactory;
-namespace Ui { class ROSColconStep; }
+namespace Ui {
+class ROSColconStep;
+}
 
 static const char ROS_COLCON_STEP_ID[] = "ROSProjectManager.ROSColconStep";
 
@@ -45,7 +47,7 @@ class ROSColconStep : public ProjectExplorer::AbstractProcessStep
     friend class ROSColconStepFactory;
 
 public:
-    enum BuildTargets {BUILD = 0, CLEAN = 1};
+    enum BuildTargets { BUILD = 0, CLEAN = 1 };
 
     ROSColconStep(ProjectExplorer::BuildStepList *parent, Utils::Id id);
     ~ROSColconStep() override;

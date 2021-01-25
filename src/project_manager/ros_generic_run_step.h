@@ -21,14 +21,15 @@
 #ifndef ROS_GENERIC_RUN_STEP_H
 #define ROS_GENERIC_RUN_STEP_H
 
-#include "ros_run_step.h"
 #include "ros_run_configuration.h"
+#include "ros_run_step.h"
 
 namespace ROSProjectManager {
 namespace Internal {
 
-
-namespace Ui { class ROSGenericStep; }
+namespace Ui {
+class ROSGenericStep;
+}
 
 class ROSGenericRunStep : public RunStep
 {
@@ -87,7 +88,10 @@ class ROSGenericRunStepConfigWidget : public RunStepConfigWidget
     Q_OBJECT
 
 public:
-    ROSGenericRunStepConfigWidget(ROSGenericRunStep *genericStep, bool packages_show, bool targets_show, bool debug_show);
+    ROSGenericRunStepConfigWidget(ROSGenericRunStep *genericStep,
+                                  bool packages_show,
+                                  bool targets_show,
+                                  bool debug_show);
     ~ROSGenericRunStepConfigWidget();
     QString summaryText() const override;
     QString displayName() const override;
@@ -102,17 +106,17 @@ private slots:
     void argumentsLineEdit_textChanged(const QString &arg1);
 
 private:
-      void updateAvailableTargets();
-      void updateAvailablePackages();
+    void updateAvailableTargets();
+    void updateAvailablePackages();
 
-      Ui::ROSGenericStep *m_ui;
-      ROSGenericRunStep *m_rosGenericStep;
-      QMap<QString, QString> m_availablePackages;
-      QMap<QString, QString> m_availableTargets;
-      QStringListModel *m_packageNames;
-      QStringListModel *m_targetNames;
+    Ui::ROSGenericStep *m_ui;
+    ROSGenericRunStep *m_rosGenericStep;
+    QMap<QString, QString> m_availablePackages;
+    QMap<QString, QString> m_availableTargets;
+    QStringListModel *m_packageNames;
+    QStringListModel *m_targetNames;
 };
 
-} // Internal
-} // ROSProjectManager
+} // namespace Internal
+} // namespace ROSProjectManager
 #endif // ROS_GENERIC_RUN_STEP_H

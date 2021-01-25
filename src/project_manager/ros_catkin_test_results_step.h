@@ -26,23 +26,24 @@
 namespace ROSProjectManager {
 namespace Internal {
 
-namespace Ui { class ROSGenericStep; }
+namespace Ui {
+class ROSGenericStep;
+}
 
 class ROSCatkinTestResultsStep : public ROSGenericRunStep
 {
-  Q_OBJECT
-  friend class ROSCatkinTestResultsStepFactory;
+    Q_OBJECT
+    friend class ROSCatkinTestResultsStepFactory;
 
 public:
-  ROSCatkinTestResultsStep(RunStepList *rsl);
+    ROSCatkinTestResultsStep(RunStepList *rsl);
 
 protected:
-  ROSCatkinTestResultsStep(RunStepList *rsl, Utils::Id id);
+    ROSCatkinTestResultsStep(RunStepList *rsl, Utils::Id id);
 
-  void ctor();
+    void ctor();
 
-  RunStepConfigWidget *createConfigWidget() override;
-
+    RunStepConfigWidget *createConfigWidget() override;
 };
 
 class ROSCatkinTestResultsStepFactory : public RunStepFactory
@@ -51,7 +52,7 @@ public:
     ROSCatkinTestResultsStepFactory();
 };
 
-} // Internal
-} // ROSProjectManager
+} // namespace Internal
+} // namespace ROSProjectManager
 
 #endif // ROS_CATKIN_TEST_RESULTS_STEP_H

@@ -92,58 +92,55 @@ void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo &info)
     Q_ASSERT(bs);
     Q_ASSERT(cs);
 
-    switch (extraInfo.buildSystem)
-    {
-        case ROSUtils::CatkinMake:
-        {
-            ROSCatkinMakeStep *makeStep = new ROSCatkinMakeStep(bs, ROS_CMS_ID);
-            bs->insertStep(0, makeStep);
-            makeStep->setBuildTarget(ROSCatkinMakeStep::BUILD);
+    switch (extraInfo.buildSystem) {
+    case ROSUtils::CatkinMake: {
+        ROSCatkinMakeStep *makeStep = new ROSCatkinMakeStep(bs, ROS_CMS_ID);
+        bs->insertStep(0, makeStep);
+        makeStep->setBuildTarget(ROSCatkinMakeStep::BUILD);
 
-            ROSCatkinMakeStep *cleanMakeStep = new ROSCatkinMakeStep(cs, ROS_CMS_ID);
-            cs->insertStep(0, cleanMakeStep);
-            cleanMakeStep->setBuildTarget(ROSCatkinMakeStep::CLEAN);
-            break;
-        }
-        case ROSUtils::CatkinTools:
-        {
-            ROSCatkinToolsStep *makeStep = new ROSCatkinToolsStep(bs, ROS_CTS_ID);
-            bs->insertStep(0, makeStep);
-            makeStep->setBuildTarget(ROSCatkinToolsStep::BUILD);
+        ROSCatkinMakeStep *cleanMakeStep = new ROSCatkinMakeStep(cs, ROS_CMS_ID);
+        cs->insertStep(0, cleanMakeStep);
+        cleanMakeStep->setBuildTarget(ROSCatkinMakeStep::CLEAN);
+        break;
+    }
+    case ROSUtils::CatkinTools: {
+        ROSCatkinToolsStep *makeStep = new ROSCatkinToolsStep(bs, ROS_CTS_ID);
+        bs->insertStep(0, makeStep);
+        makeStep->setBuildTarget(ROSCatkinToolsStep::BUILD);
 
-            ROSCatkinToolsStep *cleanMakeStep = new ROSCatkinToolsStep(cs, ROS_CTS_ID);
-            cs->insertStep(0, cleanMakeStep);
-            cleanMakeStep->setBuildTarget(ROSCatkinToolsStep::CLEAN);
-            break;
-        }
-        case ROSUtils::Colcon:
-        {
-            ROSColconStep *makeStep = new ROSColconStep(bs, ROS_COLCON_STEP_ID);
-            bs->insertStep(0, makeStep);
-            makeStep->setBuildTarget(ROSColconStep::BUILD);
+        ROSCatkinToolsStep *cleanMakeStep = new ROSCatkinToolsStep(cs, ROS_CTS_ID);
+        cs->insertStep(0, cleanMakeStep);
+        cleanMakeStep->setBuildTarget(ROSCatkinToolsStep::CLEAN);
+        break;
+    }
+    case ROSUtils::Colcon: {
+        ROSColconStep *makeStep = new ROSColconStep(bs, ROS_COLCON_STEP_ID);
+        bs->insertStep(0, makeStep);
+        makeStep->setBuildTarget(ROSColconStep::BUILD);
 
-            ROSColconStep *cleanMakeStep = new ROSColconStep(cs, ROS_COLCON_STEP_ID);
-            cs->insertStep(0, cleanMakeStep);
-            cleanMakeStep->setBuildTarget(ROSColconStep::CLEAN);
-            break;
-        }
+        ROSColconStep *cleanMakeStep = new ROSColconStep(cs, ROS_COLCON_STEP_ID);
+        cs->insertStep(0, cleanMakeStep);
+        cleanMakeStep->setBuildTarget(ROSColconStep::CLEAN);
+        break;
+    }
     }
 }
 
 QVariantMap ROSBuildConfiguration::toMap() const
 {
-  QVariantMap map(BuildConfiguration::toMap());
+    QVariantMap map(BuildConfiguration::toMap());
 
-  map.insert(QLatin1String(ROS_BC_BUILD_SYSTEM), (int)m_buildSystem);
-  map.insert(QLatin1String(ROS_BC_CMAKE_BUILD_TYPE), (int)m_cmakeBuildType);
-  return map;
+    map.insert(QLatin1String(ROS_BC_BUILD_SYSTEM), (int) m_buildSystem);
+    map.insert(QLatin1String(ROS_BC_CMAKE_BUILD_TYPE), (int) m_cmakeBuildType);
+    return map;
 }
 
 bool ROSBuildConfiguration::fromMap(const QVariantMap &map)
 {
-  m_buildSystem = (ROSUtils::BuildSystem)map.value(QLatin1String(ROS_BC_BUILD_SYSTEM)).toInt();
-  m_cmakeBuildType = (ROSUtils::BuildType)map.value(QLatin1String(ROS_BC_CMAKE_BUILD_TYPE)).toInt();
-  return BuildConfiguration::fromMap(map);
+    m_buildSystem = (ROSUtils::BuildSystem) map.value(QLatin1String(ROS_BC_BUILD_SYSTEM)).toInt();
+    m_cmakeBuildType = (ROSUtils::BuildType) map.value(QLatin1String(ROS_BC_CMAKE_BUILD_TYPE))
+                           .toInt();
+    return BuildConfiguration::fromMap(map);
 }
 
 ROSUtils::BuildSystem ROSBuildConfiguration::rosBuildSystem() const
@@ -182,7 +179,7 @@ void ROSBuildConfiguration::updateQtEnvironment(const Utils::Environment &env)
 {
     const Utils::NameValueItems diff = baseEnvironment().diff(env);
     if (!diff.isEmpty())
-      setUserEnvironmentChanges(diff);
+        setUserEnvironmentChanges(diff);
 }
 
 NamedWidget *ROSBuildConfiguration::createConfigWidget()
@@ -192,27 +189,29 @@ NamedWidget *ROSBuildConfiguration::createConfigWidget()
 
 QList<NamedWidget *> ROSBuildConfiguration::createSubConfigWidgets()
 {
-  return QList<NamedWidget *>() << new ROSBuildEnvironmentWidget(this);
+    return QList<NamedWidget *>() << new ROSBuildEnvironmentWidget(this);
 }
 
 /*!
   \class ROSBuildConfigurationFactory
 */
 
-ROSBuildConfigurationFactory::ROSBuildConfigurationFactory() :
-    BuildConfigurationFactory()
+ROSBuildConfigurationFactory::ROSBuildConfigurationFactory()
+    : BuildConfigurationFactory()
 {
     registerBuildConfiguration<ROSBuildConfiguration>(ROS_BC_ID);
 
     setSupportedProjectType(Constants::ROS_PROJECT_ID);
     setSupportedProjectMimeTypeName(Constants::ROS_MIME_TYPE);
 
-    setBuildGenerator(std::bind(&ROSBuildConfigurationFactory::availableBuilds, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    setBuildGenerator(std::bind(&ROSBuildConfigurationFactory::availableBuilds,
+                                this,
+                                std::placeholders::_1,
+                                std::placeholders::_2,
+                                std::placeholders::_3));
 }
 
-ROSBuildConfigurationFactory::~ROSBuildConfigurationFactory()
-{
-}
+ROSBuildConfigurationFactory::~ROSBuildConfigurationFactory() {}
 
 QList<BuildInfo> ROSBuildConfigurationFactory::availableBuilds(const Kit *k,
                                                                const Utils::FilePath &projectPath,
@@ -227,15 +226,18 @@ QList<BuildInfo> ROSBuildConfigurationFactory::availableBuilds(const Kit *k,
     ROSUtils::parseQtCreatorWorkspaceFile(projectPath, projectFileContent);
 
     for (int type = ROSUtils::BuildTypeDebug; type <= ROSUtils::BuildTypeUserDefined; ++type) {
-      ProjectExplorer::BuildInfo info = createBuildInfo(k, projectFileContent.defaultBuildSystem, ROSUtils::BuildType(type));
-      result << info;
+        ProjectExplorer::BuildInfo info = createBuildInfo(k,
+                                                          projectFileContent.defaultBuildSystem,
+                                                          ROSUtils::BuildType(type));
+        result << info;
     }
 
     //TO DO: Should probably check if the directory that was selected was the workspace
     return result;
 }
 
-ProjectExplorer::BuildInfo ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const
+ProjectExplorer::BuildInfo ROSBuildConfigurationFactory::createBuildInfo(
+    const Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const
 {
     ProjectExplorer::BuildInfo info;
     info.kitId = k->id();
@@ -289,37 +291,43 @@ BuildConfiguration::BuildType ROSBuildConfiguration::buildType() const
 ////////////////////////////////////////////////////////////////////////////////////
 
 ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
-    : NamedWidget(tr("ROS Manager")),
-      m_buildConfiguration(bc)
+    : NamedWidget(tr("ROS Manager"))
+    , m_buildConfiguration(bc)
 {
     m_ui = new Ui::ROSBuildConfiguration;
     m_ui->setupUi(this);
     m_ui->buildSystemComboBox->setCurrentIndex(bc->rosBuildSystem());
     m_ui->buildTypeComboBox->setCurrentIndex(bc->cmakeBuildType());
 
-    connect(m_ui->buildSystemComboBox, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(buildSystemChanged(int)));
+    connect(m_ui->buildSystemComboBox,
+            SIGNAL(currentIndexChanged(int)),
+            this,
+            SLOT(buildSystemChanged(int)));
 
-    connect(m_ui->buildTypeComboBox, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(buildTypeChanged(int)));
+    connect(m_ui->buildTypeComboBox,
+            SIGNAL(currentIndexChanged(int)),
+            this,
+            SLOT(buildTypeChanged(int)));
 
-    connect(m_ui->buildSourceWorkspaceButton, SIGNAL(clicked()),
-            this, SLOT(buildSourceWorkspaceButtonClicked()));
+    connect(m_ui->buildSourceWorkspaceButton,
+            SIGNAL(clicked()),
+            this,
+            SLOT(buildSourceWorkspaceButtonClicked()));
 }
 
 ROSBuildSettingsWidget::~ROSBuildSettingsWidget()
 {
-  delete m_ui;
+    delete m_ui;
 }
 
 void ROSBuildSettingsWidget::buildSystemChanged(int index)
 {
-    m_buildConfiguration->setBuildSystem(((ROSUtils::BuildSystem)index));
+    m_buildConfiguration->setBuildSystem(((ROSUtils::BuildSystem) index));
 }
 
 void ROSBuildSettingsWidget::buildTypeChanged(int index)
 {
-    m_buildConfiguration->setCMakeBuildType(((ROSUtils::BuildType)index));
+    m_buildConfiguration->setCMakeBuildType(((ROSUtils::BuildType) index));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -334,18 +342,26 @@ ROSBuildEnvironmentWidget::ROSBuildEnvironmentWidget(BuildConfiguration *bc)
     m_clearSystemEnvironmentCheckBox = new QCheckBox(this);
     m_clearSystemEnvironmentCheckBox->setText(tr("Clear system environment"));
 
-    m_buildEnvironmentWidget = new EnvironmentWidget(this, ProjectExplorer::EnvironmentWidget::TypeLocal, m_clearSystemEnvironmentCheckBox);
+    m_buildEnvironmentWidget = new EnvironmentWidget(this,
+                                                     ProjectExplorer::EnvironmentWidget::TypeLocal,
+                                                     m_clearSystemEnvironmentCheckBox);
     vbox->addWidget(m_buildEnvironmentWidget);
 
-    connect(m_buildEnvironmentWidget, SIGNAL(userChangesChanged()),
-            this, SLOT(environmentModelUserChangesChanged()));
-    connect(m_clearSystemEnvironmentCheckBox, SIGNAL(toggled(bool)),
-            this, SLOT(clearSystemEnvironmentCheckBoxClicked(bool)));
+    connect(m_buildEnvironmentWidget,
+            SIGNAL(userChangesChanged()),
+            this,
+            SLOT(environmentModelUserChangesChanged()));
+    connect(m_clearSystemEnvironmentCheckBox,
+            SIGNAL(toggled(bool)),
+            this,
+            SLOT(clearSystemEnvironmentCheckBoxClicked(bool)));
 
     m_buildConfiguration = bc;
 
-    connect(m_buildConfiguration, &BuildConfiguration::environmentChanged,
-            this, &ROSBuildEnvironmentWidget::environmentChanged);
+    connect(m_buildConfiguration,
+            &BuildConfiguration::environmentChanged,
+            this,
+            &ROSBuildEnvironmentWidget::environmentChanged);
 
     m_clearSystemEnvironmentCheckBox->setChecked(!m_buildConfiguration->useSystemEnvironment());
     m_buildEnvironmentWidget->setBaseEnvironment(m_buildConfiguration->baseEnvironment());
@@ -374,16 +390,17 @@ void ROSBuildEnvironmentWidget::environmentChanged()
 
 void ROSBuildSettingsWidget::buildSourceWorkspaceButtonClicked()
 {
-  ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(m_buildConfiguration->project()->projectDirectory(),
-                                                                     m_buildConfiguration->rosBuildSystem(),
-                                                                     m_buildConfiguration->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo
+        = ROSUtils::getWorkspaceInfo(m_buildConfiguration->project()->projectDirectory(),
+                                     m_buildConfiguration->rosBuildSystem(),
+                                     m_buildConfiguration->project()->distribution());
 
-  Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, m_buildConfiguration->environment()).toStringList());
+    Utils::Environment env(
+        ROSUtils::getWorkspaceEnvironment(workspaceInfo, m_buildConfiguration->environment())
+            .toStringList());
 
-  m_buildConfiguration->updateQtEnvironment(env);
+    m_buildConfiguration->updateQtEnvironment(env);
 }
 
 } // namespace Internal
-} // namespace GenericProjectManager
-
-
+} // namespace ROSProjectManager
