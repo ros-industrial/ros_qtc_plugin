@@ -21,28 +21,30 @@
 #ifndef ROS_RUN_CONFIGURATION_H
 #define ROS_RUN_CONFIGURATION_H
 
-#include "ros_run_step.h"
 #include "ros_project_constants.h"
-#include <projectexplorer/runconfiguration.h>
+#include "ros_run_step.h"
+#include <debugger/debuggerruncontrol.h>
 #include <projectexplorer/buildstep.h>
 #include <projectexplorer/devicesupport/deviceprocesslist.h>
-#include <debugger/debuggerruncontrol.h>
+#include <projectexplorer/runconfiguration.h>
 
-#include <QPointer>
-#include <QMenu>
 #include <QFutureInterface>
 #include <QFutureWatcher>
+#include <QMenu>
+#include <QPointer>
 #include <QTimer>
 
 QT_FORWARD_DECLARE_CLASS(QStringListModel)
-
 
 namespace ROSProjectManager {
 namespace Internal {
 
 class ROSRunConfigurationFactory;
 
-namespace Ui { class ROSRunConfiguration; class ROSLaunchConfiguration;}
+namespace Ui {
+class ROSRunConfiguration;
+class ROSLaunchConfiguration;
+} // namespace Ui
 
 class ROSRunConfiguration : public ProjectExplorer::RunConfiguration
 {
@@ -58,7 +60,6 @@ public:
     RunStepList *stepList() const;
 
 private:
-
     RunStepList *m_stepList;
 };
 
@@ -69,8 +70,8 @@ public:
     ~ROSRunConfigurationFactory() override;
 
 protected:
-    QList<ProjectExplorer::RunConfigurationCreationInfo>
-    availableCreators(ProjectExplorer::Target *parent) const override;
+    QList<ProjectExplorer::RunConfigurationCreationInfo> availableCreators(
+        ProjectExplorer::Target *parent) const override;
 };
 
 class ROSRunWorker : public ProjectExplorer::RunWorker

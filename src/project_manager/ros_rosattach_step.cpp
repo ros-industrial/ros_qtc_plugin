@@ -20,50 +20,51 @@
  */
 
 #include "ros_rosattach_step.h"
-#include "ros_utils.h"
 #include "ros_build_configuration.h"
+#include "ros_utils.h"
 
 namespace ROSProjectManager {
 namespace Internal {
 
-ROSAttachStep::ROSAttachStep(RunStepList *rsl) : ROSGenericRunStep(rsl, Constants::ROS_ATTACH_TO_NODE_ID)
+ROSAttachStep::ROSAttachStep(RunStepList *rsl)
+    : ROSGenericRunStep(rsl, Constants::ROS_ATTACH_TO_NODE_ID)
 {
-  ctor();
+    ctor();
 }
 
-ROSAttachStep::ROSAttachStep(RunStepList *rsl, Utils::Id id) : ROSGenericRunStep(rsl, id)
+ROSAttachStep::ROSAttachStep(RunStepList *rsl, Utils::Id id)
+    : ROSGenericRunStep(rsl, id)
 {
-  ctor();
+    ctor();
 }
 
-void ROSAttachStep::run()
-{
-}
+void ROSAttachStep::run() {}
 
 void ROSAttachStep::ctor()
 {
-  setCommand("debug");
+    setCommand("debug");
 }
 
 RunStepConfigWidget *ROSAttachStep::createConfigWidget()
 {
-  return new ROSGenericRunStepConfigWidget(this, true, false, true);
+    return new ROSGenericRunStepConfigWidget(this, true, false, true);
 }
 
 QMap<QString, QString> ROSAttachStep::getAvailableTargets()
 {
-  ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
-  return ROSUtils::getROSPackageExecutables(getPackage(), bc->environment().toStringList());
+    ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(
+        target()->activeBuildConfiguration());
+    return ROSUtils::getROSPackageExecutables(getPackage(), bc->environment().toStringList());
 }
 
-ROSAttachStepFactory::ROSAttachStepFactory() :
-    RunStepFactory()
+ROSAttachStepFactory::ROSAttachStepFactory()
+    : RunStepFactory()
 {
-  registerStep<ROSAttachStep>(Constants::ROS_ATTACH_TO_NODE_ID);
-  setDisplayName("ROS Attach to Node Step");
-  setFlags(RunStepInfo::Flags::UniqueStep);
-  setSupportedProjectType(Constants::ROS_PROJECT_ID);
-  setSupportedStepList(Constants::ROS_RUN_STEP_LIST_ID);
+    registerStep<ROSAttachStep>(Constants::ROS_ATTACH_TO_NODE_ID);
+    setDisplayName("ROS Attach to Node Step");
+    setFlags(RunStepInfo::Flags::UniqueStep);
+    setSupportedProjectType(Constants::ROS_PROJECT_ID);
+    setSupportedStepList(Constants::ROS_RUN_STEP_LIST_ID);
 }
 
 } // namespace Internal

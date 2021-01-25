@@ -20,45 +20,48 @@
  */
 
 #include "ros_rosrun_step.h"
-#include "ros_utils.h"
 #include "ros_build_configuration.h"
+#include "ros_utils.h"
 
 namespace ROSProjectManager {
 namespace Internal {
 
-ROSRunStep::ROSRunStep(RunStepList *rsl) : ROSGenericRunStep(rsl, Constants::ROS_RUN_ID)
+ROSRunStep::ROSRunStep(RunStepList *rsl)
+    : ROSGenericRunStep(rsl, Constants::ROS_RUN_ID)
 {
-  ctor();
+    ctor();
 }
 
-ROSRunStep::ROSRunStep(RunStepList *rsl, Utils::Id id) : ROSGenericRunStep(rsl, id)
+ROSRunStep::ROSRunStep(RunStepList *rsl, Utils::Id id)
+    : ROSGenericRunStep(rsl, id)
 {
-  ctor();
+    ctor();
 }
 
 void ROSRunStep::ctor()
 {
-  setCommand("rosrun");
+    setCommand("rosrun");
 }
 
 RunStepConfigWidget *ROSRunStep::createConfigWidget()
 {
-  return new ROSGenericRunStepConfigWidget(this, true, true, false);
+    return new ROSGenericRunStepConfigWidget(this, true, true, false);
 }
 
 QMap<QString, QString> ROSRunStep::getAvailableTargets()
 {
-  ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
-  return ROSUtils::getROSPackageExecutables(getPackage(), bc->environment().toStringList());
+    ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(
+        target()->activeBuildConfiguration());
+    return ROSUtils::getROSPackageExecutables(getPackage(), bc->environment().toStringList());
 }
 
-ROSRunStepFactory::ROSRunStepFactory() :
-    RunStepFactory()
+ROSRunStepFactory::ROSRunStepFactory()
+    : RunStepFactory()
 {
-  registerStep<ROSRunStep>(Constants::ROS_RUN_ID);
-  setDisplayName("ROS Run Step");
-  setSupportedProjectType(Constants::ROS_PROJECT_ID);
-  setSupportedStepList(Constants::ROS_RUN_STEP_LIST_ID);
+    registerStep<ROSRunStep>(Constants::ROS_RUN_ID);
+    setDisplayName("ROS Run Step");
+    setSupportedProjectType(Constants::ROS_PROJECT_ID);
+    setSupportedStepList(Constants::ROS_RUN_STEP_LIST_ID);
 }
 
 } // namespace Internal

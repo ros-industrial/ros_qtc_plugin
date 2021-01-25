@@ -36,8 +36,7 @@ public:
 
     bool parsePackageXml(const Utils::FilePath &filepath);
 
-    bool parsePackageXml(const Utils::FilePath &filepath,
-                         ROSUtils::PackageInfo &packageInfo);
+    bool parsePackageXml(const Utils::FilePath &filepath, ROSUtils::PackageInfo &packageInfo);
 
     ROSUtils::PackageInfo getInfo() const;
 

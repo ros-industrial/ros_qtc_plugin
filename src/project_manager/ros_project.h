@@ -21,26 +21,26 @@
 #ifndef ROSPROJECT_H
 #define ROSPROJECT_H
 
+#include "ros_build_system.h"
 #include "ros_project_plugin.h"
 #include "ros_utils.h"
-#include "ros_build_system.h"
 
+#include <coreplugin/idocument.h>
+#include <projectexplorer/buildconfiguration.h>
 #include <projectexplorer/project.h>
 #include <projectexplorer/projectnodes.h>
+#include <projectexplorer/rawprojectpart.h>
 #include <projectexplorer/target.h>
 #include <projectexplorer/toolchain.h>
-#include <projectexplorer/buildconfiguration.h>
-#include <coreplugin/idocument.h>
-#include <projectexplorer/rawprojectpart.h>
 
-#include <QFuture>
-#include <QFutureWatcher>
-#include <QFutureInterface>
-#include <QTimer>
 #include <QFileSystemWatcher>
+#include <QFuture>
+#include <QFutureInterface>
+#include <QFutureWatcher>
+#include <QTimer>
 
 namespace CppTools {
-    class CppProjectUpdater;
+class CppProjectUpdater;
 }
 
 namespace ROSProjectManager {
@@ -62,7 +62,7 @@ public:
 
     Utils::FilePath distribution() const;
     ROSUtils::BuildSystem defaultBuildSystem() const;
-    ROSBuildConfiguration* rosBuildConfiguration() const;
+    ROSBuildConfiguration *rosBuildConfiguration() const;
 
     ROSUtils::PackageInfoMap getPackageInfo() const;
     ROSUtils::PackageBuildInfoMap getPackageBuildInfo() const;
@@ -85,8 +85,8 @@ private:
     void updateEnvironment();
 
     ROSUtils::ROSProjectFileContent m_projectFileContent;
-    ROSUtils::PackageInfoMap        m_wsPackageInfo;
-    ROSUtils::PackageBuildInfoMap   m_wsPackageBuildInfo;
+    ROSUtils::PackageInfoMap m_wsPackageInfo;
+    ROSUtils::PackageBuildInfoMap m_wsPackageBuildInfo;
 
     CppTools::CppProjectUpdater *m_cppCodeModelUpdater;
 
@@ -98,20 +98,19 @@ private:
     QStringList m_workspaceDirectories;
     bool m_project_loaded;
 
-
     struct FutureWatcherResults
     {
-      ProjectExplorer::ProjectNode* node;
-      QHash<QString, ROSUtils::FolderContent> workspaceContent;
-      QStringList files;
-      QStringList directories;
+        ProjectExplorer::ProjectNode *node;
+        QHash<QString, ROSUtils::FolderContent> workspaceContent;
+        QStringList files;
+        QStringList directories;
     };
 
     struct CppToolsFutureResults
     {
-      ProjectExplorer::RawProjectParts parts;
-      ROSUtils::PackageInfoMap wsPackageInfo;
-      ROSUtils::PackageBuildInfoMap wsPackageBuildInfo;
+        ProjectExplorer::RawProjectParts parts;
+        ROSUtils::PackageInfoMap wsPackageInfo;
+        ROSUtils::PackageBuildInfoMap wsPackageBuildInfo;
     };
 
     QFutureInterface<FutureWatcherResults> *m_asyncUpdateFutureInterface;
@@ -130,9 +129,8 @@ private:
                                   const ProjectExplorer::Kit *k,
                                   const Utils::Environment &env,
                                   const ROSUtils::PackageInfoMap wsPackageInfo,
-                                  const ROSUtils::PackageBuildInfoMap  wsPackageBuildInfo,
+                                  const ROSUtils::PackageBuildInfoMap wsPackageBuildInfo,
                                   QFutureInterface<CppToolsFutureResults> &fi);
-
 };
 
 } // namespace Internal

@@ -21,8 +21,8 @@
 
 #include "ros_packagexml_parser.h"
 #include <coreplugin/messagemanager.h>
-#include <QFile>
 #include <QDebug>
+#include <QFile>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -49,11 +49,13 @@ bool ROSPackageXmlParser::parsePackageXml(const Utils::FilePath &filepath)
         return true;
     }
 
-    Core::MessageManager::write(QObject::tr("[ROS Error] Failed to parse file: %1.").arg(m_packageInfo.filepath.toString()));
+    Core::MessageManager::write(
+        QObject::tr("[ROS Error] Failed to parse file: %1.").arg(m_packageInfo.filepath.toString()));
     return false;
 }
 
-bool ROSPackageXmlParser::parsePackageXml(const Utils::FilePath &filepath, ROSUtils::PackageInfo &packageInfo)
+bool ROSPackageXmlParser::parsePackageXml(const Utils::FilePath &filepath,
+                                          ROSUtils::PackageInfo &packageInfo)
 {
     bool result = parsePackageXml(filepath);
     packageInfo = m_packageInfo;
@@ -214,7 +216,6 @@ ROSUtils::PackageInfo ROSPackageXmlParser::getInfo() const
 {
     return m_packageInfo;
 }
-
 
 } // namespace Internal
 } // namespace ROSProjectManager

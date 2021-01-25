@@ -69,6 +69,7 @@ public:
 signals:
     void finished();
     void enabledChanged();
+
 private:
     bool m_enabled = true;
 };
@@ -78,8 +79,8 @@ class RunStepInfo
 public:
     enum Flags {
         Uncreatable = 1 << 0,
-        Unclonable  = 1 << 1,
-        UniqueStep  = 1 << 8    // Can't be used twice in a RunStepList
+        Unclonable = 1 << 1,
+        UniqueStep = 1 << 8 // Can't be used twice in a RunStepList
     };
 
     using RunStepCreator = std::function<RunStep *(RunStepList *)>;
@@ -109,7 +110,7 @@ protected:
     RunStepFactory(const RunStepFactory &) = delete;
     RunStepFactory &operator=(const RunStepFactory &) = delete;
 
-    template <class RunStepType>
+    template<class RunStepType>
     void registerStep(Utils::Id id)
     {
         QTC_CHECK(!m_info.creator);
@@ -149,24 +150,28 @@ public:
 
     QList<RunStep *> steps() const;
     QList<RunStep *> steps(const std::function<bool(const RunStep *)> &filter) const;
-        template <class RS> RS *firstOfType() {
-            RS *rs = nullptr;
-            for (int i = 0; i < count(); ++i) {
-                rs = qobject_cast<RS *>(at(i));
-                if (rs)
-                    return rs;
-            }
-            return nullptr;
+    template<class RS>
+    RS *firstOfType()
+    {
+        RS *rs = nullptr;
+        for (int i = 0; i < count(); ++i) {
+            rs = qobject_cast<RS *>(at(i));
+            if (rs)
+                return rs;
         }
-        template <class RS> QList<RS *>allOfType() {
-            QList<RS *> result;
-            RS *rs = nullptr;
-            for (int i = 0; i < count(); ++i) {
-                rs = qobject_cast<RS *>(at(i));
-                if (rs)
-                    result.append(rs);
-            }
-            return result;
+        return nullptr;
+    }
+    template<class RS>
+    QList<RS *> allOfType()
+    {
+        QList<RS *> result;
+        RS *rs = nullptr;
+        for (int i = 0; i < count(); ++i) {
+            rs = qobject_cast<RS *>(at(i));
+            if (rs)
+                result.append(rs);
+        }
+        return result;
     }
     int count() const;
     bool isEmpty() const;
@@ -216,7 +221,7 @@ private:
     bool m_showWidget = true;
 };
 
-} // Internal
-} // ROSProjectManager
+} // namespace Internal
+} // namespace ROSProjectManager
 
 #endif // RUNSTEP_H

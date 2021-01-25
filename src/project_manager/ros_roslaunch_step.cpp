@@ -25,38 +25,40 @@
 namespace ROSProjectManager {
 namespace Internal {
 
-ROSLaunchStep::ROSLaunchStep(RunStepList *rsl) : ROSGenericRunStep(rsl, Constants::ROS_LAUNCH_ID)
+ROSLaunchStep::ROSLaunchStep(RunStepList *rsl)
+    : ROSGenericRunStep(rsl, Constants::ROS_LAUNCH_ID)
 {
-  ctor();
+    ctor();
 }
 
-ROSLaunchStep::ROSLaunchStep(RunStepList *rsl, Utils::Id id) : ROSGenericRunStep(rsl, id)
+ROSLaunchStep::ROSLaunchStep(RunStepList *rsl, Utils::Id id)
+    : ROSGenericRunStep(rsl, id)
 {
-  ctor();
+    ctor();
 }
 
 RunStepConfigWidget *ROSLaunchStep::createConfigWidget()
 {
-  return new ROSGenericRunStepConfigWidget(this, true, true, false);
+    return new ROSGenericRunStepConfigWidget(this, true, true, false);
 }
 
 QMap<QString, QString> ROSLaunchStep::getAvailableTargets()
 {
-  return ROSUtils::getROSPackageLaunchFiles(getPackagePath());
+    return ROSUtils::getROSPackageLaunchFiles(getPackagePath());
 }
 
 void ROSLaunchStep::ctor()
 {
-  setCommand("roslaunch");
+    setCommand("roslaunch");
 }
 
-ROSLaunchStepFactory::ROSLaunchStepFactory() :
-    RunStepFactory()
+ROSLaunchStepFactory::ROSLaunchStepFactory()
+    : RunStepFactory()
 {
-  registerStep<ROSLaunchStep>(Constants::ROS_LAUNCH_ID);
-  setDisplayName("ROS Launch Step");
-  setSupportedProjectType(Constants::ROS_PROJECT_ID);
-  setSupportedStepList(Constants::ROS_RUN_STEP_LIST_ID);
+    registerStep<ROSLaunchStep>(Constants::ROS_LAUNCH_ID);
+    setDisplayName("ROS Launch Step");
+    setSupportedProjectType(Constants::ROS_PROJECT_ID);
+    setSupportedStepList(Constants::ROS_RUN_STEP_LIST_ID);
 }
 
 } // namespace Internal

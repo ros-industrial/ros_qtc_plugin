@@ -19,10 +19,11 @@
  * limitations under the License.
  */
 #include "ros_catkin_make_step.h"
-#include "ros_project_constants.h"
 #include "ros_project.h"
+#include "ros_project_constants.h"
 #include "ui_ros_catkin_make_step.h"
 
+#include <cmakeprojectmanager/cmakeparser.h>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/gnumakeparser.h>
@@ -31,15 +32,14 @@
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/toolchain.h>
-#include <qtsupport/qtkitinformation.h>
-#include <qtsupport/qtparser.h>
-#include <utils/stringutils.h>
 #include <utils/qtcassert.h>
 #include <utils/qtcprocess.h>
-#include <cmakeprojectmanager/cmakeparser.h>
+#include <utils/stringutils.h>
+#include <qtsupport/qtkitinformation.h>
+#include <qtsupport/qtparser.h>
 
-#include <QDir>
 #include <QComboBox>
+#include <QDir>
 #include <QLabel>
 
 using namespace ProjectExplorer;
@@ -47,21 +47,24 @@ using namespace ProjectExplorer;
 namespace ROSProjectManager {
 namespace Internal {
 
-const char ROS_CMS_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("ROSProjectManager::Internal::ROSCatkinMakeStep",
-                                                     "CatkinMake Step");
+const char ROS_CMS_DISPLAY_NAME[]
+    = QT_TRANSLATE_NOOP("ROSProjectManager::Internal::ROSCatkinMakeStep", "CatkinMake Step");
 
 const char ROS_CMS_TARGET_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.Target";
-const char ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.CatkinMakeArguments";
+const char ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY[]
+    = "ROSProjectManager.ROSCatkinMakeStep.CatkinMakeArguments";
 const char ROS_CMS_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.CMakeArguments";
 const char ROS_CMS_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSCatkinMakeStep.MakeArguments";
 
-ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, const Utils::Id id) :
-    AbstractProcessStep(parent, id)
+ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, const Utils::Id id)
+    : AbstractProcessStep(parent, id)
 {
-    setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep",
-                                                      ROS_CMS_DISPLAY_NAME));
+    setDefaultDisplayName(
+        QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep",
+                                    ROS_CMS_DISPLAY_NAME));
 
-    m_percentProgress = QRegExp(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
+    m_percentProgress = QRegExp(
+        QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
 
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (bc->rosBuildSystem() != ROSUtils::CatkinMake)
@@ -78,9 +81,7 @@ ROSBuildConfiguration *ROSCatkinMakeStep::targetsActiveBuildConfiguration() cons
     return static_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
 }
 
-ROSCatkinMakeStep::~ROSCatkinMakeStep()
-{
-}
+ROSCatkinMakeStep::~ROSCatkinMakeStep() {}
 
 bool ROSCatkinMakeStep::init()
 {
@@ -88,7 +89,8 @@ bool ROSCatkinMakeStep::init()
     if (!bc)
         bc = targetsActiveBuildConfiguration();
 
-    ToolChain *tc = ToolChainKitAspect::toolChain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+    ToolChain *tc = ToolChainKitAspect::toolChain(target()->kit(),
+                                                  ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
     if (!tc)
         emit addTask(Task::compilerMissingTask());
@@ -99,12 +101,16 @@ bool ROSCatkinMakeStep::init()
     }
 
     // TODO: Need to get build data (build directory, environment, etc.) based on build System
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo
+        = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(),
+                                     bc->rosBuildSystem(),
+                                     bc->project()->distribution());
 
     ProcessParameters *pp = processParameters();
     pp->setMacroExpander(bc->macroExpander());
     pp->setWorkingDirectory(bc->project()->projectDirectory());
-    Utils::Environment env(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
+    Utils::Environment env(
+        ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList());
 
     bc->updateQtEnvironment(env); // TODO: Not sure if this is required here
 
@@ -150,7 +156,7 @@ QVariantMap ROSCatkinMakeStep::toMap() const
 
 bool ROSCatkinMakeStep::fromMap(const QVariantMap &map)
 {
-    m_target = (BuildTargets)map.value(QLatin1String(ROS_CMS_TARGET_KEY)).toInt();
+    m_target = (BuildTargets) map.value(QLatin1String(ROS_CMS_TARGET_KEY)).toInt();
     m_catkinMakeArguments = map.value(QLatin1String(ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY)).toString();
     m_cmakeArguments = map.value(QLatin1String(ROS_CMS_CMAKE_ARGUMENTS_KEY)).toString();
     m_makeArguments = map.value(QLatin1String(ROS_CMS_MAKE_ARGUMENTS_KEY)).toString();
@@ -162,17 +168,22 @@ QString ROSCatkinMakeStep::allArguments(ROSUtils::BuildType buildType, bool incl
 {
     QString args;
 
-    switch(m_target) {
+    switch (m_target) {
     case BUILD:
         Utils::QtcProcess::addArgs(&args, m_catkinMakeArguments);
         if (includeDefault)
             if (buildType == ROSUtils::BuildTypeUserDefined)
-                Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(m_cmakeArguments));
+                Utils::QtcProcess::addArgs(&args,
+                                           QString(
+                                               "--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1")
+                                               .arg(m_cmakeArguments));
             else
-                Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments));
-        else
-            if (!m_cmakeArguments.isEmpty())
-                Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
+                Utils::QtcProcess::addArgs(
+                    &args,
+                    QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2")
+                        .arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments));
+        else if (!m_cmakeArguments.isEmpty())
+            Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
 
         break;
     case CLEAN:
@@ -205,7 +216,7 @@ void ROSCatkinMakeStep::stdOutput(const QString &line)
         bool ok = false;
         int percent = m_percentProgress.cap(1).toInt(&ok);
         if (ok)
-          emit progress(percent, QString());
+            emit progress(percent, QString());
 
         pos += m_percentProgress.matchedLength();
     }
@@ -237,30 +248,43 @@ ROSCatkinMakeStepWidget::ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep)
 
     updateDetails();
 
-    connect(m_ui->catkinMakeArgumentsLineEdit, &QLineEdit::textEdited,
-            this, &ROSCatkinMakeStepWidget::updateDetails);
+    connect(m_ui->catkinMakeArgumentsLineEdit,
+            &QLineEdit::textEdited,
+            this,
+            &ROSCatkinMakeStepWidget::updateDetails);
 
-    connect(m_ui->cmakeArgumentsLineEdit, &QLineEdit::textEdited,
-            this, &ROSCatkinMakeStepWidget::updateDetails);
+    connect(m_ui->cmakeArgumentsLineEdit,
+            &QLineEdit::textEdited,
+            this,
+            &ROSCatkinMakeStepWidget::updateDetails);
 
-    connect(m_ui->makeArgumentsLineEdit, &QLineEdit::textEdited,
-            this, &ROSCatkinMakeStepWidget::updateDetails);
+    connect(m_ui->makeArgumentsLineEdit,
+            &QLineEdit::textEdited,
+            this,
+            &ROSCatkinMakeStepWidget::updateDetails);
 
-    connect(m_makeStep, SIGNAL(enabledChanged()),
-            this, SLOT(enabledChanged()));
+    connect(m_makeStep, SIGNAL(enabledChanged()), this, SLOT(enabledChanged()));
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    connect(bc, SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
-            this, SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
+    connect(bc,
+            SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
+            this,
+            SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
 
-    connect(bc, &ROSBuildConfiguration::cmakeBuildTypeChanged,
-            this, &ROSCatkinMakeStepWidget::updateDetails);
+    connect(bc,
+            &ROSBuildConfiguration::cmakeBuildTypeChanged,
+            this,
+            &ROSCatkinMakeStepWidget::updateDetails);
 
-    connect(bc, &ROSBuildConfiguration::environmentChanged,
-            this, &ROSCatkinMakeStepWidget::updateDetails);
+    connect(bc,
+            &ROSBuildConfiguration::environmentChanged,
+            this,
+            &ROSCatkinMakeStepWidget::updateDetails);
 
-    connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
-            this, SLOT(updateDetails()));
+    connect(ProjectExplorerPlugin::instance(),
+            SIGNAL(settingsChanged()),
+            this,
+            SLOT(updateDetails()));
 }
 
 ROSCatkinMakeStepWidget::~ROSCatkinMakeStepWidget()
@@ -280,13 +304,17 @@ void ROSCatkinMakeStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
+    ROSUtils::WorkspaceInfo workspaceInfo
+        = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(),
+                                     bc->rosBuildSystem(),
+                                     bc->project()->distribution());
 
     ProcessParameters param;
     param.setMacroExpander(bc->macroExpander());
     param.setWorkingDirectory(workspaceInfo.buildPath);
     param.setEnvironment(bc->environment());
-    param.setCommandLine(m_makeStep->makeCommand(m_makeStep->allArguments(bc->cmakeBuildType(), false)));
+    param.setCommandLine(
+        m_makeStep->makeCommand(m_makeStep->allArguments(bc->cmakeBuildType(), false)));
     m_summaryText = param.summary(displayName());
 }
 
@@ -298,7 +326,7 @@ void ROSCatkinMakeStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &bui
 void ROSCatkinMakeStepWidget::enabledChanged()
 {
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    if(m_makeStep->enabled() && (bc->rosBuildSystem() != ROSUtils::CatkinMake))
+    if (m_makeStep->enabled() && (bc->rosBuildSystem() != ROSUtils::CatkinMake))
         m_makeStep->setEnabled(false);
 }
 
@@ -311,13 +339,16 @@ QString ROSCatkinMakeStepWidget::summaryText() const
 // ROSCatkinMakeStepFactory
 //
 
-ROSCatkinMakeStepFactory::ROSCatkinMakeStepFactory() : BuildStepFactory()
+ROSCatkinMakeStepFactory::ROSCatkinMakeStepFactory()
+    : BuildStepFactory()
 {
-  registerStep<ROSCatkinMakeStep>(ROS_CMS_ID);
-  setFlags(BuildStepInfo::Flags::UniqueStep);
-  setDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep", ROS_CMS_DISPLAY_NAME));
-  setSupportedProjectType(Constants::ROS_PROJECT_ID);
-  setSupportedStepLists(QList<Utils::Id>({ProjectExplorer::Constants::BUILDSTEPS_BUILD, ProjectExplorer::Constants::BUILDSTEPS_CLEAN}));
+    registerStep<ROSCatkinMakeStep>(ROS_CMS_ID);
+    setFlags(BuildStepInfo::Flags::UniqueStep);
+    setDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep",
+                                               ROS_CMS_DISPLAY_NAME));
+    setSupportedProjectType(Constants::ROS_PROJECT_ID);
+    setSupportedStepLists(QList<Utils::Id>({ProjectExplorer::Constants::BUILDSTEPS_BUILD,
+                                            ProjectExplorer::Constants::BUILDSTEPS_CLEAN}));
 }
 
 } // namespace Internal

@@ -23,10 +23,10 @@
 
 #include <coreplugin/basefilewizard.h>
 #include <coreplugin/basefilewizardfactory.h>
+#include <utils/fancylineedit.h>
+#include <utils/fileutils.h>
 #include <utils/wizard.h>
 #include <utils/wizardpage.h>
-#include <utils/fileutils.h>
-#include <utils/fancylineedit.h>
 
 #include <QProcess>
 
@@ -36,7 +36,9 @@ namespace Internal {
 class ROSPackageWizardDetailsPage;
 class ROSPackageWizardDetailsPagePrivate;
 
-namespace Ui{ class ROSPackageWizardDetailsPage;}
+namespace Ui {
+class ROSPackageWizardDetailsPage;
+}
 
 class ROSPackageWizardDialog : public Core::BaseFileWizard
 {
@@ -111,13 +113,15 @@ public:
     ROSPackageWizard();
 
 protected:
-    Core::BaseFileWizard *create(QWidget *parent, const Core::WizardDialogParameters &parameters) const;
+    Core::BaseFileWizard *create(QWidget *parent,
+                                 const Core::WizardDialogParameters &parameters) const;
 
     Core::GeneratedFiles generateFiles(const QWizard *w, QString *errorMessage) const override;
 
     bool writeFiles(const Core::GeneratedFiles &files, QString *errorMessage) const override;
 
-    bool postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l,
+    bool postGenerateFiles(const QWizard *w,
+                           const Core::GeneratedFiles &l,
                            QString *errorMessage) const override;
 
 private:

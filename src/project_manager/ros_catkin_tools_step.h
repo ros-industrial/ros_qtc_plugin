@@ -25,9 +25,9 @@
 
 #include "ros_build_configuration.h"
 
+#include <yaml-cpp/yaml.h>
 #include <QDialog>
 #include <QLineEdit>
-#include <yaml-cpp/yaml.h>
 
 QT_BEGIN_NAMESPACE
 class QListWidgetItem;
@@ -39,9 +39,11 @@ namespace Internal {
 
 class ROSCatkinToolsStepWidget;
 class ROSCatkinToolsStepFactory;
-namespace Ui {class ROSCatkinToolsStep;
-              class ROSCatkinToolsListEditor;
-              class ROSCatkinToolsConfigEditor;}
+namespace Ui {
+class ROSCatkinToolsStep;
+class ROSCatkinToolsListEditor;
+class ROSCatkinToolsConfigEditor;
+} // namespace Ui
 
 static const char ROS_CTS_ID[] = "ROSProjectManager.ROSCatkinToolsStep";
 
@@ -53,7 +55,7 @@ class ROSCatkinToolsStep : public ProjectExplorer::AbstractProcessStep
     friend class ROSCatkinToolsStepFactory;
 
 public:
-    enum BuildTargets {BUILD = 0, CLEAN = 1};
+    enum BuildTargets { BUILD = 0, CLEAN = 1 };
 
     ROSCatkinToolsStep(ProjectExplorer::BuildStepList *parent, Utils::Id id);
     ~ROSCatkinToolsStep() override;
@@ -130,7 +132,6 @@ class ROSCatkinToolsProfileEditorDialog : public QDialog
     Q_OBJECT
 public:
     ROSCatkinToolsProfileEditorDialog(Utils::FilePath filePath);
-
 };
 
 class ROSCatkinToolsListEditorWidget : public QDialog
@@ -160,7 +161,7 @@ private:
     QStringList m_list;
 };
 
-class ROSCatkinToolsListWidget: public QLineEdit
+class ROSCatkinToolsListWidget : public QLineEdit
 {
     Q_OBJECT
 public:
@@ -208,7 +209,6 @@ private:
     YAML::Node m_profile_original;
     YAML::Node m_profile_current;
 };
-
 
 class ROSCatkinToolsStepFactory : public ProjectExplorer::BuildStepFactory
 {

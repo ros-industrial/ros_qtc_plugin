@@ -26,27 +26,28 @@
 namespace ROSProjectManager {
 namespace Internal {
 
-namespace Ui { class ROSGenericStep; }
+namespace Ui {
+class ROSGenericStep;
+}
 
 class ROSAttachStep : public ROSGenericRunStep
 {
-  Q_OBJECT
-  friend class ROSAttachStepFactory;
+    Q_OBJECT
+    friend class ROSAttachStepFactory;
 
 public:
-  ROSAttachStep(RunStepList *rsl);
+    ROSAttachStep(RunStepList *rsl);
 
-  void run() override;
+    void run() override;
 
 protected:
-  ROSAttachStep(RunStepList *rsl, Utils::Id id);
+    ROSAttachStep(RunStepList *rsl, Utils::Id id);
 
-  void ctor();
+    void ctor();
 
-  RunStepConfigWidget *createConfigWidget() override;
+    RunStepConfigWidget *createConfigWidget() override;
 
-  QMap<QString, QString> getAvailableTargets() override;
-
+    QMap<QString, QString> getAvailableTargets() override;
 };
 
 class ROSAttachStepFactory : public RunStepFactory
@@ -55,6 +56,6 @@ public:
     ROSAttachStepFactory();
 };
 
-} // Internal
-} // ROSProjectManager
+} // namespace Internal
+} // namespace ROSProjectManager
 #endif // ROS_ROSATTACH_STEP_H

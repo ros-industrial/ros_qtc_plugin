@@ -19,19 +19,19 @@
  * limitations under the License.
  */
 #include "ros_terminal_pane.h"
-#include "ros_project.h"
 #include "ros_build_configuration.h"
+#include "ros_project.h"
 
-#include <projectexplorer/projectexplorer.h>
-#include <projectexplorer/projectexplorersettings.h>
-#include <projectexplorer/projectexplorericons.h>
-#include <projectexplorer/session.h>
 #include <projectexplorer/kitmanager.h>
+#include <projectexplorer/projectexplorer.h>
+#include <projectexplorer/projectexplorericons.h>
+#include <projectexplorer/projectexplorersettings.h>
+#include <projectexplorer/session.h>
 
-#include <coreplugin/icontext.h>
 #include <coreplugin/coreconstants.h>
-#include <coreplugin/find/basetextfind.h>
 #include <coreplugin/coreicons.h>
+#include <coreplugin/find/basetextfind.h>
+#include <coreplugin/icontext.h>
 #include <coreplugin/icore.h>
 
 #include <utils/utilsicons.h>
@@ -39,26 +39,26 @@
 #include <aggregation/aggregate.h>
 #include <cstring>
 
-#include <texteditor/texteditorsettings.h>
-#include <texteditor/fontsettings.h>
 #include <texteditor/behaviorsettings.h>
+#include <texteditor/fontsettings.h>
+#include <texteditor/texteditorsettings.h>
 
-#include <QDir>
-#include <QSettings>
-#include <QKeySequence>
-#include <QKeyEvent>
 #include <QApplication>
+#include <QDir>
+#include <QKeyEvent>
+#include <QKeySequence>
+#include <QSettings>
 
 #include <signal.h>
 
 namespace ROSProjectManager {
 namespace Internal {
 
-ROSTerminalPane::ROSTerminalPane() :
-  m_stopButton(new QToolButton),
-  m_zoomInButton(new QToolButton),
-  m_zoomOutButton(new QToolButton),
-  m_newTerminalButton(new QToolButton)
+ROSTerminalPane::ROSTerminalPane()
+    : m_stopButton(new QToolButton)
+    , m_zoomInButton(new QToolButton)
+    , m_zoomOutButton(new QToolButton)
+    , m_newTerminalButton(new QToolButton)
 {
     m_tabWidget = new QTabWidget();
     m_tabWidget->setTabsClosable(true);
@@ -75,91 +75,84 @@ ROSTerminalPane::ROSTerminalPane() :
     updateToolBarButtonsEnabled();
 
     connect(TextEditor::TextEditorSettings::instance(),
-                &TextEditor::TextEditorSettings::behaviorSettingsChanged,
-                this, &ROSTerminalPane::updateToolBarButtonsEnabled);
+            &TextEditor::TextEditorSettings::behaviorSettingsChanged,
+            this,
+            &ROSTerminalPane::updateToolBarButtonsEnabled);
 
-    connect(m_zoomInButton, &QToolButton::clicked,
-                this, &ROSTerminalPane::zoomIn);
+    connect(m_zoomInButton, &QToolButton::clicked, this, &ROSTerminalPane::zoomIn);
 
-    connect(m_zoomOutButton, &QToolButton::clicked,
-            this, &ROSTerminalPane::zoomOut);
+    connect(m_zoomOutButton, &QToolButton::clicked, this, &ROSTerminalPane::zoomOut);
 
-    connect(m_stopButton, &QToolButton::clicked,
-            this, &ROSTerminalPane::stopProcess);
+    connect(m_stopButton, &QToolButton::clicked, this, &ROSTerminalPane::stopProcess);
 
-    connect(m_newTerminalButton, &QToolButton::clicked,
-            this, &ROSTerminalPane::startTerminalButton);
+    connect(m_newTerminalButton, &QToolButton::clicked, this, &ROSTerminalPane::startTerminalButton);
 
-    connect(m_tabWidget,SIGNAL(tabCloseRequested(int)), this, SLOT(closeTerminal(int)));
+    connect(m_tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTerminal(int)));
 }
 
 ROSTerminalPane::~ROSTerminalPane()
 {
-  delete m_tabWidget;
-  delete m_stopButton;
-  delete m_zoomInButton;
-  delete m_zoomOutButton;
-  delete m_newTerminalButton;
+    delete m_tabWidget;
+    delete m_stopButton;
+    delete m_zoomInButton;
+    delete m_zoomOutButton;
+    delete m_newTerminalButton;
 }
 
 void ROSTerminalPane::updateToolBarButtonsEnabled()
 {
-  const TextEditor::BehaviorSettings &settings
-          = TextEditor::TextEditorSettings::behaviorSettings();
+    const TextEditor::BehaviorSettings &settings = TextEditor::TextEditorSettings::behaviorSettings();
 
-  bool hasTerminal = (m_terminals.count() > 0);
-  bool zoomEnabled  = settings.m_scrollWheelZooming && hasTerminal;
+    bool hasTerminal = (m_terminals.count() > 0);
+    bool zoomEnabled = settings.m_scrollWheelZooming && hasTerminal;
 
-  m_stopButton->setEnabled(hasTerminal);
-  m_zoomInButton->setEnabled(zoomEnabled);
-  m_zoomOutButton->setEnabled(zoomEnabled);
+    m_stopButton->setEnabled(hasTerminal);
+    m_zoomInButton->setEnabled(zoomEnabled);
+    m_zoomOutButton->setEnabled(zoomEnabled);
 }
 
 void ROSTerminalPane::zoomIn()
 {
-  for (QTermWidget *ow : m_terminals) {
-    ow->zoomIn();
-  }
+    for (QTermWidget *ow : m_terminals) {
+        ow->zoomIn();
+    }
 }
 
 void ROSTerminalPane::zoomOut()
 {
-  for (QTermWidget *ow : m_terminals) {
-    ow->zoomOut();
-  }
+    for (QTermWidget *ow : m_terminals) {
+        ow->zoomOut();
+    }
 }
 
 void ROSTerminalPane::startTerminalButton()
 {
-  startTerminal();
+    startTerminal();
 }
 
 void ROSTerminalPane::closeTerminal(int index)
 {
-  m_tabNames.removeAll(m_tabWidget->tabText(index));
+    m_tabNames.removeAll(m_tabWidget->tabText(index));
 
-  // Need to kill the shell process
-  QTermWidget* terminal = qobject_cast<QTermWidget*>(m_tabWidget->currentWidget());
-  QProcess::startDetached(QString("kill -9 %1").arg(terminal->getShellPID()));
+    // Need to kill the shell process
+    QTermWidget *terminal = qobject_cast<QTermWidget *>(m_tabWidget->currentWidget());
+    QProcess::startDetached(QString("kill -9 %1").arg(terminal->getShellPID()));
 
-  m_terminals.removeAll(terminal);
-  m_tabWidget->removeTab(index);
+    m_terminals.removeAll(terminal);
+    m_tabWidget->removeTab(index);
 
-  updateToolBarButtonsEnabled();
+    updateToolBarButtonsEnabled();
 
-  emit navigateStateUpdate();
+    emit navigateStateUpdate();
 }
 
 void ROSTerminalPane::termKeyPressed(QKeyEvent *event)
 {
-    if (event->modifiers().testFlag(Qt::ControlModifier) && event->modifiers().testFlag(Qt::ShiftModifier))
-    {
-        if (event->key() == Qt::Key_C)
-        {
+    if (event->modifiers().testFlag(Qt::ControlModifier)
+        && event->modifiers().testFlag(Qt::ShiftModifier)) {
+        if (event->key() == Qt::Key_C) {
             qobject_cast<QTermWidget *>(m_tabWidget->currentWidget())->copyClipboard();
-        }
-        else if (event->key() == Qt::Key_V)
-        {
+        } else if (event->key() == Qt::Key_V) {
             qobject_cast<QTermWidget *>(m_tabWidget->currentWidget())->pasteClipboard();
         }
     }
@@ -167,77 +160,74 @@ void ROSTerminalPane::termKeyPressed(QKeyEvent *event)
 
 void ROSTerminalPane::stopProcess()
 {
-  for (QObject *obj : m_tabWidget->currentWidget()->children())
-  {
-    if(QLatin1String(obj->metaObject()->className()) == QLatin1String("Konsole::TerminalDisplay"))
-    {
-      QKeyEvent *event1 = new QKeyEvent(QEvent::KeyPress, Qt::Key_C, Qt::ControlModifier);
-      QCoreApplication::postEvent(obj, event1);
+    for (QObject *obj : m_tabWidget->currentWidget()->children()) {
+        if (QLatin1String(obj->metaObject()->className())
+            == QLatin1String("Konsole::TerminalDisplay")) {
+            QKeyEvent *event1 = new QKeyEvent(QEvent::KeyPress, Qt::Key_C, Qt::ControlModifier);
+            QCoreApplication::postEvent(obj, event1);
 
-      QKeyEvent *event2 = new QKeyEvent(QEvent::KeyRelease, Qt::Key_C, Qt::ControlModifier);
-      QCoreApplication::postEvent(obj, event2);
-      break;
+            QKeyEvent *event2 = new QKeyEvent(QEvent::KeyRelease, Qt::Key_C, Qt::ControlModifier);
+            QCoreApplication::postEvent(obj, event2);
+            break;
+        }
     }
-  }
 }
 
 QTermWidget &ROSTerminalPane::startTerminal(int startnow, const QString name)
 {
-  QString tabName = name;
-  QString tabNamePrefix;
+    QString tabName = name;
+    QString tabNamePrefix;
 
-//  const char *index = std::to_string(m_terminals.count()).c_str();
-//  char *paneId = new char[std::strlen(ROS_OUTPUT_WINDOW_PREFIX)+std::strlen(index)+1];
-//  std::strcpy(paneId, ROS_OUTPUT_WINDOW_PREFIX);
-//  std::strcat(paneId, index);
+    //  const char *index = std::to_string(m_terminals.count()).c_str();
+    //  char *paneId = new char[std::strlen(ROS_OUTPUT_WINDOW_PREFIX)+std::strlen(index)+1];
+    //  std::strcpy(paneId, ROS_OUTPUT_WINDOW_PREFIX);
+    //  std::strcat(paneId, index);
 
-  //don't start shell yet
-  QTermWidget *widget = new QTermWidget(startnow);
-  widget->setScrollBarPosition(QTermWidget::ScrollBarRight);
+    //don't start shell yet
+    QTermWidget *widget = new QTermWidget(startnow);
+    widget->setScrollBarPosition(QTermWidget::ScrollBarRight);
 
-  // This is to capture copy and paste key events
-  connect(widget, SIGNAL(termKeyPressed(QKeyEvent*)), this, SLOT(termKeyPressed(QKeyEvent*)));
+    // This is to capture copy and paste key events
+    connect(widget, SIGNAL(termKeyPressed(QKeyEvent *)), this, SLOT(termKeyPressed(QKeyEvent *)));
 
-  QSettings *s = Core::ICore::settings();
-  s->beginGroup(QLatin1String("ROSTerminal"));
+    QSettings *s = Core::ICore::settings();
+    s->beginGroup(QLatin1String("ROSTerminal"));
 
-  // Need to create a qtc dark color scheme for the terminal
-  // Example: https://github.com/lxde/qtermwidget/blob/10e17968e4457da2b91675984e17009ee6e1e7aa/lib/color-schemes/Linux.colorscheme
-  widget->setColorScheme(s->value(QLatin1String("ColorScheme"), QLatin1String("DarkPastels")).toString());
-//  QFont f(s->value(QLatin1String("FontName"), TERMINALPLUGINDEFAULTFONT).toString());
-//  f.setPointSize(s->value(QLatin1String("FontSize"), 10).toInt());
-//  widget->setTerminalFont(f);
-  s->endGroup();
+    // Need to create a qtc dark color scheme for the terminal
+    // Example: https://github.com/lxde/qtermwidget/blob/10e17968e4457da2b91675984e17009ee6e1e7aa/lib/color-schemes/Linux.colorscheme
+    widget->setColorScheme(
+        s->value(QLatin1String("ColorScheme"), QLatin1String("DarkPastels")).toString());
+    //  QFont f(s->value(QLatin1String("FontName"), TERMINALPLUGINDEFAULTFONT).toString());
+    //  f.setPointSize(s->value(QLatin1String("FontSize"), 10).toInt());
+    //  widget->setTerminalFont(f);
+    s->endGroup();
 
-  m_terminals.append(widget);
+    m_terminals.append(widget);
 
-  updateToolBarButtonsEnabled();
+    updateToolBarButtonsEnabled();
 
-  //Create a unique tab name
-  tabNamePrefix = tabName;
-  int cnt=0;
-  while(m_tabNames.contains(tabName))
-  {
-    tabName = QString::fromLatin1("%1(%2)").arg(tabNamePrefix, QString::number(cnt));
-    cnt+=1;
-  };
+    //Create a unique tab name
+    tabNamePrefix = tabName;
+    int cnt = 0;
+    while (m_tabNames.contains(tabName)) {
+        tabName = QString::fromLatin1("%1(%2)").arg(tabNamePrefix, QString::number(cnt));
+        cnt += 1;
+    };
 
-  m_tabNames.append(tabName);
-  int idx = m_tabWidget->addTab(widget, tabName);
-  // This is required so the tab is closed when the user enters "exit" in the terminal
-  connect(widget, &QTermWidget::finished, this, [this, idx]{closeTerminal(idx);});
-  m_tabWidget->setCurrentIndex(idx);
+    m_tabNames.append(tabName);
+    int idx = m_tabWidget->addTab(widget, tabName);
+    // This is required so the tab is closed when the user enters "exit" in the terminal
+    connect(widget, &QTermWidget::finished, this, [this, idx] { closeTerminal(idx); });
+    m_tabWidget->setCurrentIndex(idx);
 
-  emit navigateStateUpdate();
-  return *widget;
+    emit navigateStateUpdate();
+    return *widget;
 }
 
-QList<QWidget*> ROSTerminalPane::toolBarWidgets() const
+QList<QWidget *> ROSTerminalPane::toolBarWidgets() const
 {
-  return QList<QWidget *>() << m_newTerminalButton
-                            << m_stopButton
-                            << m_zoomInButton
-                            << m_zoomOutButton;
+    return QList<QWidget *>() << m_newTerminalButton << m_stopButton << m_zoomInButton
+                              << m_zoomOutButton;
 }
 
 bool ROSTerminalPane::hasFocus() const
@@ -272,9 +262,7 @@ QString ROSTerminalPane::displayName() const
     return tr("ROS Terminals");
 }
 
-void ROSTerminalPane::visibilityChanged(bool /*b*/)
-{
-}
+void ROSTerminalPane::visibilityChanged(bool /*b*/) {}
 
 void ROSTerminalPane::sendText(const QString &text)
 {
@@ -288,34 +276,32 @@ int ROSTerminalPane::priorityInStatusBar() const
 
 bool ROSTerminalPane::canNext() const
 {
-  if(m_terminals.count() > 1 && m_tabWidget->currentIndex() < (m_terminals.count()-1))
-  {
-    return true;
-  }
+    if (m_terminals.count() > 1 && m_tabWidget->currentIndex() < (m_terminals.count() - 1)) {
+        return true;
+    }
 
-  return false;
+    return false;
 }
 
 bool ROSTerminalPane::canPrevious() const
 {
-  if(m_terminals.count() > 1 && m_tabWidget->currentIndex() > 0)
-  {
-    return true;
-  }
+    if (m_terminals.count() > 1 && m_tabWidget->currentIndex() > 0) {
+        return true;
+    }
 
-  return false;
+    return false;
 }
 
 void ROSTerminalPane::goToNext()
 {
-  m_tabWidget->setCurrentIndex(m_tabWidget->currentIndex()+1);
-  emit navigateStateChanged();
+    m_tabWidget->setCurrentIndex(m_tabWidget->currentIndex() + 1);
+    emit navigateStateChanged();
 }
 
 void ROSTerminalPane::goToPrev()
 {
-  m_tabWidget->setCurrentIndex(m_tabWidget->currentIndex()-1);
-  emit navigateStateChanged();
+    m_tabWidget->setCurrentIndex(m_tabWidget->currentIndex() - 1);
+    emit navigateStateChanged();
 }
 
 bool ROSTerminalPane::canNavigate() const

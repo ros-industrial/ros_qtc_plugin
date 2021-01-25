@@ -21,17 +21,19 @@
 #ifndef ROSPROJECTNODE_H
 #define ROSPROJECTNODE_H
 
-#include <projectexplorer/projectnodes.h>
-#include <coreplugin/vcsmanager.h>
 #include <coreplugin/iversioncontrol.h>
+#include <coreplugin/vcsmanager.h>
+#include <projectexplorer/projectnodes.h>
 
 #include "ros_utils.h"
 
-#include <QStringList>
 #include <QHash>
 #include <QSet>
+#include <QStringList>
 
-namespace Core { class IDocument; }
+namespace Core {
+class IDocument;
+}
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -44,11 +46,12 @@ public:
     bool showInSimpleTree() const override;
 
 private:
-    static ProjectExplorer::FileNode *findFileNode(FolderNode *folder_node, const Utils::FilePath &filePaths);
+    static ProjectExplorer::FileNode *findFileNode(FolderNode *folder_node,
+                                                   const Utils::FilePath &filePaths);
 };
 typedef std::unique_ptr<ROSProjectNode> ROSProjectNodeUPtr;
 
-class ROSFolderNode: public ProjectExplorer::FolderNode
+class ROSFolderNode : public ProjectExplorer::FolderNode
 {
 public:
     explicit ROSFolderNode(const Utils::FilePath &folderPath);
