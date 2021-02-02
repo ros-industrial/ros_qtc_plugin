@@ -104,7 +104,7 @@ public:
     };
     typedef QList<PackageTargetInfo> PackageTargetInfoList;
 
-    /** @brief Contains all relavent package information */
+    /** @brief Contains all relevant package information */
     struct PackageInfo {
         Utils::FilePath path;           /**< @brief Package directory path */
         Utils::FilePath filepath;       /**< @brief Package package.xml filepath */
@@ -157,7 +157,7 @@ public:
 
     /** @brief Contains project file information */
     struct ROSProjectFileContent {
-        Utils::FilePath distribution;                     /**< @brief ROS Distribution */
+        Utils::FilePath distribution;             /**< @brief ROS Distribution */
         ROSUtils::BuildSystem defaultBuildSystem; /**< @brief Default build system */
         QStringList watchDirectories;             /**< @brief Watch directories */
     };
