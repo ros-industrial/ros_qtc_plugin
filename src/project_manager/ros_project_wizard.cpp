@@ -269,7 +269,7 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w, QString *
     Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
     QString content;
     QXmlStreamWriter workspaceXml(&content);
-    ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, projectFileContent);
+    ROSUtils::generateQtCreatorWorkspaceFile(workspaceXml, projectFileContent);
     generatedWorkspaceFile.setContents(content);
     generatedWorkspaceFile.setAttributes(Core::GeneratedFile::OpenProjectAttribute);
 

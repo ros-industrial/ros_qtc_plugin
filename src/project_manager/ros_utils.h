@@ -229,7 +229,7 @@ public:
      * @param content Project content to write to file
      * @return True if Qt ROS Project file was succesfully updated, otherwise false
      */
-    static bool gererateQtCreatorWorkspaceFile(QXmlStreamWriter &file,
+    static bool generateQtCreatorWorkspaceFile(QXmlStreamWriter &file,
                                                const ROSProjectFileContent &content);
 
     /**
@@ -268,7 +268,7 @@ public:
      * @param recursive Process sub directoires
      * @return QHash<QString, FolderContent> Directory, FolderContent
      */
-    static QHash<QString, FolderContent> getFolderContentRecurisve(const Utils::FilePath &folderPath,
+    static QHash<QString, FolderContent> getFolderContentRecursive(const Utils::FilePath &folderPath,
                                                                    QStringList &fileList,
                                                                    QStringList &directoryList);
 
