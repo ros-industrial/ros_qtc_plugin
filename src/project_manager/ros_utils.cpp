@@ -334,7 +334,7 @@ bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
   return false;
 }
 
-bool ROSUtils::gererateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const ROSProjectFileContent &content)
+bool ROSUtils::generateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const ROSProjectFileContent &content)
 {
     xmlFile.setAutoFormatting(true);
     xmlFile.writeStartDocument();
@@ -452,7 +452,7 @@ ROSUtils::FolderContent ROSUtils::getFolderContent(const QString &folder, const 
   return content;
 }
 
-QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContentRecurisve(const Utils::FilePath &folderPath, QStringList &fileList, QStringList& directoryList)
+QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContentRecursive(const Utils::FilePath &folderPath, QStringList &fileList, QStringList& directoryList)
 {
     QHash<QString, ROSUtils::FolderContent> workspaceFiles;
 

@@ -187,7 +187,7 @@ bool ROSProject::saveProjectFile()
     if (!saver.hasError())
     {
       QXmlStreamWriter workspaceXml(saver.file());
-      ROSUtils::gererateQtCreatorWorkspaceFile(workspaceXml, m_projectFileContent);
+      ROSUtils::generateQtCreatorWorkspaceFile(workspaceXml, m_projectFileContent);
       saver.setResult(&workspaceXml);
     }
     bool result = saver.finalize(ICore::mainWindow());
@@ -279,7 +279,7 @@ void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath, const Q
 
     for (const QString& dir : watchDirectories) {
         Utils::FilePath addedDir = projectFilePath.parentDir().pathAppended(dir);
-        QHash<QString, ROSUtils::FolderContent> newDirContent = ROSUtils::getFolderContentRecurisve(addedDir, results.files, results.directories);
+        QHash<QString, ROSUtils::FolderContent> newDirContent = ROSUtils::getFolderContentRecursive(addedDir, results.files, results.directories);
         results.workspaceContent.unite(newDirContent);
     }
 
