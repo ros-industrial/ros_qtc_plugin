@@ -159,7 +159,6 @@ public:
     struct ROSProjectFileContent {
         Utils::FilePath distribution;             /**< @brief ROS Distribution */
         ROSUtils::BuildSystem defaultBuildSystem; /**< @brief Default build system */
-        QStringList watchDirectories;             /**< @brief Watch directories */
     };
 
     /**

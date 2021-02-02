@@ -348,12 +348,6 @@ bool ROSUtils::generateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const R
     xmlFile.writeAttribute(QLatin1String("value"), QString::number(content.defaultBuildSystem));
     xmlFile.writeEndElement();
 
-    xmlFile.writeStartElement(QLatin1String("WatchDirectories"));
-    for (const QString& str : content.watchDirectories)
-        xmlFile.writeTextElement(QLatin1String("Directory"), str);
-
-    xmlFile.writeEndElement();
-
     xmlFile.writeEndElement();
     xmlFile.writeEndDocument();
     return xmlFile.hasError();
@@ -365,8 +359,6 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FilePath &filePath, ROSP
     QFile workspaceFile(filePath.toString());
     if (workspaceFile.open(QFile::ReadOnly | QFile::Text))
     {
-        content.watchDirectories.clear();
-
         workspaceXml.setDevice(&workspaceFile);
         while(workspaceXml.readNextStartElement())
         {
@@ -413,17 +405,7 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FilePath &filePath, ROSP
 
                 workspaceXml.readNextStartElement();
             }
-            else if (workspaceXml.name() == QLatin1String("WatchDirectories"))
-            {
-                while(workspaceXml.readNextStartElement())
-                    if(workspaceXml.name() == QLatin1String("Directory"))
-                        content.watchDirectories.append(workspaceXml.readElementText());
-            }
         }
-
-        // If there is not a directory tag it will watch the workspace directory.
-        if (content.watchDirectories.size() == 0)
-            content.watchDirectories.append("");
 
         return true;
     }
