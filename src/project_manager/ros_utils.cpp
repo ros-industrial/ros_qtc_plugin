@@ -306,7 +306,7 @@ QList<Utils::FilePath> ROSUtils::installedDistributions()
   }
 
   if (distributions.isEmpty())
-      Core::MessageManager::write(QObject::tr("[ROS Error] ROS Does not appear to be installed.\n Check ROS Settings page to verify that the install location is valid."));
+      Core::MessageManager::write(QObject::tr("[ROS Error] ROS does not appear to be installed.\n Check ROS Settings page to verify that the install location is valid."));
 
   return distributions;
 }
