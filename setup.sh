@@ -124,6 +124,7 @@ function printUsage {
     logP "  -qtm path     : qmake path"
     logP "  -no-qtc-clean : skip qt creator \"make clean\""
     logP "  -no-qtr-clean : skip ros qt plugin \"make clean\""
+    logP "  -no-clean     : skip \"make clean\" for both projects"
     logP "  -v            : verbose mode"
     logP "Defaults"
     logP "  QTCreator : $QTC_BRANCH"
@@ -526,6 +527,7 @@ while [ "$#" -gt 0 ]; do
     -di)            RUN_TYPE="$1";   shift 1;;
     -qtm)           QMAKE_PATH="$2"; shift 2;;
     -qtb)           QTC_BRANCH="$2"; shift 2;;
+    -no-clean)      QTC_SKIP_CLEAN=1; QTR_SKIP_CLEAN=1; shift 1;;
     -no-qtc-clean)  QTC_SKIP_CLEAN=1; shift 1;;
     -no-qtr-clean)  QTR_SKIP_CLEAN=1; shift 1;;
     -qtp)           QTC_PATH="$2";   shift 2;;
