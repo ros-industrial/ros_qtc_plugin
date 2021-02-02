@@ -271,17 +271,13 @@ void ROSProject::updateProjectTree()
   }
 }
 
-void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath, const QStringList watchDirectories, QFutureInterface<FutureWatcherResults> &fi)
+void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath, const Utils::FilePath& sourcePath, QFutureInterface<FutureWatcherResults> &fi)
 {
     fi.reportStarted();
 
     FutureWatcherResults results;
 
-    for (const QString& dir : watchDirectories) {
-        Utils::FilePath addedDir = projectFilePath.parentDir().pathAppended(dir);
-        QHash<QString, ROSUtils::FolderContent> newDirContent = ROSUtils::getFolderContentRecursive(addedDir, results.files, results.directories);
-        results.workspaceContent.unite(newDirContent);
-    }
+    results.workspaceContent = ROSUtils::getFolderContentRecursive(sourcePath, results.files, results.directories);
 
     ROSProjectNode* project_node(new ROSProjectNode(projectFilePath.parentDir()));
     std::unique_ptr<FileNode> root_node(new FileNode(projectFilePath, ProjectExplorer::FileType::Project));
@@ -391,7 +387,11 @@ void ROSProject::asyncUpdate()
 
   m_futureWatcher.setFuture(m_asyncUpdateFutureInterface->future());
 
-  Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority, [this]() { ROSProject::buildProjectTree(projectFilePath(), m_projectFileContent.watchDirectories, *m_asyncUpdateFutureInterface); });
+  Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority,
+    [this]() {
+      Utils::FilePath sourcePath = ROSUtils::getWorkspaceInfo(projectDirectory(), rosBuildConfiguration()->rosBuildSystem(), distribution()).sourcePath;
+      ROSProject::buildProjectTree(projectFilePath(), sourcePath, *m_asyncUpdateFutureInterface);
+    });
 }
 
 void ROSProject::asyncUpdateCppCodeModel(bool success)
