@@ -318,7 +318,7 @@ bool RunStepList::fromMap(const QVariantMap &map)
     for (int i = 0; i < maxSteps; ++i) {
         QVariantMap rsData(map.value(QString::fromLatin1(STEPS_PREFIX) + QString::number(i)).toMap());
         if (rsData.isEmpty()) {
-            Core::MessageManager::write(tr("[ROS Warning] No step data found for step %1 (continuing).").arg(i));
+            Core::MessageManager::writeSilently(tr("[ROS Warning] No step data found for step %1 (continuing).").arg(i));
             continue;
         }
         bool handled = false;
@@ -330,7 +330,7 @@ bool RunStepList::fromMap(const QVariantMap &map)
                         appendStep(rs);
                         handled = true;
                     } else {
-                        Core::MessageManager::write(tr("[ROS Warning] Restoration of step %1 failed (continuing).").arg(i));
+                        Core::MessageManager::writeSilently(tr("[ROS Warning] Restoration of step %1 failed (continuing).").arg(i));
                     }
                 }
             }

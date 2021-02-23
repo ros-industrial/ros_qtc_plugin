@@ -63,7 +63,7 @@ bool ROSUtils::sourceROS(QProcess *process, const Utils::FilePath &rosDistributi
 {
   bool results = sourceWorkspaceHelper(process, Utils::FilePath(rosDistribution).pathAppended(QLatin1String("setup.bash")).toString());
   if (!results)
-    Core::MessageManager::write(QObject::tr("[ROS Warning] Faild to source ROS Distribution: %1.").arg(rosDistribution.toString()));
+    Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Faild to source ROS Distribution: %1.").arg(rosDistribution.toString()));
 
   return results;
 }
@@ -80,17 +80,17 @@ bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspace
     bash = bash.pathAppended(QLatin1String("setup.bash"));
     if (bash.exists())
     {
-        Core::MessageManager::write(QObject::tr("[ROS Debug] Sourced workspace: %1.").arg(bash.toString()));
+        Core::MessageManager::writeSilently(QObject::tr("[ROS Debug] Sourced workspace: %1.").arg(bash.toString()));
         if (sourceWorkspaceHelper(process, bash.toString()))
             return true;
     }
     else
     {
-        Core::MessageManager::write(QObject::tr("[ROS Warning] Failed to source workspace because this file does not exist: %1.").arg(bash.toString()));
+        Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to source workspace because this file does not exist: %1.").arg(bash.toString()));
         return true;
     }
 
-    Core::MessageManager::write(QObject::tr("[ROS Warning] Failed to source workspace: %1.").arg(workspaceInfo.path.toString()));
+    Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to source workspace: %1.").arg(workspaceInfo.path.toString()));
     return false;
 }
 
@@ -134,31 +134,31 @@ bool ROSUtils::initializeWorkspaceFolders(const WorkspaceInfo &workspaceInfo)
 {
     if (!workspaceInfo.sourcePath.exists())
         if( ! QDir().mkpath(workspaceInfo.sourcePath.toString()) ) {
-            Core::MessageManager::write(QObject::tr("[ROS Warning] Failed to initialize workspace folder: %1.").arg(workspaceInfo.sourcePath.toString()));
+            Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to initialize workspace folder: %1.").arg(workspaceInfo.sourcePath.toString()));
             return false;
         }
 
     if (!workspaceInfo.logPath.exists())
         if( ! QDir().mkpath(workspaceInfo.logPath.toString()) ) {
-            Core::MessageManager::write(QObject::tr("[ROS Warning] Failed to initialize workspace folder: %1.").arg(workspaceInfo.logPath.toString()));
+            Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to initialize workspace folder: %1.").arg(workspaceInfo.logPath.toString()));
             return false;
         }
 
     if (!workspaceInfo.buildPath.exists())
         if( ! QDir().mkpath(workspaceInfo.buildPath.toString()) ) {
-            Core::MessageManager::write(QObject::tr("[ROS Warning] Failed to initialize workspace folder: %1.").arg(workspaceInfo.buildPath.toString()));
+            Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to initialize workspace folder: %1.").arg(workspaceInfo.buildPath.toString()));
             return false;
         }
 
     if (!workspaceInfo.develPath.exists())
         if( ! QDir().mkpath(workspaceInfo.develPath.toString()) ) {
-            Core::MessageManager::write(QObject::tr("[ROS Warning] Failed to initialize workspace folder: %1.").arg(workspaceInfo.develPath.toString()));
+            Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to initialize workspace folder: %1.").arg(workspaceInfo.develPath.toString()));
             return false;
         }
 
     if (!workspaceInfo.installPath.exists())
         if( ! QDir().mkpath(workspaceInfo.installPath.toString()) ) {
-            Core::MessageManager::write(QObject::tr("[ROS Warning] Failed to initialize workspace folder: %1.").arg(workspaceInfo.installPath.toString()));
+            Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to initialize workspace folder: %1.").arg(workspaceInfo.installPath.toString()));
             return false;
         }
 
@@ -221,7 +221,7 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
         if (process->exitStatus() != QProcess::CrashExit)
             return buildWorkspace(process, workspace);
 
-        Core::MessageManager::write(QObject::tr("[ROS Warning] Failed to initialize workspace: %1.").arg(workspace.path.toString()));
+        Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to initialize workspace: %1.").arg(workspace.path.toString()));
         return false;
     }
 
@@ -257,7 +257,7 @@ bool ROSUtils::buildWorkspace(QProcess *process, const WorkspaceInfo &workspaceI
     if (process->exitStatus() != QProcess::CrashExit)
         return true;
 
-    Core::MessageManager::write(QObject::tr("[ROS Warning] Failed to build workspace: %1.").arg(workspaceInfo.path.toString()));
+    Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to build workspace: %1.").arg(workspaceInfo.path.toString()));
     return false;
 }
 
@@ -306,7 +306,7 @@ QList<Utils::FilePath> ROSUtils::installedDistributions()
   }
 
   if (distributions.isEmpty())
-      Core::MessageManager::write(QObject::tr("[ROS Error] ROS does not appear to be installed.\n Check ROS Settings page to verify that the install location is valid."));
+      Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] ROS does not appear to be installed.\n Check ROS Settings page to verify that the install location is valid."));
 
   return distributions;
 }
@@ -371,7 +371,7 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FilePath &filePath, ROSP
                     content.distribution = Utils::FilePath::fromString(attributes.value(QLatin1String("path")).toString());
                     if (!distributions.empty() && !distributions.contains(content.distribution))
                     {
-                        Core::MessageManager::write(QObject::tr("[ROS Error] Project file distribution [%1] is not installed. Setting to [%2], if incorrect modify project file [%3].").arg(content.distribution.toString(), distributions.first().toString(), filePath.fileName()));
+                        Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Project file distribution [%1] is not installed. Setting to [%2], if incorrect modify project file [%3].").arg(content.distribution.toString(), distributions.first().toString(), filePath.fileName()));
                         content.distribution = distributions.first();
                     }
                 }
@@ -380,11 +380,11 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FilePath &filePath, ROSP
                     if (!distributions.isEmpty())
                     {
                         content.distribution = distributions.first();
-                        Core::MessageManager::write(QObject::tr("[ROS Error] Unable to find ROS distributions."));
+                        Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Unable to find ROS distributions."));
                     }
                     else
                     {
-                        Core::MessageManager::write(QObject::tr("[ROS Error] Project file Distribution tag did not have a name attribute."));
+                        Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Project file Distribution tag did not have a name attribute."));
                     }
                 }
 
@@ -400,7 +400,7 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FilePath &filePath, ROSP
                 else
                 {
                     content.defaultBuildSystem = ROSUtils::CatkinMake;
-                    Core::MessageManager::write(QObject::tr("[ROS Warning] Project file DefaultBuildSystem tag did not have a value attribute."));
+                    Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Project file DefaultBuildSystem tag did not have a value attribute."));
                 }
 
                 workspaceXml.readNextStartElement();
@@ -410,7 +410,7 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FilePath &filePath, ROSP
         return true;
     }
 
-    Core::MessageManager::write(QObject::tr("[ROS Error] Error opening Workspace Project File: %1.").arg(filePath.toString()));
+    Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Error opening Workspace Project File: %1.").arg(filePath.toString()));
     return false;
 }
 
@@ -529,7 +529,7 @@ ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const WorkspaceInfo &
             auto packIt = cachedPackageInfo->find(packageInfo.name);
             if (packIt != cachedPackageInfo->end())
             {
-                Core::MessageManager::write(QObject::tr("[ROS Info] Using cached package information for package: %1.").arg(packageInfo.name));
+                Core::MessageManager::writeSilently(QObject::tr("[ROS Info] Using cached package information for package: %1.").arg(packageInfo.name));
                 wsPackageInfo.insert(packIt.value().name, packIt.value());
             }
         }
@@ -567,17 +567,17 @@ ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const Works
                 }
                 else
                 {
-                    Core::MessageManager::write(QObject::tr("[ROS Warning] Unable to parse build information for package: %1.").arg(package.name));
+                    Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Unable to parse build information for package: %1.").arg(package.name));
                 }
             }
             else
             {
-                Core::MessageManager::write(QObject::tr("[ROS Warning] Unable to locate package %1 build file: %2.").arg(package.name, buildInfo.cbpFile.toString()));
+                Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Unable to locate package %1 build file: %2.").arg(package.name, buildInfo.cbpFile.toString()));
             }
         }
         else
         {
-            Core::MessageManager::write(QObject::tr("[ROS Warning] Unable to locate build directory for package: %1.").arg(package.name));
+            Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Unable to locate build directory for package: %1.").arg(package.name));
         }
 
         // Check if there is cached build info available
@@ -586,7 +586,7 @@ ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const Works
             auto packIt = cachedPackageBuildInfo->find(package.name);
             if (packIt != cachedPackageBuildInfo->end())
             {
-                Core::MessageManager::write(QObject::tr("[ROS Info] Using cached package build information for package: %1.").arg(package.name));
+                Core::MessageManager::writeSilently(QObject::tr("[ROS Info] Using cached package build information for package: %1.").arg(package.name));
                 wsBuildInfo.insert(package.name, packIt.value());
             }
         }
@@ -607,7 +607,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
   QFile cbpFile(buildInfo.cbpFile.toString());
   if (!cbpFile.open(QFile::ReadOnly | QFile::Text))
   {
-    Core::MessageManager::write(QObject::tr("[ROS Error] Error opening CodeBlocks Project File: %1.").arg(buildInfo.cbpFile.toString()));
+    Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Error opening CodeBlocks Project File: %1.").arg(buildInfo.cbpFile.toString()));
     return false;
   }
 
@@ -778,7 +778,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
           QFile flagsFile(it->flagsFile.toString());
           if (!flagsFile.open(QFile::ReadOnly | QFile::Text))
           {
-            Core::MessageManager::write(QObject::tr("[ROS Error] Error opening flags file: %1.").arg(it->flagsFile.toString()));
+            Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Error opening flags file: %1.").arg(it->flagsFile.toString()));
             it->flags.append(QLatin1String("-std=c++11"));
             continue;
           }
@@ -800,7 +800,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
       }
       else
       {
-          Core::MessageManager::write(QObject::tr("[ROS Warning] Flags file does not exist: %1.").arg(it->flagsFile.toString()));
+          Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Flags file does not exist: %1.").arg(it->flagsFile.toString()));
           it->flags.append(QLatin1String("-std=c++11"));
       }
   }
@@ -854,7 +854,7 @@ QMap<QString, QString> ROSUtils::getWorkspacePackagePaths(const WorkspaceInfo &w
     }
     else
     {
-        Core::MessageManager::write(QObject::tr("[ROS Error] Workspace source directory does not exist: %1.").arg(workspaceInfo.sourcePath.toString()));
+        Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Workspace source directory does not exist: %1.").arg(workspaceInfo.sourcePath.toString()));
     }
 
     return packageMap;

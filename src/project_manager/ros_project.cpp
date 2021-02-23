@@ -239,14 +239,14 @@ void ROSProject::updateProjectTree()
     std::unique_ptr<ProjectExplorer::ProjectNode> pn(m_futureWatcher.result().node);
     if (!pn)
     {
-        Core::MessageManager::write("[ROS Warning] Update Project Tree Failed, Results returned null pointer.");
+        Core::MessageManager::writeSilently("[ROS Warning] Update Project Tree Failed, Results returned null pointer.");
         return;
     }
     setRootProjectNode(std::move(pn));
 
     if (!m_asyncUpdateFutureInterface)
     {
-        Core::MessageManager::write("[ROS Warning] Update Project Tree Failed, Async Futur Interface was null.");
+        Core::MessageManager::writeSilently("[ROS Warning] Update Project Tree Failed, Async Futur Interface was null.");
         // TODO Need to print warning
         return;
     }

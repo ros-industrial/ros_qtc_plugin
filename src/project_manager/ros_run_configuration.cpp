@@ -224,7 +224,7 @@ void ROSDebugRunWorker::findProcess()
     ProjectExplorer::DeviceProcessItem fallback;
     for (const ProjectExplorer::DeviceProcessItem &p : ProjectExplorer::DeviceProcessList::localProcesses()) {
         if (Utils::FileUtils::normalizePathName(p.exe) == appName) {
-            Core::MessageManager::write(tr("[ROS] Attaching to process: %1.").arg(appName));
+            Core::MessageManager::writeSilently(tr("[ROS] Attaching to process: %1.").arg(appName));
             pidFound(p);
             return;
         }
@@ -238,7 +238,7 @@ void ROSDebugRunWorker::findProcess()
     if (m_timeElapsed >= 30000)
     {
         m_timer.stop();
-        Core::MessageManager::write(tr("[ROS Error] Unable to find process: %1.").arg(appName));
+        Core::MessageManager::writeFlashing(tr("[ROS Error] Unable to find process: %1.").arg(appName));
     }
 }
 

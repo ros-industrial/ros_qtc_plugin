@@ -356,7 +356,7 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   }
   else
   {
-    Core::MessageManager::write(tr("[ROS Error] Faild to create catkin package."));
+    Core::MessageManager::writeFlashing(tr("[ROS Error] Faild to create catkin package."));
     success = false;
   }
 

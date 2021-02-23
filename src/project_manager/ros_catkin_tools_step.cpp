@@ -694,7 +694,7 @@ bool ROSCatkinToolsConfigEditorWidget::parseProfileConfig(Utils::FilePath filePa
     m_profileConfigPath = filePath;
     if (!m_profileConfigPath.exists())
     {
-        Core::MessageManager::write(tr("[ROS Warning] Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString()));
+        Core::MessageManager::writeSilently(tr("[ROS Warning] Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString()));
         return false;
     }
     m_parsing = true;
@@ -783,7 +783,7 @@ bool ROSCatkinToolsConfigEditorWidget::saveProfileConfig()
 {
     if (!m_profileConfigPath.exists())
     {
-        Core::MessageManager::write(tr("[ROS Warning] Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString()));
+        Core::MessageManager::writeSilently(tr("[ROS Warning] Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString()));
         return false;
     }
 

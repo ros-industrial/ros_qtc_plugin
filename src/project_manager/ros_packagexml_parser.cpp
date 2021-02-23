@@ -49,7 +49,7 @@ bool ROSPackageXmlParser::parsePackageXml(const Utils::FilePath &filepath)
         return true;
     }
 
-    Core::MessageManager::write(QObject::tr("[ROS Error] Failed to parse file: %1.").arg(m_packageInfo.filepath.toString()));
+    Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Failed to parse file: %1.").arg(m_packageInfo.filepath.toString()));
     return false;
 }
 
