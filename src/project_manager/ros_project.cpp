@@ -180,10 +180,10 @@ ROSProject::~ROSProject()
 
 bool ROSProject::saveProjectFile()
 {
-    DocumentManager::expectFileChange(projectFilePath().toString());
+    DocumentManager::expectFileChange(projectFilePath());
     // Make sure we can open the file for writing
 
-    Utils::FileSaver saver(projectFilePath().toString(), QIODevice::Text);
+    Utils::FileSaver saver(projectFilePath(), QIODevice::Text);
     if (!saver.hasError())
     {
       QXmlStreamWriter workspaceXml(saver.file());
@@ -191,7 +191,7 @@ bool ROSProject::saveProjectFile()
       saver.setResult(&workspaceXml);
     }
     bool result = saver.finalize(ICore::mainWindow());
-    DocumentManager::unexpectFileChange(projectFilePath().toString());
+    DocumentManager::unexpectFileChange(projectFilePath());
     return result;
 }
 

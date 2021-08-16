@@ -75,9 +75,9 @@ ROSPackageWizardDialog::ROSPackageWizardDialog(const Core::BaseFileWizardFactory
     addPage(m_detailsPage);
 }
 
-void ROSPackageWizardDialog::setPath(const QString &path) {m_detailsPage->setPath(path);}
+void ROSPackageWizardDialog::setPath(const Utils::FilePath &path) {m_detailsPage->setPath(path);}
 
-void ROSPackageWizardDialog::setProjectDirectory(const QString &path) {m_detailsPage->setProjectDirectory(path);}
+void ROSPackageWizardDialog::setProjectDirectory(const Utils::FilePath &path) {m_detailsPage->setProjectDirectory(path);}
 
 QString ROSPackageWizardDialog::packageName() const {return m_detailsPage->packageName();}
 
@@ -146,12 +146,12 @@ ROSPackageWizardDetailsPage::ROSPackageWizardDetailsPage(QWidget *parent) :
 
 ROSPackageWizardDetailsPage::~ROSPackageWizardDetailsPage() {delete d;}
 
-void ROSPackageWizardDetailsPage::setPath(const QString &path) {d->m_ui.pathChooser->setPath(path);}
+void ROSPackageWizardDetailsPage::setPath(const Utils::FilePath &path) {d->m_ui.pathChooser->setPath(path.toString());}
 
-void ROSPackageWizardDetailsPage::setProjectDirectory(const QString &path)
+void ROSPackageWizardDetailsPage::setProjectDirectory(const Utils::FilePath &path)
 {
     d->m_ui.pathChooser->setInitialBrowsePathBackup(path);
-    d->m_ui.pathChooser->lineEdit()->setPlaceholderText(path);
+    d->m_ui.pathChooser->lineEdit()->setPlaceholderText(path.toString());
 }
 
 QString ROSPackageWizardDetailsPage::packageName() const {return d->m_ui.packageNameLineEdit->text();}
@@ -246,8 +246,8 @@ ROSPackageWizard::ROSPackageWizard()
 }
 
 Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent, const Core::WizardDialogParameters &parameters) const
-{  
-    QString defaultPath = parameters.defaultPath();
+{
+    Utils::FilePath defaultPath = Utils::FilePath::fromString(parameters.defaultPath());
 
     ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectExplorer::ProjectTree::currentProject());
 
@@ -262,13 +262,13 @@ Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent, const Core::Wiza
                                                                            bc->rosBuildSystem(),
                                                                            bc->project()->distribution());
 
-        if( defaultPath ==  workspaceInfo.path.toString() )
-            defaultPath = workspaceInfo.sourcePath.toString();
+        if( defaultPath ==  workspaceInfo.path )
+            defaultPath = workspaceInfo.sourcePath;
     }
 
     m_wizard = new ROSPackageWizardDialog(this, parent);
 
-    m_wizard->setProjectDirectory(rosProject->projectDirectory().toString() + QDir::separator());
+    m_wizard->setProjectDirectory(rosProject->projectDirectory());
     m_wizard->setPath(defaultPath);
 
     for (QWizardPage *p : m_wizard->extensionPages())

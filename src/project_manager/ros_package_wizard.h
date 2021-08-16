@@ -45,8 +45,8 @@ class ROSPackageWizardDialog : public Core::BaseFileWizard
 public:
     explicit ROSPackageWizardDialog(const Core::BaseFileWizardFactory *factory, QWidget *parent = 0);
 
-    void setPath(const QString &path);
-    void setProjectDirectory(const QString &path);
+    void setPath(const Utils::FilePath &path);
+    void setProjectDirectory(const Utils::FilePath &path);
 
     QString packageName() const;
     QString packagePath() const;
@@ -73,8 +73,8 @@ public:
 
     bool isComplete() const override;
 
-    void setPath(const QString &path);
-    void setProjectDirectory(const QString &path);
+    void setPath(const Utils::FilePath &path);
+    void setProjectDirectory(const Utils::FilePath &path);
 
     QString packageName() const;
     QString packagePath() const;
