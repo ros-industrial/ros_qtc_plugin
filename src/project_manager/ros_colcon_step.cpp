@@ -160,32 +160,32 @@ bool ROSColconStep::fromMap(const QVariantMap &map)
 
 QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeDefault) const
 {
-    QString args;
+    QStringList args;
 
     switch(m_target) {
     case BUILD:
-        Utils::QtcProcess::addArgs(&args, QLatin1String("build"));
-        Utils::QtcProcess::addArgs(&args, m_colconArguments);
+        args << QLatin1String("build");
+        args << m_colconArguments;
         if (includeDefault)
             if (buildType == ROSUtils::BuildTypeUserDefined)
-                Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(m_cmakeArguments));
+                args << QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(m_cmakeArguments);
             else
-                Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments));
+                args << QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments);
         else
             if (!m_cmakeArguments.isEmpty())
-                Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
+                args << QString("--cmake-args %1").arg(m_cmakeArguments);
 
         break;
     case CLEAN:
-        Utils::QtcProcess::addArgs(&args, QLatin1String("-r build/ install/ log/"));
+        args << QLatin1String("-r build/ install/ log/");
 
         break;
     }
 
     if (!m_makeArguments.isEmpty())
-        Utils::QtcProcess::addArgs(&args, QString("--make-args %1").arg(m_makeArguments));
+        args << QString("--make-args %1").arg(m_makeArguments);
 
-    return args;
+    return args.join(" ");
 }
 
 Utils::CommandLine ROSColconStep::makeCommand(const QString &args) const

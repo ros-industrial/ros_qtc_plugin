@@ -182,40 +182,40 @@ bool ROSCatkinToolsStep::fromMap(const QVariantMap &map)
 
 QString ROSCatkinToolsStep::allArguments(ROSUtils::BuildType buildType, bool includeDefault) const
 {
-    QString args;
+    QStringList args;
 
     switch(m_target) {
     case BUILD:
-        Utils::QtcProcess::addArgs(&args, QLatin1String("build"));
-        Utils::QtcProcess::addArgs(&args, m_catkinToolsArguments);
+        args << QLatin1String("build");
+        args << m_catkinToolsArguments;
 
         if (!m_catkinMakeArguments.isEmpty())
-            Utils::QtcProcess::addArgs(&args, QString("--catkin-make-args %1").arg(m_catkinMakeArguments));
+            args << QString("--catkin-make-args %1").arg(m_catkinMakeArguments);
 
         if (includeDefault)
-            Utils::QtcProcess::addArgs(&args, QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments));
+            args << QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments);
         else
             if (!m_cmakeArguments.isEmpty())
-                Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
+                args << QString("--cmake-args %1").arg(m_cmakeArguments);
 
         break;
     case CLEAN:
-        Utils::QtcProcess::addArgs(&args, QLatin1String("clean"));
-        Utils::QtcProcess::addArgs(&args, QLatin1String("-y"));
-        Utils::QtcProcess::addArgs(&args, m_catkinToolsArguments);
+        args << QLatin1String("clean");
+        args << QLatin1String("-y");
+        args << m_catkinToolsArguments;
 
         if (!m_catkinMakeArguments.isEmpty())
-            Utils::QtcProcess::addArgs(&args, QString("--catkin-make-args %1").arg(m_catkinMakeArguments));
+            args << QString("--catkin-make-args %1").arg(m_catkinMakeArguments);
 
         if (!m_cmakeArguments.isEmpty())
-            Utils::QtcProcess::addArgs(&args, QString("--cmake-args %1").arg(m_cmakeArguments));
+            args << QString("--cmake-args %1").arg(m_cmakeArguments);
         break;
     }
 
     if (!m_makeArguments.isEmpty())
-        Utils::QtcProcess::addArgs(&args, QString("--make-args %1").arg(m_makeArguments));
+        args << QString("--make-args %1").arg(m_makeArguments);
 
-    return args;
+    return args.join(" ");
 }
 
 Utils::CommandLine ROSCatkinToolsStep::makeCommand(const QString &args) const
