@@ -1,5 +1,5 @@
 ## set the QTC_SOURCE environment variable to override the setting here
-## Following variables are exporeted in setup.sh.
+## Following variables are exported in setup.sh.
 ## If running qmake manually, please export QTC_SOURCE, QTC_BUILD
 ## else QTCREATOR_SOURCES will default to $$PWD/../qt-creator and
 ## IDE_BUILD_TREE will default $$PWD/../qt-creator-build
