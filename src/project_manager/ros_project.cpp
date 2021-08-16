@@ -358,7 +358,7 @@ void ROSProject::fileSystemChanged(const QString &path)
 
   // This is to check if untracked dirs or files were added. If so do not start timer.
   if (files_added.empty() && dirs_added.empty() && files_removed.empty() && dirs_removed.empty())
-    return;  
+    return;
 
   m_asyncUpdateTimer.setInterval(UPDATE_INTERVAL);
   m_asyncUpdateTimer.start();
