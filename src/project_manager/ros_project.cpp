@@ -97,7 +97,7 @@ static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
             directoryWithoutPrefix = directory;
         }
     }
-    QStringList parts = directoryWithoutPrefix.toString().split('/', QString::SkipEmptyParts);
+    QStringList parts = directoryWithoutPrefix.toString().split('/', Qt::SkipEmptyParts);
     if (!Utils::HostOsInfo::isWindowsHost() && !isRelative && parts.count() > 0)
         parts[0].prepend('/');
 
@@ -342,11 +342,11 @@ void ROSProject::fileSystemChanged(const QString &path)
   ROSUtils::getDefaultFolderContentFilters(folderNameFilters, fileNameFilters);
   const ROSUtils::FolderContent& cur_content = ROSUtils::getFolderContent(path, folderNameFilters, fileNameFilters);
 
-  QSet<QString> pre_content_files = QSet<QString>::fromList(pre_content.files);
-  QSet<QString> pre_content_dirs = QSet<QString>::fromList(pre_content.directories);
+  QSet<QString> pre_content_files(pre_content.files.begin(), pre_content.files.end());
+  QSet<QString> pre_content_dirs(pre_content.directories.begin(), pre_content.directories.end());
 
-  QSet<QString> cur_content_files = QSet<QString>::fromList(cur_content.files);
-  QSet<QString> cur_content_dirs = QSet<QString>::fromList(cur_content.directories);
+  QSet<QString> cur_content_files(cur_content.files.begin(), cur_content.files.end());
+  QSet<QString> cur_content_dirs(cur_content.directories.begin(), cur_content.directories.end());
 
   // Content that has been added
   QSet<QString> files_added = cur_content_files - pre_content_files;

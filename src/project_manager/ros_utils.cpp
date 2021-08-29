@@ -316,7 +316,7 @@ bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
   QStringList env_list;
   QString cmd = QLatin1String("source ") + path + QLatin1String(" && env");
 
-  process->start(QLatin1String("bash"));
+  process->start(QLatin1String("bash"), QStringList());
   process->waitForStarted();
   process->write(cmd.toLatin1());
   process->closeWriteChannel();
@@ -325,7 +325,7 @@ bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
   if (process->exitStatus() != QProcess::CrashExit)
   {
     QString output = QString::fromStdString(process->readAllStandardOutput().toStdString());
-    env_list = output.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+    env_list = output.split(QRegExp("[\r\n]"), Qt::SkipEmptyParts);
 
     Utils::Environment env(env_list);
     process->setProcessEnvironment(env.toProcessEnvironment());
@@ -787,11 +787,11 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
           while (!flagsStream.atEnd()) {
               QString line = flagsStream.readLine().trimmed();
               if (line.startsWith("CXX_FLAGS ="))
-                  it->flags = line.mid(11).trimmed().split(' ', QString::SkipEmptyParts);
+                  it->flags = line.mid(11).trimmed().split(' ', Qt::SkipEmptyParts);
 
               QStringList defines;
               if (line.startsWith("CXX_DEFINES ="))
-                  defines = line.mid(13).trimmed().split(' ', QString::SkipEmptyParts);
+                  defines = line.mid(13).trimmed().split(' ', Qt::SkipEmptyParts);
 
               // Need to remove -D from the define and escaped quotes
               for (auto& d : defines)
@@ -815,7 +815,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   QStringList tmp;
 
   process.setEnvironment(env);
-  process.start(QLatin1String("bash"));
+  process.start(QLatin1String("bash"), QStringList());
   process.waitForStarted();
   QString cmd = QLatin1String("rospack list"); // TODO: for ROS2 do 'ros2 pkg list'
   process.write(cmd.toLatin1());
@@ -825,7 +825,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   if (process.exitStatus() != QProcess::CrashExit)
   {
     QString output = QString::fromStdString(process.readAllStandardOutput().toStdString());
-    QStringList package_list = output.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+    QStringList package_list = output.split(QRegExp("[\r\n]"), Qt::SkipEmptyParts);
 
     for (const QString& str : package_list)
     {
@@ -885,7 +885,7 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
   QMap<QString, QString> package_executables;
 
   process.setEnvironment(env);
-  process.start(QLatin1String("bash"));
+  process.start(QLatin1String("bash"), QStringList());
   process.waitForStarted();
   QString cmd = QLatin1String("catkin_find --without-underlays --libexec ") + packageName;
   process.write(cmd.toLatin1());
@@ -895,7 +895,7 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
   if (process.exitStatus() != QProcess::CrashExit)
   {
     QString output = QString::fromStdString(process.readAllStandardOutput().toStdString());
-    QStringList loc_list = output.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+    QStringList loc_list = output.split(QRegExp("[\r\n]"), Qt::SkipEmptyParts);
 
     if (loc_list.size() > 0)
     {
