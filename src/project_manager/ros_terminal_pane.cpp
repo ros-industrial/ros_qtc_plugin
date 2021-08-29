@@ -140,7 +140,7 @@ void ROSTerminalPane::closeTerminal(int index)
 
   // Need to kill the shell process
   QTermWidget* terminal = qobject_cast<QTermWidget*>(m_tabWidget->currentWidget());
-  QProcess::startDetached(QString("kill -9 %1").arg(terminal->getShellPID()));
+  QProcess::startDetached(QString("kill"), QStringList() << "-9" << QString(terminal->getShellPID()));
 
   m_terminals.removeAll(terminal);
   m_tabWidget->removeTab(index);

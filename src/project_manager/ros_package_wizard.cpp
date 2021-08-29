@@ -198,7 +198,7 @@ void ROSPackageWizardDetailsPage::slotActivated()
 QStringList ROSPackageWizardDetailsPage::processList(const QString &text) const
 {
     QStringList newList;
-    for (const QString& str : text.split(QRegExp(QLatin1String("[,;]")), QString::SkipEmptyParts))
+    for (const QString& str : text.split(QRegExp(QLatin1String("[,;]")), Qt::SkipEmptyParts))
     {
         newList.append(QString::fromLatin1("\"%1\"").arg(str.trimmed()));
     }
