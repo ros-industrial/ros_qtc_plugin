@@ -1,0 +1,5 @@
+qtc_version: "5.0"
+qtc_modules: ["qtcreator", "qtcreator_dev"]
+
+qt_version: "5.15"
+qt_modules: ['qtbase', 'qtdeclarative', 'icu']
