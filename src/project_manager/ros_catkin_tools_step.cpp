@@ -25,7 +25,6 @@
 #include "ui_ros_catkin_tools_list_editor.h"
 #include "ui_ros_catkin_tools_config_editor.h"
 
-#include <boost/algorithm/string/join.hpp>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/gnumakeparser.h>
