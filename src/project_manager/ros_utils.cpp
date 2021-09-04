@@ -1010,7 +1010,7 @@ bool ROSUtils::removeCatkinToolsProfile(const Utils::FilePath &workspaceDir, con
                 return false;
 
             if (activeProfile == profileName)
-                setCatkinToolsActiveProfile(workspaceDir, QLatin1Literal("default"));
+                setCatkinToolsActiveProfile(workspaceDir, QLatin1String("default"));
         }
     }
 

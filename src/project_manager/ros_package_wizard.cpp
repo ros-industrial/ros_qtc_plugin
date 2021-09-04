@@ -317,13 +317,13 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   cmd += QString::fromLatin1(" \"%1\"").arg(m_wizard->packageName());
 
   if (!m_wizard->catkin_dependencies().isEmpty())
-      cmd += m_wizard->catkin_dependencies().join(QLatin1Literal(" ")).insert(0,QLatin1Literal(" "));
+      cmd += m_wizard->catkin_dependencies().join(QLatin1String(" ")).insert(0,QLatin1String(" "));
 
   if (!m_wizard->system_dependencies().isEmpty())
-      cmd += m_wizard->system_dependencies().join(QLatin1Literal(" ")).insert(0,QLatin1Literal(" -s "));
+      cmd += m_wizard->system_dependencies().join(QLatin1String(" ")).insert(0,QLatin1String(" -s "));
 
   if (!m_wizard->boost_components().isEmpty())
-      cmd += m_wizard->boost_components().join(QLatin1Literal(" ")).insert(0,QLatin1Literal(" -b "));
+      cmd += m_wizard->boost_components().join(QLatin1String(" ")).insert(0,QLatin1String(" -b "));
 
   if (!m_wizard->version().isEmpty())
       cmd += QString::fromLatin1(" -V \"%1\"").arg(m_wizard->version());
@@ -335,10 +335,10 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
       cmd += QString::fromLatin1(" -D \"%1\"").arg(m_wizard->description());
 
   if (!m_wizard->authors().isEmpty())
-      cmd += m_wizard->authors().join(QLatin1Literal(" -a ")).insert(0,QLatin1Literal(" -a "));
+      cmd += m_wizard->authors().join(QLatin1String(" -a ")).insert(0,QLatin1String(" -a "));
 
   if (!m_wizard->maintainers().isEmpty())
-      cmd += m_wizard->maintainers().join(QLatin1Literal(" -m ")).insert(0,QLatin1Literal(" -m "));
+      cmd += m_wizard->maintainers().join(QLatin1String(" -m ")).insert(0,QLatin1String(" -m "));
 
   cmd += QString::fromLatin1(" --rosdistro \"%1\"").arg(project->distribution().fileName());
 
