@@ -6,64 +6,51 @@ How to Install (Developers)
 Installation
 ------------
 
-Installation Procedure for Ubuntu 14.04
+Installation Dependencies for Ubuntu 20.04
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-    sudo add-apt-repository ppa:levi-armstrong/qt-libraries-trusty
-    sudo add-apt-repository ppa:levi-armstrong/ppa
-    sudo apt-get update && sudo apt-get install qt57creator-plugin-ros libqtermwidget57-0-dev
-
-Installation Procedure for Ubuntu 16.04
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-   sudo add-apt-repository ppa:levi-armstrong/qt-libraries-xenial
-   sudo add-apt-repository ppa:levi-armstrong/ppa
-   sudo apt-get update && sudo apt-get install qt57creator-plugin-ros libqtermwidget57-0-dev
-
-Configure system to use the new version of Qt
----------------------------------------------
-
-After installation you need to tell qtchooser where to find this install. Replace the two lines in the file below with the location to the local version shown below. Make sure to change *username* and *version* in the file path to match your system.
-
-File:
-
-.. code-block:: bash
-
-   sudo gedit /usr/lib/x86_64-linux-gnu/qt-default/qtchooser/default.conf
-
-File content:
-
-.. code-block:: bash
-
-   /opt/qt57/bin
-   /opt/qt57/lib
+    sudo apt update
+    sudo apt install libgl1-mesa-dev ninja-build libyaml-cpp-dev libqtermwidget5-0-dev libutf8proc-dev
+    sudo apt install python3-pip
+    pip install pyyaml requests py7zr
 
 Run ROS Qt Creator setup script
 -------------------------------
 
-#. Clone your fork of the repository.
+#. Clone the latest `devel` version:
 
    .. code-block:: bash
 
-      git clone -b master https://github.com/<username>/ros_qtc_plugins.git
+      git clone https://github.com/ros-industrial/ros_qtc_plugin.git -b devel
 
-#. Next in a terminal, navigate into the repository directory and execute the command below.
+#. Navigate to `ros_qtc_plugin` and run the setup script to download additional Qt and Qt Creator dependencies:
 
    .. code-block:: bash
 
-      bash setup.sh -d
+      ./setup.py
 
-.. Note:: Instruction 2 can can be repeated to get the latest updates for Qt Creator source. The developer must manually update there fork to get the latest version of ros_qtc_plugins.
+.. Note:: The script will download the official binary distributions of Qt and Qt Creator and thus will only support commonly used architectures. If you want to build the plugin on unsupported architectures, you have to build them from source or use a Linux distribution that provides sufficiently new versions of these packages.
+
+.. Note:: The script will download the latest versions that are compatible with the `devel` branch. The versions can be changed in `versions.yaml` to build against an older or newer version.
+
+.. Note:: Alternatively to the setup script, you can use the official binary installer for Qt and Qt Creator. In this case, you have to select the "Plugin Development" package to install the development headers, and "Debug Symbols" if you want your gdb backtrace to contain Qt Creator symbols.
+
+Build plugin
+-------------------------------
+
+#. Compile the plugin and create a plugin package
+
+   .. code-block:: bash
+
+      cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="/tmp/qtc_sdk/Tools/QtCreator;/tmp/qtc_sdk/5.15.0/gcc_64"
+      cmake --build build --target package
 
 Testing Plugin
 --------------
 
-#. Execute the command below or launch using the desktop launcher.
+#. Extract the archive to your Qt Creator installation and execute the command below or launch using the desktop launcher.
 
    .. code-block:: bash
 
@@ -74,21 +61,18 @@ Testing Plugin
 Debug issues with Plugin
 ------------------------
 
-#. Next in a terminal, navigate to the repository ros_qtc_plugin and execute the command below.
+#. The instructions above compile the plugin with debug symbols. You can then debug the plugin by starting Qt Creator with gdb:
 
    .. code-block:: bash
 
-      bash setup.sh -di
+      gdb --ex=r --args qtcreator
 
-#. Now launch qtcreator using gdb as shown below and after the plugin segfaults post the trace back in the active/new issue.
-
-   .. code-block:: bash
-
-      gdb <local>/qt-creator-build/bin/qtcreator
-      (gdb) run
-
-   After error:
+#. After the plugin segfaults, print a backtrace:
 
    .. code-block:: bash
 
       (gdb) bt
+
+   and share it on GitHub in a new or active issue.
+
+.. Note:: By default, Qt Creator does not come with debug symbols. The backtrace will only contain symbols of the plugin. Qt Creator debug symbols can be installed either by downloading them from the same source as the setup script, or via the official binary distribution installer (package "Debug Symbols").
