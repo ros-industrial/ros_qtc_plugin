@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(ROSProjectManager VERSION 0.3.11)
+project(ROSProjectManager VERSION 0.4.0)
 
 add_subdirectory(src/project_manager)
 
