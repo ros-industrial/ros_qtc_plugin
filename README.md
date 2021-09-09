@@ -37,12 +37,12 @@ Additionally, you need:
 - utf8proc
 
 The can be installed via apt on Ubuntu:
-```
+```bash
 sudo apt install libgl1-mesa-dev ninja-build libyaml-cpp-dev libqtermwidget5-0-dev libutf8proc-dev
 ```
 
 To use the `setup.py` script, you will need additional python dependencies:
-```
+```bash
 pip install pyyaml requests py7zr
 ```
 
@@ -51,16 +51,16 @@ pip install pyyaml requests py7zr
 If Qt Creator and the Plugin Development package are not installed in one of the default folders, you have to tell CMake via `CMAKE_PREFIX_PATH` where those can be found.
 
 When using the official Qt binary installer with the default installation path, this is:
-```
+```bash
 cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="~/Qt/Tools/QtCreator/;~/Qt/5.15.2/gcc_64"
 ```
 When using the `setup.py` script, the script will show the installation path (which can be adjusted using `--install_path`) and the compile commands. On `x86_64` Linux with the default path, this is:
-```
+```bash
 cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="/tmp/qtc_sdk/Tools/QtCreator;/tmp/qtc_sdk/5.15.0/gcc_64"
 ```
 
 Finally, compile the plugin and create an archive:
-```
+```bash
 cmake --build build --target package
 ```
 This will create an archive of the format `ROSProjectManager-${version}-Linux-${arch}.zip` inside the build folder (`build` by default). This archive can either be imported by Qt Creator via Help → About Plugins… → Install Plugin… or alternatively extracted directly to `~/Qt/Tools/QtCreator/`.
