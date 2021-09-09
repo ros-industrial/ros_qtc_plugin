@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(ROSProjectManager VERSION 0.4.1)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_link_options("-Wl,-z,relro,-z,now,-z,defs")
 endif()
