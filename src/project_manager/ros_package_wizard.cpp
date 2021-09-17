@@ -343,8 +343,11 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   cmd += QString::fromLatin1(" --rosdistro \"%1\"").arg(project->distribution().fileName());
 
   // create package using ros command catkin_create_pkg
-  Utils::FilePath packagePath = Utils::FilePath::fromString(m_wizard->packagePath());
-  catkin_create_pkg->setWorkingDirectory(packagePath.toString());
+  const QDir packagePath = m_wizard->packagePath();
+  if (!packagePath.exists()) {
+      packagePath.mkpath(".");
+  }
+  catkin_create_pkg->setWorkingDirectory(packagePath.path());
 
   ROSUtils::sourceROS(catkin_create_pkg, project->distribution());
   catkin_create_pkg->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << cmd);
