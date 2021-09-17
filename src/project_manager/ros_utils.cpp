@@ -271,7 +271,7 @@ QList<Utils::FilePath> ROSUtils::installedDistributions()
     QDir custom_dir(custom_ros_path.toString());
 
     custom_dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    for (auto entry : custom_dir.entryList())
+    for (const auto &entry : custom_dir.entryList())
     {
       Utils::FilePath path(custom_ros_path);
       path = path.pathAppended(entry);
@@ -291,7 +291,7 @@ QList<Utils::FilePath> ROSUtils::installedDistributions()
     QDir ros_opt(default_ros_path.toString());
 
     ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    for (auto entry : ros_opt.entryList())
+    for (const auto &entry : ros_opt.entryList())
     {
       Utils::FilePath path = Utils::FilePath::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
       path = path.pathAppended(entry);
@@ -444,7 +444,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContentRecursive(cons
     QStringList folderNameFilters, fileNameFilters;
     getDefaultFolderContentFilters(folderNameFilters, fileNameFilters);
 
-    ROSUtils::FolderContent content = getFolderContent(folder, folderNameFilters, fileNameFilters);
+    const ROSUtils::FolderContent content = getFolderContent(folder, folderNameFilters, fileNameFilters);
 
     workspaceFiles[folder] = content;
 
@@ -464,7 +464,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContentRecursive(cons
 
         QString folder_name = Utils::FilePath::fromString(folder).fileName();
         bool found = false;
-        for (auto filter : folderNameFilters)
+        for (const auto& filter : qAsConst(folderNameFilters))
         {
           QRegularExpression rx(filter);
           if (rx.match(folder_name).hasMatch())
@@ -490,7 +490,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContentRecursive(cons
 
         if (skip) continue;
 
-        content = getFolderContent(folder, folderNameFilters, fileNameFilters);
+        const ROSUtils::FolderContent content = getFolderContent(folder, folderNameFilters, fileNameFilters);
 
         workspaceFiles[folder] = content;
 
