@@ -88,119 +88,6 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="authorsLabel">
-     <property name="text">
-      <string>Authors:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <widget class="QLabel" name="maintainerLabel">
-     <property name="text">
-      <string>Maintainers:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="0">
-    <widget class="QLabel" name="descriptionLabel">
-     <property name="text">
-      <string>Description:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="1">
-    <widget class="QPlainTextEdit" name="descriptionPlainTextEdit"/>
-   </item>
-   <item row="7" column="0">
-    <widget class="QLabel" name="dependsLabel">
-     <property name="text">
-      <string>Dependencies</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1">
-    <widget class="QLineEdit" name="maintainersLineEdit"/>
-   </item>
-   <item row="8" column="0">
-    <widget class="QLabel" name="catkinLabel">
-     <property name="minimumSize">
-      <size>
-       <width>101</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Catkin:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-     </property>
-     <property name="indent">
-      <number>40</number>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="0">
-    <widget class="QLabel" name="systemLabel">
-     <property name="minimumSize">
-      <size>
-       <width>101</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>System:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-     </property>
-     <property name="indent">
-      <number>40</number>
-     </property>
-    </widget>
-   </item>
-   <item row="10" column="0">
-    <widget class="QLabel" name="boostLabel">
-     <property name="text">
-      <string>Boost:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-     </property>
-     <property name="margin">
-      <number>0</number>
-     </property>
-     <property name="indent">
-      <number>40</number>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QLineEdit" name="authorsLineEdit">
-     <property name="inputMethodHints">
-      <set>Qt::ImhNone</set>
-     </property>
-     <property name="inputMask">
-      <string/>
-     </property>
-     <property name="frame">
-      <bool>true</bool>
-     </property>
-     <property name="echoMode">
-      <enum>QLineEdit::Normal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="1">
-    <widget class="QLineEdit" name="catkinLineEdit"/>
-   </item>
-   <item row="9" column="1">
-    <widget class="QLineEdit" name="systemLineEdit"/>
-   </item>
-   <item row="10" column="1">
-    <widget class="QLineEdit" name="boostLineEdit"/>
-   </item>
    <item row="3" column="1">
     <widget class="QComboBox" name="licenseComboBox">
      <property name="editable">
@@ -253,6 +140,86 @@
      </item>
     </widget>
    </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="dependsLabel">
+     <property name="text">
+      <string>Dependencies</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="catkinLabel">
+     <property name="minimumSize">
+      <size>
+       <width>101</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Catkin:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+     <property name="indent">
+      <number>40</number>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QLineEdit" name="catkinLineEdit"/>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="systemLabel">
+     <property name="minimumSize">
+      <size>
+       <width>101</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>System:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+     <property name="indent">
+      <number>40</number>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QLineEdit" name="systemLineEdit"/>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="boostLabel">
+     <property name="text">
+      <string>Boost:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <property name="indent">
+      <number>40</number>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="QLineEdit" name="boostLineEdit"/>
+   </item>
+   <item row="9" column="0">
+    <widget class="QLabel" name="descriptionLabel">
+     <property name="text">
+      <string>Description:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QPlainTextEdit" name="descriptionPlainTextEdit"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -272,8 +239,6 @@
   <tabstop>packageNameLineEdit</tabstop>
   <tabstop>versionLineEdit</tabstop>
   <tabstop>licenseComboBox</tabstop>
-  <tabstop>authorsLineEdit</tabstop>
-  <tabstop>maintainersLineEdit</tabstop>
   <tabstop>catkinLineEdit</tabstop>
   <tabstop>systemLineEdit</tabstop>
   <tabstop>boostLineEdit</tabstop>

@@ -89,10 +89,6 @@ QString ROSPackageWizardDialog::licenses() const {return m_detailsPage->licenses
 
 QString ROSPackageWizardDialog::description() const {return m_detailsPage->description();}
 
-QStringList ROSPackageWizardDialog::authors() const {return m_detailsPage->authors();}
-
-QStringList ROSPackageWizardDialog::maintainers() const {return m_detailsPage->maintainers();}
-
 QStringList ROSPackageWizardDialog::catkin_dependencies() const {return m_detailsPage->catkin_dependencies();}
 
 QStringList ROSPackageWizardDialog::system_dependencies() const {return m_detailsPage->system_dependencies();}
@@ -164,10 +160,6 @@ QString ROSPackageWizardDetailsPage::licenses() const {return d->m_ui.licenseCom
 
 QString ROSPackageWizardDetailsPage::description() const {return d->m_ui.descriptionPlainTextEdit->toPlainText();}
 
-QStringList ROSPackageWizardDetailsPage::authors() const {return processList(d->m_ui.authorsLineEdit->text());}
-
-QStringList ROSPackageWizardDetailsPage::maintainers() const {return processList(d->m_ui.maintainersLineEdit->text());}
-
 QStringList ROSPackageWizardDetailsPage::catkin_dependencies() const {return processList(d->m_ui.catkinLineEdit->text());}
 
 QStringList ROSPackageWizardDetailsPage::system_dependencies() const {return processList(d->m_ui.systemLineEdit->text());}
@@ -197,12 +189,7 @@ void ROSPackageWizardDetailsPage::slotActivated()
 
 QStringList ROSPackageWizardDetailsPage::processList(const QString &text) const
 {
-    QStringList newList;
-    for (const QString& str : text.split(QRegExp(QLatin1String("[,;]")), Qt::SkipEmptyParts))
-    {
-        newList.append(QString::fromLatin1("\"%1\"").arg(str.trimmed()));
-    }
-    return newList;
+    return text.split(QRegExp(QLatin1String("[,; ]")), Qt::SkipEmptyParts);
 }
 
 bool ROSPackageWizardDetailsPage::validateWithValidator(Utils::FancyLineEdit *edit, QString *errorMessage)
@@ -283,7 +270,6 @@ Core::GeneratedFiles ROSPackageWizard::generateFiles(const QWizard *w,
     Q_UNUSED(w);
     Q_UNUSED(errorMessage);
 
-    QString package;
     Utils::FilePath packagePath = Utils::FilePath::fromString(m_wizard->packagePath());
     Utils::FilePath cmakelistPath = Utils::FilePath::fromString(m_wizard->packagePath());
 
@@ -308,63 +294,109 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   Q_UNUSED(files);
   Q_UNUSED(errorMessage);
 
-  ROSProject *project = static_cast<ROSProject *>(ProjectExplorer::ProjectTree::currentProject());
+  const ROSProject *project = static_cast<ROSProject *>(ProjectExplorer::ProjectTree::currentProject());
 
-  QProcess *catkin_create_pkg = new QProcess();
+  const ROSUtils::BuildSystem bs = project->defaultBuildSystem();
 
-  QString cmd = QLatin1String("catkin_create_pkg");
+  QStringList create_args;
 
-  cmd += QString::fromLatin1(" \"%1\"").arg(m_wizard->packageName());
+  switch (bs) {
+  case ROSUtils::BuildSystem::CatkinMake:
+      create_args.append("catkin_create_pkg");
+      break;
+  case ROSUtils::BuildSystem::CatkinTools:
+      create_args.append({"catkin", "create", "pkg"});
+      break;
+  case ROSUtils::BuildSystem::Colcon:
+      create_args.append({"ros2", "pkg", "create"});
+      break;
+  }
 
-  if (!m_wizard->catkin_dependencies().isEmpty())
-      cmd += m_wizard->catkin_dependencies().join(QLatin1String(" ")).insert(0,QLatin1String(" "));
+  create_args.append(m_wizard->packageName());
 
-  if (!m_wizard->system_dependencies().isEmpty())
-      cmd += m_wizard->system_dependencies().join(QLatin1String(" ")).insert(0,QLatin1String(" -s "));
+  // for colcon, all dependencies are of the same type
+  // TODO: change UI to a single set of dependencies for colcon
+  if (bs == ROSUtils::BuildSystem::Colcon &&
+      !m_wizard->catkin_dependencies().isEmpty() &&
+      !m_wizard->system_dependencies().isEmpty() &&
+      !m_wizard->boost_components().isEmpty())
+  {
+      create_args.append("--dependencies");
+  }
 
-  if (!m_wizard->boost_components().isEmpty())
-      cmd += m_wizard->boost_components().join(QLatin1String(" ")).insert(0,QLatin1String(" -b "));
+  if (!m_wizard->catkin_dependencies().isEmpty()) {
+      if (bs == ROSUtils::BuildSystem::CatkinTools)
+        create_args.append("--catkin-deps");
+      create_args.append(m_wizard->catkin_dependencies());
+  }
 
-  if (!m_wizard->version().isEmpty())
-      cmd += QString::fromLatin1(" -V \"%1\"").arg(m_wizard->version());
+  if (!m_wizard->system_dependencies().isEmpty()) {
+      if (bs != ROSUtils::BuildSystem::Colcon)
+        create_args.append("-s");
+      create_args.append(m_wizard->system_dependencies());
+  }
 
-  if (!m_wizard->licenses().isEmpty())
-      cmd += QString::fromLatin1(" -l \"%1\"").arg(m_wizard->licenses());
+  if (!m_wizard->boost_components().isEmpty()) {
+      if (bs == ROSUtils::BuildSystem::CatkinMake)
+        create_args.append("--boost-comps");
+      else if (bs == ROSUtils::BuildSystem::CatkinTools)
+        create_args.append("--boost-components");
+      create_args.append(m_wizard->boost_components());
+  }
+
+  if (!m_wizard->version().isEmpty()) {
+      if (bs == ROSUtils::BuildSystem::CatkinMake)
+          create_args.append({"-V", m_wizard->version()});
+      else if (bs == ROSUtils::BuildSystem::CatkinTools)
+        create_args.append({"-v", m_wizard->version()});
+  }
+
+  if (!m_wizard->licenses().isEmpty()) {
+      if (bs == ROSUtils::BuildSystem::Colcon)
+          create_args.append({"--license", QString("'%1'").arg(m_wizard->licenses())});
+      else
+          create_args.append({"-l", QString("'%1'").arg(m_wizard->licenses())});
+  }
 
   if (!m_wizard->description().isEmpty())
-      cmd += QString::fromLatin1(" -D \"%1\"").arg(m_wizard->description());
+      create_args.append({"--description", QString("'%1'").arg(m_wizard->description())});
 
-  if (!m_wizard->authors().isEmpty())
-      cmd += m_wizard->authors().join(QLatin1String(" -a ")).insert(0,QLatin1String(" -a "));
-
-  if (!m_wizard->maintainers().isEmpty())
-      cmd += m_wizard->maintainers().join(QLatin1String(" -m ")).insert(0,QLatin1String(" -m "));
-
-  cmd += QString::fromLatin1(" --rosdistro \"%1\"").arg(project->distribution().fileName());
+  if (bs != ROSUtils::BuildSystem::Colcon)
+    create_args.append({"--rosdistro", project->distribution().fileName()});
 
   // create package using ros command catkin_create_pkg
   const QDir packagePath = m_wizard->packagePath();
   if (!packagePath.exists()) {
       packagePath.mkpath(".");
   }
-  catkin_create_pkg->setWorkingDirectory(packagePath.path());
 
-  ROSUtils::sourceROS(catkin_create_pkg, project->distribution());
-  catkin_create_pkg->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << cmd);
-  catkin_create_pkg->waitForFinished();
-  bool success;
-  if (catkin_create_pkg->exitStatus() != QProcess::CrashExit)
-  {
-    success = true;
-  }
-  else
-  {
-    Core::MessageManager::writeFlashing(tr("[ROS Error] Faild to create catkin package."));
-    success = false;
-  }
+  QProcess create_pkg_proc;
+  create_pkg_proc.setWorkingDirectory(packagePath.path());
 
-  delete catkin_create_pkg;
-  return success;
+  ROSUtils::sourceROS(&create_pkg_proc, project->distribution());
+  create_pkg_proc.start("bash", {"-c", create_args.join(" ")});
+  if (!create_pkg_proc.waitForStarted(-1)) {
+      Core::MessageManager::writeFlashing(tr("[ROS Error] Faild to start catkin_create_pkg."));
+      return false;
+  }
+  if (!create_pkg_proc.waitForFinished(-1)) {
+      Core::MessageManager::writeFlashing(tr("[ROS Error] Faild to finish catkin_create_pkg."));
+      return false;
+  }
+  const QByteArray message_stdio = create_pkg_proc.readAllStandardOutput();
+  if (!message_stdio.isEmpty()) {
+      Core::MessageManager::writeSilently(QString::fromStdString(message_stdio.toStdString()));
+  }
+  const QByteArray message_err = create_pkg_proc.readAllStandardError();
+  if (!message_err.isEmpty()) {
+      Core::MessageManager::writeFlashing(QString::fromStdString(message_err.toStdString()));
+      return false;
+  }
+  if (create_pkg_proc.exitStatus() != QProcess::NormalExit) {
+      Core::MessageManager::writeFlashing(tr("[ROS Error] Faild to create catkin package."));
+      return false;
+  }
+  return true;
 }
 
 bool ROSPackageWizard::postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l,
