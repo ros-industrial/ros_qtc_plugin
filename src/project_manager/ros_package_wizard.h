@@ -53,8 +53,6 @@ public:
     QString version() const;
     QString licenses() const;
     QString description() const;
-    QStringList authors() const;
-    QStringList maintainers() const;
     QStringList catkin_dependencies() const;
     QStringList system_dependencies() const;
     QStringList boost_components() const;
@@ -81,8 +79,6 @@ public:
     QString version() const;
     QString licenses() const;
     QString description() const;
-    QStringList authors() const;
-    QStringList maintainers() const;
     QStringList catkin_dependencies() const;
     QStringList system_dependencies() const;
     QStringList boost_components() const;
