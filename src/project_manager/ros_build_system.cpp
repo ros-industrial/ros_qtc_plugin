@@ -23,6 +23,8 @@ void ROSBuildSystem::triggerParsing()
 
 bool ROSBuildSystem::addFiles(ProjectExplorer::Node *context, const Utils::FilePaths &filePaths, Utils::FilePaths *notAdded)
 {
+    // update entire workspace project
+    dynamic_cast<ROSProject *>(context->getProject())->refresh();
     return true;
 }
 
