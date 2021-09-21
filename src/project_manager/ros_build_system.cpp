@@ -21,27 +21,27 @@ void ROSBuildSystem::triggerParsing()
     guardParsingRun().markAsSuccess();
 }
 
-bool ROSBuildSystem::addFiles(ProjectExplorer::Node *context, const QStringList &filePaths, QStringList *notAdded)
+bool ROSBuildSystem::addFiles(ProjectExplorer::Node *context, const Utils::FilePaths &filePaths, Utils::FilePaths *notAdded)
 {
     return true;
 }
 
-ProjectExplorer::RemovedFilesFromProject ROSBuildSystem::removeFiles(ProjectExplorer::Node *context, const QStringList &filePaths, QStringList *notRemoved)
+ProjectExplorer::RemovedFilesFromProject ROSBuildSystem::removeFiles(ProjectExplorer::Node *context, const Utils::FilePaths &filePaths, Utils::FilePaths *notRemoved)
 {
     return ProjectExplorer::RemovedFilesFromProject::Ok;
 }
 
-bool ROSBuildSystem::deleteFiles(ProjectExplorer::Node *context, const QStringList &filePaths)
+bool ROSBuildSystem::deleteFiles(ProjectExplorer::Node *context, const Utils::FilePaths &filePaths)
 {
     return true;
 }
 
-bool ROSBuildSystem::canRenameFile(ProjectExplorer::Node *context, const QString &filePath, const QString &newFilePath)
+bool ROSBuildSystem::canRenameFile(ProjectExplorer::Node *context, const Utils::FilePath &oldFilePath, const Utils::FilePath &newFilePath)
 {
     return true;
 }
 
-bool ROSBuildSystem::renameFile(ProjectExplorer::Node *context, const QString &filePath, const QString &newFilePath)
+bool ROSBuildSystem::renameFile(ProjectExplorer::Node *context, const Utils::FilePath &oldFilePath, const Utils::FilePath &newFilePath)
 {
     return true;
 }
