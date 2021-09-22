@@ -464,6 +464,7 @@ void ROSCatkinToolsStepWidget::editProfile(const QString profileName)
     Utils::FilePath profile = ROSUtils::getCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
 
     ROSCatkinToolsProfileEditorDialog *editor = new ROSCatkinToolsProfileEditorDialog(profile);
+    editor->setModal(true);
     editor->show();
 }
 
