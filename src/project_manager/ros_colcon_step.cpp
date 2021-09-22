@@ -158,6 +158,11 @@ bool ROSColconStep::fromMap(const QVariantMap &map)
     return BuildStep::fromMap(map);
 }
 
+QWidget *ROSColconStep::createConfigWidget()
+{
+    return new ROSColconStepWidget(this);
+}
+
 QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeDefault) const
 {
     QStringList args;
