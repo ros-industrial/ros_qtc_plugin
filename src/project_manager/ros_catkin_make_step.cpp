@@ -158,6 +158,11 @@ bool ROSCatkinMakeStep::fromMap(const QVariantMap &map)
     return BuildStep::fromMap(map);
 }
 
+QWidget *ROSCatkinMakeStep::createConfigWidget()
+{
+    return new ROSCatkinMakeStepWidget(this);
+}
+
 QString ROSCatkinMakeStep::allArguments(ROSUtils::BuildType buildType, bool includeDefault) const
 {
     QStringList args;

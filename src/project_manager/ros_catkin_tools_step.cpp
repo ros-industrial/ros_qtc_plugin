@@ -179,6 +179,11 @@ bool ROSCatkinToolsStep::fromMap(const QVariantMap &map)
     return BuildStep::fromMap(map);
 }
 
+QWidget *ROSCatkinToolsStep::createConfigWidget()
+{
+    return new ROSCatkinToolsStepWidget(this);
+}
+
 QString ROSCatkinToolsStep::allArguments(ROSUtils::BuildType buildType, bool includeDefault) const
 {
     QStringList args;

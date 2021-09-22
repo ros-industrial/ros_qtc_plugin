@@ -77,6 +77,7 @@ public:
 protected:
     QStringList automaticallyAddedArguments() const;
     bool fromMap(const QVariantMap &map) override;
+    QWidget *createConfigWidget() override;
 
 private:
     ROSBuildConfiguration *targetsActiveBuildConfiguration() const;
