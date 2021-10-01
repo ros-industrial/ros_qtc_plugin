@@ -86,14 +86,30 @@ void ROSGenericRunStep::run()
   if (workspaceInfo.install)
     sourcePath = Utils::FilePath(workspaceInfo.installPath);
 
+  Utils::FilePath source_bash_file = sourcePath.pathAppended("setup.bash");
+  Utils::FilePath source_shell_file = sourcePath.pathAppended("setup.sh");
+  Utils::FilePath source_zshell_file = sourcePath.pathAppended("setup.zsh");
+
   if (shell.fileName() == "bash")
-      source_cmd = QString("source %1\n").arg(sourcePath.pathAppended("setup.bash").toString());
+  {
+      // Some reason if a workspace does not contain at least one catkin package it does not generate a setup.bash only a setup.sh
+      if (source_bash_file.exists())
+        source_cmd = QString("source %1\n").arg(source_bash_file.toString());
+      else
+        source_cmd = QString("source %1\n").arg(source_shell_file.toString());
+  }
   else if (shell.fileName() == "sh")
-      source_cmd = QString("source %1\n").arg(sourcePath.pathAppended("setup.sh").toString());
+  {
+      source_cmd = QString("source %1\n").arg(source_shell_file.toString());
+  }
   else if (shell.fileName() == "zsh")
-       source_cmd = QString("source %1\n").arg(sourcePath.pathAppended("setup.zsh").toString());
+  {
+      source_cmd = QString("source %1\n").arg(source_zshell_file.toString());
+  }
   else
+  {
        Core::MessageManager::writeFlashing(tr("[ROS Error] The shell: %1 is currently not supported (Use bash, sh, or zsh)!").arg(shell.toString()));
+  }
 
   //create terminal without starting shell
   QTermWidget &terminal = ROSProjectPlugin::instance()->startTerminal(0, command);
