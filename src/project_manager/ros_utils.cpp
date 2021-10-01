@@ -73,20 +73,28 @@ bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspace
     if (!initializeWorkspace(process, workspaceInfo))
         return false;
 
-    Utils::FilePath bash(workspaceInfo.develPath);
+    Utils::FilePath sourcePath(workspaceInfo.develPath);
     if (workspaceInfo.install)
-      bash = Utils::FilePath(workspaceInfo.installPath);
+      sourcePath = Utils::FilePath(workspaceInfo.installPath);
 
-    bash = bash.pathAppended(QLatin1String("setup.bash"));
-    if (bash.exists())
+    Utils::FilePath source_bash_file = sourcePath.pathAppended("setup.bash");
+    Utils::FilePath source_shell_file = sourcePath.pathAppended("setup.sh");
+    if (source_bash_file.exists())
     {
-        Core::MessageManager::writeSilently(QObject::tr("[ROS Debug] Sourced workspace: %1.").arg(bash.toString()));
-        if (sourceWorkspaceHelper(process, bash.toString()))
+        Core::MessageManager::writeSilently(QObject::tr("[ROS Debug] Sourced workspace: %1.").arg(source_bash_file.toString()));
+        if (sourceWorkspaceHelper(process, source_bash_file.toString()))
+            return true;
+    }
+    else if (source_shell_file.exists())
+    {
+        // Some reason if a workspace does not contain at least one catkin package it does not generate a setup.bash only a setup.sh
+        Core::MessageManager::writeSilently(QObject::tr("[ROS Debug] Sourced workspace: %1.").arg(source_shell_file.toString()));
+        if (sourceWorkspaceHelper(process, source_shell_file.toString()))
             return true;
     }
     else
     {
-        Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to source workspace because this file does not exist: %1.").arg(bash.toString()));
+        Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to source workspace because either of these files do not exist: %1 or %2.").arg(source_bash_file.toString(), source_shell_file.toString()));
         return true;
     }
 
