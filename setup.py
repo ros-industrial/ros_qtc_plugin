@@ -41,6 +41,10 @@ def download_check_fail(url, expected_type):
         raise RuntimeError("invalid format of "+response.url)
     return response
 
+def read_downloadable_archives(package):
+    archive_names = io.StringIO(package.find("DownloadableArchives").text)
+    return list(csv.reader(archive_names, delimiter=',', skipinitialspace=True))[0]
+
 def qtc_download_check_extract(cfg, dir_install):
     # if the Qt Creator version contains '-beta' or '-rc' we have to
     # use the "development" repo, otherwise use the "official" repo
@@ -127,24 +131,32 @@ def qt_download_check_extract(cfg, dir_install):
         ver_maj = ver_maj, ver_concat = ver_concat,
         compiler = compiler)
 
-    base_package_version = None
-    base_package_archives = None
+    extra_package_name = "qt.qt{ver_maj}.{ver_concat}.{module}.{compiler}".format(
+        ver_maj = ver_maj, ver_concat = ver_concat,
+        module = "{module}",
+        compiler = compiler)
+
+    extra_package_names = list()
+    for module in cfg['versions']['qt_modules']:
+        extra_package_names.append(extra_package_name.format(module = module))
+
+    package_archives = dict()
     for package in metadata.iter("PackageUpdate"):
-        if package.find("Name").text == base_package_name:
-            base_package_version = package.find("Version").text
-            archives = package.find("DownloadableArchives").text
-            base_package_archives = list(
-                csv.reader(io.StringIO(archives),
-                           delimiter=',', skipinitialspace=True))[0]
+        if package.find("Name").text in [base_package_name] + extra_package_names:
+            package_archives[package.find("Name").text] = {
+                "version": package.find("Version").text,
+                "archives": read_downloadable_archives(package)
+                }
 
     archives_match = []
     for module_name in cfg['versions']['qt_modules']:
-        for archive_name in base_package_archives:
-            if archive_name.startswith(module_name):
-                archives_match.append(archive_name)
+        for package_name, data in package_archives.items():
+            for archive_name in data["archives"]:
+                if archive_name.startswith(module_name):
+                    archives_match.append([package_name, data["version"], archive_name])
 
-    for archive_name in archives_match:
-        url_archive = base_url+'/'+base_package_name+'/'+base_package_version+archive_name
+    for package_name, package_version, archive_name in archives_match:
+        url_archive = base_url+'/'+package_name+'/'+package_version+archive_name
 
         print("download", url_archive)
 
