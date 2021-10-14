@@ -2,6 +2,7 @@
 
 #include <projectexplorer/buildsystem.h>
 #include <projectexplorer/projectnodes.h>
+#include "ros_build_configuration.h"
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -28,6 +29,10 @@ public:
     virtual bool renameFile(ProjectExplorer::Node *context, const Utils::FilePath &oldFilePath, const Utils::FilePath &newFilePath) override final;
     virtual bool addDependencies(ProjectExplorer::Node *context, const QStringList &dependencies) override final;
     virtual bool supportsAction(ProjectExplorer::Node *context, ProjectExplorer::ProjectAction action, const ProjectExplorer::Node *node) const override final;
+    virtual QString name() const override final;
+
+private:
+    const ROSUtils::BuildSystem ros_build_system;
 };
 
 } // namespace Internal

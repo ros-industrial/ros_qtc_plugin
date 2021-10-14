@@ -46,7 +46,9 @@ namespace Internal {
 
 class ROSBuildConfigurationFactory;
 class ROSBuildSettingsWidget;
+class ROSBuildSystem;
 class ROSExtraBuildInfo;
+class ROSProject;
 namespace Ui { class ROSBuildConfiguration; }
 
 class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
