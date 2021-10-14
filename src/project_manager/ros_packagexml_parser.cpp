@@ -39,7 +39,7 @@ bool ROSPackageXmlParser::parsePackageXml(const Utils::FilePath &filepath)
 
         while (!atEnd()) {
             readNext();
-            if (name() == "package")
+            if (name().toString() == "package")
                 parse();
             else if (isStartElement())
                 parseUnknownElement();
@@ -66,33 +66,33 @@ void ROSPackageXmlParser::parse()
         readNext();
         if (isEndElement())
             return;
-        else if (name() == "name")
+        else if (name().toString() == "name")
             parseName();
-        else if (name() == "version")
+        else if (name().toString() == "version")
             parseVersion();
-        else if (name() == "description")
+        else if (name().toString() == "description")
             parseDescription();
-        else if (name() == "maintainer")
+        else if (name().toString() == "maintainer")
             parseMaintainer();
-        else if (name() == "license")
+        else if (name().toString() == "license")
             parseLicense();
-        else if (name() == "depend")
+        else if (name().toString() == "depend")
             parseDepend();
-        else if (name() == "build_depend")
+        else if (name().toString() == "build_depend")
             parseBuildDepend();
-        else if (name() == "buildtool_depend")
+        else if (name().toString() == "buildtool_depend")
             parseBuildToolDepend();
-        else if (name() == "build_export_depend")
+        else if (name().toString() == "build_export_depend")
             parseBuildExportDepend();
-        else if (name() == "exec_depend")
+        else if (name().toString() == "exec_depend")
             parseExecDepend();
-        else if (name() == "run_depend")
+        else if (name().toString() == "run_depend")
             parseExecDepend();
-        else if (name() == "test_depend")
+        else if (name().toString() == "test_depend")
             parseTestDepend();
-        else if (name() == "doc_depend")
+        else if (name().toString() == "doc_depend")
             parseDocDepend();
-        else if (name() == "export")
+        else if (name().toString() == "export")
             parseExport();
         else if (isStartElement())
             parseUnknownElement();
@@ -183,7 +183,7 @@ void ROSPackageXmlParser::parseExport()
         readNext();
         if (isEndElement())
             return;
-        else if (name() == "metapackage")
+        else if (name().toString() == "metapackage")
             parseMetapackage();
         else if (isStartElement())
             parseUnknownElement();
