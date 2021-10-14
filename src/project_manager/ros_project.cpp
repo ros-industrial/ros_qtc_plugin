@@ -31,9 +31,9 @@
 #include <coreplugin/vcsmanager.h>
 #include <coreplugin/progressmanager/progressmanager.h>
 #include <coreplugin/messagemanager.h>
-#include <cpptools/cpptoolsconstants.h>
-#include <cpptools/cppmodelmanager.h>
-#include <cpptools/projectinfo.h>
+#include <cppeditor/cppeditorconstants.h>
+#include <cppeditor/cppmodelmanager.h>
+#include <cppeditor/projectinfo.h>
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/abi.h>
 #include <projectexplorer/buildsteplist.h>
@@ -58,7 +58,7 @@
 #include <QtConcurrentRun>
 #include <QRegularExpression>
 
-#include <cpptools/cppprojectupdater.h>
+#include <cppeditor/cppprojectupdater.h>
 
 using namespace Core;
 using namespace ProjectExplorer;
@@ -127,7 +127,7 @@ const int UPDATE_INTERVAL = 300;
 
 ROSProject::ROSProject(const Utils::FilePath &fileName) :
     ProjectExplorer::Project(Constants::ROS_MIME_TYPE, fileName),
-    m_cppCodeModelUpdater(new CppTools::CppProjectUpdater),
+    m_cppCodeModelUpdater(new CppEditor::CppProjectUpdater),
     m_project_loaded(false),
     m_asyncUpdateFutureInterface(nullptr),
     m_asyncBuildCodeModelFutureInterface(nullptr)

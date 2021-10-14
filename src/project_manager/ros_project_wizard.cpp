@@ -31,8 +31,8 @@
 #include <projectexplorer/editorconfiguration.h>
 #include <projectexplorer/project.h>
 
-#include <cpptools/cppcodestylepreferences.h>
-#include <cpptools/cpptoolsconstants.h>
+#include <cppeditor/cppcodestylepreferences.h>
+#include <cppeditor/cppeditorconstants.h>
 
 #include <texteditor/icodestylepreferences.h>
 #include <texteditor/texteditorsettings.h>
@@ -290,12 +290,12 @@ bool ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core::Generated
 
     // Set the Cpp code style for the project.
     QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
-    TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppTools::Constants::CPP_SETTINGS_ID);
+    TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
 
     for (const auto& code_style : code_style_pool->codeStyles()) {
         if (ros_settings->default_code_style == code_style->displayName()) {
             ProjectExplorer::EditorConfiguration *editorConfiguration = project->editorConfiguration();
-            TextEditor::ICodeStylePreferences *codeStylePreferences = editorConfiguration->codeStyle(CppTools::Constants::CPP_SETTINGS_ID);
+            TextEditor::ICodeStylePreferences *codeStylePreferences = editorConfiguration->codeStyle(CppEditor::Constants::CPP_SETTINGS_ID);
             codeStylePreferences->setCurrentDelegate(code_style->id());
             break;
         }

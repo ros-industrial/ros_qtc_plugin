@@ -31,7 +31,7 @@
 #include <texteditor/texteditorsettings.h>
 #include <texteditor/codestylepool.h>
 
-#include <cpptools/cpptoolsconstants.h>
+#include <cppeditor/cppeditorconstants.h>
 
 #include <projectexplorer/projectexplorerconstants.h>
 
@@ -128,7 +128,7 @@ ROSSettingsWidget::ROSSettingsWidget(QWidget *parent) :
 
     // See ProjectExplorer::CodeStyleSettingsWidget and ProjectExplorer::EditorConfiguration as an example
     // TODO: Add python support
-    TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppTools::Constants::CPP_SETTINGS_ID);
+    TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
 
     for (const auto& code_style : code_style_pool->builtInCodeStyles()) {
         QString name = code_style->displayName() + " [built-in]";
