@@ -220,10 +220,10 @@ void ROSDebugRunWorker::pidFound(ProjectExplorer::DeviceProcessItem process)
 void ROSDebugRunWorker::findProcess()
 {
     m_timeElapsed += 10;
-    const QString &appName = Utils::FileUtils::normalizePathName(m_debugTargetPath);
+    const QString &appName = Utils::FileUtils::normalizedPathName(m_debugTargetPath);
     ProjectExplorer::DeviceProcessItem fallback;
     for (const ProjectExplorer::DeviceProcessItem &p : ProjectExplorer::DeviceProcessList::localProcesses()) {
-        if (Utils::FileUtils::normalizePathName(p.exe) == appName) {
+        if (Utils::FileUtils::normalizedPathName(p.exe) == appName) {
             Core::MessageManager::writeSilently(tr("[ROS] Attaching to process: %1.").arg(appName));
             pidFound(p);
             return;
