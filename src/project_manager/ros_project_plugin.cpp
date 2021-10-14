@@ -45,9 +45,9 @@
 #include <coreplugin/actionmanager/command.h>
 #include <coreplugin/progressmanager/progressmanager.h>
 
-#include <cpptools/cppcodestylepreferences.h>
-#include <cpptools/cpptoolssettings.h>
-#include <cpptools/cpptoolsconstants.h>
+#include <cppeditor/cppcodestylepreferences.h>
+#include <cppeditor/cpptoolssettings.h>
+#include <cppeditor/cppeditorconstants.h>
 
 #include <texteditor/codestylepool.h>
 #include <texteditor/tabsettings.h>
@@ -201,10 +201,10 @@ QSharedPointer<ROSSettings> ROSProjectPlugin::settings() const
 
 void ROSProjectPlugin::createCppCodeStyle()
 {
-  TextEditor::CodeStylePool *pool = TextEditor::TextEditorSettings::codeStylePool(CppTools::Constants::CPP_SETTINGS_ID);
+  TextEditor::CodeStylePool *pool = TextEditor::TextEditorSettings::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
 
   // ROS style
-  CppTools::CppCodeStylePreferences *rosCodeStyle = new CppTools::CppCodeStylePreferences();
+  CppEditor::CppCodeStylePreferences *rosCodeStyle = new CppEditor::CppCodeStylePreferences();
   rosCodeStyle->setId(Constants::ROS_CPP_CODE_STYLE_ID);
   rosCodeStyle->setDisplayName(tr("ROS"));
   rosCodeStyle->setReadOnly(true);
@@ -216,7 +216,7 @@ void ROSProjectPlugin::createCppCodeStyle()
   rosTabSettings.m_continuationAlignBehavior = TextEditor::TabSettings::ContinuationAlignWithIndent;
   rosCodeStyle->setTabSettings(rosTabSettings);
 
-  CppTools::CppCodeStyleSettings rosCodeStyleSettings;
+  CppEditor::CppCodeStyleSettings rosCodeStyleSettings;
   rosCodeStyleSettings.alignAssignments = false;
   rosCodeStyleSettings.bindStarToIdentifier = true;
   rosCodeStyleSettings.bindStarToLeftSpecifier = false;
@@ -244,8 +244,8 @@ void ROSProjectPlugin::createCppCodeStyle()
   // Since the ROS Cpp code style can not be added until after the CppToolsSettings instance is create
   // the Cpp code style must be reloaded from settings to capture if it is set ROS Cpp code style.
   QSettings *s = Core::ICore::settings();
-  CppTools::CppCodeStylePreferences *originalCppCodeStylePreferences = CppTools::CppToolsSettings::instance()->cppCodeStyle();
-  originalCppCodeStylePreferences->fromSettings(QLatin1String(CppTools::Constants::CPP_SETTINGS_ID), s);
+  CppEditor::CppCodeStylePreferences *originalCppCodeStylePreferences = CppEditor::CppToolsSettings::instance()->cppCodeStyle();
+  originalCppCodeStylePreferences->fromSettings(QLatin1String(CppEditor::Constants::CPP_SETTINGS_ID), s);
 }
 
 void ROSProjectPlugin::reloadProjectBuildInfo()

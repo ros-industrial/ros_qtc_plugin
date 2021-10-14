@@ -39,7 +39,7 @@
 #include <QTimer>
 #include <QFileSystemWatcher>
 
-namespace CppTools {
+namespace CppEditor {
     class CppProjectUpdater;
 }
 
@@ -88,7 +88,7 @@ private:
     ROSUtils::PackageInfoMap        m_wsPackageInfo;
     ROSUtils::PackageBuildInfoMap   m_wsPackageBuildInfo;
 
-    CppTools::CppProjectUpdater *m_cppCodeModelUpdater;
+    CppEditor::CppProjectUpdater *m_cppCodeModelUpdater;
 
     // Watching Directories to keep Project Tree updated
     QTimer m_asyncUpdateTimer;

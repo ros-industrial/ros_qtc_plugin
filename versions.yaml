@@ -1,5 +1,7 @@
-qtc_version: "5.0"
+# see https://download.qt.io/development_releases/qtcreator for valid versions
+# the version schema is: {major}.{minor}[-{devel}]
+qtc_version: "6.0"
 qtc_modules: ["qtcreator", "qtcreator_dev"]
 
-qt_version: "5.15"
-qt_modules: ['qtbase', 'qtdeclarative', 'icu', 'qttools']
+qt_version: "6.2"
+qt_modules: ['qtbase', 'qtdeclarative', 'icu', 'qttools', 'qt5compat']

@@ -4,7 +4,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(QtCreator COMPONENTS Core REQUIRED)
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
+find_package(QT NAMES Qt6 COMPONENTS Widgets REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(qtermwidget5 REQUIRED)
 
@@ -42,14 +42,14 @@ add_qtc_plugin(${PROJECT_NAME}
   PLUGIN_DEPENDS
     QtCreator::CMakeProjectManager
     QtCreator::Core
-    QtCreator::CppTools
+    QtCreator::CppEditor
     QtCreator::Debugger
     QtCreator::ProjectExplorer
     QtCreator::QtSupport
     QtCreator::TextEditor
   DEPENDS
     QtCreator::Utils
-    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt::Widgets
     yaml-cpp
     qtermwidget5
   SOURCES
