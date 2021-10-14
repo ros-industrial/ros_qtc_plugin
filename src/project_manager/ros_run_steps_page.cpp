@@ -48,7 +48,6 @@ namespace Internal {
 ToolWidget::ToolWidget(QWidget *parent) : FadingPanel(parent)
 {
     auto layout = new QHBoxLayout;
-    layout->setMargin(4);
     layout->setSpacing(4);
     setLayout(layout);
     m_firstWidget = new Utils::FadingWidget(this);
@@ -71,7 +70,6 @@ ToolWidget::ToolWidget(QWidget *parent) : FadingPanel(parent)
     m_secondWidget = new Utils::FadingWidget(this);
     m_secondWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     hbox = new QHBoxLayout();
-    hbox->setMargin(0);
     hbox->setSpacing(4);
     m_secondWidget->setLayout(hbox);
 
@@ -444,7 +442,6 @@ RunStepsPage::RunStepsPage(ROSRunConfiguration *rc, Utils::Id id) :
     m_widget(new RunStepListWidget(this))
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
     layout->setSpacing(0);
     layout->addWidget(m_widget);
 
