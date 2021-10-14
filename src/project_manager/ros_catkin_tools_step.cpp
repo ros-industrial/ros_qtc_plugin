@@ -224,7 +224,7 @@ QString ROSCatkinToolsStep::allArguments(ROSUtils::BuildType buildType, bool inc
 
 Utils::CommandLine ROSCatkinToolsStep::makeCommand(const QString &args) const
 {
-    Utils::CommandLine cmd(QLatin1String("catkin"));
+    Utils::CommandLine cmd("catkin");
     cmd.addArgs(args, Utils::CommandLine::RawType::Raw);
     return cmd;
 }

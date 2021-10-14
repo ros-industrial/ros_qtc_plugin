@@ -60,7 +60,7 @@ bool ROSProjectNode::showInSimpleTree() const
 
 ROSFolderNode::ROSFolderNode(const Utils::FilePath &folderPath) : FolderNode(folderPath), m_repository(nullptr)
 {
-    QString path = this->filePath().toString();
+    const Utils::FilePath path = this->filePath();
 
     if (Core::IVersionControl *vc = Core::VcsManager::findVersionControlForDirectory(path))
     {
@@ -75,9 +75,8 @@ QString ROSFolderNode::displayName() const
 {
     if (m_repository)
     {
-        QString path = this->filePath().toString();
-        QString name = Utils::FilePath::fromString(path).fileName();
-        return QString::fromLatin1("%1 [%2]").arg(name, m_repository->vcsTopic(path));
+        const Utils::FilePath path = this->filePath();
+        return QString::fromLatin1("%1 [%2]").arg(path.fileName(), m_repository->vcsTopic(path));
     }
     else
     {

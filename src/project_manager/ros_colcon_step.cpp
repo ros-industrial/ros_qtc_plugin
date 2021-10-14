@@ -195,16 +195,16 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
 
 Utils::CommandLine ROSColconStep::makeCommand(const QString &args) const
 {
-    QLatin1String exec;
+    Utils::FilePath exec;
     switch(m_target) {
     case BUILD:
-        exec = QLatin1String("colcon");
+        exec = "colcon";
         break;
     case CLEAN:
-        exec = QLatin1String("rm");
+        exec = "rm";
         break;
     default:
-        exec = QLatin1String("colcon");
+        exec = "colcon";
         break;
     }
 
