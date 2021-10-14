@@ -234,7 +234,7 @@ ROSPackageWizard::ROSPackageWizard()
 
 Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent, const Core::WizardDialogParameters &parameters) const
 {
-    Utils::FilePath defaultPath = Utils::FilePath::fromString(parameters.defaultPath());
+    Utils::FilePath defaultPath = parameters.defaultPath();
 
     ROSProject *rosProject = qobject_cast<ROSProject *>(ProjectExplorer::ProjectTree::currentProject());
 
