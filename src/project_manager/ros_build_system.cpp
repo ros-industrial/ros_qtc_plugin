@@ -1,5 +1,4 @@
 #include "ros_build_system.h"
-#include "ros_build_configuration.h"
 
 using namespace ProjectExplorer;
 
@@ -11,7 +10,7 @@ namespace Internal {
 // --------------------------------------------------------------------
 
 ROSBuildSystem::ROSBuildSystem(ROSBuildConfiguration *bc)
-    : BuildSystem((BuildConfiguration*)bc)
+    : BuildSystem((BuildConfiguration*)bc), ros_build_system(bc->rosBuildSystem())
 {
     connect(((BuildConfiguration*)bc)->project(), &Project::activeTargetChanged, this, [this]() { triggerParsing(); });
 }
@@ -65,6 +64,20 @@ bool ROSBuildSystem::supportsAction(ProjectExplorer::Node *context, ProjectExplo
     };
 
     return possible_actions.count(action);
+}
+
+QString ROSBuildSystem::name() const
+{
+    switch (ros_build_system) {
+    case ROSUtils::BuildSystem::CatkinMake:
+        return "catkin_make";
+    case ROSUtils::BuildSystem::CatkinTools:
+        return "catkin-tools";
+    case ROSUtils::BuildSystem::Colcon:
+        return "colcon";
+    default:
+        return QString{};
+    }
 }
 
 } // namespace Internal
