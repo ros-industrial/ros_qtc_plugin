@@ -23,7 +23,9 @@
 #include <extensionsystem/iplugin.h>
 #include <QObject>
 #include <QAction>
+#ifdef ROSTERMINAL
 #include <qtermwidget5/qtermwidget.h>
+#endif
 
 namespace ProjectExplorer {
 class Project;
@@ -48,6 +50,7 @@ public:
 
     static ROSProjectPlugin *instance();
 
+#ifdef ROSTERMINAL
     /**
      * @brief Start a terminal in the tabbed terminal widget
      * @param startnow If 1 the terminal shell is started
@@ -55,6 +58,7 @@ public:
      * @return A a reference to the created terminal
      */
     QTermWidget &startTerminal(int startnow = 1, const QString name = QString());
+#endif
 
     /**
      * @brief Get ROS Main settings
