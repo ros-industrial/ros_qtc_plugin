@@ -61,7 +61,7 @@ ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, const Utils::Id id) 
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep",
                                                       ROS_CMS_DISPLAY_NAME));
 
-    m_percentProgress = QRegExp(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
+    m_percentProgress = QRegularExpression(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
 
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (bc->rosBuildSystem() != ROSUtils::CatkinMake)
@@ -205,14 +205,13 @@ Utils::CommandLine ROSCatkinMakeStep::makeCommand(const QString &args) const
 void ROSCatkinMakeStep::stdOutput(const QString &line)
 {
     AbstractProcessStep::stdOutput(line);
-    int pos = 0;
-    while ((pos = m_percentProgress.indexIn(line, pos)) != -1) {
+    QRegularExpressionMatchIterator i = m_percentProgress.globalMatch(line);
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
         bool ok = false;
-        int percent = m_percentProgress.cap(1).toInt(&ok);
+        const int percent = match.captured(1).toInt(&ok);
         if (ok)
           emit progress(percent, QString());
-
-        pos += m_percentProgress.matchedLength();
     }
 }
 
