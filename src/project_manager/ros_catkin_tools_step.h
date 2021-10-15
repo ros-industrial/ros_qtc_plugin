@@ -89,7 +89,7 @@ private:
     QString m_cmakeArguments;
     QString m_makeArguments;
     QString m_catkinToolsWorkingDir;
-    QRegExp m_percentProgress;
+    QRegularExpression m_percentProgress;
 };
 
 class ROSCatkinToolsStepWidget : public QWidget

@@ -75,7 +75,7 @@ private:
     QString m_colconArguments;
     QString m_cmakeArguments;
     QString m_makeArguments;
-    QRegExp m_percentProgress;
+    QRegularExpression m_percentProgress;
 };
 
 class ROSColconStepWidget : public QWidget

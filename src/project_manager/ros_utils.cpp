@@ -333,7 +333,7 @@ bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
   if (process->exitStatus() != QProcess::CrashExit)
   {
     QString output = QString::fromStdString(process->readAllStandardOutput().toStdString());
-    env_list = output.split(QRegExp("[\r\n]"), Qt::SkipEmptyParts);
+    env_list = output.split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts);
 
     Utils::Environment env(env_list);
     process->setProcessEnvironment(env.toProcessEnvironment());
@@ -833,7 +833,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   if (process.exitStatus() != QProcess::CrashExit)
   {
     QString output = QString::fromStdString(process.readAllStandardOutput().toStdString());
-    QStringList package_list = output.split(QRegExp("[\r\n]"), Qt::SkipEmptyParts);
+    QStringList package_list = output.split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts);
 
     for (const QString& str : package_list)
     {
@@ -903,7 +903,7 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
   if (process.exitStatus() != QProcess::CrashExit)
   {
     QString output = QString::fromStdString(process.readAllStandardOutput().toStdString());
-    QStringList loc_list = output.split(QRegExp("[\r\n]"), Qt::SkipEmptyParts);
+    QStringList loc_list = output.split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts);
 
     if (loc_list.size() > 0)
     {

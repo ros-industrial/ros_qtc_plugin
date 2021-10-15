@@ -74,7 +74,7 @@ private:
     QString m_catkinMakeArguments;
     QString m_cmakeArguments;
     QString m_makeArguments;
-    QRegExp m_percentProgress;
+    QRegularExpression m_percentProgress;
 };
 
 class ROSCatkinMakeStepWidget : public QWidget
