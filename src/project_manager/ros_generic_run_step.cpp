@@ -111,6 +111,7 @@ void ROSGenericRunStep::run()
        Core::MessageManager::writeFlashing(tr("[ROS Error] The shell: %1 is currently not supported (Use bash, sh, or zsh)!").arg(shell.toString()));
   }
 
+#ifdef ROSTERMINAL
   //create terminal without starting shell
   QTermWidget &terminal = ROSProjectPlugin::instance()->startTerminal(0, command);
 
@@ -124,6 +125,7 @@ void ROSGenericRunStep::run()
 
   //send roslaunch command
   terminal.sendText(command);
+#endif
 }
 
 QVariantMap ROSGenericRunStep::toMap() const

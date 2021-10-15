@@ -19,7 +19,9 @@
  * limitations under the License.
  */
 #include "ros_project_plugin.h"
+#ifdef ROSTERMINAL
 #include "ros_terminal_pane.h"
+#endif
 #include "ros_build_configuration.h"
 #include "ros_run_configuration.h"
 #include "ros_rosrun_step.h"
@@ -109,7 +111,9 @@ public:
     ROSCatkinToolsStepFactory catkinToolsStepFactory;
     ROSColconStepFactory colconStepFactory;
 
+#ifdef ROSTERMINAL
     ROSTerminalPane terminalPane;
+#endif
 
     QSharedPointer<ROSSettings> settings;
     QSharedPointer<ROSSettingsPage> settingsPage;
@@ -122,7 +126,9 @@ ROSProjectPlugin::ROSProjectPlugin() : ExtensionSystem::IPlugin()
 
 ROSProjectPlugin::~ROSProjectPlugin()
 {
+#ifdef ROSTERMINAL
   ExtensionSystem::PluginManager::removeObject(&(d->terminalPane));
+#endif
   delete d;
   m_instance = nullptr;
 }
@@ -137,7 +143,9 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     Q_UNUSED(errorMessage);
 
     d = new ROSProjectPluginPrivate();
+#ifdef ROSTERMINAL
     ExtensionSystem::PluginManager::addObject(&(d->terminalPane));
+#endif
 
     QFile mimeFilePath(":rosproject/ROSProjectManager.mimetypes.xml");
 
@@ -189,10 +197,12 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     return true;
 }
 
+#ifdef ROSTERMINAL
 QTermWidget &ROSProjectPlugin::startTerminal(int startnow, const QString name)
 {
   return d->terminalPane.startTerminal(startnow, name);
 }
+#endif
 
 QSharedPointer<ROSSettings> ROSProjectPlugin::settings() const
 {

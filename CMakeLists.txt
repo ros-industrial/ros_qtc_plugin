@@ -6,6 +6,8 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_link_options("-Wl,-z,relro,-z,now,-z,defs")
 endif()
 
+option(BUILD_ROSTERMINAL "build with an integrated ROS terminal")
+
 add_subdirectory(src/project_manager)
 
 # generate plugin archive

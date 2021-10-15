@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(QtCreator COMPONENTS Core REQUIRED)
 find_package(QT NAMES Qt6 COMPONENTS Widgets REQUIRED)
 find_package(yaml-cpp REQUIRED)
-find_package(qtermwidget5 REQUIRED)
 
 set(SRC
   "remove_directory_dialog.cpp"
@@ -31,9 +30,11 @@ set(SRC
   "ros_run_step.cpp"
   "ros_run_steps_page.cpp"
   "ros_settings_page.cpp"
-  "ros_terminal_pane.cpp"
   "ros_utils.cpp"
 )
+if(BUILD_ROSTERMINAL)
+  list(APPEND SRC "ros_terminal_pane.cpp")
+endif()
 
 # add the resource file
 list(APPEND SRC "ros_project.qrc")
@@ -51,10 +52,15 @@ add_qtc_plugin(${PROJECT_NAME}
     QtCreator::Utils
     Qt::Widgets
     yaml-cpp
-    qtermwidget5
   SOURCES
     ${SRC}
 )
+
+if(BUILD_ROSTERMINAL)
+  find_package(qtermwidget5 REQUIRED)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC ROSTERMINAL)
+  target_link_libraries(${PROJECT_NAME} PUBLIC qtermwidget5)
+endif()
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/share/
         DESTINATION ${IDE_DATA_PATH}
