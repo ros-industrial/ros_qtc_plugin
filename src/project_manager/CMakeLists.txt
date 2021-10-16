@@ -3,9 +3,11 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_CXX_STANDARD 17)
 
+set(YAMLCPP_USE_STATIC_LIBS TRUE)
+
 find_package(QtCreator COMPONENTS Core REQUIRED)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
-find_package(yaml-cpp REQUIRED)
+find_package(YamlCpp REQUIRED)
 find_package(qtermwidget5 REQUIRED)
 
 set(SRC
@@ -50,7 +52,7 @@ add_qtc_plugin(${PROJECT_NAME}
   DEPENDS
     QtCreator::Utils
     Qt${QT_VERSION_MAJOR}::Widgets
-    yaml-cpp
+    ${YAMLCPP_STATIC}
     qtermwidget5
   SOURCES
     ${SRC}
