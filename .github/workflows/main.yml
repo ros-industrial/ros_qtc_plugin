@@ -10,7 +10,7 @@ jobs:
       matrix:
         config:
           - { name: "Linux", os: ubuntu-latest }
-          # - { name: "Windows", os: windows-latest }
+          - { name: "Windows", os: windows-latest }
           - { name: "macOS", os: macos-latest }
     outputs:
       archive_name: ${{ steps.find_plugin_archive.outputs.archive_name }}
@@ -22,6 +22,10 @@ jobs:
           python-version: "3.x"
 
       - uses: conda-incubator/setup-miniconda@v2
+        if: runner.os == 'Windows'
+
+      - name: install Microsoft Visual C++ (Windows)
+        uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
 
       - name: install Linux system dependencies
@@ -110,7 +114,7 @@ jobs:
       matrix:
         name:
           - Linux
-          # - Windows
+          - Windows
           - macOS
     steps:
       - name: download artifact
