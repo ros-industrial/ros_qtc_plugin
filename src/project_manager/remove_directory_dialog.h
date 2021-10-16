@@ -31,7 +31,7 @@ namespace Ui { class RemoveDirectoryDialog;}
 /**
  * @brief This a remove directory dialog for deleting directories.
  */
-class CORE_EXPORT RemoveDirectoryDialog : public QDialog
+class RemoveDirectoryDialog : public QDialog
 {
   Q_OBJECT
 public:
