@@ -33,7 +33,7 @@ class Node;
 namespace ROSProjectManager {
 namespace Internal {
 
-class ROSSettings;
+struct ROSSettings;
 
 class ROSProjectPlugin : public ExtensionSystem::IPlugin
 {
