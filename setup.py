@@ -169,7 +169,13 @@ def qt_download_check_extract(cfg, dir_install):
 
         py7zr.SevenZipFile(io.BytesIO(content)).extractall(dir_install)
 
-    return os.path.join(dir_install, "{}.{}.0".format(ver_maj, ver_min), compiler_bits)
+    qt_path = os.path.join(dir_install, "{}.{}.0".format(ver_maj, ver_min))
+    qt_archs = os.listdir(qt_path)
+    if len(qt_archs) > 1:
+        raise RuntimeWarning(
+            "more than one architecture found in {path}, will use first: {arch}"
+            .format(path = qt_path, arch = qt_archs[0]))
+    return os.path.join(qt_path, qt_archs[0])
 
 
 if __name__ == "__main__":
