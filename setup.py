@@ -211,4 +211,5 @@ if __name__ == "__main__":
 
     if args.export_variables:
         with open("env", 'w') as f:
-            f.write("QTC_PREFIX_PATH=\"{}\"\n".format(prefix_paths))
+            f.write("QTC_PATH={}\n".format(dir_qtc))
+            f.write("QT_PATH={}\n".format(dir_qt))
