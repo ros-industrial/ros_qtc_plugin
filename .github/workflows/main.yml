@@ -63,7 +63,7 @@ jobs:
 
       - name: build plugin
         run: |
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.QTC_PATH }};${{ env.QT_PATH }}"
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.QTC_PATH }};${{ env.QT_PATH }}" -DBUILD_ROSTERMINAL=OFF
           cmake --build build --target package
 
       - name: find plugin archive
