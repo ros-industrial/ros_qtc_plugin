@@ -38,7 +38,7 @@ jobs:
 
       - name: install macOS system dependencies
         if: runner.os == 'macOS'
-        run: brew install ninja yaml-cpp
+        run: brew install ninja yaml-cpp qt5
 
       - name: install Qt and Qt Creator
         shell: bash
@@ -48,17 +48,17 @@ jobs:
           cat env >> $GITHUB_ENV
 
       - name: install qtermwidget
-        if: runner.os != 'Linux'
+        if: runner.os == 'macOS'
         shell: bash
         run: |
           git clone https://github.com/lxqt/lxqt-build-tools.git extern/lxqt-build-tools
           cd extern/lxqt-build-tools
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${{ env.QTC_PREFIX_PATH }}
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DQt5Core_DIR=$(brew --prefix qt5)/lib/cmake/Qt5Core
           cmake --build build --target install
           cd ../..
           git clone https://github.com/lxqt/qtermwidget.git extern/qtermwidget
           cd extern/qtermwidget
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${{ env.QTC_PREFIX_PATH }}
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DQt5Core_DIR=$(brew --prefix qt5)/lib/cmake/Qt5Core -DQt5Widgets_DIR=$(brew --prefix qt5)/lib/cmake/Qt5Widgets -DQt5LinguistTools_DIR=$(brew --prefix qt5)/lib/cmake/Qt5LinguistTools
           cmake --build build --target install
 
       - name: build plugin
