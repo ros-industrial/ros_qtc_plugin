@@ -606,7 +606,7 @@ ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const Works
 
 bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils::PackageBuildInfo &buildInfo)
 {
-  QMap<QString, PackageTargetInfo*> targetMap;
+  QMap<QString, PackageTargetInfoPtr> targetMap;
 
   // Parse CodeBlocks Project File
   // Need to search for all of the tags <Add directory="include path" />
@@ -712,11 +712,11 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
         {
             targetLocalIncludes.append(buildtimeInclude.toString());
 
-            PackageTargetInfo targetInfo;
-            targetInfo.name = targetName;
-            targetInfo.type = targetType;
-            targetInfo.flagsFile = Utils::FilePath::fromString(targetWorkingDir).pathAppended("CMakeFiles").pathAppended(QString("%1.dir").arg(targetName)).pathAppended("flags.make");
-            if (!targetInfo.flagsFile.exists())
+            PackageTargetInfoPtr targetInfo = std::make_shared<PackageTargetInfo>();
+            targetInfo->name = targetName;
+            targetInfo->type = targetType;
+            targetInfo->flagsFile = Utils::FilePath::fromString(targetWorkingDir).pathAppended("CMakeFiles").pathAppended(QString("%1.dir").arg(targetName)).pathAppended("flags.make");
+            if (!targetInfo->flagsFile.exists())
             {
                 QDirIterator it(buildInfo.path.toString(), QStringList() << QString("%1.dir").arg(targetName), QDir::NoFilter, QDirIterator::Subdirectories);
                 while (it.hasNext())
@@ -724,18 +724,18 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
                     Utils::FilePath found_path = Utils::FilePath::fromString(it.next()).pathAppended("flags.make");
                     if (found_path.exists())
                     {
-                      targetInfo.flagsFile = found_path;
+                      targetInfo->flagsFile = found_path;
                       break;
                     }
                 }
             }
 
             // The order matters so it will order local first then system
-            targetInfo.includes = targetLocalIncludes;
-            targetInfo.includes.append(targetSystemIncludes);
+            targetInfo->includes = targetLocalIncludes;
+            targetInfo->includes.append(targetSystemIncludes);
 
             buildInfo.targets.append(targetInfo);
-            targetMap[targetName] = &(buildInfo.targets.back());
+            targetMap[targetName] = targetInfo;
         }
       }
       else if(cbpXml.name() == QLatin1String("Unit"))
@@ -778,7 +778,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
 //      workspace_includes.append(includePath);
 //  }
 
-  for(auto it = buildInfo.targets.begin(); it != buildInfo.targets.end(); ++it)
+  for (const PackageTargetInfoPtr &it : buildInfo.targets)
   {
       // Next need to parse flags.cmake for flags and defines
       if (it->flagsFile.exists())
