@@ -494,18 +494,18 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
     int cnt = 0;
     double max = results.wsPackageBuildInfo.size();
-    for (const ROSUtils::PackageBuildInfo& buildInfo : results.wsPackageBuildInfo)
+    for (const ROSUtils::PackageBuildInfo& buildInfo : qAsConst(results.wsPackageBuildInfo))
     {
         QStringList packageFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
         QStringList packageCppFiles = packageFiles.filter(QRegularExpression(pattern));
         ProjectExplorer::HeaderPaths packageHeaderPaths = workspace_header_paths;
         QStringList package_includes = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
 
-        for (const ROSUtils::PackageTargetInfo& targetInfo : buildInfo.targets)
+        for (const ROSUtils::PackageTargetInfoPtr& targetInfo : buildInfo.targets)
         {
             ProjectExplorer::RawProjectPart rpp;
             const QString defineArg
-                    = Utils::transform(targetInfo.defines, [](const QString &s) -> QString {
+                    = Utils::transform(targetInfo->defines, [](const QString &s) -> QString {
                         QString result = QString::fromLatin1("#define ") + s;
                         int assignIndex = result.indexOf('=');
                         if (assignIndex != -1)
@@ -514,28 +514,28 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
                     }).join('\n');
 
             rpp.setProjectFileLocation(projectFilePath.toString());
-            rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo.name + '|' + projectFilePath.toString());
-            rpp.setDisplayName(buildInfo.parent.name + '|' + targetInfo.name);
+            rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo->name + '|' + projectFilePath.toString());
+            rpp.setDisplayName(buildInfo.parent.name + '|' + targetInfo->name);
             rpp.setQtVersion(activeQtVersion);
             rpp.setMacros(ProjectExplorer::Macro::toMacros(defineArg.toUtf8()));
 
             QSet<QString> toolChainIncludes;
             const HeaderPaths header_paths = \
                     cxxToolChain->createBuiltInHeaderPathsRunner(env)\
-                    (targetInfo.flags, sysRoot.toString(), QString());
+                    (targetInfo->flags, sysRoot.toString(), QString());
             for (const HeaderPath &hp : header_paths) {
                 toolChainIncludes.insert(hp.path);
             }
 
-            for (const QString &i : targetInfo.includes) {
+            for (const QString &i : targetInfo->includes) {
                 if (!toolChainIncludes.contains(i) && !package_includes.contains(i)) {
                     packageHeaderPaths.append(ProjectExplorer::HeaderPath(i, ProjectExplorer::HeaderPathType::System));
                     package_includes.append(i);
                 }
             }
 
-            rpp.setFlagsForCxx({cxxToolChain, targetInfo.flags, sysRoot.toString()});
-            rpp.setFiles(targetInfo.source_files);
+            rpp.setFlagsForCxx({cxxToolChain, targetInfo->flags, sysRoot.toString()});
+            rpp.setFiles(targetInfo->source_files);
             rpp.setHeaderPaths(packageHeaderPaths);
             rpps.append(rpp);
         }

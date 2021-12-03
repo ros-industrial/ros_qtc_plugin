@@ -102,7 +102,8 @@ public:
         QStringList flags;         /**< @brief Target's cxx build flags */
         QStringList defines;       /**< @brief Target's defines build flags */
     };
-    typedef QList<PackageTargetInfo> PackageTargetInfoList;
+    typedef std::shared_ptr<PackageTargetInfo> PackageTargetInfoPtr;
+    typedef QList<PackageTargetInfoPtr> PackageTargetInfoList;
 
     /** @brief Contains all relevant package information */
     struct PackageInfo {
