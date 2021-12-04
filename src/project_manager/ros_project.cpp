@@ -366,7 +366,11 @@ void ROSProject::fileSystemChanged(const QString &path)
 
 void ROSProject::asyncUpdate()
 {
-  rosBuildConfiguration()->buildSystem()->requestParse();
+  ROSBuildConfiguration *bc = rosBuildConfiguration();
+  if (!bc)
+    return;
+
+  bc->buildSystem()->requestParse();
 
   m_futureWatcher.waitForFinished();
 
@@ -388,8 +392,8 @@ void ROSProject::asyncUpdate()
   m_futureWatcher.setFuture(m_asyncUpdateFutureInterface->future());
 
   Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority,
-    [this]() {
-      Utils::FilePath sourcePath = ROSUtils::getWorkspaceInfo(projectDirectory(), rosBuildConfiguration()->rosBuildSystem(), distribution()).sourcePath;
+    [this, bc]() {
+      Utils::FilePath sourcePath = ROSUtils::getWorkspaceInfo(projectDirectory(), bc->rosBuildSystem(), distribution()).sourcePath;
       ROSProject::buildProjectTree(projectFilePath(), sourcePath, *m_asyncUpdateFutureInterface);
     });
 }
