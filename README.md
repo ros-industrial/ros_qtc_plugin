@@ -67,16 +67,11 @@ This will create an archive of the format `ROSProjectManager-${version}-Linux-${
 
 ## Installation
 
-Install the runtime dependencies `yaml-cpp` and `qtermwidget` via apt:
-```bash
-sudo apt install '^(libyaml-cpp|libqtermwidget).*([^v]|[^e]v|[^d]ev|[^-]dev)$'
-```
-
 Download the plugin archive from the [release page](https://github.com/ros-industrial/ros_qtc_plugin/releases/latest) and extract it into the root of a Qt Creator installation. Qt Creator can be installed via the official [online](https://www.qt.io/download-thank-you) and [offline](https://www.qt.io/offline-installers) installer. The Qt Creator root will be `~/Qt/Tools/QtCreator` for the online installer and `~/qtcreator-${version}` for the offline installer. The following script extracts the archive to the default online installer location:
 ```bash
 sudo apt install libarchive-tools # needed for bsdtar
 export QTC_ROOT=~/Qt/Tools/QtCreator # online installer
-# export QTC_ROOT=~/qtcreator-5.0.0 # offline installer
+# export QTC_ROOT=~/qtcreator-6.0.0 # offline installer
 export PLUGIN_URL=`curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*ROSProjectManager-.*-Linux-.*.zip' | cut -d'"' -f 4`
 curl -SL $PLUGIN_URL | bsdtar -xzf - -C $QTC_ROOT
 ```
