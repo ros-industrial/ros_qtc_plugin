@@ -22,8 +22,16 @@ The ROS Qt Creator Plug-in provides the following capabilities:
    * Basic URDF File
    * Basic Node File
 
-### Tips
-  * Users may create custom templates.
+## Installation
+
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/qtcreator-ros)
+
+You can install Qt Creator with the ROS corresponding plugin via the [snap store](https://snapcraft.io/qtcreator-ros). This will make sure that the Qt Creator version and the ROS plugin version will use matching API and update automatically once a new version has been released. You can install the `qtcreator-ros` snap by searching in the software centre or from the command line:
+```bash
+sudo snap install qtcreator-ros --classic
+```
+
+To install the plugin manually, use the released plugin archives as described in [Plugin Installation](#plugin-installation). To build the plugin from scratch, e.g. for unreleased Qt Creator versions, just follow the build instructions below.
 
 ## Dependencies
 
@@ -65,7 +73,7 @@ cmake --build build --target package
 ```
 This will create an archive of the format `ROSProjectManager-${version}-Linux-${arch}.zip` inside the build folder (`build` by default). This archive can either be imported by Qt Creator via Help → About Plugins… → Install Plugin… or alternatively extracted directly to `~/Qt/Tools/QtCreator/`.
 
-## Installation
+## Plugin Installation
 
 Download the plugin archive from the [release page](https://github.com/ros-industrial/ros_qtc_plugin/releases/latest) and extract it into the root of a Qt Creator installation. Qt Creator can be installed via the official [online](https://www.qt.io/download-thank-you) and [offline](https://www.qt.io/offline-installers) installer. The Qt Creator root will be `~/Qt/Tools/QtCreator` for the online installer and `~/qtcreator-${version}` for the offline installer. The following script extracts the archive to the default online installer location:
 ```bash
