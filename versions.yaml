@@ -1,6 +1,9 @@
-# see https://download.qt.io/development_releases/qtcreator for valid versions
+# see
+# - https://download.qt.io/development_releases/qtcreator/
+# - https://download.qt.io/official_releases/qtcreator/
+# for valid versions
 # the version schema is: {major}.{minor}[-{devel}]
-qtc_version: "6.0"
+qtc_version: "7.0"
 qtc_modules: ["qtcreator", "qtcreator_dev"]
 
 qt_version: "6.2"
