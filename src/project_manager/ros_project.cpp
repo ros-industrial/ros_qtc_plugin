@@ -483,27 +483,10 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
     const ToolChain *cxxToolChain = ToolChainKitAspect::cxxToolChain(k);
 
-    QString pattern = "^.*\\.(" + QRegularExpression::escape("c") +
-                            "|" + QRegularExpression::escape("cc") +
-                            "|" + QRegularExpression::escape("cpp") +
-                            "|" + QRegularExpression::escape("c++") +
-                            "|" + QRegularExpression::escape("cp") +
-                            "|" + QRegularExpression::escape("cxx") +
-                            "|" + QRegularExpression::escape("h") +
-                            "|" + QRegularExpression::escape("hh") +
-                            "|" + QRegularExpression::escape("hpp") +
-                            "|" + QRegularExpression::escape("h++") +
-                            "|" + QRegularExpression::escape("hp") +
-                            "|" + QRegularExpression::escape("hxx") + ")";
-
-    QStringList workspaceCppFiles = workspaceFiles.filter(QRegularExpression(pattern));
-
     int cnt = 0;
     double max = results.wsPackageBuildInfo.size();
     for (const ROSUtils::PackageBuildInfo& buildInfo : qAsConst(results.wsPackageBuildInfo))
     {
-        QStringList packageFiles = workspaceFiles.filter(buildInfo.parent.path.toString() + QDir::separator());
-        QStringList packageCppFiles = packageFiles.filter(QRegularExpression(pattern));
         ProjectExplorer::HeaderPaths packageHeaderPaths = workspace_header_paths;
         QStringList package_includes = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
 
