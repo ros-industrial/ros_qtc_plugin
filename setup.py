@@ -38,7 +38,8 @@ def download_check_fail(url, expected_type):
     if not response.ok:
         raise RuntimeError("error retrieving "+response.url)
     if response.headers.get('content-type') != expected_type:
-        raise RuntimeError("invalid format of "+response.url)
+        print("Warning: invalid content type, expected '{}', got '{}'".format(
+            expected_type, response.headers.get('content-type')))
     return response
 
 def read_downloadable_archives(package):
