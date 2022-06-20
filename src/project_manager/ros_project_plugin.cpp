@@ -73,7 +73,6 @@
 
 #include <utils/algorithm.h>
 #include <utils/fileutils.h>
-#include <utils/mimetypes/mimedatabase.h>
 #include <utils/removefiledialog.h>
 
 #include <QtPlugin>

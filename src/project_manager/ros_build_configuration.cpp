@@ -34,7 +34,6 @@
 #include <projectexplorer/kitinformation.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/toolchain.h>
-#include <utils/mimetypes/mimedatabase.h>
 #include <utils/pathchooser.h>
 #include <utils/qtcassert.h>
 

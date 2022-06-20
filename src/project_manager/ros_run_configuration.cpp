@@ -41,7 +41,6 @@
 #include <qtsupport/qtsupportconstants.h>
 
 #include <utils/fileutils.h>
-#include <utils/mimetypes/mimedatabase.h>
 #include <utils/qtcprocess.h>
 #include <utils/winutils.h>
 #include <qmljstools/qmljstoolsconstants.h>
