@@ -129,7 +129,7 @@ ROSRunWorker::ROSRunWorker(RunControl *runControl) : RunWorker(runControl)
 
 void ROSRunWorker::start()
 {
-    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
+    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->target()->activeRunConfiguration())->stepList()->steps())
     {
         if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
         {
@@ -156,7 +156,7 @@ ROSDebugRunWorker::ROSDebugRunWorker(RunControl *runControl) : Debugger::Debugge
 void ROSDebugRunWorker::start()
 {
     bool found = false;
-    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
+    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->target()->activeRunConfiguration())->stepList()->steps())
     {
         if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID)
         {
@@ -185,7 +185,7 @@ void ROSDebugRunWorker::start()
     if (found)
     {
         // Now that the watcher is started run all of the other steps
-        for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->runConfiguration())->stepList()->steps())
+        for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->target()->activeRunConfiguration())->stepList()->steps())
         {
             if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
             {
