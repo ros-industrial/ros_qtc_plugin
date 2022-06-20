@@ -46,6 +46,7 @@
 #include <qmljstools/qmljstoolsconstants.h>
 #include <utils/detailswidget.h>
 #include <utils/utilsicons.h>
+#include <utils/processinfo.h>
 
 #include <QLineEdit>
 #include <QComboBox>
@@ -204,12 +205,12 @@ void ROSDebugRunWorker::start()
     }
 }
 
-void ROSDebugRunWorker::pidFound(ProjectExplorer::DeviceProcessItem process)
+void ROSDebugRunWorker::pidFound(const Utils::ProcessInfo &process)
 {
     m_timer.stop();
-    setAttachPid(Utils::ProcessHandle(process.pid));
-    setId(tr("Process %1").arg(process.pid));
-    setInferiorExecutable(Utils::FilePath::fromString(process.exe));
+    setAttachPid(Utils::ProcessHandle(process.processId));
+    setId(tr("Process %1").arg(process.processId));
+    setInferiorExecutable(Utils::FilePath::fromString(process.executable));
     setStartMode(Debugger::StartExternal);
     setCloseMode(Debugger::DetachAtClose);
     setContinueAfterAttach(m_debugContinueOnAttach);
@@ -220,17 +221,17 @@ void ROSDebugRunWorker::findProcess()
 {
     m_timeElapsed += 10;
     const QString &appName = Utils::FileUtils::normalizedPathName(m_debugTargetPath);
-    ProjectExplorer::DeviceProcessItem fallback;
-    for (const ProjectExplorer::DeviceProcessItem &p : ProjectExplorer::DeviceProcessList::localProcesses()) {
-        if (Utils::FileUtils::normalizedPathName(p.exe) == appName) {
+    Utils::ProcessInfo fallback;
+    for (const Utils::ProcessInfo &p : Utils::ProcessInfo::processInfoList()) {
+        if (Utils::FileUtils::normalizedPathName(p.executable) == appName) {
             Core::MessageManager::writeSilently(tr("[ROS] Attaching to process: %1.").arg(appName));
             pidFound(p);
             return;
         }
-        if (p.cmdLine.startsWith(appName))
+        if (p.commandLine.startsWith(appName))
             fallback = p;
     }
-    if (fallback.pid != 0)
+    if (fallback.processId != 0)
         pidFound(fallback);
 
     // Make sure this does not run indefinitely. Allow 30sec to start the process.
