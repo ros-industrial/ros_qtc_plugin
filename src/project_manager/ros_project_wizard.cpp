@@ -39,7 +39,6 @@
 #include <texteditor/codestylepool.h>
 
 #include <utils/filewizardpage.h>
-#include <utils/mimetypes/mimedatabase.h>
 #include <utils/wizard.h>
 #include <utils/icon.h>
 

@@ -33,7 +33,6 @@
 #include <projectexplorer/projecttree.h>
 
 #include <utils/filewizardpage.h>
-#include <utils/mimetypes/mimedatabase.h>
 #include <utils/wizard.h>
 
 #include <QApplication>
