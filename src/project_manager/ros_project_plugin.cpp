@@ -22,7 +22,6 @@
 #ifdef ROSTERMINAL
 #include "ros_terminal_pane.h"
 #endif
-#include "ros_build_configuration.h"
 #include "ros_run_configuration.h"
 #include "ros_rosrun_step.h"
 #include "ros_roslaunch_step.h"
@@ -35,7 +34,6 @@
 #include "ros_catkin_tools_step.h"
 #include "ros_colcon_step.h"
 #include "ros_project.h"
-#include "ros_utils.h"
 #include "ros_project_constants.h"
 #include "ros_package_wizard.h"
 #include "ros_settings_page.h"
