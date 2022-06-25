@@ -483,53 +483,56 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
     const ToolChain *cxxToolChain = ToolChainKitAspect::cxxToolChain(k);
 
-    int cnt = 0;
-    double max = results.wsPackageBuildInfo.size();
-    for (const ROSUtils::PackageBuildInfo& buildInfo : qAsConst(results.wsPackageBuildInfo))
+    if (cxxToolChain)
     {
-        ProjectExplorer::HeaderPaths packageHeaderPaths = workspace_header_paths;
-        QStringList package_includes = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
-
-        for (const ROSUtils::PackageTargetInfoPtr& targetInfo : buildInfo.targets)
+        int cnt = 0;
+        double max = results.wsPackageBuildInfo.size();
+        for (const ROSUtils::PackageBuildInfo& buildInfo : qAsConst(results.wsPackageBuildInfo))
         {
-            ProjectExplorer::RawProjectPart rpp;
-            const QString defineArg
-                    = Utils::transform(targetInfo->defines, [](const QString &s) -> QString {
-                        QString result = QString::fromLatin1("#define ") + s;
-                        int assignIndex = result.indexOf('=');
-                        if (assignIndex != -1)
-                            result[assignIndex] = ' ';
-                        return result;
-                    }).join('\n');
+            ProjectExplorer::HeaderPaths packageHeaderPaths = workspace_header_paths;
+            QStringList package_includes = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
 
-            rpp.setProjectFileLocation(projectFilePath.toString());
-            rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo->name + '|' + projectFilePath.toString());
-            rpp.setDisplayName(buildInfo.parent.name + '|' + targetInfo->name);
-            rpp.setQtVersion(activeQtVersion);
-            rpp.setMacros(ProjectExplorer::Macro::toMacros(defineArg.toUtf8()));
+            for (const ROSUtils::PackageTargetInfoPtr& targetInfo : buildInfo.targets)
+            {
+                ProjectExplorer::RawProjectPart rpp;
+                const QString defineArg
+                        = Utils::transform(targetInfo->defines, [](const QString &s) -> QString {
+                            QString result = QString::fromLatin1("#define ") + s;
+                            int assignIndex = result.indexOf('=');
+                            if (assignIndex != -1)
+                                result[assignIndex] = ' ';
+                            return result;
+                        }).join('\n');
 
-            QSet<QString> toolChainIncludes;
-            const HeaderPaths header_paths = \
-                    cxxToolChain->createBuiltInHeaderPathsRunner(env)\
-                    (targetInfo->flags, sysRoot.toString(), QString());
-            for (const HeaderPath &hp : header_paths) {
-                toolChainIncludes.insert(hp.path);
-            }
+                rpp.setProjectFileLocation(projectFilePath.toString());
+                rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo->name + '|' + projectFilePath.toString());
+                rpp.setDisplayName(buildInfo.parent.name + '|' + targetInfo->name);
+                rpp.setQtVersion(activeQtVersion);
+                rpp.setMacros(ProjectExplorer::Macro::toMacros(defineArg.toUtf8()));
 
-            for (const QString &i : targetInfo->includes) {
-                if (!toolChainIncludes.contains(i) && !package_includes.contains(i)) {
-                    packageHeaderPaths.append(ProjectExplorer::HeaderPath(i, ProjectExplorer::HeaderPathType::System));
-                    package_includes.append(i);
+                QSet<QString> toolChainIncludes;
+                const HeaderPaths header_paths = \
+                        cxxToolChain->createBuiltInHeaderPathsRunner(env)\
+                        (targetInfo->flags, sysRoot.toString(), QString());
+                for (const HeaderPath &hp : header_paths) {
+                    toolChainIncludes.insert(hp.path);
                 }
-            }
 
-            rpp.setFlagsForCxx({cxxToolChain, targetInfo->flags, sysRoot.toString()});
-            rpp.setFiles(targetInfo->source_files);
-            rpp.setHeaderPaths(packageHeaderPaths);
-            rpps.append(rpp);
+                for (const QString &i : targetInfo->includes) {
+                    if (!toolChainIncludes.contains(i) && !package_includes.contains(i)) {
+                        packageHeaderPaths.append(ProjectExplorer::HeaderPath(i, ProjectExplorer::HeaderPathType::System));
+                        package_includes.append(i);
+                    }
+                }
+
+                rpp.setFlagsForCxx({cxxToolChain, targetInfo->flags, sysRoot.toString()});
+                rpp.setFiles(targetInfo->source_files);
+                rpp.setHeaderPaths(packageHeaderPaths);
+                rpps.append(rpp);
+            }
+            cnt += 1;
+            fi.setProgressValue(static_cast<int>(100.0 * static_cast<double>(cnt) / max));
         }
-        cnt += 1;
-        fi.setProgressValue(static_cast<int>(100.0 * static_cast<double>(cnt) / max));
     }
 
     results.parts = std::move(rpps);
