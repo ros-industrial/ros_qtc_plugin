@@ -34,6 +34,7 @@
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorericons.h>
 #include <projectexplorer/buildstepspage.h>
+#include <projectexplorer/projectexplorerconstants.h>
 #include <debugger/debuggerengine.h>
 
 #include <qtsupport/qtkitinformation.h>
