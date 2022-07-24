@@ -513,7 +513,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
                 QSet<QString> toolChainIncludes;
                 const HeaderPaths header_paths = \
                         cxxToolChain->createBuiltInHeaderPathsRunner(env)\
-                        (targetInfo->flags, sysRoot.toString(), QString());
+                        (targetInfo->flags, sysRoot, QString());
                 for (const HeaderPath &hp : header_paths) {
                     toolChainIncludes.insert(hp.path);
                 }
