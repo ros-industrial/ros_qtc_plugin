@@ -19,10 +19,7 @@
  * limitations under the License.
  */
 #include "ros_run_configuration.h"
-#include "ros_project.h"
-#include "ros_run_steps_page.h"
 #include "ros_generic_run_step.h"
-#include "ui_ros_run_configuration.h"
 
 #include <coreplugin/editormanager/editormanager.h>
 #include <coreplugin/editormanager/ieditor.h>
