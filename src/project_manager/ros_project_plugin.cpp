@@ -72,6 +72,7 @@
 #include <utils/algorithm.h>
 #include <utils/fileutils.h>
 #include <utils/removefiledialog.h>
+#include <utils/mimeutils.h>
 
 #include <QtPlugin>
 #include <QDebug>
