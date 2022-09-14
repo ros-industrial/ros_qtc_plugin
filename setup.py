@@ -59,8 +59,11 @@ def qtc_download_check_extract(cfg, dir_install):
         qtc_ver_type = None
 
     ver_split = qtc_ver_nr.split('.')
-    qtc_ver_maj = "{}.{}".format(ver_split[0], ver_split[1])
-    qtc_ver_full = "{}.{}.{}".format(ver_split[0], ver_split[1], 0)
+    qtc_ver_major = ver_split[0]
+    qtc_ver_minor = ver_split[1] if len(ver_split)>1 else 0
+    qtc_ver_patch = ver_split[2] if len(ver_split)>2 else 0
+    qtc_ver_maj = "{}.{}".format(qtc_ver_major, qtc_ver_minor)
+    qtc_ver_full = "{}.{}".format(qtc_ver_maj, qtc_ver_patch)
     if qtc_ver_type:
         qtc_ver_full = "{ver}-{type}".format(ver = qtc_ver_full, type = qtc_ver_type)
 
