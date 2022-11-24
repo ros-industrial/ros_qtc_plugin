@@ -185,7 +185,7 @@ void ROSImportWizardPage::setForceFirstCapitalLetterForFileName(bool b)
 
 Utils::FilePath ROSImportWizardPage::workspaceDirectory() const
 {
-  return Utils::FilePath::fromString(d->m_ui.pathChooser->path());
+  return Utils::FilePath::fromString(d->m_ui.pathChooser->filePath().toString());
 }
 
 void ROSImportWizardPage::slotProjectNameValidChanged()

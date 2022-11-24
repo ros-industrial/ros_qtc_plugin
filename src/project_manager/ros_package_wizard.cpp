@@ -151,7 +151,7 @@ void ROSPackageWizardDetailsPage::setProjectDirectory(const Utils::FilePath &pat
 
 QString ROSPackageWizardDetailsPage::packageName() const {return d->m_ui.packageNameLineEdit->text();}
 
-QString ROSPackageWizardDetailsPage::packagePath() const {return d->m_ui.pathChooser->path();}
+QString ROSPackageWizardDetailsPage::packagePath() const {return d->m_ui.pathChooser->filePath().toString();}
 
 QString ROSPackageWizardDetailsPage::version() const {return d->m_ui.versionLineEdit->text();}
 
