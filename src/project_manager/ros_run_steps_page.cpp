@@ -41,6 +41,7 @@
 #include <QHBoxLayout>
 #include <QToolButton>
 #include <QMessageBox>
+#include <QtWidgets>
 
 namespace ROSProjectManager {
 namespace Internal {
