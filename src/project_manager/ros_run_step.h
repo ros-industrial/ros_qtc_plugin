@@ -21,6 +21,7 @@
 #ifndef RUNSTEP_H
 #define RUNSTEP_H
 
+#include "utils/qtcassert.h"
 #include <projectexplorer/projectconfiguration.h>
 #include <projectexplorer/runconfiguration.h>
 #include <projectexplorer/target.h>
