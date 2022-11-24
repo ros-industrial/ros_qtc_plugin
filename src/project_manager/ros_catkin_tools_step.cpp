@@ -811,8 +811,8 @@ void ROSCatkinToolsConfigEditorWidget::propertyChanged()
     {
         m_modified = true;
 
-        if (!m_ui->extend_path_chooser->path().isEmpty())
-            m_profile_original["extend_path"] = m_ui->extend_path_chooser->path().trimmed().toStdString();
+        if (!m_ui->extend_path_chooser->filePath().toString().isEmpty())
+            m_profile_original["extend_path"] = m_ui->extend_path_chooser->filePath().toString().trimmed().toStdString();
         else
             m_profile_original["extend_path"] = "null";
 
@@ -856,7 +856,7 @@ bool ROSCatkinToolsConfigEditorWidget::isModified() const
 bool ROSCatkinToolsConfigEditorWidget::isValid() const
 {
     bool valid = true;
-    if (!m_ui->extend_path_chooser->path().isEmpty())
+    if (!m_ui->extend_path_chooser->filePath().toString().isEmpty())
         valid &= m_ui->extend_path_chooser->isValid();
 
     valid &= m_ui->space_source_lineEdit->isValid();

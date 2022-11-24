@@ -157,12 +157,12 @@ ROSSettings ROSSettingsWidget::settings() const
     rc.default_distribution = m_ui->distributionComboBox->currentText();
     rc.default_build_system = static_cast<ROSUtils::BuildSystem>(m_ui->buildSystemComboBox->currentIndex());
     rc.default_code_style = m_available_code_styles[m_ui->codeStyleComboBox->currentText()];
-    rc.default_dist_path = m_ui->defaultDistributionPathChooser->path();
+    rc.default_dist_path = m_ui->defaultDistributionPathChooser->filePath().toString();
 
     if (rc.default_dist_path.isEmpty())
       rc.default_dist_path = Constants::ROS_INSTALL_DIRECTORY;
 
-    rc.custom_dist_path = m_ui->customDistributionPathChooser->path();
+    rc.custom_dist_path = m_ui->customDistributionPathChooser->filePath().toString();
     return rc;
 }
 
