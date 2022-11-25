@@ -664,7 +664,7 @@ ROSCatkinToolsConfigEditorWidget::ROSCatkinToolsConfigEditorWidget() : QWidget()
 
     connect(m_ui->saveButton, &QAbstractButton::clicked, this, &ROSCatkinToolsConfigEditorWidget::saveProfileConfig);
 
-    connect(m_ui->extend_path_chooser, &Utils::PathChooser::pathChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
+    connect(m_ui->extend_path_chooser, &Utils::PathChooser::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
 
     connect(m_ui->blacklist_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
     connect(m_ui->whitelist_lineEdit, &QLineEdit::textChanged, this, &ROSCatkinToolsConfigEditorWidget::propertyChanged);
