@@ -15,9 +15,9 @@ jobs:
     outputs:
       archive_name: ${{ steps.find_plugin_archive.outputs.archive_name }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.x"
 
@@ -91,7 +91,7 @@ jobs:
           echo "QTC_PLUGIN_ARCHIVE=`cat ./archive_name`" >> $GITHUB_ENV
 
       - name: upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: plugin_archive_artifact_${{ matrix.config.name }}
           if-no-files-found: error
@@ -131,7 +131,7 @@ jobs:
           - macOS
     steps:
       - name: download artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: plugin_archive_artifact_${{ matrix.name }}
           path: ./
@@ -141,7 +141,7 @@ jobs:
         run: echo "QTC_PLUGIN_ARCHIVE=`cat ./archive_name`" >> $GITHUB_ENV
 
       - name: upload archive release
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
