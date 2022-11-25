@@ -158,7 +158,8 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
 
     ProjectManager::registerProjectType<ROSProject>(Constants::ROS_MIME_TYPE);
 
-    IWizardFactory::registerFactoryCreator([]() { return QList<IWizardFactory *>() << new ROSProjectWizard << new ROSPackageWizard; });
+    IWizardFactory::registerFactoryCreator([]() { return new ROSProjectWizard; });
+    IWizardFactory::registerFactoryCreator([]() { return new ROSPackageWizard; });
 
     ActionContainer *mproject = ActionManager::actionContainer(ProjectExplorer::Constants::M_PROJECTCONTEXT);
 
