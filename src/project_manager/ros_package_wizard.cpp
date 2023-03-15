@@ -275,10 +275,10 @@ Core::GeneratedFiles ROSPackageWizard::generateFiles(const QWizard *w,
     packagePath = packagePath.pathAppended(m_wizard->packageName()).pathAppended(QLatin1String("package.xml"));
     cmakelistPath = cmakelistPath.pathAppended(m_wizard->packageName()).pathAppended(QLatin1String("CMakeLists.txt"));
 
-    Core::GeneratedFile generatedPackageFile(packagePath.toString());
+    Core::GeneratedFile generatedPackageFile(packagePath);
     generatedPackageFile.setAttributes(Core::GeneratedFile::CustomGeneratorAttribute);
 
-    Core::GeneratedFile generatedCMakeListFile(cmakelistPath.toString());
+    Core::GeneratedFile generatedCMakeListFile(cmakelistPath);
     generatedCMakeListFile.setAttributes(Core::GeneratedFile::CustomGeneratorAttribute);
 
     Core::GeneratedFiles files;
