@@ -257,7 +257,7 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w, QString *
     const QDir wsDir(wizard->workspaceDirectory().toString());
 
     const QString projectName = wizard->projectName();
-    const QString workspaceFileName = QFileInfo(wsDir, projectName + QLatin1String(".workspace")).absoluteFilePath();
+    const Utils::FilePath workspaceFileName = Utils::FilePath::fromFileInfo(QFileInfo(wsDir, projectName + QLatin1String(".workspace")));
     ROSUtils::ROSProjectFileContent projectFileContent;
     projectFileContent.defaultBuildSystem = wizard->buildSystem();
     projectFileContent.distribution = wizard->distribution();
