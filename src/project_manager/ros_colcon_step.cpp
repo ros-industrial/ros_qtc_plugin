@@ -176,6 +176,7 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
     case BUILD:
         args << QLatin1String("build");
         args << m_colconArguments;
+        args << "--event-handlers status+ console_start_end+";
         if (includeDefault)
             if (buildType == ROSUtils::BuildTypeUserDefined)
                 args << QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(m_cmakeArguments);
