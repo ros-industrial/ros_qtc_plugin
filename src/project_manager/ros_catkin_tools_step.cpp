@@ -77,6 +77,11 @@ ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, const Utils::Id id
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (bc->rosBuildSystem() != ROSUtils::CatkinTools)
         setEnabled(false);
+
+    connect(this, &BuildStep::addOutput, this, [this](const QString &string, OutputFormat format) {
+        if (format == OutputFormat::Stdout)
+            stdOutput(string);
+    });
 }
 
 ROSBuildConfiguration *ROSCatkinToolsStep::rosBuildConfiguration() const
@@ -231,7 +236,6 @@ Utils::CommandLine ROSCatkinToolsStep::makeCommand(const QString &args) const
 
 void ROSCatkinToolsStep::stdOutput(const QString &line)
 {
-    AbstractProcessStep::stdOutput(line);
     QRegularExpressionMatchIterator i = m_percentProgress.globalMatch(line);
     while (i.hasNext()) {
         QRegularExpressionMatch match = i.next();
