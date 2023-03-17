@@ -34,6 +34,9 @@
        <height>0</height>
       </size>
      </property>
+     <property name="currentIndex">
+      <number>2</number>
+     </property>
      <item>
       <property name="text">
        <string>CatkinMake</string>
