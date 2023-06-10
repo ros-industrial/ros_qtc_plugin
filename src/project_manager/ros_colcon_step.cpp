@@ -35,7 +35,6 @@
 #include <qtsupport/qtparser.h>
 #include <utils/stringutils.h>
 #include <utils/qtcassert.h>
-#include <utils/qtcprocess.h>
 #include <cmakeprojectmanager/cmakeparser.h>
 
 #include <QDir>

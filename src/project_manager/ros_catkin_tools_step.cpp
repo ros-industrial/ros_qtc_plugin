@@ -37,7 +37,6 @@
 #include <qtsupport/qtparser.h>
 #include <utils/stringutils.h>
 #include <utils/qtcassert.h>
-#include <utils/qtcprocess.h>
 #include <cmakeprojectmanager/cmakeparser.h>
 #include <utils/variablechooser.h>
 #include <coreplugin/messagemanager.h>
