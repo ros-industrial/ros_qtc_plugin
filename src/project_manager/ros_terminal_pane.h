@@ -24,7 +24,6 @@
 #include <coreplugin/ioutputpane.h>
 
 #include <projectexplorer/processparameters.h>
-#include <utils/qtcprocess.h>
 
 #include <QTabWidget>
 #include <QToolButton>
