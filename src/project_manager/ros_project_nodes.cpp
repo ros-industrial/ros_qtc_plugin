@@ -43,14 +43,15 @@ FileNode *ROSProjectNode::findFileNode(FolderNode *folder_node, const Utils::Fil
   if (file_node)
       return file_node;
 
-  for (FolderNode *fn : folder_node->folderNodes())
-  {
-    file_node = findFileNode(fn, filePaths);
-    if (file_node)
-        return file_node;
-  }
+  folder_node->findChildFolderNode([&](FolderNode *folder_node) {
+    file_node = findFileNode(folder_node, filePaths);
+    return bool(file_node);
+  });
 
-  return nullptr;
+  if (file_node)
+    return file_node;
+  else
+    return nullptr;
 }
 
 bool ROSProjectNode::showInSimpleTree() const
