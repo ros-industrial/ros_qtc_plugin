@@ -69,8 +69,7 @@ namespace Internal {
 
 static FolderNode *folderNode(const FolderNode *folder, const Utils::FilePath &directory)
 {
-    return static_cast<FolderNode *>(Utils::findOrDefault(folder->folderNodes(),
-                                                          [&directory](const FolderNode *fn) {
+    return static_cast<FolderNode *>(folder->findChildFolderNode([&](FolderNode *fn) {
         return fn && fn->filePath() == directory;
     }));
 }
