@@ -526,7 +526,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
                     }
                 }
 
-                rpp.setFlagsForCxx({cxxToolChain, targetInfo->flags, sysRoot.toString()});
+                rpp.setFlagsForCxx({cxxToolChain, targetInfo->flags, sysRoot});
                 rpp.setFiles(targetInfo->source_files);
                 rpp.setHeaderPaths(packageHeaderPaths);
                 rpps.append(rpp);
