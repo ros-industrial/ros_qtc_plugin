@@ -23,7 +23,7 @@
 
 #include <coreplugin/messagemanager.h>
 #include <extensionsystem/pluginmanager.h>
-#include <projectexplorer/kitinformation.h>
+#include <projectexplorer/kitaspects.h>
 #include <projectexplorer/project.h>
 #include <utils/algorithm.h>
 #include <QDebug>

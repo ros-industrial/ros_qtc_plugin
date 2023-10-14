@@ -34,7 +34,6 @@
 #include <projectexplorer/projectexplorerconstants.h>
 #include <debugger/debuggerengine.h>
 
-#include <qtsupport/qtkitinformation.h>
 #include <qtsupport/qtoutputformatter.h>
 #include <qtsupport/qtsupportconstants.h>
 

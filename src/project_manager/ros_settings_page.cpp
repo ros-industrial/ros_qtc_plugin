@@ -31,6 +31,8 @@
 #include <texteditor/texteditorsettings.h>
 #include <texteditor/codestylepool.h>
 
+#include <utils/theme/theme.h>
+
 #include <cppeditor/cppeditorconstants.h>
 
 #include <projectexplorer/projectexplorerconstants.h>

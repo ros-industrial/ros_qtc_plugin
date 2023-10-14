@@ -38,7 +38,7 @@
 #include <projectexplorer/abi.h>
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/headerpath.h>
-#include <projectexplorer/kitinformation.h>
+#include <projectexplorer/kitaspects.h>
 #include <projectexplorer/kitmanager.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/buildmanager.h>
@@ -46,11 +46,10 @@
 #include <qtsupport/baseqtversion.h>
 #include <projectexplorer/customexecutablerunconfiguration.h>
 #include <qtsupport/qtcppkitinfo.h>
-#include <qtsupport/qtkitinformation.h>
+#include <qtsupport/qtkitaspect.h>
 #include <utils/fileutils.h>
 #include <utils/qtcassert.h>
 #include <utils/algorithm.h>
-#include <utils/runextensions.h>
 
 #include <QDir>
 #include <QtWidgets>
