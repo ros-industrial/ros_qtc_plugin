@@ -253,9 +253,8 @@ void ROSProjectPlugin::createCppCodeStyle()
 
   // Since the ROS Cpp code style can not be added until after the CppToolsSettings instance is create
   // the Cpp code style must be reloaded from settings to capture if it is set ROS Cpp code style.
-  QSettings *s = Core::ICore::settings();
   CppEditor::CppCodeStylePreferences *originalCppCodeStylePreferences = CppEditor::CppToolsSettings::instance()->cppCodeStyle();
-  originalCppCodeStylePreferences->fromSettings(QLatin1String(CppEditor::Constants::CPP_SETTINGS_ID), s);
+  originalCppCodeStylePreferences->fromSettings(CppEditor::Constants::CPP_SETTINGS_ID);
 }
 
 void ROSProjectPlugin::reloadProjectBuildInfo()
