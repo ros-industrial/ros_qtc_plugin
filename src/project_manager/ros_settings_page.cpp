@@ -63,7 +63,7 @@ ROSSettings::ROSSettings()
   }
 }
 
-void ROSSettings::toSettings(QSettings *s) const
+void ROSSettings::toSettings(Utils::QtcSettings *s) const
 {
     s->beginGroup(QLatin1String(Constants::ROS_SETTINGS_GROUP_ID));
     s->setValue(DEFAULT_DISTRIBUTION_ID, default_distribution);
@@ -80,7 +80,7 @@ void ROSSettings::toSettings(QSettings *s) const
     s->endGroup();
 }
 
-void ROSSettings::fromSettings(QSettings *s)
+void ROSSettings::fromSettings(Utils::QtcSettings *s)
 {
     s->beginGroup(QLatin1String(Constants::ROS_SETTINGS_GROUP_ID));
 

@@ -50,8 +50,8 @@ struct ROSSettings
 
     QString custom_dist_path;
 
-    void toSettings(QSettings *) const;
-    void fromSettings(QSettings *);
+    void toSettings(Utils::QtcSettings *) const;
+    void fromSettings(Utils::QtcSettings *);
 
     bool equals(const ROSSettings &rhs) const;
     bool operator==(const ROSSettings &s) const { return equals(s); }
