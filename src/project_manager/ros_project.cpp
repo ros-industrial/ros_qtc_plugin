@@ -101,7 +101,7 @@ static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
         parts[0].prepend('/');
 
     ProjectExplorer::FolderNode *parent = folder;
-    foreach (const QString &part, parts) {
+    for (const QString &part : parts) {
         path = path.pathAppended(part);
         // Find folder in subFolders
         FolderNode *next = folderNode(parent, path);
