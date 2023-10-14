@@ -47,6 +47,7 @@
 #include <projectexplorer/customexecutablerunconfiguration.h>
 #include <qtsupport/qtcppkitinfo.h>
 #include <qtsupport/qtkitaspect.h>
+#include <utils/async.h>
 #include <utils/fileutils.h>
 #include <utils/qtcassert.h>
 #include <utils/algorithm.h>
@@ -390,7 +391,7 @@ void ROSProject::asyncUpdate()
 
   m_futureWatcher.setFuture(m_asyncUpdateFutureInterface->future());
 
-  Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority,
+  Utils::asyncRun(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority,
     [this, bc]() {
       Utils::FilePath sourcePath = ROSUtils::getWorkspaceInfo(projectDirectory(), bc->rosBuildSystem(), distribution()).sourcePath;
       ROSProject::buildProjectTree(projectFilePath(), sourcePath, *m_asyncUpdateFutureInterface);
@@ -432,7 +433,7 @@ void ROSProject::asyncUpdateCppCodeModel(bool success)
         // TODO: Figure out why running this async causes segfaults
         if (async)
         {
-          Utils::runAsync(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority, [this, workspaceInfo, k, current_environment]() { ROSProject::buildCppCodeModel(workspaceInfo, projectFilePath(), m_workspaceFiles, k, current_environment, m_wsPackageInfo, m_wsPackageBuildInfo, *m_asyncBuildCodeModelFutureInterface); });
+          Utils::asyncRun(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority, [this, workspaceInfo, k, current_environment]() { ROSProject::buildCppCodeModel(workspaceInfo, projectFilePath(), m_workspaceFiles, k, current_environment, m_wsPackageInfo, m_wsPackageBuildInfo, *m_asyncBuildCodeModelFutureInterface); });
         }
         else
         {
