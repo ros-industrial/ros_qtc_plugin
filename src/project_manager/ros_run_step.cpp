@@ -167,7 +167,7 @@ const char STEPS_PREFIX[] = "ProjectExplorer.RunStepList.Step.";
 
 
 RunStep::RunStep(RunStepList *rsl, Utils::Id id) :
-    ProjectConfiguration(rsl, id)
+    ProjectConfiguration(rsl->target(), id)
 {
     //
 }
@@ -249,10 +249,10 @@ bool RunStep::enabled() const
     return m_enabled;
 }
 
-RunStepList::RunStepList(QObject *parent, Utils::Id id) :
-    ProjectConfiguration(parent, id)
+RunStepList::RunStepList(ProjectExplorer::Target *target, Utils::Id id) :
+    ProjectConfiguration(target, id)
 {
-    Q_ASSERT(parent);
+    Q_ASSERT(target);
     setDefaultDisplayName(tr("Run"));
 }
 

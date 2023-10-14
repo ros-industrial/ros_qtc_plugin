@@ -60,9 +60,9 @@ namespace Internal {
 
 const char ROS_RC_ID[] = "ROSProjectManager.ROSRunConfiguration";
 
-ROSRunConfiguration::ROSRunConfiguration(Target *parent, Utils::Id id) :
-    RunConfiguration(parent, id),
-    m_stepList(new RunStepList(this, Constants::ROS_RUN_STEP_LIST_ID))
+ROSRunConfiguration::ROSRunConfiguration(Target *target, Utils::Id id) :
+    RunConfiguration(target, id),
+    m_stepList(new RunStepList(target, Constants::ROS_RUN_STEP_LIST_ID))
 {
 }
 
