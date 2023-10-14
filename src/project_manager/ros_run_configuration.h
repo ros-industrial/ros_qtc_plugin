@@ -25,7 +25,7 @@
 #include "ros_project_constants.h"
 #include <projectexplorer/runconfiguration.h>
 #include <projectexplorer/buildstep.h>
-#include <projectexplorer/devicesupport/deviceprocesslist.h>
+#include <utils/processinfo.h>
 #include <debugger/debuggerruncontrol.h>
 
 #include <QPointer>
