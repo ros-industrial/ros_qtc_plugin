@@ -76,7 +76,7 @@ private slots:
     void updateCppCodeModel();
 
 protected:
-    Project::RestoreResult fromMap(const QVariantMap &map, QString *errorMessage) override;
+    Project::RestoreResult fromMap(const Utils::Store &map, QString *errorMessage) override;
 
 private:
     void asyncUpdate();

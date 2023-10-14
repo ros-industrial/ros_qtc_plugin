@@ -152,34 +152,33 @@ void ROSCatkinToolsStep::setupOutputFormatter(Utils::OutputFormatter *formatter)
     AbstractProcessStep::setupOutputFormatter(formatter);
 }
 
-QVariantMap ROSCatkinToolsStep::toMap() const
+void ROSCatkinToolsStep::toMap(Utils::Store &map) const
 {
-    QVariantMap map(AbstractProcessStep::toMap());
+    AbstractProcessStep::toMap(map);
 
-    map.insert(QLatin1String(ROS_CTS_TARGET_KEY), m_target);
-    map.insert(QLatin1String(ROS_CTS_ACTIVE_PROFILE_KEY), m_activeProfile);
-    map.insert(QLatin1String(ROS_CTS_CATKIN_TOOLS_ARGUMENTS_KEY), m_catkinToolsArguments);
-    map.insert(QLatin1String(ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY), m_catkinMakeArguments);
-    map.insert(QLatin1String(ROS_CTS_CMAKE_ARGUMENTS_KEY), m_cmakeArguments);
-    map.insert(QLatin1String(ROS_CTS_MAKE_ARGUMENTS_KEY), m_makeArguments);
-    map.insert(QLatin1String(ROS_CTS_CATKIN_TOOLS_WORKING_DIR_KEY), m_catkinToolsWorkingDir);
-    return map;
+    map.insert(ROS_CTS_TARGET_KEY, m_target);
+    map.insert(ROS_CTS_ACTIVE_PROFILE_KEY, m_activeProfile);
+    map.insert(ROS_CTS_CATKIN_TOOLS_ARGUMENTS_KEY, m_catkinToolsArguments);
+    map.insert(ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY, m_catkinMakeArguments);
+    map.insert(ROS_CTS_CMAKE_ARGUMENTS_KEY, m_cmakeArguments);
+    map.insert(ROS_CTS_MAKE_ARGUMENTS_KEY, m_makeArguments);
+    map.insert(ROS_CTS_CATKIN_TOOLS_WORKING_DIR_KEY, m_catkinToolsWorkingDir);
 }
 
-bool ROSCatkinToolsStep::fromMap(const QVariantMap &map)
+void ROSCatkinToolsStep::fromMap(const Utils::Store &map)
 {
-    m_target = (BuildTargets)map.value(QLatin1String(ROS_CTS_TARGET_KEY)).toInt();
-    m_activeProfile = map.value(QLatin1String(ROS_CTS_ACTIVE_PROFILE_KEY)).toString();
-    m_catkinToolsArguments = map.value(QLatin1String(ROS_CTS_CATKIN_TOOLS_ARGUMENTS_KEY)).toString();
-    m_catkinMakeArguments = map.value(QLatin1String(ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY)).toString();
-    m_cmakeArguments = map.value(QLatin1String(ROS_CTS_CMAKE_ARGUMENTS_KEY)).toString();
-    m_makeArguments = map.value(QLatin1String(ROS_CTS_MAKE_ARGUMENTS_KEY)).toString();
-    m_catkinToolsWorkingDir = map.value(QLatin1String(ROS_CTS_CATKIN_TOOLS_WORKING_DIR_KEY)).toString();
+    m_target = (BuildTargets)map.value(ROS_CTS_TARGET_KEY).toInt();
+    m_activeProfile = map.value(ROS_CTS_ACTIVE_PROFILE_KEY).toString();
+    m_catkinToolsArguments = map.value(ROS_CTS_CATKIN_TOOLS_ARGUMENTS_KEY).toString();
+    m_catkinMakeArguments = map.value(ROS_CTS_CATKIN_MAKE_ARGUMENTS_KEY).toString();
+    m_cmakeArguments = map.value(ROS_CTS_CMAKE_ARGUMENTS_KEY).toString();
+    m_makeArguments = map.value(ROS_CTS_MAKE_ARGUMENTS_KEY).toString();
+    m_catkinToolsWorkingDir = map.value(ROS_CTS_CATKIN_TOOLS_WORKING_DIR_KEY).toString();
 
     if (m_catkinToolsWorkingDir.isEmpty())
         m_catkinToolsWorkingDir = Constants::ROS_DEFAULT_WORKING_DIR;
 
-    return BuildStep::fromMap(map);
+    BuildStep::fromMap(map);
 }
 
 QWidget *ROSCatkinToolsStep::createConfigWidget()
@@ -280,7 +279,7 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     m_ui->makeArgumentsLineEdit->setText(m_makeStep->m_makeArguments);
 
     m_ui->catkinToolsWorkingDirWidget->setPath(m_makeStep->m_catkinToolsWorkingDir);
-    m_ui->catkinToolsWorkingDirWidget->setHistoryCompleter(QLatin1String("Qt.WorkingDir.History"));
+    m_ui->catkinToolsWorkingDirWidget->setHistoryCompleter("Qt.WorkingDir.History");
     m_ui->catkinToolsWorkingDirWidget->setExpectedKind(Utils::PathChooser::Directory);
     m_ui->catkinToolsWorkingDirWidget->setFilePath(makeStep->rosBuildConfiguration()->project()->projectDirectory());
 

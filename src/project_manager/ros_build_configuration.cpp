@@ -128,20 +128,19 @@ void ROSBuildConfiguration::initialize(const ProjectExplorer::BuildInfo &info)
     }
 }
 
-QVariantMap ROSBuildConfiguration::toMap() const
+void ROSBuildConfiguration::toMap(Utils::Store &map) const
 {
-  QVariantMap map(BuildConfiguration::toMap());
+  BuildConfiguration::toMap(map);
 
-  map.insert(QLatin1String(ROS_BC_BUILD_SYSTEM), (int)m_buildSystem);
-  map.insert(QLatin1String(ROS_BC_CMAKE_BUILD_TYPE), (int)m_cmakeBuildType);
-  return map;
+  map.insert(ROS_BC_BUILD_SYSTEM, (int)m_buildSystem);
+  map.insert(ROS_BC_CMAKE_BUILD_TYPE, (int)m_cmakeBuildType);
 }
 
-bool ROSBuildConfiguration::fromMap(const QVariantMap &map)
+void ROSBuildConfiguration::fromMap(const Utils::Store &map)
 {
-  m_buildSystem = (ROSUtils::BuildSystem)map.value(QLatin1String(ROS_BC_BUILD_SYSTEM)).toInt();
-  m_cmakeBuildType = (ROSUtils::BuildType)map.value(QLatin1String(ROS_BC_CMAKE_BUILD_TYPE)).toInt();
-  return BuildConfiguration::fromMap(map);
+  m_buildSystem = (ROSUtils::BuildSystem)map.value(ROS_BC_BUILD_SYSTEM).toInt();
+  m_cmakeBuildType = (ROSUtils::BuildType)map.value(ROS_BC_CMAKE_BUILD_TYPE).toInt();
+  BuildConfiguration::fromMap(map);
 }
 
 ROSUtils::BuildSystem ROSBuildConfiguration::rosBuildSystem() const

@@ -140,25 +140,24 @@ void ROSColconStep::setupOutputFormatter(Utils::OutputFormatter *formatter)
     AbstractProcessStep::setupOutputFormatter(formatter);
 }
 
-QVariantMap ROSColconStep::toMap() const
+void ROSColconStep::toMap(Utils::Store &map) const
 {
-    QVariantMap map(AbstractProcessStep::toMap());
+    AbstractProcessStep::toMap(map);
 
-    map.insert(QLatin1String(ROS_COLCON_STEP), m_target);
-    map.insert(QLatin1String(ROS_COLCON_STEP_ARGUMENTS_KEY), m_colconArguments);
-    map.insert(QLatin1String(ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY), m_cmakeArguments);
-    map.insert(QLatin1String(ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY), m_makeArguments);
-    return map;
+    map.insert(ROS_COLCON_STEP, m_target);
+    map.insert(ROS_COLCON_STEP_ARGUMENTS_KEY, m_colconArguments);
+    map.insert(ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY, m_cmakeArguments);
+    map.insert(ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY, m_makeArguments);
 }
 
-bool ROSColconStep::fromMap(const QVariantMap &map)
+void ROSColconStep::fromMap(const Utils::Store &map)
 {
-    m_target = (BuildTargets)map.value(QLatin1String(ROS_COLCON_STEP)).toInt();
-    m_colconArguments = map.value(QLatin1String(ROS_COLCON_STEP_ARGUMENTS_KEY)).toString();
-    m_cmakeArguments = map.value(QLatin1String(ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY)).toString();
-    m_makeArguments = map.value(QLatin1String(ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY)).toString();
+    m_target = (BuildTargets)map.value(ROS_COLCON_STEP).toInt();
+    m_colconArguments = map.value(ROS_COLCON_STEP_ARGUMENTS_KEY).toString();
+    m_cmakeArguments = map.value(ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY).toString();
+    m_makeArguments = map.value(ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY).toString();
 
-    return BuildStep::fromMap(map);
+    BuildStep::fromMap(map);
 }
 
 QWidget *ROSColconStep::createConfigWidget()

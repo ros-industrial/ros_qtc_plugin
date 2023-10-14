@@ -562,7 +562,7 @@ void ROSProject::updateCppCodeModel()
 
 }
 
-Project::RestoreResult ROSProject::fromMap(const QVariantMap &map, QString *errorMessage)
+Project::RestoreResult ROSProject::fromMap(const Utils::Store &map, QString *errorMessage)
 {
       RestoreResult result = Project::fromMap(map, errorMessage);
       if (result != RestoreResult::Ok)

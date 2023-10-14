@@ -65,7 +65,7 @@ ROSSettings::ROSSettings()
 
 void ROSSettings::toSettings(Utils::QtcSettings *s) const
 {
-    s->beginGroup(QLatin1String(Constants::ROS_SETTINGS_GROUP_ID));
+    s->beginGroup(Constants::ROS_SETTINGS_GROUP_ID);
     s->setValue(DEFAULT_DISTRIBUTION_ID, default_distribution);
     s->setValue(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(default_build_system));
     s->setValue(DEFAULT_CODE_STYLE_ID, default_code_style);
@@ -82,7 +82,7 @@ void ROSSettings::toSettings(Utils::QtcSettings *s) const
 
 void ROSSettings::fromSettings(Utils::QtcSettings *s)
 {
-    s->beginGroup(QLatin1String(Constants::ROS_SETTINGS_GROUP_ID));
+    s->beginGroup(Constants::ROS_SETTINGS_GROUP_ID);
 
     default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, "").toString();
 
