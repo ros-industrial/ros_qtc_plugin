@@ -140,25 +140,24 @@ void ROSCatkinMakeStep::setupOutputFormatter(Utils::OutputFormatter *formatter)
     AbstractProcessStep::setupOutputFormatter(formatter);
 }
 
-QVariantMap ROSCatkinMakeStep::toMap() const
+void ROSCatkinMakeStep::toMap(Utils::Store &map) const
 {
-    QVariantMap map(AbstractProcessStep::toMap());
+    AbstractProcessStep::toMap(map);
 
-    map.insert(QLatin1String(ROS_CMS_TARGET_KEY), m_target);
-    map.insert(QLatin1String(ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY), m_catkinMakeArguments);
-    map.insert(QLatin1String(ROS_CMS_CMAKE_ARGUMENTS_KEY), m_cmakeArguments);
-    map.insert(QLatin1String(ROS_CMS_MAKE_ARGUMENTS_KEY), m_makeArguments);
-    return map;
+    map.insert(ROS_CMS_TARGET_KEY, m_target);
+    map.insert(ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY, m_catkinMakeArguments);
+    map.insert(ROS_CMS_CMAKE_ARGUMENTS_KEY, m_cmakeArguments);
+    map.insert(ROS_CMS_MAKE_ARGUMENTS_KEY, m_makeArguments);
 }
 
-bool ROSCatkinMakeStep::fromMap(const QVariantMap &map)
+void ROSCatkinMakeStep::fromMap(const Utils::Store &map)
 {
-    m_target = (BuildTargets)map.value(QLatin1String(ROS_CMS_TARGET_KEY)).toInt();
-    m_catkinMakeArguments = map.value(QLatin1String(ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY)).toString();
-    m_cmakeArguments = map.value(QLatin1String(ROS_CMS_CMAKE_ARGUMENTS_KEY)).toString();
-    m_makeArguments = map.value(QLatin1String(ROS_CMS_MAKE_ARGUMENTS_KEY)).toString();
+    m_target = (BuildTargets)map.value(ROS_CMS_TARGET_KEY).toInt();
+    m_catkinMakeArguments = map.value(ROS_CMS_CATKIN_MAKE_ARGUMENTS_KEY).toString();
+    m_cmakeArguments = map.value(ROS_CMS_CMAKE_ARGUMENTS_KEY).toString();
+    m_makeArguments = map.value(ROS_CMS_MAKE_ARGUMENTS_KEY).toString();
 
-    return BuildStep::fromMap(map);
+    BuildStep::fromMap(map);
 }
 
 QWidget *ROSCatkinMakeStep::createConfigWidget()

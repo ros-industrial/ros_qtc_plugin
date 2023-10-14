@@ -56,8 +56,8 @@ public:
     virtual bool runInGuiThread() const;
     virtual void cancel();
 
-    bool fromMap(const QVariantMap &map) override;
-    QVariantMap toMap() const override;
+    void fromMap(const Utils::Store &map) override;
+    void toMap(Utils::Store &map) const override;
 
     bool enabled() const;
     void setEnabled(bool b);
@@ -102,7 +102,7 @@ public:
     RunStepInfo stepInfo() const;
     Utils::Id stepId() const;
     RunStep *create(RunStepList *parent, Utils::Id id);
-    RunStep *restore(RunStepList *parent, const QVariantMap &map);
+    RunStep *restore(RunStepList *parent, const Utils::Store &map);
 
     bool canHandle(RunStepList *rsl) const;
 
@@ -182,8 +182,8 @@ public:
 
     ProjectExplorer::Target *target() const;
 
-    virtual QVariantMap toMap() const override;
-    bool fromMap(const QVariantMap &map) override;
+    virtual void toMap(Utils::Store &map) const override;
+    void fromMap(const Utils::Store &map) override;
 
 signals:
     void stepInserted(int position);

@@ -128,9 +128,9 @@ void ROSGenericRunStep::run()
 #endif
 }
 
-QVariantMap ROSGenericRunStep::toMap() const
+void ROSGenericRunStep::toMap(Utils::Store &map) const
 {
-    QVariantMap map(RunStep::toMap());
+    RunStep::toMap(map);
 
     map.insert(ROS_GENERIC_COMMAND_KEY, m_command);
     map.insert(ROS_GENERIC_PACKAGE_KEY, m_package);
@@ -139,10 +139,9 @@ QVariantMap ROSGenericRunStep::toMap() const
     map.insert(ROS_GENERIC_TARGET_PATH_KEY, m_targetPath);
     map.insert(ROS_GENERIC_ARGUMENTS_KEY, m_arguments);
     map.insert(ROS_GENERIC_DEBUG_CONTINUE_ON_ATTACH_KEY, m_debugContinueOnAttach);
-    return map;
 }
 
-bool ROSGenericRunStep::fromMap(const QVariantMap &map)
+void ROSGenericRunStep::fromMap(const Utils::Store &map)
 {
     m_command = map.value(ROS_GENERIC_COMMAND_KEY).toString();
     m_package = map.value(ROS_GENERIC_PACKAGE_KEY).toString();
@@ -152,7 +151,7 @@ bool ROSGenericRunStep::fromMap(const QVariantMap &map)
     m_arguments = map.value(ROS_GENERIC_ARGUMENTS_KEY).toString();
     m_debugContinueOnAttach = map.value(ROS_GENERIC_DEBUG_CONTINUE_ON_ATTACH_KEY).toBool();
 
-    return RunStep::fromMap(map);
+    RunStep::fromMap(map);
 }
 
 ROSRunConfiguration *ROSGenericRunStep::rosRunConfiguration() const

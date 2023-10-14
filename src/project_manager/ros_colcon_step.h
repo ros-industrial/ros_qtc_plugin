@@ -60,11 +60,11 @@ public:
     QString allArguments(ROSUtils::BuildType buildType, bool includeDefault = true) const;
     Utils::CommandLine makeCommand(const QString &args) const;
 
-    QVariantMap toMap() const override;
+    void toMap(Utils::Store &map) const override;
 
 protected:
     QStringList automaticallyAddedArguments() const;
-    bool fromMap(const QVariantMap &map) override;
+    void fromMap(const Utils::Store &map) override;
     QWidget *createConfigWidget() override;
 
 private:

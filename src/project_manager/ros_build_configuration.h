@@ -68,7 +68,7 @@ public:
 
     BuildType buildType() const override;
 
-    QVariantMap toMap() const override;
+    void toMap(Utils::Store &map) const override;
 
     ROSUtils::BuildSystem rosBuildSystem() const;
     void setBuildSystem(const ROSUtils::BuildSystem &buildSystem);
@@ -87,7 +87,7 @@ signals:
     void cmakeBuildTypeChanged(const ROSUtils::BuildType &buildType);
 
 protected:
-    bool fromMap(const QVariantMap &map) override;
+    void fromMap(const Utils::Store &map) override;
 
     friend class ROSBuildSettingsWidget;
 

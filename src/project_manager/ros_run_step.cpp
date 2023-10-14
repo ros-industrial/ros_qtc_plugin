@@ -147,16 +147,12 @@ RunStep *RunStepFactory::create(RunStepList *parent, Utils::Id id)
     return rs;
 }
 
-RunStep *RunStepFactory::restore(RunStepList *parent, const QVariantMap &map)
+RunStep *RunStepFactory::restore(RunStepList *parent, const Utils::Store &map)
 {
     RunStep *rs = m_info.creator(parent);
     if (!rs)
         return nullptr;
-    if (!rs->fromMap(map)) {
-        QTC_CHECK(false);
-        delete rs;
-        return nullptr;
-    }
+    rs->fromMap(map);
     return rs;
 }
 
@@ -172,17 +168,16 @@ RunStep::RunStep(RunStepList *rsl, Utils::Id id) :
     //
 }
 
-bool RunStep::fromMap(const QVariantMap &map)
+void RunStep::fromMap(const Utils::Store &map)
 {
     m_enabled = map.value(runStepEnabledKey, true).toBool();
-    return ProjectConfiguration::fromMap(map);
+    ProjectConfiguration::fromMap(map);
 }
 
-QVariantMap RunStep::toMap() const
+void RunStep::toMap(Utils::Store &map) const
 {
-    QVariantMap map = ProjectConfiguration::toMap();
+    ProjectConfiguration::toMap(map);
     map.insert(runStepEnabledKey, m_enabled);
-    return map;
 }
 
 ProjectExplorer::RunConfiguration *RunStep::runConfiguration() const
@@ -268,15 +263,18 @@ void RunStepList::clear()
     m_steps.clear();
 }
 
-QVariantMap RunStepList::toMap() const
+void RunStepList::toMap(Utils::Store &map) const
 {
-    QVariantMap map(ProjectConfiguration::toMap());
+    ProjectConfiguration::toMap(map);
     // Save run steps
-    map.insert(QString::fromLatin1(STEPS_COUNT_KEY), m_steps.count());
-    for (int i = 0; i < m_steps.count(); ++i)
-        map.insert(QString::fromLatin1(STEPS_PREFIX) + QString::number(i), m_steps.at(i)->toMap());
+    map.insert(STEPS_COUNT_KEY, m_steps.count());
+    for (int i = 0; i < m_steps.count(); ++i) {
+        const Utils::Key key_step = (QString(STEPS_PREFIX) + QString::number(i)).toUtf8();
+        Utils::Store map_step;
+        m_steps.at(i)->toMap(map_step);
+        map.insert(key_step, Utils::variantFromStore(map_step));
+    }
 
-    return map;
 }
 
 int RunStepList::count() const
@@ -305,18 +303,18 @@ bool RunStepList::enabled() const
     return false;
 }
 
-bool RunStepList::fromMap(const QVariantMap &map)
+void RunStepList::fromMap(const Utils::Store &map)
 {
     clear();
 
     // We need the ID set before trying to restore the steps!
-    if (!ProjectConfiguration::fromMap(map))
-        return false;
+    ProjectConfiguration::fromMap(map);
 
     const QList<RunStepFactory *> factories = RunStepFactory::allRunStepFactories();
-    int maxSteps = map.value(QString::fromLatin1(STEPS_COUNT_KEY), 0).toInt();
+    int maxSteps = map.value(STEPS_COUNT_KEY, 0).toInt();
     for (int i = 0; i < maxSteps; ++i) {
-        QVariantMap rsData(map.value(QString::fromLatin1(STEPS_PREFIX) + QString::number(i)).toMap());
+        const Utils::Key key_step = (QString(STEPS_PREFIX) + QString::number(i)).toUtf8();
+        Utils::Store rsData = Utils::storeFromVariant(map.value(key_step).toMap());
         if (rsData.isEmpty()) {
             Core::MessageManager::writeSilently(tr("[ROS Warning] No step data found for step %1 (continuing).").arg(i));
             continue;
@@ -337,7 +335,6 @@ bool RunStepList::fromMap(const QVariantMap &map)
         }
         QTC_ASSERT(handled, qDebug() << "No factory for run step" << stepId.toString() << "found.");
     }
-    return true;
 }
 
 void RunStepList::runStep_enabledChanged(RunStep *step)

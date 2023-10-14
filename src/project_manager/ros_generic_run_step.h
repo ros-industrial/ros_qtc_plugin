@@ -45,7 +45,7 @@ public:
 
     RunStepConfigWidget *createConfigWidget() override;
 
-    QVariantMap toMap() const override;
+    void toMap(Utils::Store &map) const override;
 
     ROSRunConfiguration *rosRunConfiguration() const;
     ROSRunConfiguration *targetsActiveRunConfiguration() const;
@@ -67,7 +67,7 @@ public:
     virtual void setDebugContinueOnAttach(const bool &contOnAttach);
 
 protected:
-    bool fromMap(const QVariantMap &map) override;
+    void fromMap(const Utils::Store &map) override;
 
     virtual QMap<QString, QString> getAvailableTargets() { return QMap<QString, QString>(); }
 
