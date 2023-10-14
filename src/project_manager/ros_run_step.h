@@ -143,7 +143,7 @@ class RunStepList : public ProjectExplorer::ProjectConfiguration
     Q_OBJECT
 
 public:
-    RunStepList(QObject *parent, Utils::Id id);
+    RunStepList(ProjectExplorer::Target *target, Utils::Id id);
     ~RunStepList() override;
 
     void clear();
