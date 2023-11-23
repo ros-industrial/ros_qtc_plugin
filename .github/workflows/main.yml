@@ -15,7 +15,7 @@ jobs:
     outputs:
       archive_name: ${{ steps.find_plugin_archive.outputs.archive_name }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v4
         with:
