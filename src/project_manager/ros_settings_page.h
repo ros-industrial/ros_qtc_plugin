@@ -84,9 +84,9 @@ public:
     explicit ROSSettingsPage(QSharedPointer<ROSSettings> &settings,
                              QObject *parent = nullptr);
 
-    QWidget *widget();
-    void apply();
-    void finish();
+    QWidget *widget() override;
+    void apply() override;
+    void finish() override;
 
 private:
     const QSharedPointer<ROSSettings> m_settings;

@@ -54,7 +54,7 @@ public:
 
     virtual bool immutable() const;
     virtual bool runInGuiThread() const;
-    virtual void cancel();
+    virtual void cancel() override;
 
     void fromMap(const Utils::Store &map) override;
     void toMap(Utils::Store &map) const override;
