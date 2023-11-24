@@ -50,8 +50,8 @@ class ToolWidget : public Utils::FadingPanel
 public:
     ToolWidget(QWidget *parent = 0);
 
-    void fadeTo(qreal value);
-    void setOpacity(qreal value);
+    void fadeTo(qreal value) override;
+    void setOpacity(qreal value) override;
 
     void setRunStepEnabled(bool b);
     void setUpEnabled(bool b);

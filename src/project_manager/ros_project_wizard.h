@@ -59,7 +59,7 @@ public:
     explicit ROSImportWizardPage(QWidget *parent = 0);
     ~ROSImportWizardPage();
 
-    bool isComplete() const;
+    bool isComplete() const override;
 
     bool forceFirstCapitalLetterForFileName() const;
     void setForceFirstCapitalLetterForFileName(bool b);
