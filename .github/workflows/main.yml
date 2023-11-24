@@ -12,8 +12,6 @@ jobs:
           - { name: "Linux", os: ubuntu-20.04 }
           - { name: "Windows", os: windows-latest }
           - { name: "macOS", os: macos-latest }
-    outputs:
-      archive_name: ${{ steps.find_plugin_archive.outputs.archive_name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -89,63 +87,32 @@ jobs:
         run: |
           find build/ -maxdepth 1 -name 'ROSProjectManager-*-*-*.zip' -print0 | xargs -0 basename -a > ./archive_name
           echo "QTC_PLUGIN_ARCHIVE=`cat ./archive_name`" >> $GITHUB_ENV
+          echo "QTC_PLUGIN_ARCHIVE: `cat ./archive_name`"
+          file ./build/`cat ./archive_name`
+          file ./build/ROSProjectManager-*-*-*.zip
 
       - name: upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: plugin_archive_artifact_${{ matrix.config.name }}
+          name: plugin_archive_artifact
           if-no-files-found: error
           path: |
-            ./build/${{ env.QTC_PLUGIN_ARCHIVE }}
-            ./archive_name
+            ./build/ROSProjectManager-*-*-*.zip
 
   release:
     name: create release
     if: contains(github.ref, '/tags/')
     runs-on: ubuntu-latest
     needs: build
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-    steps:
-      - name: create release
-        uses: actions/create-release@v1
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
-
-  publish:
-    name: publish plugin archive (${{ matrix.name }})
-    if: contains(github.ref, '/tags/')
-    runs-on: ubuntu-latest
-    needs: [build, release]
-    strategy:
-      matrix:
-        name:
-          - Linux
-          - Windows
-          - macOS
     steps:
       - name: download artifact
         uses: actions/download-artifact@v3
         with:
-          name: plugin_archive_artifact_${{ matrix.name }}
+          name: plugin_archive_artifact
           path: ./
 
-      - name: set archive name
-        shell: bash
-        run: echo "QTC_PLUGIN_ARCHIVE=`cat ./archive_name`" >> $GITHUB_ENV
-
-      - name: upload archive release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: create release
+        uses: ncipollo/release-action@v1
+        id: create_release
         with:
-          upload_url: ${{needs.release.outputs.upload_url}}
-          asset_path: ./build/${{ env.QTC_PLUGIN_ARCHIVE }}
-          asset_name: ${{ env.QTC_PLUGIN_ARCHIVE }}
-          asset_content_type: application/zip
+          artifacts: ROSProjectManager-*-*-*.zip
