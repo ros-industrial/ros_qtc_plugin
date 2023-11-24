@@ -444,7 +444,7 @@ void ROSProject::asyncUpdateCppCodeModel(bool success)
 
 void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
                                    const Utils::FilePath projectFilePath,
-                                   const QStringList workspaceFiles,
+                                   const QStringList /*workspaceFiles*/,
                                    const Kit *k,
                                    const Utils::Environment &env,
                                    const ROSUtils::PackageInfoMap wsPackageInfo,
