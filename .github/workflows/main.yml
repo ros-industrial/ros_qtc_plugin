@@ -92,9 +92,9 @@ jobs:
           file ./build/ROSProjectManager-*-*-*.zip
 
       - name: upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: plugin_archive_artifact
+          name: plugin_archive_artifact_${{ matrix.config.name }}
           if-no-files-found: error
           path: |
             ./build/ROSProjectManager-*-*-*.zip
@@ -106,9 +106,10 @@ jobs:
     needs: build
     steps:
       - name: download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: plugin_archive_artifact
+          pattern: plugin_archive_artifact_*
+          merge-multiple: true
           path: ./
 
       - name: create release
