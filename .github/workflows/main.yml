@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: "3.x"
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         if: runner.os == 'Windows'
 
       - name: install Microsoft Visual C++ (Windows)
