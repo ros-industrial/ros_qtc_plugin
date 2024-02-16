@@ -67,14 +67,14 @@ ROSRunConfiguration::ROSRunConfiguration(Target *target, Utils::Id id) :
 }
 
 
-QString ROSRunConfiguration::disabledReason() const
+QString ROSRunConfiguration::disabledReason(Utils::Id runMode) const
 {
   QString output;
-  output = RunConfiguration::disabledReason();
+  output = RunConfiguration::disabledReason(runMode);
 
   if (output.isEmpty())
   {
-    if (!isEnabled())
+    if (!isEnabled(runMode))
         output = tr("No ROS run step for active project.");
   }
 
