@@ -481,7 +481,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
     ProjectExplorer::RawProjectParts rpps;
 
-    const ToolChain *cxxToolChain = ToolChainKitAspect::cxxToolChain(k);
+    const Toolchain *cxxToolChain = ToolchainKitAspect::cxxToolchain(k);
 
     if (cxxToolChain)
     {

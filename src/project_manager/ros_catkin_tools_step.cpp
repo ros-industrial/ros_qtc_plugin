@@ -102,7 +102,7 @@ bool ROSCatkinToolsStep::init()
     if (!bc)
         bc = targetsActiveBuildConfiguration();
 
-    ToolChain *tc = ToolChainKitAspect::toolChain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+    Toolchain *tc = ToolchainKitAspect::toolchain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
     if (!tc)
         emit addTask(Task::compilerMissingTask());
