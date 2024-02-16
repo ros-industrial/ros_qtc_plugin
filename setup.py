@@ -34,12 +34,13 @@ arch_bits = {"x86": "32",
              "x64": "64"}
 
 def download_check_fail(url, expected_type):
+    print("download URL:", url, flush=True)
     response = requests.get(url, allow_redirects=True, timeout=1800)
     if not response.ok:
         raise RuntimeError("error retrieving "+response.url)
     if response.headers.get('content-type') != expected_type:
         print("Warning: invalid content type, expected '{}', got '{}'".format(
-            expected_type, response.headers.get('content-type')))
+            expected_type, response.headers.get('content-type')), flush=True)
     return response
 
 def read_downloadable_archives(package):
@@ -85,8 +86,6 @@ def qtc_download_check_extract(cfg, dir_install):
 
     for archive_name in archive_names:
         url_archive = base_url+"/"+archive_name
-
-        print("download", url_archive)
 
         content = download_check_fail(url_archive, "application/x-7z-compressed").content
 
@@ -161,8 +160,6 @@ def qt_download_check_extract(cfg, dir_install):
 
     for package_name, package_version, archive_name in archives_match:
         url_archive = base_url+'/'+package_name+'/'+package_version+archive_name
-
-        print("download", url_archive)
 
         content = download_check_fail(url_archive, "application/x-7z-compressed").content
 
