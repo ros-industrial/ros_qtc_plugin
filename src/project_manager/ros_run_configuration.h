@@ -53,7 +53,7 @@ public:
     ROSRunConfiguration(ProjectExplorer::Target *target, Utils::Id id);
 
     // RunConfiguration
-    QString disabledReason() const override;
+    QString disabledReason(Utils::Id runMode) const override;
 
     RunStepList *stepList() const;
 
