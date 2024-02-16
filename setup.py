@@ -34,7 +34,7 @@ arch_bits = {"x86": "32",
              "x64": "64"}
 
 def download_check_fail(url, expected_type):
-    response = requests.get(url, allow_redirects=True)
+    response = requests.get(url, allow_redirects=True, timeout=1800)
     if not response.ok:
         raise RuntimeError("error retrieving "+response.url)
     if response.headers.get('content-type') != expected_type:
