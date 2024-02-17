@@ -18,22 +18,32 @@ url_repo_qtc_fmt = "https://download.qt.io/{release_type}_releases/qtcreator/{qt
 
 url_repo_qt_fmt = "https://download.qt.io/online/qtsdkrepository/{os}_{arch}/desktop/qt{ver_maj}_{ver_concat}/"
 
-os_map = {"Linux": "linux",
-          "Windows": "windows",
-          "Darwin": "mac"}
+os_map = {
+    "Linux": "linux",
+    "Windows": "windows",
+    "Darwin": "mac",
+}
 
-arch_map = {"i386": "x86",
-            "i686": "x86",
-            "x86": "x86",
-            "x86_64": "x64",
-            "AMD64": "x64"}
+arch_map = {
+    "i386": "x86",
+    "i686": "x86",
+    "x86": "x86",
+    "x86_64": "x64",
+    "AMD64": "x64",
+    "aarch64": "arm64",
+}
 
-os_compiler = {"Linux": "gcc",
-               "Windows": "msvc2019",
-               "Darwin": "clang"}
+os_compiler = {
+    "Linux": "gcc",
+    "Windows": "msvc2019",
+    "Darwin": "clang",
+}
 
-arch_bits = {"x86": "32",
-             "x64": "64"}
+arch_bits = {
+    "x86": "32",
+    "x64": "64",
+    "arm64": "64",
+}
 
 def download_check_fail(url, expected_type):
     print("download URL:", url, flush=True)
