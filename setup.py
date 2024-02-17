@@ -191,6 +191,9 @@ def qt_download_check_extract(cfg, dir_install):
                 if archive_name.startswith(module_name):
                     archives_match.append([package_name, data["version"], archive_name])
 
+    if not archives_match:
+        raise RuntimeError(f"no matches for Qt modules ({cfg['versions']['qt_modules']}) found")
+
     for package_name, package_version, archive_name in archives_match:
         url_archive = base_url+'/'+package_name+'/'+package_version+archive_name
 
