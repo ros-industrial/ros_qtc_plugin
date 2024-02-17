@@ -11,6 +11,8 @@ from xml.etree import ElementTree
 import py7zr
 import requests
 import yaml
+from tqdm_loggable.auto import tqdm
+
 
 url_repo_qtc_fmt = "https://download.qt.io/{release_type}_releases/qtcreator/{qtcv_maj}/{qtcv_full}/installer_source/{os}_{arch}/"
 
@@ -46,6 +48,27 @@ def download_check_fail(url, expected_type):
 def read_downloadable_archives(package):
     archive_names = io.StringIO(package.find("DownloadableArchives").text)
     return list(csv.reader(archive_names, delimiter=',', skipinitialspace=True))[0]
+
+def extract_progress(archive_bytes, archive_name, destination_path):
+    class ExtractProgressBar(py7zr.callbacks.ExtractCallback, tqdm):
+        def __init__(self, *args, total_bytes, **kwargs):
+            super().__init__(self, *args, total=total_bytes, **kwargs)
+        def report_start_preparation(self):
+            pass
+        def report_start(self, processing_file_path, processing_bytes):
+            pass
+        def report_end(self, processing_file_path, wrote_bytes):
+            self.update(int(wrote_bytes))
+        def report_postprocess(self):
+            self.update(int(self.total))
+        def report_warning(self, message):
+            pass
+
+    with py7zr.SevenZipFile(io.BytesIO(archive_bytes)) as zf:
+        with ExtractProgressBar(unit='B', unit_scale=True, miniters=1,
+                                total_bytes=sum([f.uncompressed for f in zf.files]),
+                                desc=archive_name) as cb_progress:
+            zf.extractall(path=destination_path, callback=cb_progress)
 
 def qtc_download_check_extract(cfg, dir_install):
     # if the Qt Creator version contains '-beta' or '-rc' we have to
@@ -92,7 +115,7 @@ def qtc_download_check_extract(cfg, dir_install):
         if md5sums[archive_name] != hashlib.md5(content).hexdigest():
             raise RuntimeError(archive_name+" MD5 hash sum does not match")
 
-        py7zr.SevenZipFile(io.BytesIO(content)).extractall(dir_install_qt)
+        extract_progress(content, archive_name, dir_install_qt)
 
     if cfg['os'] == "Darwin":
         dir_install_qt = os.path.join(dir_install_qt, "Qt Creator.app", "Contents", "Resources")
@@ -168,7 +191,7 @@ def qt_download_check_extract(cfg, dir_install):
         if sha1sum != hashlib.sha1(content).hexdigest():
             raise RuntimeError(archive_name+" SHA1 hash sum does not match")
 
-        py7zr.SevenZipFile(io.BytesIO(content)).extractall(dir_install)
+        extract_progress(content, archive_name, dir_install)
 
     qt_path = os.path.join(dir_install, "{}.{}.0".format(ver_maj, ver_min))
     qt_archs = os.listdir(qt_path)
