@@ -33,16 +33,18 @@ arch_map = {
     "aarch64": "arm64",
 }
 
-os_compiler = {
-    "Linux": "gcc",
-    "Windows": "msvc2019",
-    "Darwin": "clang",
-}
-
-arch_bits = {
-    "x86": "32",
-    "x64": "64",
-    "arm64": "64",
+os_arch_toolchain = {
+    "linux": {
+        "x64": "gcc_64",
+        "arm64": "linux_gcc_arm64",
+    },
+    "windows": {
+        "x64": "win64_msvc2019_64",
+        "arm64": "win64_msvc2019_arm64",
+    },
+    "mac": {
+        "x64": "clang_64",
+    },
 }
 
 def download_check_fail(url, expected_type):
@@ -156,21 +158,16 @@ def qt_download_check_extract(cfg, dir_install):
 
     metadata = ElementTree.fromstring(r.text)
 
-    compiler_bits = os_compiler[cfg['os']]+"_"+arch_bits[sys_arch]
-
-    if cfg['os'] == "Windows":
-        compiler = "win"+arch_bits[sys_arch]+"_"+compiler_bits
-    else:
-        compiler = compiler_bits
+    toolchain = os_arch_toolchain[sys_os][sys_arch]
 
     base_package_name = "qt.qt{ver_maj}.{ver_concat}.{compiler}".format(
         ver_maj = ver_maj, ver_concat = ver_concat,
-        compiler = compiler)
+        compiler = toolchain)
 
     extra_package_name = "qt.qt{ver_maj}.{ver_concat}.{module}.{compiler}".format(
         ver_maj = ver_maj, ver_concat = ver_concat,
         module = "{module}",
-        compiler = compiler)
+        compiler = toolchain)
 
     extra_package_names = list()
     for module in cfg['versions']['qt_modules']:
