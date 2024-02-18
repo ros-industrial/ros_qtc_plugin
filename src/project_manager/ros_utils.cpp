@@ -348,9 +348,12 @@ bool ROSUtils::generateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const R
     xmlFile.writeStartDocument();
     xmlFile.writeStartElement(QLatin1String("Workspace"));
 
-    xmlFile.writeStartElement(QLatin1String("Distribution"));
-    xmlFile.writeAttribute(QLatin1String("path"), content.distribution.toString());
-    xmlFile.writeEndElement();
+    if (!content.distribution.path().trimmed().isEmpty())
+    {
+        xmlFile.writeStartElement(QLatin1String("Distribution"));
+        xmlFile.writeAttribute(QLatin1String("path"), content.distribution.toString());
+        xmlFile.writeEndElement();
+    }
 
     xmlFile.writeStartElement(QLatin1String("DefaultBuildSystem"));
     xmlFile.writeAttribute(QLatin1String("value"), QString::number(content.defaultBuildSystem));
