@@ -407,7 +407,7 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FilePath &filePath, ROSP
                 }
                 else
                 {
-                    content.defaultBuildSystem = ROSUtils::CatkinMake;
+                    content.defaultBuildSystem = ROSUtils::Colcon;
                     Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Project file DefaultBuildSystem tag did not have a value attribute."));
                 }
 
