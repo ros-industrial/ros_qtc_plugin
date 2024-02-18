@@ -61,11 +61,8 @@ QString ROSUtils::buildTypeName(const ROSUtils::BuildType &buildType)
 
 bool ROSUtils::sourceROS(QProcess *process, const Utils::FilePath &rosDistribution)
 {
-  bool results = sourceWorkspaceHelper(process, Utils::FilePath(rosDistribution).pathAppended(QLatin1String("setup.bash")).toString());
-  if (!results)
-    Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Faild to source ROS Distribution: %1.").arg(rosDistribution.toString()));
-
-  return results;
+  sourceWorkspaceHelper(process, Utils::FilePath(rosDistribution).pathAppended(QLatin1String("setup.bash")).toString());
+  return true;
 }
 
 bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspaceInfo)
@@ -79,27 +76,26 @@ bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspace
 
     Utils::FilePath source_bash_file = sourcePath.pathAppended("setup.bash");
     Utils::FilePath source_shell_file = sourcePath.pathAppended("setup.sh");
+    QString source_path;
     if (source_bash_file.exists())
     {
         Core::MessageManager::writeSilently(QObject::tr("[ROS Debug] Sourced workspace: %1.").arg(source_bash_file.toString()));
-        if (sourceWorkspaceHelper(process, source_bash_file.toString()))
-            return true;
+        source_path = source_bash_file.toString();
     }
     else if (source_shell_file.exists())
     {
         // Some reason if a workspace does not contain at least one catkin package it does not generate a setup.bash only a setup.sh
         Core::MessageManager::writeSilently(QObject::tr("[ROS Debug] Sourced workspace: %1.").arg(source_shell_file.toString()));
-        if (sourceWorkspaceHelper(process, source_shell_file.toString()))
-            return true;
+        source_path = source_shell_file.toString();
     }
     else
     {
         Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to source workspace because either of these files do not exist: %1 or %2.").arg(source_bash_file.toString(), source_shell_file.toString()));
-        return true;
+        source_path = QString{};
     }
 
-    Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to source workspace: %1.").arg(workspaceInfo.path.toString()));
-    return false;
+    sourceWorkspaceHelper(process, source_path);
+    return true;
 }
 
 bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
@@ -319,27 +315,30 @@ QList<Utils::FilePath> ROSUtils::installedDistributions()
   return distributions;
 }
 
-bool ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
+void ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
 {
-  QStringList env_list;
-  QString cmd = QLatin1String("source ") + path + QLatin1String(" && env");
+  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 
-  process->start(QLatin1String("bash"), QStringList());
-  process->waitForStarted();
-  process->write(cmd.toLatin1());
-  process->closeWriteChannel();
-  process->waitForFinished();
-
-  if (process->exitStatus() != QProcess::CrashExit)
+  if (!path.isEmpty())
   {
-    QString output = QString::fromStdString(process->readAllStandardOutput().toStdString());
-    env_list = output.split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts);
+      const QString cmd = QLatin1String("source ") + path + QLatin1String(" && env");
+      process->start(QLatin1String("bash"), QStringList());
+      process->waitForStarted();
+      process->write(cmd.toLatin1());
+      process->closeWriteChannel();
+      process->waitForFinished();
 
-    Utils::Environment env(env_list);
-    process->setProcessEnvironment(env.toProcessEnvironment());
-    return true;
+      if (process->exitStatus() != QProcess::CrashExit)
+      {
+        while (process->canReadLine()) {
+            const QStringList env_kv = QString::fromLocal8Bit(process->readLine().trimmed())
+                                           .split('=', Qt::SkipEmptyParts);
+            env.insert(env_kv[0], env_kv[1]);
+        }
+      }
   }
-  return false;
+
+  process->setProcessEnvironment(env);
 }
 
 bool ROSUtils::generateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const ROSProjectFileContent &content)
