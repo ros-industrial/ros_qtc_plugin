@@ -481,7 +481,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
 
     ProjectExplorer::RawProjectParts rpps;
 
-    const ToolChain *cxxToolChain = ToolChainKitAspect::cxxToolChain(k);
+    const Toolchain *cxxToolChain = ToolchainKitAspect::cxxToolchain(k);
 
     if (cxxToolChain)
     {
@@ -551,7 +551,7 @@ void ROSProject::updateCppCodeModel()
     QtSupport::CppKitInfo kitInfo(this->activeTarget()->kit());
     QTC_ASSERT(kitInfo.isValid(), return);
 
-    m_cppCodeModelUpdater->update({this, kitInfo, rosBuildConfiguration()->environment(), m_futureBuildCodeModelWatcher.result().parts});
+    m_cppCodeModelUpdater->update({this, kitInfo, rosBuildConfiguration()->environment(), m_futureBuildCodeModelWatcher.result().parts}, {});
 
     m_asyncBuildCodeModelFutureInterface->reportFinished();
     delete m_asyncBuildCodeModelFutureInterface;
