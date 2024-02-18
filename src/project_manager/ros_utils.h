@@ -433,9 +433,8 @@ private:
      * @brief sourceWorkspaceHelper - Source workspace helper function
      * @param process - QProcess to execute source bash command
      * @param path - Path to workspace setup.bash
-     * @return True if successful
      */
-    static bool sourceWorkspaceHelper(QProcess *process, const QString &path);
+    static void sourceWorkspaceHelper(QProcess *process, const QString &path);
 
     /**
      * @brief This will parse the CodeBlock file and get the build info (incudes, Cxx Flags, etc.)
