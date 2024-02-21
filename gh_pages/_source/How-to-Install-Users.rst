@@ -7,149 +7,25 @@ This wiki explains the procedure for installing the ROS Qt Creator Plug-in.
 Installation
 ------------
 
-.. Important::
+Install the runtime dependencies `yaml-cpp` and `qtermwidget` via apt:
 
-   The install method has changed from using the ppa method to a custom installer. This is to enable the ability to provide richer support leveraging existing ros tools which was not possible using the ppa.
+.. code-block:: bash
 
-Installation Procedure for Ubuntu 18.04
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   sudo apt install '^(libyaml-cpp|libqtermwidget).*([^v]|[^e]v|[^d]ev|[^-]dev)$'
 
-#. Download Installer:
+Download the plugin archive from the `release page <https://github.com/ros-industrial/ros_qtc_plugin/releases/latest.>`_ and extract it into the root of a Qt Creator installation. Qt Creator can be installed via the official `online <https://www.qt.io/download-thank-you>`_ and `offline <https://www.qt.io/offline-installers>`_ installer. The Qt Creator root will be :code:`~/Qt/Tools/QtCreator` for the online installer and :code:`~/qtcreator-${version}` for the offline installer. The following script extracts the archive to the default online installer location:
 
-   #. `Bionic Online Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/bionic/qtcreator-ros-bionic-latest-online-installer.run>`_ (Recommended)
+.. code-block:: bash
 
-   #. `Bionic Offline Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/bionic/qtcreator-ros-bionic-latest-offline-installer.run>`_
+   sudo apt install libarchive-tools # needed for bsdtar
+   export QTC_ROOT=~/Qt/Tools/QtCreator # online installer
+   # export QTC_ROOT=~/qtcreator-5.0.0 # offline installer
+   export PLUGIN_URL=`curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*ROSProjectManager-.*-   Linux-.*.zip' | cut -d'"' -f 4`
+   curl -SL $PLUGIN_URL | bsdtar -xzf - -C $QTC_ROOT
 
-   .. Note::
+.. Note:: Qt Creator from the online installer may notify you about available updates and install them when instructed to do so. The plugin API is only compatible with patch updates. A major or minor update will break the plugin API and Qt Creator will then refuse to load the plugin. Make sure that a compatible plugin version is available before updating Qt Creator, since it is not possible to downgrade to an older Qt Creator version using the online installer. The offline installer installs a specific Qt Creator version and does not provide updates.
 
-      The Offline Installer is to be used on machines that do not have internet access.
+Verify
+------
 
-#. Next proceed to `Qt Installer Procedure`_
-
-Installation Procedure for Ubuntu 16.04
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#. Download Installer:
-
-   #. `Xenial Online Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/xenial/qtcreator-ros-xenial-latest-online-installer.run>`_ (Recommended)
-
-   #. `Xenial Offline Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/xenial/qtcreator-ros-xenial-latest-offline-installer.run>`_
-
-   .. Note::
-
-      The Offline Installer is to be used on machines that do not have internet access.
-
-#. Next proceed to `Qt Installer Procedure`_
-
-
-.. Important::
-
-   If previously installed using the ppa please follow the procedure below to remove old version.
-
-   .. code-block:: bash
-
-      sudo apt install ppa-purge
-      sudo ppa-purge -o beineri
-      sudo ppa-purge levi-armstrong/qt-libraries-xenial
-      sudo ppa-purge levi-armstrong/ppa
-
-   .. Warning::
-
-      The ppa-purge removes everything installed from the ppa, so if the ppa is used for other development do not purge.
-
-
-Installation Procedure for Ubuntu 14.04
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#. Download Installer:
-
-   #. `Trusty Online Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/trusty/qtcreator-ros-trusty-latest-online-installer.run>`_ (Recommended)
-
-   #. `Trusty Offline Installer <https://qtcreator-ros.datasys.swri.edu/downloads/installers/trusty/qtcreator-ros-trusty-latest-offline-installer.run>`_
-
-   .. Note::
-
-      The Offline Installer is to be used on machines that do not have internet access.
-
-#. Next proceed to `Qt Installer Procedure`_
-
-.. Important::
-
-   If previously installed using the ppa please follow the procedure below to remove old version.
-
-   .. code-block:: bash
-
-      sudo apt install ppa-purge
-      sudo ppa-purge -o beineri
-      sudo ppa-purge levi-armstrong/qt-libraries-xenial
-      sudo ppa-purge levi-armstrong/ppa
-
-   .. Warning::
-
-      The ppa-purge removes everything installed from the ppa, so if the ppa is used for other development do not purge.
-
-Archived Versions
-~~~~~~~~~~~~~~~~~
-
-If for some reason you need a version other than the latest, all installers may be found `here <https://qtcreator-ros.datasys.swri.edu/downloads/installers/>`_.
-
-
-Qt Installer Procedure
-~~~~~~~~~~~~~~~~~~~~~~
-
-#. Then right click on the installer file, select properties and enable execution under permissions.
-
-#. Next double click the installer and it should open and step throught the installer.
-
-
-   .. image:: ../_static/installer_page_1.png
-
-|
-
-   .. image:: ../_static/installer_page_2.png
-
-|
-
-   .. image:: ../_static/installer_page_3.png
-
-|
-
-   .. image:: ../_static/installer_page_4.png
-
-|
-
-   .. image:: ../_static/installer_page_5.png
-
-|
-
-   .. image:: ../_static/installer_page_6.png
-
-|
-
-   .. image:: ../_static/installer_page_7.png
-
-|
-
-#. How to get future updates, open Qt Creator and on the menubar under Help select **"Check for Updates"**.
-
-   .. image:: ../_static/get_updates.png
-
-
-Installation Issues and Conflicts
----------------------------------
-
-* No known issues
-
-Testing Plugin.
----------------
-
-#. Start Qt Creator
-
-   * Option 1: Launch using the desktop icon.
-   * Option 2: Launch from terminal.
-
-     .. code-block:: bash
-
-        qtcreator-ros
-
-#. To verify that the plugin exist, goto File>New File or Project>Projects>Other Project>ROS Workspace. If the ROS Workspace is present then everything built correctly and is ready for development and testing.
+Open Qt Creator and goto File>New File or Project>Projects>Other Project>ROS Workspace. If the ROS Workspace is present then everything installed correctly and is ready for development and testing.
