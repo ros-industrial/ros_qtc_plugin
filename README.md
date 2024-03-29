@@ -51,7 +51,7 @@ sudo apt install libgl1-mesa-dev ninja-build libyaml-cpp-dev libqtermwidget5-0-d
 
 To use the `setup.py` script, you will need additional python dependencies:
 ```bash
-pip install pyyaml requests py7zr
+pip install pyyaml requests py7zr==0.21
 ```
 
 ## Build
