@@ -177,7 +177,7 @@ ROSProject *ROSBuildConfiguration::project()
 
 void ROSBuildConfiguration::updateQtEnvironment(const Utils::Environment &env)
 {
-    const Utils::NameValueItems diff = baseEnvironment().diff(env);
+    const Utils::EnvironmentItems diff = baseEnvironment().diff(env);
     if (!diff.isEmpty())
       setUserEnvironmentChanges(diff);
 }
