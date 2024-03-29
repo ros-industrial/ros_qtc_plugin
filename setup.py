@@ -69,6 +69,8 @@ def extract_progress(archive_bytes, archive_name, destination_path):
             pass
         def report_start(self, processing_file_path, processing_bytes):
             pass
+        def report_update(self, decompressed_bytes):
+            pass
         def report_end(self, processing_file_path, wrote_bytes):
             self.update(int(wrote_bytes))
         def report_postprocess(self):
