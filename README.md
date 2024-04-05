@@ -22,7 +22,9 @@ The ROS Qt Creator Plug-in provides the following capabilities:
    * Basic URDF File
    * Basic Node File
 
-## Installation
+## Installation (Binary)
+
+### Snap with Qt Creator and Plugin
 
 [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/qtcreator-ros)
 
@@ -31,57 +33,73 @@ You can install Qt Creator with the ROS corresponding plugin via the [snap store
 sudo snap install qtcreator-ros --classic
 ```
 
-To install the plugin manually, use the released plugin archives as described in [Plugin Installation](#plugin-installation). To build the plugin from scratch, e.g. for unreleased Qt Creator versions, just follow the build instructions below.
+### Manual Qt Creator and Plugin Installation
 
-## Dependencies
+Qt Creator can be installed via the official [online](https://www.qt.io/download-thank-you) and [offline](https://www.qt.io/offline-installers) installer.
 
-To build the Qt Creator plugin, you will need Qt Creator, the matching "Plugin Development" package and a recent Qt version. These can be installed either via the official binary installer of via the `setup.py` script. The latter method allows you to adjust the target Qt Creator version via `versions.yaml`.
+Download the plugin archive from the [release page](https://github.com/ros-industrial/ros_qtc_plugin/releases/latest) and extract it into the root of a Qt Creator installation. The Qt Creator root will be `~/Qt/Tools/QtCreator` for the online installer and `~/qtcreator-${version}` for the offline installer.
+
+ The following script extracts the archive to the default online installer location:
+```bash
+sudo apt install libarchive-tools # needed for bsdtar
+curl -SL $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*ROSProjectManager-.*-Linux-.*.zip' | cut -d'"' -f 4) | bsdtar -xzf - -C ~/Qt/Tools/QtCreator
+```
+
+Note: Qt Creator from the online installer may notify you about available updates and install them when instructed to do so. The plugin API is only compatible with patch-level updates. A major or minor update will break the plugin API and Qt Creator will then refuse to load the plugin. Make sure that a compatible plugin version is available before updating Qt Creator as it is not possible to downgrade to an older Qt Creator version using the online installer. The offline installer installs a specific Qt Creator version and does not provide updates.
+
+## Build (Source)
+
+### Dependencies
+
+To build the Qt Creator plugin, you will need Qt Creator, the matching "Plugin Development" package and a recent Qt version. These can be installed either via the official binary installer or via the [`setup.py`](setup.py) script. The latter method allows you to adjust the target Qt Creator version via [`versions.yaml`](versions.yaml).
 
 Additionally, you need:
 - OpenGL development libraries
 - ninja for building
 - yaml-cpp
-- qtermwidget
 - utf8proc
 
-The can be installed via apt on Ubuntu:
+The dependencies can be installed via apt on Ubuntu:
 ```bash
-sudo apt install libgl1-mesa-dev ninja-build libyaml-cpp-dev libqtermwidget5-0-dev libutf8proc-dev
+sudo apt install libgl1-mesa-dev ninja-build libyaml-cpp-dev libutf8proc-dev
 ```
 
-To use the `setup.py` script, you will need additional python dependencies:
+The `setup.py` script needs additional Python dependencies:
 ```bash
 pip install pyyaml requests py7zr==0.21
 ```
 
-## Build
-
-If Qt Creator and the Plugin Development package are not installed in one of the default folders, you have to tell CMake via `CMAKE_PREFIX_PATH` where those can be found.
-
-When using the official Qt binary installer with the default installation path, this is:
-```bash
-cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="~/Qt/Tools/QtCreator/;~/Qt/5.15.2/gcc_64"
+Install Qt Creator, its development files and Qt to a folder of your choice:
+```sh
+./setup.py --install_path ~/Downloads/
 ```
-When using the `setup.py` script, the script will show the installation path (which can be adjusted using `--install_path`) and the compile commands. On `x86_64` Linux with the default path, this is:
-```bash
-cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="/tmp/qtc_sdk/Tools/QtCreator;/tmp/qtc_sdk/5.15.0/gcc_64"
-```
+The script will print the CMake commands for building the plugin and create an archive.
 
-Finally, compile the plugin and create an archive:
-```bash
+### Build the Plugin Archive
+
+If Qt Creator and the Plugin Development package are not installed in one of the default folders, you have to tell CMake via `CMAKE_PREFIX_PATH` where those can be found. With the `setup.py` command above, this could be (adjust `CMAKE_PREFIX_PATH` and the Qt version if necessary):
+```sh
+cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="~/Downloads/qtc-sdk/Tools/QtCreator;~/Downloads/qtc-sdk/6.6.0/gcc_64"
 cmake --build build --target package
 ```
-This will create an archive of the format `ROSProjectManager-${version}-Linux-${arch}.zip` inside the build folder (`build` by default). This archive can either be imported by Qt Creator via Help → About Plugins… → Install Plugin… or alternatively extracted directly to `~/Qt/Tools/QtCreator/`.
+This will create the plugin archive `ROSProjectManager-${version}-Linux-${arch}.zip` inside the build folder (`build` by default). This archive has to be extracted to the Qt Creator root path (e.g. `~/Qt/Tools/QtCreator/` for the online installer version).
 
-## Plugin Installation
+### Development & Debugging
 
-Download the plugin archive from the [release page](https://github.com/ros-industrial/ros_qtc_plugin/releases/latest) and extract it into the root of a Qt Creator installation. Qt Creator can be installed via the official [online](https://www.qt.io/download-thank-you) and [offline](https://www.qt.io/offline-installers) installer. The Qt Creator root will be `~/Qt/Tools/QtCreator` for the online installer and `~/qtcreator-${version}` for the offline installer. The following script extracts the archive to the default online installer location:
-```bash
-sudo apt install libarchive-tools # needed for bsdtar
-export QTC_ROOT=~/Qt/Tools/QtCreator # online installer
-# export QTC_ROOT=~/qtcreator-6.0.0 # offline installer
-export PLUGIN_URL=`curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*ROSProjectManager-.*-Linux-.*.zip' | cut -d'"' -f 4`
-curl -SL $PLUGIN_URL | bsdtar -xzf - -C $QTC_ROOT
+To develop on the plugin and test changes iteratively, build the plugin in `Debug` mode and skip creating the plugin archive:
+```sh
+cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="~/Downloads/qtc-sdk/Tools/QtCreator;~/Downloads/qtc-sdk/6.6.0/gcc_64"
+cmake --build build
+```
+This creates a shared plugin library at `build/lib/qtcreator/plugins/libROSProjectManager.so`.
+
+To test the changes to the plugin, launch Qt Creator and point it to the location of the compiled plugin:
+```sh
+~/Downloads/qtc-sdk/Tools/QtCreator/bin/qtcreator -pluginpath build/lib/qtcreator/plugins/
+```
+To debug the plugin with `gdb`, prefix the above command with `gdb --ex=r --args`:
+```sh
+gdb --ex=r --args ~/Downloads/qtc-sdk/Tools/QtCreator/bin/qtcreator -pluginpath build/lib/qtcreator/plugins/
 ```
 
-Note: Qt Creator from the online installer may notify you about available updates and install them when instructed to do so. The plugin API is only compatible with patch updates. A major or minor update will break the plugin API and Qt Creator will then refuse to load the plugin. Make sure that a compatible plugin version is available before updating Qt Creator, since it is not possible to downgrade to an older Qt Creator version using the online installer. The offline installer installs a specific Qt Creator version and does not provide updates.
+To further debug the inner workings of Qt Creator, you have to install the Qt Creator "Debug Symbols". If you are using the online installer, those are available via the "Qt Maintenance Tool".
