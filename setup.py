@@ -230,7 +230,9 @@ if __name__ == "__main__":
 
     dir_install = args.install_path
     if not dir_install:
-        dir_install = os.path.join(tempfile.gettempdir(), "qtc_sdk")
+        dir_install = os.path.join(tempfile.gettempdir())
+
+    dir_install = os.path.join(dir_install, "qtc-sdk")
 
     os.makedirs(dir_install, exist_ok=True)
 
