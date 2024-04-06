@@ -331,8 +331,7 @@ void ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
       if (process->exitStatus() != QProcess::CrashExit)
       {
         while (process->canReadLine()) {
-            const QStringList env_kv = QString::fromLocal8Bit(process->readLine().trimmed())
-                                           .split('=', Qt::SkipEmptyParts);
+            const QStringList env_kv = QString::fromLocal8Bit(process->readLine().trimmed()).split('=');
             env.insert(env_kv[0], env_kv[1]);
         }
       }
