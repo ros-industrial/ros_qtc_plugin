@@ -35,7 +35,7 @@ sudo snap install qtcreator-ros --classic
 
 ### Manual Qt Creator and Plugin Installation
 
-Qt Creator can be installed via the official [online](https://www.qt.io/download-thank-you) and [offline](https://www.qt.io/offline-installers) installer.
+Qt Creator can be installed via the official [online](https://www.qt.io/download-qt-installer-oss) and [offline](https://www.qt.io/offline-installers) installer.
 
 Download the plugin archive from the [release page](https://github.com/ros-industrial/ros_qtc_plugin/releases/latest) and extract it into the root of a Qt Creator installation. The Qt Creator root will be `~/Qt/Tools/QtCreator` for the online installer and `~/qtcreator-${version}` for the offline installer.
 
