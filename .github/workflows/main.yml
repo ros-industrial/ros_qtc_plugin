@@ -11,7 +11,7 @@ jobs:
         config:
           - { name: "Linux", os: ubuntu-20.04 }
           - { name: "Windows", os: windows-latest }
-          - { name: "macOS", os: macos-latest }
+          - { name: "macOS", os: macos-13 }
     steps:
       - uses: actions/checkout@v4
 
