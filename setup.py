@@ -29,6 +29,7 @@ arch_map = {
     "i686": "x86",
     "x86": "x86",
     "x86_64": "x64",
+    "x64": "x64",
     "AMD64": "x64",
     "aarch64": "arm64",
 }
@@ -224,6 +225,10 @@ if __name__ == "__main__":
 
     cfg['os'] = platform.system()
     cfg['arch'] = platform.machine()
+
+    # macOS uses a universal binary that stores all architectures in the "x64" folder
+    if cfg['os'] == "Darwin":
+        cfg['arch'] = "x64"
 
     with open("versions.yaml", 'r') as file:
         cfg['versions'] = yaml.safe_load(file)
