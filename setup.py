@@ -11,7 +11,10 @@ from xml.etree import ElementTree
 import py7zr
 import requests
 import yaml
-from tqdm_loggable.auto import tqdm
+try:
+    from tqdm_loggable.auto import tqdm
+except ModuleNotFoundError:
+    from tqdm import tqdm
 
 
 url_repo_qtc_fmt = "https://download.qt.io/{release_type}_releases/qtcreator/{qtcv_maj}/{qtcv_full}/installer_source/{os}_{arch}/"
