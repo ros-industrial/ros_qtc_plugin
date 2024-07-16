@@ -363,7 +363,7 @@ void ROSCatkinToolsStepWidget::updateDetails()
     m_makeStep->m_catkinMakeArguments = m_ui->catkinMakeArgumentsLineEdit->text();
     m_makeStep->m_cmakeArguments = m_ui->cmakeArgumentsLineEdit->text();
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
-    m_makeStep->m_catkinToolsWorkingDir = m_ui->catkinToolsWorkingDirWidget->rawFilePath().toString();
+    m_makeStep->m_catkinToolsWorkingDir = m_ui->catkinToolsWorkingDirWidget->unexpandedFilePath().toString();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
