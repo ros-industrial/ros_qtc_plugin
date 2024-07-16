@@ -39,7 +39,7 @@ arch_map = {
 
 os_arch_toolchain = {
     "linux": {
-        "x64": "gcc_64",
+        "x64": "linux_gcc_64",
         "arm64": "linux_gcc_arm64",
     },
     "windows": {

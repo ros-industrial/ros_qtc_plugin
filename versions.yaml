@@ -3,8 +3,8 @@
 # - https://download.qt.io/official_releases/qtcreator/
 # for valid versions
 # the version schema is: {major}[.{minor}][.{patch}][-{devel}]
-qtc_version: "13"
+qtc_version: "14"
 qtc_modules: ["qtcreator", "qtcreator_dev"]
 
-qt_version: "6.6"
+qt_version: "6.7"
 qt_modules: ['qtbase', 'qtdeclarative', 'icu', 'qttools', 'qt5compat']
