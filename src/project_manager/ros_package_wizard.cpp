@@ -375,11 +375,11 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   ROSUtils::sourceROS(&create_pkg_proc, project->distribution());
   create_pkg_proc.start("bash", {"-c", create_args.join(" ")});
   if (!create_pkg_proc.waitForStarted(-1)) {
-      Core::MessageManager::writeFlashing(tr("[ROS Error] Faild to start catkin_create_pkg."));
+      Core::MessageManager::writeFlashing(tr("[ROS Error] Failed to start catkin_create_pkg."));
       return false;
   }
   if (!create_pkg_proc.waitForFinished(-1)) {
-      Core::MessageManager::writeFlashing(tr("[ROS Error] Faild to finish catkin_create_pkg."));
+      Core::MessageManager::writeFlashing(tr("[ROS Error] Failed to finish catkin_create_pkg."));
       return false;
   }
   const QByteArray message_stdio = create_pkg_proc.readAllStandardOutput();
@@ -392,7 +392,7 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
       return false;
   }
   if (create_pkg_proc.exitStatus() != QProcess::NormalExit) {
-      Core::MessageManager::writeFlashing(tr("[ROS Error] Faild to create catkin package."));
+      Core::MessageManager::writeFlashing(tr("[ROS Error] Failed to create catkin package."));
       return false;
   }
   return true;
