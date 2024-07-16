@@ -57,8 +57,7 @@ def download_check_fail(url, expected_type):
     if not response.ok:
         raise RuntimeError("error retrieving "+response.url)
     if response.headers.get('content-type') != expected_type:
-        print("Warning: invalid content type, expected '{}', got '{}'".format(
-            expected_type, response.headers.get('content-type')), flush=True)
+        print(f"Warning: invalid content type, expected '{expected_type}', got '{response.headers.get('content-type')}'", flush=True)
     return response
 
 def read_downloadable_archives(package):
@@ -104,10 +103,10 @@ def qtc_download_check_extract(cfg, dir_install):
     qtc_ver_major = ver_split[0]
     qtc_ver_minor = ver_split[1] if len(ver_split)>1 else 0
     qtc_ver_patch = ver_split[2] if len(ver_split)>2 else 0
-    qtc_ver_maj = "{}.{}".format(qtc_ver_major, qtc_ver_minor)
-    qtc_ver_full = "{}.{}".format(qtc_ver_maj, qtc_ver_patch)
+    qtc_ver_maj = f"{qtc_ver_major}.{qtc_ver_minor}"
+    qtc_ver_full = f"{qtc_ver_maj}.{qtc_ver_patch}"
     if qtc_ver_type:
-        qtc_ver_full = "{ver}-{type}".format(ver = qtc_ver_full, type = qtc_ver_type)
+        qtc_ver_full = f"{qtc_ver_full}-{qtc_ver_type}"
 
     base_url = url_repo_qtc_fmt.format(release_type = release,
                                        qtcv_maj = qtc_ver_maj,
@@ -152,7 +151,7 @@ def qt_download_check_extract(cfg, dir_install):
 
     qt_ver = cfg['versions']['qt_version']
     ver_maj, ver_min = qt_ver.split('.')
-    ver_concat = "{}{}0".format(ver_maj, ver_min)
+    ver_concat = f"{ver_maj}{ver_min}0"
 
     base_url = url_repo_qt_fmt.format(
                         os = sys_os, arch = url_arch,
@@ -166,18 +165,11 @@ def qt_download_check_extract(cfg, dir_install):
 
     toolchain = os_arch_toolchain[sys_os][sys_arch]
 
-    base_package_name = "qt.qt{ver_maj}.{ver_concat}.{compiler}".format(
-        ver_maj = ver_maj, ver_concat = ver_concat,
-        compiler = toolchain)
-
-    extra_package_name = "qt.qt{ver_maj}.{ver_concat}.{module}.{compiler}".format(
-        ver_maj = ver_maj, ver_concat = ver_concat,
-        module = "{module}",
-        compiler = toolchain)
+    base_package_name = f"qt.qt{ver_maj}.{ver_concat}.{toolchain}"
 
     extra_package_names = list()
     for module in cfg['versions']['qt_modules']:
-        extra_package_names.append(extra_package_name.format(module = module))
+        extra_package_names.append(f"qt.qt{ver_maj}.{ver_concat}.{module}.{toolchain}")
 
     package_archives = dict()
     for package in metadata.iter("PackageUpdate"):
@@ -209,12 +201,10 @@ def qt_download_check_extract(cfg, dir_install):
 
         extract_progress(content, archive_name, dir_install)
 
-    qt_path = os.path.join(dir_install, "{}.{}.0".format(ver_maj, ver_min))
+    qt_path = os.path.join(dir_install, f"{ver_maj}.{ver_min}.0")
     qt_archs = os.listdir(qt_path)
     if len(qt_archs) > 1:
-        raise RuntimeWarning(
-            "more than one architecture found in {path}, will use first: {arch}"
-            .format(path = qt_path, arch = qt_archs[0]))
+        raise RuntimeWarning(f"more than one architecture found in {qt_path}, will use first: {qt_archs[0]}")
     return os.path.join(qt_path, qt_archs[0])
 
 
@@ -263,5 +253,5 @@ if __name__ == "__main__":
 
     if args.export_variables:
         with open("env", 'w') as f:
-            f.write("QTC_PATH={}\n".format(dir_qtc))
-            f.write("QT_PATH={}\n".format(dir_qt))
+            f.write(f"QTC_PATH={dir_qtc}\n")
+            f.write(f"QT_PATH={dir_qt}\n")
