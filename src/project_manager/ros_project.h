@@ -32,16 +32,13 @@
 #include <projectexplorer/buildconfiguration.h>
 #include <coreplugin/idocument.h>
 #include <projectexplorer/rawprojectpart.h>
+#include <projectexplorer/projectupdater.h>
 
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QFutureInterface>
 #include <QTimer>
 #include <QFileSystemWatcher>
-
-namespace CppEditor {
-    class CppProjectUpdater;
-}
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -88,7 +85,7 @@ private:
     ROSUtils::PackageInfoMap        m_wsPackageInfo;
     ROSUtils::PackageBuildInfoMap   m_wsPackageBuildInfo;
 
-    CppEditor::CppProjectUpdater *m_cppCodeModelUpdater;
+    ProjectExplorer::ProjectUpdater *m_cppCodeModelUpdater;
 
     // Watching Directories to keep Project Tree updated
     QTimer m_asyncUpdateTimer;
