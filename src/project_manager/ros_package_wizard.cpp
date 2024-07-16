@@ -372,7 +372,9 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   QProcess create_pkg_proc;
   create_pkg_proc.setWorkingDirectory(packagePath.path());
 
-  ROSUtils::sourceROS(&create_pkg_proc, project->distribution());
+  QProcessEnvironment env;
+  ROSUtils::sourceROS(env, project->distribution());
+  create_pkg_proc.setProcessEnvironment(env);
   create_pkg_proc.start("bash", {"-c", create_args.join(" ")});
   if (!create_pkg_proc.waitForStarted(-1)) {
       Core::MessageManager::writeFlashing(tr("[ROS Error] Failed to start catkin_create_pkg."));

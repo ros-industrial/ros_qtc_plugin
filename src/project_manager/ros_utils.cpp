@@ -59,15 +59,15 @@ QString ROSUtils::buildTypeName(const ROSUtils::BuildType &buildType)
     }
 }
 
-bool ROSUtils::sourceROS(QProcess *process, const Utils::FilePath &rosDistribution)
+bool ROSUtils::sourceROS(QProcessEnvironment &env, const Utils::FilePath &rosDistribution)
 {
-  sourceWorkspaceHelper(process, Utils::FilePath(rosDistribution).pathAppended(QLatin1String("setup.bash")).toString());
+  sourceWorkspaceHelper(env, Utils::FilePath(rosDistribution).pathAppended(QLatin1String("setup.bash")).toString());
   return true;
 }
 
-bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspaceInfo)
+bool ROSUtils::sourceWorkspace(QProcessEnvironment &env, const WorkspaceInfo &workspaceInfo)
 {
-    if (!initializeWorkspace(process, workspaceInfo))
+    if (!initializeWorkspace(env, workspaceInfo))
         return false;
 
     Utils::FilePath sourcePath(workspaceInfo.develPath);
@@ -94,7 +94,7 @@ bool ROSUtils::sourceWorkspace(QProcess *process, const WorkspaceInfo &workspace
         source_path = QString{};
     }
 
-    sourceWorkspaceHelper(process, source_path);
+    sourceWorkspaceHelper(env, source_path);
     return true;
 }
 
@@ -169,23 +169,26 @@ bool ROSUtils::initializeWorkspaceFolders(const WorkspaceInfo &workspaceInfo)
     return true;
 }
 
-bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &workspaceInfo)
+bool ROSUtils::initializeWorkspace(QProcessEnvironment &env, const WorkspaceInfo &workspaceInfo)
 {
     WorkspaceInfo workspace = workspaceInfo;
 
-    if (sourceROS(process, workspaceInfo.rosDistribution))
+    if (sourceROS(env, workspaceInfo.rosDistribution)) {
         if (!isWorkspaceInitialized(workspaceInfo))
         {
+            QProcess process;
+            process.setProcessEnvironment(env);
+
             switch (workspaceInfo.buildSystem) {
             case CatkinMake:
             {
                 if( !initializeWorkspaceFolders(workspaceInfo) )
                     return false;
 
-                process->setWorkingDirectory(workspaceInfo.sourcePath.toString());
-                process->start(QLatin1String("bash"), QStringList() << QStringList() << QLatin1String("-c") << QLatin1String("catkin_init_workspace"));
+                process.setWorkingDirectory(workspaceInfo.sourcePath.toString());
+                process.start(QLatin1String("bash"), QStringList() << QStringList() << QLatin1String("-c") << QLatin1String("catkin_init_workspace"));
 
-                if( !process->waitForFinished() )
+                if( !process.waitForFinished() )
                     return false;
 
                 break;
@@ -201,10 +204,10 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
                 if( !initializeWorkspaceFolders(workspace) )
                     return false;
 
-                process->setWorkingDirectory(workspace.path.toString());
-                process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin init"));
+                process.setWorkingDirectory(workspace.path.toString());
+                process.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin init"));
 
-                if( !process->waitForFinished() )
+                if( !process.waitForFinished() )
                     return false;
 
                 break;
@@ -220,45 +223,46 @@ bool ROSUtils::initializeWorkspace(QProcess *process, const WorkspaceInfo &works
 
                 break;
             }
-         }
+            } // switch
 
-        if (process->exitStatus() != QProcess::CrashExit)
-            return buildWorkspace(process, workspace);
+            if (process.exitStatus() != QProcess::CrashExit)
+                return buildWorkspace(process, workspace);
 
-        Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to initialize workspace: %1.").arg(workspace.path.toString()));
-        return false;
+            Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to initialize workspace: %1.").arg(workspace.path.toString()));
+            return false;
+        } // if
     }
 
     return true;
 }
 
-bool ROSUtils::buildWorkspace(QProcess *process, const WorkspaceInfo &workspaceInfo)
+bool ROSUtils::buildWorkspace(QProcess &process, const WorkspaceInfo &workspaceInfo)
 {
     switch(workspaceInfo.buildSystem) {
     case CatkinMake:
     {
-        process->setWorkingDirectory(workspaceInfo.path.toString());
-        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin_make --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
-        process->waitForFinished();
+        process.setWorkingDirectory(workspaceInfo.path.toString());
+        process.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin_make --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process.waitForFinished();
         break;
     }
     case CatkinTools:
     {
-        process->setWorkingDirectory(workspaceInfo.path.toString());
-        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
-        process->waitForFinished();
+        process.setWorkingDirectory(workspaceInfo.path.toString());
+        process.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process.waitForFinished();
         break;
     }
     case Colcon:
     {
-        process->setWorkingDirectory(workspaceInfo.path.toString());
-        process->start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("colcon build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
-        process->waitForFinished();
+        process.setWorkingDirectory(workspaceInfo.path.toString());
+        process.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("colcon build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process.waitForFinished();
         break;
     }
     }
 
-    if (process->exitStatus() != QProcess::CrashExit)
+    if (process.exitStatus() != QProcess::CrashExit)
         return true;
 
     Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to build workspace: %1.").arg(workspaceInfo.path.toString()));
@@ -315,29 +319,27 @@ QList<Utils::FilePath> ROSUtils::installedDistributions()
   return distributions;
 }
 
-void ROSUtils::sourceWorkspaceHelper(QProcess *process, const QString &path)
+void ROSUtils::sourceWorkspaceHelper(QProcessEnvironment &env, const QString &path)
 {
-  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    if (path.isEmpty())
+        return;
 
-  if (!path.isEmpty())
-  {
-      const QString cmd = QLatin1String("source ") + path + QLatin1String(" && env");
-      process->start(QLatin1String("bash"), QStringList());
-      process->waitForStarted();
-      process->write(cmd.toLatin1());
-      process->closeWriteChannel();
-      process->waitForFinished();
+    QProcess process;
 
-      if (process->exitStatus() != QProcess::CrashExit)
-      {
-        while (process->canReadLine()) {
-            const QStringList env_kv = QString::fromLocal8Bit(process->readLine().trimmed()).split('=');
-            env.insert(env_kv[0], env_kv[1]);
-        }
-      }
-  }
+    const QString cmd = QLatin1String("source ") + path + QLatin1String(" && env");
+    process.start(QLatin1String("bash"), QStringList());
+    process.waitForStarted();
+    process.write(cmd.toLatin1());
+    process.closeWriteChannel();
+    process.waitForFinished();
 
-  process->setProcessEnvironment(env);
+    if (process.exitStatus() == QProcess::CrashExit)
+        return;
+
+    while (process.canReadLine()) {
+        const QStringList env_kv = QString::fromLocal8Bit(process.readLine().trimmed()).split('=');
+        env.insert(env_kv[0], env_kv[1]);
+    }
 }
 
 bool ROSUtils::generateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const ROSProjectFileContent &content)
@@ -1209,14 +1211,13 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FilePath &worksp
 
 QProcessEnvironment ROSUtils::getWorkspaceEnvironment(const WorkspaceInfo &workspaceInfo, const Utils::Environment& current_environment)
 {
-    QProcess process;
-
-    process.setProcessEnvironment(current_environment.toProcessEnvironment());
-
-    sourceWorkspace(&process, workspaceInfo);
-
-    QProcessEnvironment env = process.processEnvironment();
+    // initialise environment
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert(current_environment.toProcessEnvironment());
     env.insert("PWD", workspaceInfo.path.toString());
+
+    // source workspaces
+    sourceWorkspace(env, workspaceInfo);
 
     return env;
 }

@@ -171,19 +171,19 @@ public:
 
     /**
      * @brief Source ROS
-     * @param process QProcess to execute the ROS bash command
+     * @param env environment to create from sourcing workspaces
      * @param rosDistribution ROS distribution
      * @return True if successful, otherwise false
      */
-    static bool sourceROS(QProcess *process, const Utils::FilePath &rosDistribution);
+    static bool sourceROS(QProcessEnvironment &env, const Utils::FilePath &rosDistribution);
 
     /**
      * @brief Source Workspace
-     * @param process QProcess to execute the ROS bash command
+     * @param env environment to create from sourcing workspaces
      * @param workspaceInfo Workspace information
      * @return True if successful
      */
-    static bool sourceWorkspace(QProcess *process,
+    static bool sourceWorkspace(QProcessEnvironment &env,
                                 const WorkspaceInfo &workspaceInfo);
 
     /**
@@ -195,11 +195,11 @@ public:
 
     /**
      * @brief Initialize workspace
-     * @param process QProcess to execute the ROS bash command
+     * @param env QProcess to execute the ROS bash command
      * @param workspaceInfo Workspace information
      * @return True if successfully executed, otherwise false
      */
-    static bool initializeWorkspace(QProcess *process,
+    static bool initializeWorkspace(QProcessEnvironment &env,
                                     const WorkspaceInfo &workspaceInfo);
 
     /**
@@ -211,11 +211,11 @@ public:
 
     /**
      * @brief Build workspace
-     * @param process QProcess to execute the catkin_make
+     * @param process QProcess to execute the build tool commands
      * @param workspaceInfo Workspace information
      * @return True if successfully executed, otherwise false
      */
-    static bool buildWorkspace(QProcess *process,
+    static bool buildWorkspace(QProcess &process,
                                const WorkspaceInfo &workspaceInfo);
 
     /**
@@ -431,10 +431,10 @@ public:
 private:
     /**
      * @brief sourceWorkspaceHelper - Source workspace helper function
-     * @param process - QProcess to execute source bash command
+     * @param env - environment to create from sourcing workspaces
      * @param path - Path to workspace setup.bash
      */
-    static void sourceWorkspaceHelper(QProcess *process, const QString &path);
+    static void sourceWorkspaceHelper(QProcessEnvironment &env, const QString &path);
 
     /**
      * @brief This will parse the CodeBlock file and get the build info (incudes, Cxx Flags, etc.)
