@@ -1217,7 +1217,6 @@ QProcessEnvironment ROSUtils::getWorkspaceEnvironment(const WorkspaceInfo &works
 
     QProcessEnvironment env = process.processEnvironment();
     env.insert("PWD", workspaceInfo.path.toString());
-    env.insert("TERM", "xterm");
 
     return env;
 }
