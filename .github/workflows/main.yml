@@ -38,20 +38,6 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install ninja
 
-      - name: install yaml-cpp
-        shell: bash
-        run: |
-          git clone --depth 1 https://github.com/jbeder/yaml-cpp.git extern/yaml-cpp --branch yaml-cpp-0.7.0
-          cd extern/yaml-cpp
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DYAML_CPP_BUILD_TESTS=OFF
-          $(which sudo) cmake --build build --target install
-
-      - name: set build environment variables (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          echo "YAML_DIR='C:/Program Files (x86)/YAML_CPP/share/cmake/yaml-cpp/'" >> $GITHUB_ENV
-
       - name: install Qt and Qt Creator
         shell: bash
         run: |
@@ -61,7 +47,7 @@ jobs:
 
       - name: build plugin
         run: |
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.QTC_PATH }};${{ env.QT_PATH }}" -Dyaml-cpp_DIR=${{ env.YAML_DIR }} -DBUILD_ROSTERMINAL=OFF
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.QTC_PATH }};${{ env.QT_PATH }}" -DBUILD_ROSTERMINAL=OFF
           cmake --build build --target package
 
       - name: find plugin archive
