@@ -56,12 +56,11 @@ To build the Qt Creator plugin, you will need Qt Creator, the matching "Plugin D
 Additionally, you need:
 - OpenGL development libraries
 - ninja for building
-- yaml-cpp
 - utf8proc
 
 The dependencies can be installed via apt on Ubuntu:
 ```bash
-sudo apt install libgl1-mesa-dev ninja-build libyaml-cpp-dev libutf8proc-dev
+sudo apt install libgl1-mesa-dev ninja-build libutf8proc-dev
 ```
 
 The `setup.py` script needs additional Python dependencies:
