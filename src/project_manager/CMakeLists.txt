@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(QtCreator COMPONENTS Core REQUIRED)
 find_package(QT NAMES Qt6 COMPONENTS Widgets REQUIRED)
-find_package(yaml-cpp REQUIRED)
 
 set(SRC
   "remove_directory_dialog.cpp"
@@ -50,8 +49,8 @@ add_qtc_plugin(${PROJECT_NAME}
     QtCreator::TextEditor
   DEPENDS
     QtCreator::Utils
+    QtCreator::yaml-cpp
     Qt::Widgets
-    yaml-cpp
   SOURCES
     ${SRC}
 )
