@@ -74,7 +74,6 @@ private:
     BuildTargets m_target;
     QString m_colconArguments;
     QString m_cmakeArguments;
-    QString m_makeArguments;
     QRegularExpression m_percentProgress;
 };
 

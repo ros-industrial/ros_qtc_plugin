@@ -51,7 +51,6 @@ const char ROS_COLCON_STEP_DISPLAY_NAME[] = QT_TRANSLATE_NOOP("ROSProjectManager
 const char ROS_COLCON_STEP[] = "ROSProjectManager.ROSColconStep.Target";
 const char ROS_COLCON_STEP_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.ColconArguments";
 const char ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.CMakeArguments";
-const char ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY[] = "ROSProjectManager.ROSColconStep.MakeArguments";
 
 ROSColconStep::ROSColconStep(BuildStepList *parent, const Utils::Id id) :
     AbstractProcessStep(parent, id)
@@ -147,7 +146,6 @@ void ROSColconStep::toMap(Utils::Store &map) const
     map.insert(ROS_COLCON_STEP, m_target);
     map.insert(ROS_COLCON_STEP_ARGUMENTS_KEY, m_colconArguments);
     map.insert(ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY, m_cmakeArguments);
-    map.insert(ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY, m_makeArguments);
 }
 
 void ROSColconStep::fromMap(const Utils::Store &map)
@@ -155,7 +153,6 @@ void ROSColconStep::fromMap(const Utils::Store &map)
     m_target = (BuildTargets)map.value(ROS_COLCON_STEP).toInt();
     m_colconArguments = map.value(ROS_COLCON_STEP_ARGUMENTS_KEY).toString();
     m_cmakeArguments = map.value(ROS_COLCON_STEP_CMAKE_ARGUMENTS_KEY).toString();
-    m_makeArguments = map.value(ROS_COLCON_STEP_MAKE_ARGUMENTS_KEY).toString();
 
     BuildStep::fromMap(map);
 }
@@ -189,9 +186,6 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
 
         break;
     }
-
-    if (!m_makeArguments.isEmpty())
-        args << QString("--make-args %1").arg(m_makeArguments);
 
     return args.join(" ");
 }
@@ -250,7 +244,6 @@ ROSColconStepWidget::ROSColconStepWidget(ROSColconStep *makeStep)
 
     m_ui->colconArgumentsLineEdit->setText(m_makeStep->m_colconArguments);
     m_ui->cmakeArgumentsLineEdit->setText(m_makeStep->m_cmakeArguments);
-    m_ui->makeArgumentsLineEdit->setText(m_makeStep->m_makeArguments);
 
     updateDetails();
 
@@ -258,9 +251,6 @@ ROSColconStepWidget::ROSColconStepWidget(ROSColconStep *makeStep)
             this, &ROSColconStepWidget::updateDetails);
 
     connect(m_ui->cmakeArgumentsLineEdit, &QLineEdit::textEdited,
-            this, &ROSColconStepWidget::updateDetails);
-
-    connect(m_ui->makeArgumentsLineEdit, &QLineEdit::textEdited,
             this, &ROSColconStepWidget::updateDetails);
 
     connect(m_makeStep, SIGNAL(enabledChanged()),
@@ -294,7 +284,6 @@ void ROSColconStepWidget::updateDetails()
 {
     m_makeStep->m_colconArguments = m_ui->colconArgumentsLineEdit->text();
     m_makeStep->m_cmakeArguments = m_ui->cmakeArgumentsLineEdit->text();
-    m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
