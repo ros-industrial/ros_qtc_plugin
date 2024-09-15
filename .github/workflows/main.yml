@@ -50,16 +50,6 @@ jobs:
           cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ env.QTC_PATH }};${{ env.QT_PATH }}" -DBUILD_ROSTERMINAL=OFF
           cmake --build build --target package
 
-      - name: find plugin archive
-        id: find_plugin_archive
-        shell: bash
-        run: |
-          find build/ -maxdepth 1 -name 'ROSProjectManager-*-*-*.zip' -print0 | xargs -0 basename -a > ./archive_name
-          echo "QTC_PLUGIN_ARCHIVE=`cat ./archive_name`" >> $GITHUB_ENV
-          echo "QTC_PLUGIN_ARCHIVE: `cat ./archive_name`"
-          file ./build/`cat ./archive_name`
-          file ./build/ROSProjectManager-*-*-*.zip
-
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
