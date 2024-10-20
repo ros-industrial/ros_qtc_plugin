@@ -1,7 +1,9 @@
 {
-    "Name" : "ROSProjectManager",
+    "Id" : "rosprojectmanager",
+    "Name" : "ROS Project Manager",
     "Version" : "${IDE_VERSION}",
     "CompatVersion" : "${IDE_VERSION_COMPAT}",
+    "VendorId" : "rosindustrial",
     "Vendor" : "ROS Industrial",
     "Copyright" : "(C) 2015 ROS Industrial",
     "License" : [ "Commercial Usage",
