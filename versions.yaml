@@ -1,10 +1,19 @@
-# see
-# - https://download.qt.io/development_releases/qtcreator/
+# Qt Creator is downloaded from the "official" or "development" repos:
 # - https://download.qt.io/official_releases/qtcreator/
-# for valid versions
-# the version schema is: {major}[.{minor}][.{patch}][-{devel}]
+# - https://download.qt.io/development_releases/qtcreator/
+
+# The 'qtc_version' version scheme follows the SemVer format
+# MAJOR.MINOR.PATCH, with MINOR and PATCH being optional:
+# {MAJOR}[.{MINOR}[.{PATCH}]]
+# Only the MAJOR version is required. Omitting MINOR and PATCH
+# will implicitly replace them with '0'.
+
 qtc_version: "14"
 qtc_modules: ["qtcreator", "qtcreator_dev"]
+
+# To use a "development" version, set the 'qtc_dev_tag' to a valid
+# "development" suffix, starting with "beta" or "rc".
+# qtc_dev_tag:
 
 qt_version: "6.7"
 qt_modules: ['qtbase', 'qtdeclarative', 'icu', 'qttools', 'qt5compat']

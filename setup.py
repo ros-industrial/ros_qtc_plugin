@@ -88,27 +88,26 @@ def extract_progress(archive_bytes, archive_name, destination_path):
             zf.extractall(path=destination_path, callback=cb_progress)
 
 def qtc_download_check_extract(cfg, dir_install):
-    # if the Qt Creator version contains '-beta' or '-rc' we have to
-    # use the "development" repo, otherwise use the "official" repo
     qtc_ver = cfg['versions']['qtc_version']
-    if qtc_ver.find("-beta") > 0 or qtc_ver.find("-rc") > 0:
-        release = "development"
-        qtc_ver_nr, qtc_ver_type = qtc_ver.split('-')
-    else:
-        release = "official"
-        qtc_ver_nr = qtc_ver
-        qtc_ver_type = None
+    qtc_dev_tag = cfg['versions'].get('qtc_dev_tag', str())
+    release = not qtc_dev_tag
 
-    ver_split = qtc_ver_nr.split('.')
+    # If no 'qtc_dev_tag' is provided, or it is empty, we use a released version from the "official" repo.
+    # Otherwise, if the 'qtc_dev_tag' contains 'beta' or 'rc' we have to use the "development" repo.
+
+    if not release and (qtc_dev_tag.find("beta") == -1 and qtc_dev_tag.find("rc") == -1):
+        raise RuntimeWarning(f"Invalid development tag '{qtc_dev_tag}'. Valid tags contain 'beta' or 'rc'.")
+
+    ver_split = qtc_ver.split('.')
     qtc_ver_major = ver_split[0]
     qtc_ver_minor = ver_split[1] if len(ver_split)>1 else 0
     qtc_ver_patch = ver_split[2] if len(ver_split)>2 else 0
     qtc_ver_maj = f"{qtc_ver_major}.{qtc_ver_minor}"
     qtc_ver_full = f"{qtc_ver_maj}.{qtc_ver_patch}"
-    if qtc_ver_type:
-        qtc_ver_full = f"{qtc_ver_full}-{qtc_ver_type}"
+    if not release:
+        qtc_ver_full = f"{qtc_ver_full}-{qtc_dev_tag}"
 
-    base_url = url_repo_qtc_fmt.format(release_type = release,
+    base_url = url_repo_qtc_fmt.format(release_type = "official" if release else "development",
                                        qtcv_maj = qtc_ver_maj,
                                        qtcv_full = qtc_ver_full,
                                        os = os_map[cfg['os']],
