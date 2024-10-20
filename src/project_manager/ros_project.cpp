@@ -504,7 +504,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
                             return result;
                         }).join('\n');
 
-                rpp.setProjectFileLocation(projectFilePath.toString());
+                rpp.setProjectFileLocation(projectFilePath);
                 rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo->name + '|' + projectFilePath.toString());
                 rpp.setDisplayName(buildInfo.parent.name + '|' + targetInfo->name);
                 rpp.setQtVersion(activeQtVersion);
