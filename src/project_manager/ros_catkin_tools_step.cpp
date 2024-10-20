@@ -386,7 +386,7 @@ void ROSCatkinToolsStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &bu
 void ROSCatkinToolsStepWidget::enabledChanged()
 {
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    if(m_makeStep->enabled() && (bc->rosBuildSystem() != ROSUtils::CatkinTools))
+    if(m_makeStep->stepEnabled() && (bc->rosBuildSystem() != ROSUtils::CatkinTools))
         m_makeStep->setEnabled(false);
 }
 

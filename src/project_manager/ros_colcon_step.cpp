@@ -304,7 +304,7 @@ void ROSColconStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSy
 void ROSColconStepWidget::enabledChanged()
 {
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    if(m_makeStep->enabled() && (bc->rosBuildSystem() != ROSUtils::Colcon))
+    if(m_makeStep->stepEnabled() && (bc->rosBuildSystem() != ROSUtils::Colcon))
         m_makeStep->setEnabled(false);
 }
 

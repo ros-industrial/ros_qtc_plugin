@@ -303,7 +303,7 @@ void ROSCatkinMakeStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &bui
 void ROSCatkinMakeStepWidget::enabledChanged()
 {
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
-    if(m_makeStep->enabled() && (bc->rosBuildSystem() != ROSUtils::CatkinMake))
+    if(m_makeStep->stepEnabled() && (bc->rosBuildSystem() != ROSUtils::CatkinMake))
         m_makeStep->setEnabled(false);
 }
 
