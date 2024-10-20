@@ -178,17 +178,21 @@ def qt_download_check_extract(cfg, dir_install):
                 "archives": read_downloadable_archives(package)
                 }
 
-    archives_match = []
+    archives_match = dict()
     for module_name in cfg['versions']['qt_modules']:
+        found = False
         for package_name, data in package_archives.items():
             for archive_name in data["archives"]:
                 if archive_name.startswith(module_name):
-                    archives_match.append([package_name, data["version"], archive_name])
+                    archives_match[module_name] = [package_name, data["version"], archive_name]
+                    found = True
+        if not found:
+            print(f"no archive for Qt module '{module_name}' found")
 
     if not archives_match:
         raise RuntimeError(f"no matches for Qt modules ({cfg['versions']['qt_modules']}) found")
 
-    for package_name, package_version, archive_name in archives_match:
+    for package_name, package_version, archive_name in archives_match.values():
         url_archive = base_url+'/'+package_name+'/'+package_version+archive_name
 
         content = download_check_fail(url_archive, "application/x-7z-compressed").content
