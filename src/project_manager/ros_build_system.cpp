@@ -42,7 +42,7 @@ bool ROSBuildSystem::canRenameFile(ProjectExplorer::Node */*context*/, const Uti
     return true;
 }
 
-bool ROSBuildSystem::renameFile(ProjectExplorer::Node */*context*/, const Utils::FilePath &/*oldFilePath*/, const Utils::FilePath &/*newFilePath*/)
+bool ROSBuildSystem::renameFiles(ProjectExplorer::Node */*context*/, const Utils::FilePairs &/*filesToRename*/, Utils::FilePaths */*notRenamed*/)
 {
     return true;
 }
