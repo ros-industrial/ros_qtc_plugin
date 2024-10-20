@@ -60,7 +60,7 @@ public:
     void toMap(Utils::Store &map) const override;
 
     bool enabled() const;
-    void setEnabled(bool b);
+    void setEnabled(bool b) override;
 
     ProjectExplorer::RunConfiguration *runConfiguration() const;
     ProjectExplorer::ProjectConfiguration *projectConfiguration() const;
