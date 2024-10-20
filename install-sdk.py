@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 
 url_repo_qtc_fmt = "https://download.qt.io/{release_type}_releases/qtcreator/{qtcv_maj}/{qtcv_full}/installer_source/{os}_{arch}/"
 
-url_repo_qt_fmt = "https://download.qt.io/online/qtsdkrepository/{os}_{arch}/desktop/qt{ver_maj}_{ver_concat}/"
+url_repo_qt_fmt = "https://download.qt.io/online/qtsdkrepository/{os}_{arch}/desktop/qt{ver_maj}_{ver_concat}/qt{ver_maj}_{ver_concat}/"
 
 os_map = {
     "Linux": "linux",
@@ -43,8 +43,8 @@ os_arch_toolchain = {
         "arm64": "linux_gcc_arm64",
     },
     "windows": {
-        "x64": "win64_msvc2019_64",
-        "arm64": "win64_msvc2019_arm64",
+        "x64": "win64_msvc2022_64",
+        "arm64": "win64_msvc2022_arm64",
     },
     "mac": {
         "x64": "clang_64",
@@ -168,7 +168,7 @@ def qt_download_check_extract(cfg, dir_install):
 
     extra_package_names = list()
     for module in cfg['versions']['qt_modules']:
-        extra_package_names.append(f"qt.qt{ver_maj}.{ver_concat}.{module}.{toolchain}")
+        extra_package_names.append(f"qt.qt{ver_maj}.{ver_concat}.addons.{module}.{toolchain}")
 
     package_archives = dict()
     for package in metadata.iter("PackageUpdate"):
