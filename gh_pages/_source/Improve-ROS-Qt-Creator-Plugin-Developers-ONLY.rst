@@ -29,7 +29,7 @@ Run ROS Qt Creator setup script
 
    .. code-block:: bash
 
-      ./setup.py
+      ./install-sdk.py
 
 .. Note:: The script will download the official binary distributions of Qt and Qt Creator and thus will only support commonly used architectures. If you want to build the plugin on unsupported architectures, you have to build them from source or use a Linux distribution that provides sufficiently new versions of these packages.
 

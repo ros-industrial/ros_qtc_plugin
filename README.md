@@ -51,7 +51,7 @@ Note: Qt Creator from the online installer may notify you about available update
 
 ### Dependencies
 
-To build the Qt Creator plugin, you will need Qt Creator, the matching "Plugin Development" package and a recent Qt version. These can be installed either via the official binary installer or via the [`setup.py`](setup.py) script. The latter method allows you to adjust the target Qt Creator version via [`versions.yaml`](versions.yaml).
+To build the Qt Creator plugin, you will need Qt Creator, the matching "Plugin Development" package and a recent Qt version. These can be installed either via the official binary installer or via the [`install-sdk.py`](install-sdk.py) script. The latter method allows you to adjust the target Qt Creator version via [`versions.yaml`](versions.yaml).
 
 Additionally, you need:
 - OpenGL development libraries
@@ -63,20 +63,20 @@ The dependencies can be installed via apt on Ubuntu:
 sudo apt install libgl1-mesa-dev ninja-build libutf8proc-dev
 ```
 
-The `setup.py` script needs additional Python dependencies:
+The `install-sdk.py` script needs additional Python dependencies:
 ```bash
 pip install pyyaml requests py7zr==0.21
 ```
 
 Install Qt Creator, its development files and Qt to a folder of your choice:
 ```sh
-./setup.py --install_path ~/Downloads/
+./install-sdk.py --install_path ~/Downloads/
 ```
 The script will print the CMake commands for building the plugin and create an archive.
 
 ### Build the Plugin Archive
 
-If Qt Creator and the Plugin Development package are not installed in one of the default folders, you have to tell CMake via `CMAKE_PREFIX_PATH` where those can be found. With the `setup.py` command above, this could be (adjust `CMAKE_PREFIX_PATH` and the Qt version if necessary):
+If Qt Creator and the Plugin Development package are not installed in one of the default folders, you have to tell CMake via `CMAKE_PREFIX_PATH` where those can be found. With the `install-sdk.py` command above, this could be (adjust `CMAKE_PREFIX_PATH` and the Qt version if necessary):
 ```sh
 cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="~/Downloads/qtc-sdk/Tools/QtCreator;~/Downloads/qtc-sdk/6.6.0/gcc_64"
 cmake --build build --target package

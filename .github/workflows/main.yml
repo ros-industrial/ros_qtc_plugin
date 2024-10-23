@@ -42,7 +42,7 @@ jobs:
         shell: bash
         run: |
           pip install pyyaml requests py7zr==0.21 tqdm_loggable
-          python setup.py --export_variables
+          python install-sdk.py --export_variables
           cat env >> $GITHUB_ENV
 
       - name: build plugin
