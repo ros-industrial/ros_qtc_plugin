@@ -83,6 +83,19 @@ cmake --build build --target package
 ```
 This will create the plugin archive `ROSProjectManager-${version}-Linux-${arch}.zip` inside the build folder (`build` by default). This archive has to be extracted to the Qt Creator root path (e.g. `~/Qt/Tools/QtCreator/` for the online installer version).
 
+On Debian-based distributions, you can generate a Debian package via CPack:
+```sh
+# install the experimental Qt Creator package
+# from the `cpack_experimental` folder under https://download.qt.io/*_releases/qtcreator/
+wget $(./packaging/format-deb-url.py) --directory-prefix=/tmp
+sudo apt install /tmp/qtcreator-opensource-linux-*-*.deb
+
+# generate and install the plugin package
+cd build
+cpack -G DEB
+sudo apt install ./ROSProjectManager-*-Linux-*.deb
+```
+
 ### Development & Debugging
 
 To develop on the plugin and test changes iteratively, build the plugin in `Debug` mode and skip creating the plugin archive:
