@@ -8,7 +8,7 @@
 # Only the MAJOR version is required. Omitting MINOR and PATCH
 # will implicitly replace them with '0'.
 
-qtc_version: "14"
+qtc_version: "14.0.2"
 qtc_modules: ["qtcreator", "qtcreator_dev"]
 
 # To use a "development" version, set the 'qtc_dev_tag' to a valid
