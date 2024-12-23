@@ -66,8 +66,8 @@ jobs:
       - name: install Qt Creator DEB package
         if: runner.os == 'Linux'
         run: |
-          wget $(./packaging/format-deb-url.py) --directory-prefix=/tmp
-          sudo apt install /tmp/qtcreator-opensource-linux-*-*.deb
+          wget $(./packaging/format-deb-url.py) --directory-prefix=${GITHUB_WORKSPACE}/build
+          sudo apt install ${GITHUB_WORKSPACE}/build/qtcreator-opensource-linux-*-*.deb
 
       - name: generate plugin DEB package
         if: runner.os == 'Linux'
@@ -82,6 +82,7 @@ jobs:
           name: plugin_archive_artifact_${{ matrix.config.name }}_deb
           if-no-files-found: error
           path: |
+            ./build/qtcreator-opensource-linux-*-*.deb
             ./build/ROSProjectManager-*-*-*.deb
             ./build/ROSProjectManager-*-*-*-dbgsym.ddeb
 
@@ -102,4 +103,4 @@ jobs:
         uses: ncipollo/release-action@v1
         id: create_release
         with:
-          artifacts: ROSProjectManager-*-*-*.zip,ROSProjectManager-*-*-*.deb,ROSProjectManager-*-*-*-dbgsym.ddeb
+          artifacts: qtcreator-opensource-linux-*-*.deb,ROSProjectManager-*-*-*.zip,ROSProjectManager-*-*-*.deb,ROSProjectManager-*-*-*-dbgsym.ddeb
