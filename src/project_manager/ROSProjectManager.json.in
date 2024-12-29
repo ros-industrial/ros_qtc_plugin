@@ -1,7 +1,7 @@
 {
     "Id" : "rosprojectmanager",
     "Name" : "ROS Project Manager",
-    "Version" : "${IDE_VERSION}",
+    "Version" : "${PROJECT_VERSION}",
     "CompatVersion" : "${IDE_VERSION_COMPAT}",
     "VendorId" : "rosindustrial",
     "Vendor" : "ROS Industrial",
