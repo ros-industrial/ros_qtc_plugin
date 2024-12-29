@@ -103,6 +103,7 @@ wget $(./packaging/format-deb-url.py) --directory-prefix=/tmp
 sudo apt install /tmp/qtcreator-opensource-linux-*-*.deb
 
 # generate and install the plugin package
+sudo apt install desktop-file-utils
 cd build
 cpack -G DEB
 sudo apt install ./ROSProjectManager-*-Linux-*.deb
