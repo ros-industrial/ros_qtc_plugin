@@ -7,4 +7,5 @@ elseif(CPACK_GENERATOR MATCHES "DEB")
     # generate Debian package
     set(CPACK_STRIP_FILES NO)
     set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/qt-creator/")
+    set(CPACK_INSTALL_SCRIPTS ${CMAKE_CURRENT_LIST_DIR}/launcher.cmake)
 endif()
