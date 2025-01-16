@@ -63,7 +63,7 @@ jobs:
           name: plugin_archive_artifact_${{ matrix.config.name }}
           if-no-files-found: error
           path: |
-            ./build/ROSProjectManager-*-*-*.zip
+            ./build/qtcreator-plugin-ros-*-*-*.zip
 
       - name: install Qt Creator DEB package
         if: runner.os == 'Linux'
@@ -85,8 +85,8 @@ jobs:
           if-no-files-found: error
           path: |
             ./build/qtcreator-opensource-linux-*-*.deb
-            ./build/ROSProjectManager-*-*-*.deb
-            ./build/ROSProjectManager-*-*-*-dbgsym.ddeb
+            ./build/qtcreator-plugin-ros_*_*.deb
+            ./build/qtcreator-plugin-ros-dbgsym_*_*.ddeb
 
   release:
     name: create release
@@ -104,5 +104,5 @@ jobs:
       - name: create release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: qtcreator-opensource-linux-*-*.deb,ROSProjectManager-*-*-*.zip,ROSProjectManager-*-*-*.deb,ROSProjectManager-*-*-*-dbgsym.ddeb
+          artifacts: qtcreator-opensource-linux-*-*.deb,qtcreator-plugin-ros-*-*-*.zip,qtcreator-plugin-ros_*_*.deb,qtcreator-plugin-ros-dbgsym_*_*.ddeb
           artifactErrorsFailBuild: true
