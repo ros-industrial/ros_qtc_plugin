@@ -38,7 +38,11 @@ if __name__ == '__main__':
     if not release:
         qtc_ver_full += f"-{qtc_dev_tag}"
 
-    arch = platform.machine()
+    arch_map = {
+        "aarch64": "arm64",
+    }
+
+    arch = arch_map.get(platform.machine(), platform.machine())
 
     deb_url = qtc_deb_url_fmt.format(release_type = "official" if release else "development",
                                      qtcv_maj = qtc_ver_maj,
