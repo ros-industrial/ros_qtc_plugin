@@ -102,6 +102,5 @@ jobs:
 
       - name: create release
         uses: ncipollo/release-action@v1
-        id: create_release
         with:
           artifacts: qtcreator-opensource-linux-*-*.deb,ROSProjectManager-*-*-*.zip,ROSProjectManager-*-*-*.deb,ROSProjectManager-*-*-*-dbgsym.ddeb
