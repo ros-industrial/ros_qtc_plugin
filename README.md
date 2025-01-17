@@ -42,7 +42,7 @@ Download the plugin archive from the [release page](https://github.com/ros-indus
  The following script extracts the archive to the default online installer location:
 ```bash
 sudo apt install libarchive-tools # needed for bsdtar
-curl -SL $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*ROSProjectManager-.*-Linux-.*.zip' | cut -d'"' -f 4) | bsdtar -xzf - -C ~/Qt/Tools/QtCreator
+curl -SL $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*qtcreator-plugin-ros-.*-Linux-.*.zip' | cut -d'"' -f 4) | bsdtar -xzf - -C ~/Qt/Tools/QtCreator
 ```
 
 Note: Qt Creator from the online installer may notify you about available updates and install them when instructed to do so. The plugin API is only compatible with patch-level updates. A major or minor update will break the plugin API and Qt Creator will then refuse to load the plugin. Make sure that a compatible plugin version is available before updating Qt Creator as it is not possible to downgrade to an older Qt Creator version using the online installer. The offline installer installs a specific Qt Creator version and does not provide updates.
@@ -52,9 +52,9 @@ Note: Qt Creator from the online installer may notify you about available update
 Install Qt Creator and the plugin via Debian packages:
 ```sh
 # download Qt Creator and plugin Debian packages
-wget --directory-prefix=/tmp $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*(ROSProjectManager-.*-Linux-'$(arch)'|qtcreator-opensource-linux-'$(arch)'-*).*deb' | cut -d'"' -f 4)
+wget --directory-prefix=/tmp/qtcros $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*(qtcreator-plugin-ros.*_'$(dpkg --print-architecture)'|qtcreator-opensource-linux-('$(dpkg --print-architecture)'|'$(arch)')-*).*deb' | cut -d'"' -f 4)
 # install Debian packages
-sudo apt install /tmp/qtcreator-opensource-linux-$(arch)-*.deb /tmp/ROSProjectManager-*-Linux-$(arch){.deb,-dbgsym.ddeb}
+sudo apt install /tmp/qtcros/*{.deb,.ddeb}
 # launch Qt Creator
 /opt/qt-creator/bin/qtcreator
 ```
@@ -93,7 +93,7 @@ If Qt Creator and the Plugin Development package are not installed in one of the
 cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="~/Downloads/qtc-sdk/Tools/QtCreator;~/Downloads/qtc-sdk/6.8.0/gcc_64"
 cmake --build build --target package
 ```
-This will create the plugin archive `ROSProjectManager-${version}-Linux-${arch}.zip` inside the build folder (`build` by default). This archive has to be extracted to the Qt Creator root path (e.g. `~/Qt/Tools/QtCreator/` for the online installer version).
+This will create the plugin archive `qtcreator-plugin-ros-${version}-Linux-${arch}.zip` inside the build folder (`build` by default). This archive has to be extracted to the Qt Creator root path (e.g. `~/Qt/Tools/QtCreator/` for the online installer version).
 
 On Debian-based distributions, you can generate a Debian package via CPack:
 ```sh
@@ -106,7 +106,7 @@ sudo apt install /tmp/qtcreator-opensource-linux-*-*.deb
 sudo apt install desktop-file-utils
 cd build
 cpack -G DEB
-sudo apt install ./ROSProjectManager-*-Linux-*.deb
+sudo apt install ./qtcreator-plugin-ros_*_*.deb
 ```
 
 ### Development & Debugging
