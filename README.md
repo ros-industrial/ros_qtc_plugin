@@ -42,7 +42,7 @@ Download the plugin archive from the [release page](https://github.com/ros-indus
  The following script extracts the archive to the default online installer location:
 ```bash
 sudo apt install libarchive-tools # needed for bsdtar
-curl -SL $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*qtcreator-plugin-ros-.*-Linux-.*.zip' | cut -d'"' -f 4) | bsdtar -xzf - -C ~/Qt/Tools/QtCreator
+curl -SL $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*qtcreator-plugin-ros-.*-Linux-'$(arch)'.zip' | cut -d'"' -f 4) | bsdtar -xzf - -C ~/Qt/Tools/QtCreator
 ```
 
 Note: Qt Creator from the online installer may notify you about available updates and install them when instructed to do so. The plugin API is only compatible with patch-level updates. A major or minor update will break the plugin API and Qt Creator will then refuse to load the plugin. Make sure that a compatible plugin version is available before updating Qt Creator as it is not possible to downgrade to an older Qt Creator version using the online installer. The offline installer installs a specific Qt Creator version and does not provide updates.
