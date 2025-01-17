@@ -104,3 +104,4 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: qtcreator-opensource-linux-*-*.deb,ROSProjectManager-*-*-*.zip,ROSProjectManager-*-*-*.deb,ROSProjectManager-*-*-*-dbgsym.ddeb
+          artifactErrorsFailBuild: true
