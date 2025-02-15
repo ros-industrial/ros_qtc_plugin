@@ -5,7 +5,11 @@ execute_process(
 )
 
 execute_process(
-    COMMAND desktop-file-edit "${CMAKE_CURRENT_BINARY_DIR}/usr/share/applications/qtcreator-ros.desktop" "--set-key=Exec" "--set-value=/opt/qt-creator/bin/qtcreator %F" "--set-key=Name" "--set-value=Qt Creator ROS" "--set-key=Icon" "--set-value=/usr/share/icons/hicolor/qtcreator-ros.svg"
+    COMMAND desktop-file-edit "${CMAKE_CURRENT_BINARY_DIR}/usr/share/applications/qtcreator-ros.desktop"
+                              "--set-key=Exec" "--set-value=env QT_QPA_PLATFORM=\"wayland;xcb\" /opt/qt-creator/bin/qtcreator %F"
+                              "--set-key=Name" "--set-value=Qt Creator ROS"
+                              "--set-key=Icon" "--set-value=/usr/share/icons/hicolor/qtcreator-ros.svg"
+                              "--set-key=StartupWMClass" "--set-value=org.qt-project.qtcreator"
     COMMAND_ERROR_IS_FATAL ANY
 )
 
