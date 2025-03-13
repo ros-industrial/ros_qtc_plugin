@@ -60,9 +60,8 @@ namespace Internal {
 //
 //////////////////////////////////////////////////////////////////////////////
 
-ROSPackageWizardDialog::ROSPackageWizardDialog(const Core::BaseFileWizardFactory *factory,
-                                                       QWidget *parent) :
-    Core::BaseFileWizard(factory, QVariantMap(), parent)
+ROSPackageWizardDialog::ROSPackageWizardDialog(const Core::BaseFileWizardFactory *factory) :
+    Core::BaseFileWizard(factory, QVariantMap())
 {
 
     setWindowTitle(tr("Create ROS Package"));
@@ -231,7 +230,7 @@ ROSPackageWizard::ROSPackageWizard()
     setFlags(Core::IWizardFactory::PlatformIndependent);
 }
 
-Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent, const Core::WizardDialogParameters &parameters) const
+Core::BaseFileWizard *ROSPackageWizard::create(const Core::WizardDialogParameters &parameters) const
 {
     Utils::FilePath defaultPath = parameters.defaultPath();
 
@@ -252,7 +251,7 @@ Core::BaseFileWizard *ROSPackageWizard::create(QWidget *parent, const Core::Wiza
             defaultPath = workspaceInfo.sourcePath;
     }
 
-    m_wizard = new ROSPackageWizardDialog(this, parent);
+    m_wizard = new ROSPackageWizardDialog(this);
 
     m_wizard->setProjectDirectory(rosProject->projectDirectory());
     m_wizard->setPath(defaultPath);

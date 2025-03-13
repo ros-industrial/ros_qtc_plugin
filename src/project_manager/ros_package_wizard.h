@@ -43,7 +43,7 @@ class ROSPackageWizardDialog : public Core::BaseFileWizard
     Q_OBJECT
 
 public:
-    explicit ROSPackageWizardDialog(const Core::BaseFileWizardFactory *factory, QWidget *parent = 0);
+    explicit ROSPackageWizardDialog(const Core::BaseFileWizardFactory *factory);
 
     void setPath(const Utils::FilePath &path);
     void setProjectDirectory(const Utils::FilePath &path);
@@ -107,7 +107,7 @@ public:
     ROSPackageWizard();
 
 protected:
-    Core::BaseFileWizard *create(QWidget *parent, const Core::WizardDialogParameters &parameters) const override;
+    Core::BaseFileWizard *create(const Core::WizardDialogParameters &parameters) const override;
 
     Core::GeneratedFiles generateFiles(const QWizard *w, QString *errorMessage) const override;
 

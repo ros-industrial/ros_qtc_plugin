@@ -66,8 +66,8 @@ namespace Internal {
 //
 //////////////////////////////////////////////////////////////////////////////
 
-ROSProjectWizardDialog::ROSProjectWizardDialog(const Core::BaseFileWizardFactory *factory, QWidget *parent) :
-    Core::BaseFileWizard(factory, QVariantMap(), parent)
+ROSProjectWizardDialog::ROSProjectWizardDialog(const Core::BaseFileWizardFactory *factory) :
+    Core::BaseFileWizard(factory, QVariantMap())
 {
     setWindowTitle(tr("Creates New ROS Project"));
 
@@ -239,10 +239,10 @@ ROSProjectWizard::ROSProjectWizard()
     setFlags(Core::IWizardFactory::PlatformIndependent);
 }
 
-Core::BaseFileWizard *ROSProjectWizard::create(QWidget *parent, const Core::WizardDialogParameters &parameters) const
+Core::BaseFileWizard *ROSProjectWizard::create(const Core::WizardDialogParameters &parameters) const
 {
     Q_UNUSED(parameters);
-    ROSProjectWizardDialog *wizard = new ROSProjectWizardDialog(this, parent);
+    ROSProjectWizardDialog *wizard = new ROSProjectWizardDialog(this);
 
     for (QWizardPage *p : wizard->extensionPages())
         wizard->addPage(p);
