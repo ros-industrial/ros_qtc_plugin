@@ -137,9 +137,12 @@ ROSProjectPlugin *ROSProjectPlugin::instance()
     return m_instance;
 }
 
-bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
+void ROSProjectPlugin::initialize()
 {
-    Q_UNUSED(errorMessage);
+    IOptionsPage::registerCategory(
+        Constants::ROS_SETTINGS_CATEGORY_ID,
+        QCoreApplication::translate(Constants::ROS_SETTINGS_CATEGORY_NAME_ID, "ROS"),
+        ":rosproject/ros_icon.png");
 
     d = new ROSProjectPluginPrivate();
 #ifdef ROSTERMINAL
@@ -193,8 +196,6 @@ bool ROSProjectPlugin::initialize(const QStringList &, QString *errorMessage)
     mfolderContextMenu->addAction(renameCommand, ProjectExplorer::Constants::G_FOLDER_FILES);
 
     createCppCodeStyle();
-
-    return true;
 }
 
 #ifdef ROSTERMINAL
