@@ -23,7 +23,8 @@
 
 #include <coreplugin/messagemanager.h>
 #include <extensionsystem/pluginmanager.h>
-#include <projectexplorer/kitaspects.h>
+#include <projectexplorer/toolchainkitaspect.h>
+#include <projectexplorer/devicesupport/devicekitaspects.h>
 #include <projectexplorer/project.h>
 #include <utils/algorithm.h>
 #include <QDebug>
@@ -62,7 +63,7 @@ bool RunStepFactory::canHandle(RunStepList *rsl) const
     if (!m_supportedDeviceTypes.isEmpty()) {
         ProjectExplorer::Target *target = rsl->target();
         QTC_ASSERT(target, return false);
-        Utils::Id deviceType = ProjectExplorer::DeviceTypeKitAspect::deviceTypeId(target->kit());
+        Utils::Id deviceType = ProjectExplorer::RunDeviceTypeKitAspect::deviceTypeId(target->kit());
         if (!m_supportedDeviceTypes.contains(deviceType))
             return false;
     }

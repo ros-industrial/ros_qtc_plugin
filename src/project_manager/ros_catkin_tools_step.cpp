@@ -28,7 +28,7 @@
 #include <extensionsystem/pluginmanager.h>
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/gnumakeparser.h>
-#include <projectexplorer/kitaspects.h>
+#include <projectexplorer/toolchainkitaspect.h>
 #include <projectexplorer/processparameters.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>

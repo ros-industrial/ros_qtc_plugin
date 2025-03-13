@@ -38,7 +38,8 @@
 #include <projectexplorer/abi.h>
 #include <projectexplorer/buildsteplist.h>
 #include <projectexplorer/headerpath.h>
-#include <projectexplorer/kitaspects.h>
+#include <projectexplorer/toolchainkitaspect.h>
+#include <projectexplorer/sysrootkitaspect.h>
 #include <projectexplorer/kitmanager.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/buildmanager.h>
