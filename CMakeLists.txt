@@ -8,7 +8,9 @@ set(QTC_COMPAT_MAJOR ${CMAKE_MATCH_1})
 string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" QTC_VER_DISPLAY ${IDE_VERSION_DISPLAY})
 set(QTC_DISPLAY_MAJOR ${CMAKE_MATCH_1})
 
-project(ROSProjectManager VERSION ${QTC_DISPLAY_MAJOR}.3)
+set(PLUGIN_MINOR 0)
+
+project(ROSProjectManager VERSION ${QTC_DISPLAY_MAJOR}.${PLUGIN_MINOR})
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Werror -Wall -Wextra -Wpedantic -Wsuggest-override)
