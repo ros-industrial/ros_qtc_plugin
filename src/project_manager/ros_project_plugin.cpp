@@ -45,7 +45,6 @@
 #include <coreplugin/actionmanager/command.h>
 #include <coreplugin/progressmanager/progressmanager.h>
 
-#include <cppeditor/cppcodestylepreferences.h>
 #include <cppeditor/cpptoolssettings.h>
 #include <cppeditor/cppeditorconstants.h>
 

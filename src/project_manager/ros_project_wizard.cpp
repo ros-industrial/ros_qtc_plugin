@@ -31,7 +31,6 @@
 #include <projectexplorer/editorconfiguration.h>
 #include <projectexplorer/project.h>
 
-#include <cppeditor/cppcodestylepreferences.h>
 #include <cppeditor/cppeditorconstants.h>
 
 #include <texteditor/icodestylepreferences.h>
