@@ -98,7 +98,7 @@ static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
             directoryWithoutPrefix = directory;
         }
     }
-    QStringList parts = directoryWithoutPrefix.toString().split('/', Qt::SkipEmptyParts);
+    QStringList parts = directoryWithoutPrefix.toFSPathString().split('/', Qt::SkipEmptyParts);
     if (!Utils::HostOsInfo::isWindowsHost() && !isRelative && parts.count() > 0)
         parts[0].prepend('/');
 
@@ -472,11 +472,11 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
     QStringList workspace_includes; // This should be the same as workspace_header_paths used for checking for duplicates
     ProjectExplorer::HeaderPaths workspace_header_paths;
     for (const auto& package : qAsConst(results.wsPackageInfo)) {
-      Utils::FilePath include_path = Utils::FilePath::fromString(package.path.toString());
+      Utils::FilePath include_path = package.path;
       include_path = include_path.pathAppended("include");
-      if (!workspace_includes.contains(include_path.toString())) {
-        workspace_includes.append(include_path.toString());
-        workspace_header_paths.append(ProjectExplorer::HeaderPath(include_path.toString(), ProjectExplorer::HeaderPathType::User));
+      if (!workspace_includes.contains(include_path.toFSPathString())) {
+        workspace_includes.append(include_path.toFSPathString());
+        workspace_header_paths.append(ProjectExplorer::HeaderPath(include_path.toFSPathString(), ProjectExplorer::HeaderPathType::User));
       }
     }
 
@@ -506,7 +506,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
                         }).join('\n');
 
                 rpp.setProjectFileLocation(projectFilePath);
-                rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo->name + '|' + projectFilePath.toString());
+                rpp.setBuildSystemTarget(buildInfo.parent.name + '|' + targetInfo->name + '|' + projectFilePath.toFSPathString());
                 rpp.setDisplayName(buildInfo.parent.name + '|' + targetInfo->name);
                 rpp.setQtVersion(activeQtVersion);
                 rpp.setMacros(ProjectExplorer::Macro::toMacros(defineArg.toUtf8()));

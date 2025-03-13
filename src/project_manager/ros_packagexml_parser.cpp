@@ -33,7 +33,7 @@ bool ROSPackageXmlParser::parsePackageXml(const Utils::FilePath &filepath)
     m_packageInfo.filepath = filepath;
     m_packageInfo.buildFile = m_packageInfo.path.pathAppended("CMakeLists.txt");
 
-    QFile pkgFile(filepath.toString());
+    QFile pkgFile(filepath.toFSPathString());
     if (pkgFile.exists() && pkgFile.open(QFile::ReadOnly)) {
         setDevice(&pkgFile);
 
@@ -49,7 +49,7 @@ bool ROSPackageXmlParser::parsePackageXml(const Utils::FilePath &filepath)
         return true;
     }
 
-    Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Failed to parse file: %1.").arg(m_packageInfo.filepath.toString()));
+    Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Failed to parse file: %1.").arg(m_packageInfo.filepath.toFSPathString()));
     return false;
 }
 

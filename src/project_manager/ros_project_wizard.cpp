@@ -126,7 +126,7 @@ ROSImportWizardPage::ROSImportWizardPage(QWidget *parent) :
     dist_list.append(QString{});
     for(auto entry : ROSUtils::installedDistributions())
     {
-        dist_list.append(entry.toString());
+        dist_list.append(entry.toFSPathString());
     }
     d->m_ui.distributionComboBox->addItems(dist_list);
 
@@ -185,7 +185,7 @@ void ROSImportWizardPage::setForceFirstCapitalLetterForFileName(bool b)
 
 Utils::FilePath ROSImportWizardPage::workspaceDirectory() const
 {
-  return Utils::FilePath::fromString(d->m_ui.pathChooser->filePath().toString());
+  return d->m_ui.pathChooser->filePath();
 }
 
 void ROSImportWizardPage::slotProjectNameValidChanged()
@@ -254,7 +254,7 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w, QString *
     Q_UNUSED(errorMessage);
 
     const ROSProjectWizardDialog *wizard = qobject_cast<const ROSProjectWizardDialog *>(w);
-    const QDir wsDir(wizard->workspaceDirectory().toString());
+    const QDir wsDir(wizard->workspaceDirectory().toFSPathString());
 
     const QString projectName = wizard->projectName();
     const Utils::FilePath workspaceFileName = Utils::FilePath::fromFileInfo(QFileInfo(wsDir, projectName + QLatin1String(".workspace")));

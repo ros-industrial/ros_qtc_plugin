@@ -79,7 +79,7 @@ void ROSPackageWizardDialog::setProjectDirectory(const Utils::FilePath &path) {m
 
 QString ROSPackageWizardDialog::packageName() const {return m_detailsPage->packageName();}
 
-QString ROSPackageWizardDialog::packagePath() const {return m_detailsPage->packagePath();}
+Utils::FilePath ROSPackageWizardDialog::packagePath() const {return m_detailsPage->packagePath();}
 
 QString ROSPackageWizardDialog::version() const {return m_detailsPage->version();}
 
@@ -140,17 +140,17 @@ ROSPackageWizardDetailsPage::ROSPackageWizardDetailsPage(QWidget *parent) :
 
 ROSPackageWizardDetailsPage::~ROSPackageWizardDetailsPage() {delete d;}
 
-void ROSPackageWizardDetailsPage::setPath(const Utils::FilePath &path) {d->m_ui.pathChooser->setPath(path.toString());}
+void ROSPackageWizardDetailsPage::setPath(const Utils::FilePath &path) {d->m_ui.pathChooser->setPath(path.toFSPathString());}
 
 void ROSPackageWizardDetailsPage::setProjectDirectory(const Utils::FilePath &path)
 {
     d->m_ui.pathChooser->setInitialBrowsePathBackup(path);
-    d->m_ui.pathChooser->lineEdit()->setPlaceholderText(path.toString());
+    d->m_ui.pathChooser->lineEdit()->setPlaceholderText(path.toFSPathString());
 }
 
 QString ROSPackageWizardDetailsPage::packageName() const {return d->m_ui.packageNameLineEdit->text();}
 
-QString ROSPackageWizardDetailsPage::packagePath() const {return d->m_ui.pathChooser->filePath().toString();}
+Utils::FilePath ROSPackageWizardDetailsPage::packagePath() const {return d->m_ui.pathChooser->filePath();}
 
 QString ROSPackageWizardDetailsPage::version() const {return d->m_ui.versionLineEdit->text();}
 
@@ -268,8 +268,8 @@ Core::GeneratedFiles ROSPackageWizard::generateFiles(const QWizard *w,
     Q_UNUSED(w);
     Q_UNUSED(errorMessage);
 
-    Utils::FilePath packagePath = Utils::FilePath::fromString(m_wizard->packagePath());
-    Utils::FilePath cmakelistPath = Utils::FilePath::fromString(m_wizard->packagePath());
+    Utils::FilePath packagePath = m_wizard->packagePath();
+    Utils::FilePath cmakelistPath = m_wizard->packagePath();
 
     packagePath = packagePath.pathAppended(m_wizard->packageName()).pathAppended(QLatin1String("package.xml"));
     cmakelistPath = cmakelistPath.pathAppended(m_wizard->packageName()).pathAppended(QLatin1String("CMakeLists.txt"));
@@ -363,7 +363,7 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
     create_args.append({"--rosdistro", project->distribution().fileName()});
 
   // create package using ros command catkin_create_pkg
-  const QDir packagePath = m_wizard->packagePath();
+  const QDir packagePath = m_wizard->packagePath().toFSPathString();
   if (!packagePath.exists()) {
       packagePath.mkpath(".");
   }

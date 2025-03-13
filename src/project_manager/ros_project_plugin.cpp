@@ -269,7 +269,7 @@ void ROSProjectPlugin::removeProjectDirectory()
 
   QTC_ASSERT(currentNode && currentNode->isFolderNodeType(), return);
 
-  QString filePath = currentNode->filePath().toString();
+  QString filePath = currentNode->filePath().toFSPathString();
   RemoveDirectoryDialog removeDirectoryDialog(filePath, ICore::mainWindow());
 
   if (removeDirectoryDialog.exec() == QDialog::Accepted)
