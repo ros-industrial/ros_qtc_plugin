@@ -25,7 +25,6 @@
 #include "ros_project.h"
 
 #include <projectexplorer/buildconfiguration.h>
-#include <projectexplorer/namedwidget.h>
 #include <projectexplorer/buildinfo.h>
 #include <projectexplorer/kit.h>
 #include <projectexplorer/target.h>
@@ -63,8 +62,8 @@ public:
 
     void initialize(const ProjectExplorer::BuildInfo &info);
 
-    ProjectExplorer::NamedWidget *createConfigWidget() override;
-    QList<ProjectExplorer::NamedWidget *> createSubConfigWidgets() override;
+    QWidget *createConfigWidget() override;
+    void addSubConfigWidgets(const BuildConfiguration::WidgetAdder &adder) override;
 
     BuildType buildType() const override;
 
@@ -95,7 +94,7 @@ private:
     ROSUtils::BuildSystem m_buildSystem;
     ROSBuildSystem *m_build_system;
     ROSUtils::BuildType m_cmakeBuildType;
-    ProjectExplorer::NamedWidget *m_buildEnvironmentWidget;
+    QWidget *m_buildEnvironmentWidget;
 
 };
 
@@ -113,7 +112,7 @@ private:
     ProjectExplorer::BuildInfo createBuildInfo(const ProjectExplorer::Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const;
 };
 
-class ROSBuildSettingsWidget : public ProjectExplorer::NamedWidget
+class ROSBuildSettingsWidget : public QWidget
 {
     Q_OBJECT
 
@@ -131,7 +130,7 @@ private:
     ROSBuildConfiguration *m_buildConfiguration;
 };
 
-class ROSBuildEnvironmentWidget : public ProjectExplorer::NamedWidget
+class ROSBuildEnvironmentWidget : public QWidget
 {
   Q_OBJECT
 
