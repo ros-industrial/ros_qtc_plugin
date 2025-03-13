@@ -272,7 +272,7 @@ bool ROSUtils::buildWorkspace(QProcess &process, const WorkspaceInfo &workspaceI
 QList<Utils::FilePath> ROSUtils::installedDistributions()
 {
   QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
-  Utils::FilePath custom_ros_path = Utils::FilePath::fromString(ros_settings->custom_dist_path);
+  Utils::FilePath custom_ros_path = ros_settings->custom_dist_path;
   QList<Utils::FilePath> distributions;
   if(custom_ros_path.exists())
   {
@@ -293,7 +293,7 @@ QList<Utils::FilePath> ROSUtils::installedDistributions()
     }
   }
 
-  Utils::FilePath default_ros_path = Utils::FilePath::fromString(ros_settings->default_dist_path);
+  Utils::FilePath default_ros_path = ros_settings->default_dist_path;
   if (default_ros_path.exists())
   {
     QDir ros_opt(default_ros_path.toFSPathString());

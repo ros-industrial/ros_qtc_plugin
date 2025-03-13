@@ -73,9 +73,9 @@ void ROSSettings::toSettings(Utils::QtcSettings *s) const
     if (default_dist_path.isEmpty())
       s->setValue(DEFAULT_DISTRIBUTION_PATH_ID, Constants::ROS_INSTALL_DIRECTORY);
     else
-      s->setValue(DEFAULT_DISTRIBUTION_PATH_ID, default_dist_path);
+      s->setValue(DEFAULT_DISTRIBUTION_PATH_ID, default_dist_path.toFSPathString());
 
-    s->setValue(CUSTOM_DISTRIBUTION_PATH_ID, custom_dist_path);
+    s->setValue(CUSTOM_DISTRIBUTION_PATH_ID, custom_dist_path.toFSPathString());
 
     s->endGroup();
 }
@@ -91,12 +91,12 @@ void ROSSettings::fromSettings(Utils::QtcSettings *s)
 
     default_build_system = static_cast<ROSUtils::BuildSystem>(s->value(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(ROSUtils::BuildSystem::CatkinTools)).toInt());
     default_code_style = s->value(DEFAULT_CODE_STYLE_ID, "ROS").toString();
-    default_dist_path = s->value(DEFAULT_DISTRIBUTION_PATH_ID, Constants::ROS_INSTALL_DIRECTORY).toString();
+    default_dist_path = Utils::FilePath::fromString(s->value(DEFAULT_DISTRIBUTION_PATH_ID, Constants::ROS_INSTALL_DIRECTORY).toString());
 
     if (default_dist_path.isEmpty())
       default_dist_path = Constants::ROS_INSTALL_DIRECTORY;
 
-    custom_dist_path = s->value(CUSTOM_DISTRIBUTION_PATH_ID, "").toString();
+    custom_dist_path = Utils::FilePath::fromString(s->value(CUSTOM_DISTRIBUTION_PATH_ID, "").toString());
     s->endGroup();
 }
 
@@ -159,12 +159,12 @@ ROSSettings ROSSettingsWidget::settings() const
     rc.default_distribution = m_ui->distributionComboBox->currentText();
     rc.default_build_system = static_cast<ROSUtils::BuildSystem>(m_ui->buildSystemComboBox->currentIndex());
     rc.default_code_style = m_available_code_styles[m_ui->codeStyleComboBox->currentText()];
-    rc.default_dist_path = m_ui->defaultDistributionPathChooser->filePath().toFSPathString();
+    rc.default_dist_path = m_ui->defaultDistributionPathChooser->filePath();
 
     if (rc.default_dist_path.isEmpty())
       rc.default_dist_path = Constants::ROS_INSTALL_DIRECTORY;
 
-    rc.custom_dist_path = m_ui->customDistributionPathChooser->filePath().toFSPathString();
+    rc.custom_dist_path = m_ui->customDistributionPathChooser->filePath();
     return rc;
 }
 
@@ -186,9 +186,9 @@ void ROSSettingsWidget::setSettings(const ROSSettings &s)
     if (s.default_dist_path.isEmpty())
       m_ui->defaultDistributionPathChooser->setPath(Constants::ROS_INSTALL_DIRECTORY);
     else
-      m_ui->defaultDistributionPathChooser->setPath(s.default_dist_path);
+      m_ui->defaultDistributionPathChooser->setFilePath(s.default_dist_path);
 
-    m_ui->customDistributionPathChooser->setPath(s.custom_dist_path);
+    m_ui->customDistributionPathChooser->setFilePath(s.custom_dist_path);
 }
 
 // --------------- ROSSettingsPage
