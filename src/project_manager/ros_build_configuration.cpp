@@ -65,6 +65,8 @@ const char ROS_BC_CMAKE_BUILD_TYPE[] = "ROSProjectManager.ROSBuildConfiguration.
 ROSBuildConfiguration::ROSBuildConfiguration(Target *parent, Utils::Id id)
     : BuildConfiguration(parent, id)
 {
+    setConfigWidgetDisplayName(tr("ROS Manager"));
+
     setInitializer(std::bind(&ROSBuildConfiguration::initialize, this, std::placeholders::_1));
 
     m_build_system = new ROSBuildSystem(this);
@@ -182,14 +184,15 @@ void ROSBuildConfiguration::updateQtEnvironment(const Utils::Environment &env)
       setUserEnvironmentChanges(diff);
 }
 
-NamedWidget *ROSBuildConfiguration::createConfigWidget()
+QWidget *ROSBuildConfiguration::createConfigWidget()
 {
     return new ROSBuildSettingsWidget(this);
 }
 
-QList<NamedWidget *> ROSBuildConfiguration::createSubConfigWidgets()
+void ROSBuildConfiguration::addSubConfigWidgets(const BuildConfiguration::WidgetAdder &adder)
 {
-  return QList<NamedWidget *>() << new ROSBuildEnvironmentWidget(this);
+    adder(new ROSBuildEnvironmentWidget(this), tr("Build Environment"));
+    ProjectExplorer::BuildConfiguration::addSubConfigWidgets(adder);
 }
 
 /*!
@@ -286,8 +289,7 @@ BuildConfiguration::BuildType ROSBuildConfiguration::buildType() const
 ////////////////////////////////////////////////////////////////////////////////////
 
 ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
-    : NamedWidget(tr("ROS Manager")),
-      m_buildConfiguration(bc)
+    : m_buildConfiguration(bc)
 {
     m_ui = new Ui::ROSBuildConfiguration;
     m_ui->setupUi(this);
@@ -324,7 +326,6 @@ void ROSBuildSettingsWidget::buildTypeChanged(int index)
 ////////////////////////////////////////////////////////////////////////////////////
 
 ROSBuildEnvironmentWidget::ROSBuildEnvironmentWidget(BuildConfiguration *bc)
-    : NamedWidget(tr("Build Environment"))
 {
     QVBoxLayout *vbox = new QVBoxLayout(this);
     m_clearSystemEnvironmentCheckBox = new QCheckBox(this);
