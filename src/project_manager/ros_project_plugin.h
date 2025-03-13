@@ -45,7 +45,7 @@ class ROSProjectPlugin : public ExtensionSystem::IPlugin
 public:
     ROSProjectPlugin();
     ~ROSProjectPlugin() override;
-    bool initialize(const QStringList &arguments, QString *errorString) override;
+    void initialize() override;
     void extensionsInitialized() override {}
 
     static ROSProjectPlugin *instance();

@@ -200,8 +200,6 @@ ROSSettingsPage::ROSSettingsPage(QSharedPointer<ROSSettings> &settings,
     setId(Constants::ROS_SETTINGS_MAIN_PAGE_ID);
     setDisplayName(QCoreApplication::translate(Constants::ROS_SETTINGS_MAIN_PAGE_NAME_ID, "ROS Main Settings"));
     setCategory(Constants::ROS_SETTINGS_CATEGORY_ID);
-    setDisplayCategory(QCoreApplication::translate(Constants::ROS_SETTINGS_CATEGORY_NAME_ID, "ROS"));
-    setCategoryIconPath(":rosproject/ros_icon.png");
 }
 
 QWidget *ROSSettingsPage::widget()
