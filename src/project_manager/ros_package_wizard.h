@@ -49,7 +49,7 @@ public:
     void setProjectDirectory(const Utils::FilePath &path);
 
     QString packageName() const;
-    QString packagePath() const;
+    Utils::FilePath packagePath() const;
     QString version() const;
     QString licenses() const;
     QString description() const;
@@ -75,7 +75,7 @@ public:
     void setProjectDirectory(const Utils::FilePath &path);
 
     QString packageName() const;
-    QString packagePath() const;
+    Utils::FilePath packagePath() const;
     QString version() const;
     QString licenses() const;
     QString description() const;

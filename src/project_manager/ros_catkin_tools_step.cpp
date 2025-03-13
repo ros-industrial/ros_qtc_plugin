@@ -363,7 +363,7 @@ void ROSCatkinToolsStepWidget::updateDetails()
     m_makeStep->m_catkinMakeArguments = m_ui->catkinMakeArgumentsLineEdit->text();
     m_makeStep->m_cmakeArguments = m_ui->cmakeArgumentsLineEdit->text();
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
-    m_makeStep->m_catkinToolsWorkingDir = m_ui->catkinToolsWorkingDirWidget->unexpandedFilePath().toString();
+    m_makeStep->m_catkinToolsWorkingDir = m_ui->catkinToolsWorkingDirWidget->unexpandedFilePath().toFSPathString();
 
     ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
@@ -701,12 +701,12 @@ bool ROSCatkinToolsConfigEditorWidget::parseProfileConfig(Utils::FilePath filePa
     m_profileConfigPath = filePath;
     if (!m_profileConfigPath.exists())
     {
-        Core::MessageManager::writeSilently(tr("[ROS Warning] Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString()));
+        Core::MessageManager::writeSilently(tr("[ROS Warning] Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toFSPathString()));
         return false;
     }
     m_parsing = true;
 
-    m_profile_original = YAML::LoadFile(m_profileConfigPath.toString().toStdString());
+    m_profile_original = YAML::LoadFile(m_profileConfigPath.toFSPathString().toStdString());
     m_profile_current = m_profile_original;
     m_modified = false;
 
@@ -790,11 +790,11 @@ bool ROSCatkinToolsConfigEditorWidget::saveProfileConfig()
 {
     if (!m_profileConfigPath.exists())
     {
-        Core::MessageManager::writeSilently(tr("[ROS Warning] Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toString()));
+        Core::MessageManager::writeSilently(tr("[ROS Warning] Catkin Tools Profile Config File: %1, does not exist.").arg(m_profileConfigPath.toFSPathString()));
         return false;
     }
 
-    std::ofstream fout(m_profileConfigPath.toString().toStdString());
+    std::ofstream fout(m_profileConfigPath.toFSPathString().toStdString());
     fout << m_profile_current; // dump it back into the file
     fout.close();
 
@@ -811,8 +811,8 @@ void ROSCatkinToolsConfigEditorWidget::propertyChanged()
     {
         m_modified = true;
 
-        if (!m_ui->extend_path_chooser->filePath().toString().isEmpty())
-            m_profile_original["extend_path"] = m_ui->extend_path_chooser->filePath().toString().trimmed().toStdString();
+        if (!m_ui->extend_path_chooser->filePath().toFSPathString().isEmpty())
+            m_profile_original["extend_path"] = m_ui->extend_path_chooser->filePath().toFSPathString().trimmed().toStdString();
         else
             m_profile_original["extend_path"] = "null";
 
@@ -856,7 +856,7 @@ bool ROSCatkinToolsConfigEditorWidget::isModified() const
 bool ROSCatkinToolsConfigEditorWidget::isValid() const
 {
     bool valid = true;
-    if (!m_ui->extend_path_chooser->filePath().toString().isEmpty())
+    if (!m_ui->extend_path_chooser->filePath().toFSPathString().isEmpty())
         valid &= m_ui->extend_path_chooser->isValid();
 
     valid &= m_ui->space_source_lineEdit->isValid();

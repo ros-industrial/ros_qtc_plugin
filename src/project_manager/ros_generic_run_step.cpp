@@ -94,21 +94,21 @@ void ROSGenericRunStep::run()
   {
       // Some reason if a workspace does not contain at least one catkin package it does not generate a setup.bash only a setup.sh
       if (source_bash_file.exists())
-        source_cmd = QString("source %1\n").arg(source_bash_file.toString());
+        source_cmd = QString("source %1\n").arg(source_bash_file.toFSPathString());
       else
-        source_cmd = QString("source %1\n").arg(source_shell_file.toString());
+        source_cmd = QString("source %1\n").arg(source_shell_file.toFSPathString());
   }
   else if (shell.fileName() == "sh")
   {
-      source_cmd = QString("source %1\n").arg(source_shell_file.toString());
+      source_cmd = QString("source %1\n").arg(source_shell_file.toFSPathString());
   }
   else if (shell.fileName() == "zsh")
   {
-      source_cmd = QString("source %1\n").arg(source_zshell_file.toString());
+      source_cmd = QString("source %1\n").arg(source_zshell_file.toFSPathString());
   }
   else
   {
-       Core::MessageManager::writeFlashing(tr("[ROS Error] The shell: %1 is currently not supported (Use bash, sh, or zsh)!").arg(shell.toString()));
+       Core::MessageManager::writeFlashing(tr("[ROS Error] The shell: %1 is currently not supported (Use bash, sh, or zsh)!").arg(shell.toFSPathString()));
   }
 
 #ifdef ROSTERMINAL

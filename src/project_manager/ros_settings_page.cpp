@@ -52,7 +52,7 @@ ROSSettings::ROSSettings()
   Utils::FilePath ros_path = Utils::FilePath::fromString(Constants::ROS_INSTALL_DIRECTORY);
   if (ros_path.exists())
   {
-    QDir ros_opt(ros_path.toString());
+    QDir ros_opt(ros_path.toFSPathString());
     ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
     for (auto entry : ros_opt.entryList())
     {
@@ -87,7 +87,7 @@ void ROSSettings::fromSettings(Utils::QtcSettings *s)
     default_distribution = s->value(DEFAULT_DISTRIBUTION_ID, "").toString();
 
     if (default_distribution.isEmpty() && !m_system_distributions.empty())
-      default_distribution = m_system_distributions.first().toString();
+      default_distribution = m_system_distributions.first().toFSPathString();
 
     default_build_system = static_cast<ROSUtils::BuildSystem>(s->value(DEFAULT_BUILD_SYSTEM_ID, static_cast<int>(ROSUtils::BuildSystem::CatkinTools)).toInt());
     default_code_style = s->value(DEFAULT_CODE_STYLE_ID, "ROS").toString();
@@ -121,7 +121,7 @@ ROSSettingsWidget::ROSSettingsWidget(QWidget *parent) :
     // Add available ros distributions
     QStringList installed_distributions;
     for(auto entry : ROSUtils::installedDistributions())
-      installed_distributions.append(entry.toString());
+      installed_distributions.append(entry.toFSPathString());
 
     m_ui->distributionComboBox->addItems(installed_distributions);
 
@@ -159,12 +159,12 @@ ROSSettings ROSSettingsWidget::settings() const
     rc.default_distribution = m_ui->distributionComboBox->currentText();
     rc.default_build_system = static_cast<ROSUtils::BuildSystem>(m_ui->buildSystemComboBox->currentIndex());
     rc.default_code_style = m_available_code_styles[m_ui->codeStyleComboBox->currentText()];
-    rc.default_dist_path = m_ui->defaultDistributionPathChooser->filePath().toString();
+    rc.default_dist_path = m_ui->defaultDistributionPathChooser->filePath().toFSPathString();
 
     if (rc.default_dist_path.isEmpty())
       rc.default_dist_path = Constants::ROS_INSTALL_DIRECTORY;
 
-    rc.custom_dist_path = m_ui->customDistributionPathChooser->filePath().toString();
+    rc.custom_dist_path = m_ui->customDistributionPathChooser->filePath().toFSPathString();
     return rc;
 }
 
