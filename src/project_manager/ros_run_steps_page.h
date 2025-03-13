@@ -25,7 +25,6 @@
 #include "ros_run_configuration.h"
 
 #include <projectexplorer/buildstep.h>
-#include <projectexplorer/namedwidget.h>
 #include <utils/detailsbutton.h>
 
 QT_BEGIN_NAMESPACE
@@ -90,7 +89,7 @@ public:
     ToolWidget *toolWidget;
 };
 
-class RunStepListWidget : public ProjectExplorer::NamedWidget
+class RunStepListWidget : public QWidget
 {
     Q_OBJECT
 
@@ -125,7 +124,7 @@ private:
 
 namespace Ui { class RunStepsPage; }
 
-class RunStepsPage : public ProjectExplorer::NamedWidget
+class RunStepsPage : public QWidget
 {
     Q_OBJECT
 

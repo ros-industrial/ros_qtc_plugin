@@ -186,7 +186,7 @@ RunStepsWidgetData::~RunStepsWidgetData()
 }
 
 RunStepListWidget::RunStepListWidget(QWidget *parent) :
-    NamedWidget(tr("Steps"), parent)
+    QWidget(parent)
 {
 }
 
@@ -438,7 +438,6 @@ void RunStepListWidget::updateRunStepButtonsState()
 }
 
 RunStepsPage::RunStepsPage(ROSRunConfiguration *rc, Utils::Id id) :
-    NamedWidget(tr("ROS Run Steps")),
     m_id(id),
     m_widget(new RunStepListWidget(this))
 {
