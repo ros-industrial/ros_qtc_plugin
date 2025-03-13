@@ -203,13 +203,14 @@ void ROSDebugRunWorker::start()
 
 void ROSDebugRunWorker::pidFound(const Utils::ProcessInfo &process)
 {
+    Debugger::DebuggerRunParameters &rp = runParameters();
     m_timer.stop();
-    setAttachPid(Utils::ProcessHandle(process.processId));
+    rp.setAttachPid(Utils::ProcessHandle(process.processId));
     setId(tr("Process %1").arg(process.processId));
-    setInferiorExecutable(Utils::FilePath::fromString(process.executable));
-    setStartMode(Debugger::StartExternal);
-    setCloseMode(Debugger::DetachAtClose);
-    setContinueAfterAttach(m_debugContinueOnAttach);
+    rp.setInferiorExecutable(Utils::FilePath::fromString(process.executable));
+    rp.setStartMode(Debugger::StartExternal);
+    rp.setCloseMode(Debugger::DetachAtClose);
+    rp.setContinueAfterAttach(m_debugContinueOnAttach);
     DebuggerRunTool::start();
 }
 
