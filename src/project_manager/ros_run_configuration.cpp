@@ -159,7 +159,7 @@ void ROSDebugRunWorker::start()
             found = true;
             m_debugContinueOnAttach = qobject_cast<ROSGenericRunStep *>(rs)->getDebugContinueOnAttach();
             m_debugTargetPath = qobject_cast<ROSGenericRunStep *>(rs)->getTargetPath();
-            if (QFileInfo(m_debugTargetPath).exists())
+            if (QFileInfo::exists(m_debugTargetPath))
             {
                 m_timeElapsed = 0;
                 m_timer.start(10);
