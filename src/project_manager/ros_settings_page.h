@@ -81,8 +81,7 @@ private:
 class ROSSettingsPage : public Core::IOptionsPage
 {
 public:
-    explicit ROSSettingsPage(QSharedPointer<ROSSettings> &settings,
-                             QObject *parent = nullptr);
+    explicit ROSSettingsPage(QSharedPointer<ROSSettings> &settings);
 
     QWidget *widget() override;
     void apply() override;

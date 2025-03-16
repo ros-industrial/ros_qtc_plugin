@@ -191,9 +191,7 @@ void ROSSettingsWidget::setSettings(const ROSSettings &s)
 }
 
 // --------------- ROSSettingsPage
-ROSSettingsPage::ROSSettingsPage(QSharedPointer<ROSSettings> &settings,
-                                 QObject *parent) :
-    Core::IOptionsPage(parent),
+ROSSettingsPage::ROSSettingsPage(QSharedPointer<ROSSettings> &settings) :
     m_settings(settings)
 {
     setId(Constants::ROS_SETTINGS_MAIN_PAGE_ID);
