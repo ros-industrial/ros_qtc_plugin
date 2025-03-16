@@ -61,12 +61,12 @@ private:
     QList<Utils::FilePath> m_system_distributions;
 };
 
-class ROSSettingsWidget : public QWidget
+class ROSSettingsWidget : public Core::IOptionsPageWidget
 {
   Q_OBJECT
 
 public:
-  explicit ROSSettingsWidget(QWidget *parent = 0);
+  explicit ROSSettingsWidget();
   ~ROSSettingsWidget();
 
   ROSSettings settings() const;

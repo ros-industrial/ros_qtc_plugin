@@ -111,8 +111,7 @@ bool ROSSettings::equals(const ROSSettings &rhs) const
 
 // ------------------ ROSSettingsWidget
 
-ROSSettingsWidget::ROSSettingsWidget(QWidget *parent) :
-    QWidget(parent),
+ROSSettingsWidget::ROSSettingsWidget() :
     m_ui(new Ui::ROSSettingsPage),
     m_available_code_style_names(new QStringListModel)
 {
