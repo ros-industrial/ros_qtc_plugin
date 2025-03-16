@@ -16,6 +16,6 @@
     ],
     "Category" : "Build Systems",
     "Description" : "ROS Support.",
-    "Url" : "http://www.qt.io",
+    "Url" : "https://github.com/ros-industrial/ros_qtc_plugin",
     ${IDE_PLUGIN_DEPENDENCIES}
 }
