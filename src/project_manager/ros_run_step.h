@@ -194,7 +194,7 @@ signals:
     void stepMoved(int from, int to);
 
 private slots:
-    void runStep_enabledChanged(RunStep *step);
+    void runStep_enabledChanged(ROSProjectManager::Internal::RunStep *step);
 
 private:
     QList<RunStep *> m_steps;
