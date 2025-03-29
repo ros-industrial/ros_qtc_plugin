@@ -200,8 +200,6 @@ bool ROSPackageWizardDetailsPage::validateWithValidator(Utils::FancyLineEdit *ed
         return false;
     }
 
-    const QFileInfo fi(path);
-
     if (!path.startsWith(edit->placeholderText()))
     {
         if (errorMessage)
