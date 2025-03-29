@@ -29,8 +29,9 @@
 #include <utils/algorithm.h>
 #include <QDebug>
 
-static const char runStepEnabledKey[] = "ProjectExplorer.RunStep.Enabled";
+// clazy:excludeall=non-pod-global-static
 
+static constexpr char runStepEnabledKey[] = "ProjectExplorer.RunStep.Enabled";
 
 
 namespace ROSProjectManager {
