@@ -30,6 +30,8 @@
 #include <QFutureInterface>
 #include <QWidget>
 
+// clazy:excludeall=overridden-signal
+
 namespace ROSProjectManager {
 namespace Internal {
 
