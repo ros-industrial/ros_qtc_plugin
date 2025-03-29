@@ -836,7 +836,8 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   if (process.exitStatus() != QProcess::CrashExit)
   {
     QString output = QString::fromStdString(process.readAllStandardOutput().toStdString());
-    QStringList package_list = output.split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts);
+    static const QRegularExpression ex_newline("[\r\n]");
+    QStringList package_list = output.split(ex_newline, Qt::SkipEmptyParts);
 
     for (const QString& str : package_list)
     {
@@ -906,7 +907,8 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
   if (process.exitStatus() != QProcess::CrashExit)
   {
     QString output = QString::fromStdString(process.readAllStandardOutput().toStdString());
-    QStringList loc_list = output.split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts);
+    static const QRegularExpression ex_newline("[\r\n]");
+    QStringList loc_list = output.split(ex_newline, Qt::SkipEmptyParts);
 
     if (loc_list.size() > 0)
     {
