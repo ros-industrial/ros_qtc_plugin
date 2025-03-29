@@ -1,0 +1,36 @@
+name: ROS Qt Creator plugin clazy checks
+
+on:
+  push:
+    paths-ignore: ["**.md"]
+  pull_request:
+    paths-ignore: ["**.md"]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install libgl1-mesa-dev ninja-build libutf8proc-dev libcups2-dev
+          sudo apt install clazy
+
+      - name: install Qt and Qt Creator
+        run: |
+          pip install pyyaml requests py7zr==0.21 tqdm_loggable
+          python install-sdk.py --export_variables
+          cat env >> $GITHUB_ENV
+
+      - name: build plugin
+        run: |
+          cmake -B build -G Ninja -D CMAKE_PREFIX_PATH="${{ env.QTC_PATH }};${{ env.QT_PATH }}" -D CMAKE_CXX_COMPILER=clazy -D BUILD_ROSTERMINAL=OFF
+          cmake --build build --target package
