@@ -41,7 +41,6 @@
 #include <QHBoxLayout>
 #include <QToolButton>
 #include <QMessageBox>
-#include <QtWidgets>
 
 // clazy:excludeall=connect-3arg-lambda
 
