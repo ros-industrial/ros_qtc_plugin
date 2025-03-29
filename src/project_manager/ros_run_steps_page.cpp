@@ -43,6 +43,8 @@
 #include <QMessageBox>
 #include <QtWidgets>
 
+// clazy:excludeall=connect-3arg-lambda
+
 namespace ROSProjectManager {
 namespace Internal {
 
