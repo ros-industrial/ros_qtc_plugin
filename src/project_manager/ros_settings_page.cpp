@@ -174,8 +174,8 @@ void ROSSettingsWidget::setSettings(const ROSSettings &s)
 
     m_ui->buildSystemComboBox->setCurrentIndex(static_cast<int>(s.default_build_system));
 
-    for (const auto& key : m_available_code_styles.keys()) {
-        if (m_available_code_styles.value(key) == s.default_code_style) {
+    for (const auto& [key, value] : m_available_code_styles.asKeyValueRange()) {
+        if (value == s.default_code_style) {
             idx = m_ui->codeStyleComboBox->findText(key, Qt::MatchExactly);
             m_ui->codeStyleComboBox->setCurrentIndex(idx);
             break;
