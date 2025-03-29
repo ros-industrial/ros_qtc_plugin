@@ -520,7 +520,7 @@ ROSUtils::PackageInfoMap ROSUtils::getWorkspacePackageInfo(const WorkspaceInfo &
     PackageInfoMap wsPackageInfo;
     QMap<QString, QString> packages =  ROSUtils::getWorkspacePackagePaths(workspaceInfo);
 
-    for(const auto& it : packages)
+    for(const auto& it : std::as_const(packages))
     {
         Utils::FilePath pkgXml = Utils::FilePath::fromString(it).pathAppended("package.xml");
         ROSUtils::PackageInfo packageInfo;

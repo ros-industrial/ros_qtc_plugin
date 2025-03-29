@@ -343,7 +343,7 @@ void RunStepList::runStep_enabledChanged(RunStep *step)
 {
     if (step->enabled() == true)
     {
-        for (RunStep *rs : m_steps)
+        for (RunStep *rs : std::as_const(m_steps))
         {
             if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID && rs != step)
             {
@@ -369,7 +369,7 @@ void RunStepList::insertStep(int position, RunStep *step)
     {
         if (step->enabled() == true)
         {
-            for (RunStep *rs : m_steps)
+            for (RunStep *rs : std::as_const(m_steps))
             {
                 if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID)
                 {

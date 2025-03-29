@@ -202,7 +202,7 @@ void RunStepListWidget::updateSummary()
 {
     RunStepConfigWidget *widget = qobject_cast<RunStepConfigWidget *>(sender());
     if (widget) {
-        for (const RunStepsWidgetData *s : m_runStepsData) {
+        for (const RunStepsWidgetData *s : std::as_const(m_runStepsData)) {
             if (s->widget == widget) {
                 s->detailsWidget->setSummaryText(widget->summaryText());
                 break;
@@ -215,7 +215,7 @@ void RunStepListWidget::updateAdditionalSummary()
 {
     RunStepConfigWidget *widget = qobject_cast<RunStepConfigWidget *>(sender());
     if (widget) {
-        for (const RunStepsWidgetData *s : m_runStepsData) {
+        for (const RunStepsWidgetData *s : std::as_const(m_runStepsData)) {
             if (s->widget == widget) {
                 s->detailsWidget->setAdditionalSummaryText(widget->additionalSummaryText());
                 break;
