@@ -475,7 +475,7 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContentRecursive(cons
 
         QString folder_name = Utils::FilePath::fromString(folder).fileName();
         bool found = false;
-        for (const auto& filter : qAsConst(folderNameFilters))
+        for (const auto& filter : std::as_const(folderNameFilters))
         {
           QRegularExpression rx(filter);
           if (rx.match(folder_name).hasMatch())
