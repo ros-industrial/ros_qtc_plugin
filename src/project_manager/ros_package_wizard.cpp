@@ -187,7 +187,8 @@ void ROSPackageWizardDetailsPage::slotActivated()
 
 QStringList ROSPackageWizardDetailsPage::processList(const QString &text) const
 {
-    return text.split(QRegularExpression(QLatin1String("[,; ]")), Qt::SkipEmptyParts);
+    static const QRegularExpression ex("[,; ]");
+    return text.split(ex, Qt::SkipEmptyParts);
 }
 
 bool ROSPackageWizardDetailsPage::validateWithValidator(Utils::FancyLineEdit *edit, QString *errorMessage)
