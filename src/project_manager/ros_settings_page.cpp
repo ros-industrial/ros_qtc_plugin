@@ -54,7 +54,7 @@ ROSSettings::ROSSettings()
   {
     QDir ros_opt(ros_path.toFSPathString());
     ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    for (auto entry : ros_opt.entryList())
+    for (const QString &entry : ros_opt.entryList())
     {
       Utils::FilePath path = Utils::FilePath::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
       path = path.pathAppended(entry);
@@ -119,7 +119,7 @@ ROSSettingsWidget::ROSSettingsWidget() :
 
     // Add available ros distributions
     QStringList installed_distributions;
-    for(auto entry : ROSUtils::installedDistributions())
+    for(const Utils::FilePath &entry : ROSUtils::installedDistributions())
       installed_distributions.append(entry.toFSPathString());
 
     m_ui->distributionComboBox->addItems(installed_distributions);
