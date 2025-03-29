@@ -473,7 +473,7 @@ void ROSCatkinToolsStepWidget::editProfile(const QString profileName)
 void ROSCatkinToolsStepWidget::removeProfile(const QString profileName)
 {
     ROSUtils::removeCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
-    setProfile(ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory())[0]);
+    setProfile(ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory()).constFirst());
 }
 
 QString ROSCatkinToolsStepWidget::uniqueName(const QString &name, const bool &isRename)
