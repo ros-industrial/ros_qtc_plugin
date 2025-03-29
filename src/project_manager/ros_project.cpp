@@ -54,7 +54,6 @@
 #include <utils/algorithm.h>
 
 #include <QDir>
-#include <QtWidgets>
 #include <QProcessEnvironment>
 #include <QtXml/QDomDocument>
 #include <QtConcurrentRun>
