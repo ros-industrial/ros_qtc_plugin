@@ -221,7 +221,7 @@ ROSCatkinMakeStep::BuildTargets ROSCatkinMakeStep::buildTarget() const
     return m_target;
 }
 
-void ROSCatkinMakeStep::setBuildTarget(const BuildTargets &target)
+void ROSCatkinMakeStep::setBuildTarget(const BuildTargets target)
 {
     m_target = target;
 }
@@ -295,7 +295,7 @@ void ROSCatkinMakeStepWidget::updateDetails()
     m_summaryText = param.summary(displayName());
 }
 
-void ROSCatkinMakeStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSystem)
+void ROSCatkinMakeStepWidget::updateBuildSystem(const ROSUtils::BuildSystem buildSystem)
 {
     m_makeStep->setEnabled((buildSystem == ROSUtils::CatkinMake));
 }

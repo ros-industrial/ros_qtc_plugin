@@ -64,7 +64,7 @@ public:
     virtual void setTarget(const QString &target);
     virtual void setTargetPath(const QString &target);
     virtual void setArguments(const QString &arguments);
-    virtual void setDebugContinueOnAttach(const bool &contOnAttach);
+    virtual void setDebugContinueOnAttach(const bool contOnAttach);
 
 protected:
     void fromMap(const Utils::Store &map) override;
@@ -93,7 +93,7 @@ public:
     QString displayName() const override;
 
 private slots:
-    void debugCheckBox_toggled(const bool &arg1);
+    void debugCheckBox_toggled(const bool arg1);
 
     void packageComboBox_currentIndexChanged(const QString &arg1);
 

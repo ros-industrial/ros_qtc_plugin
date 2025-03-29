@@ -227,7 +227,7 @@ ROSColconStep::BuildTargets ROSColconStep::buildTarget() const
     return m_target;
 }
 
-void ROSColconStep::setBuildTarget(const BuildTargets &target)
+void ROSColconStep::setBuildTarget(const BuildTargets target)
 {
     m_target = target;
 }
@@ -296,7 +296,7 @@ void ROSColconStepWidget::updateDetails()
     m_summaryText = param.summary(displayName());
 }
 
-void ROSColconStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSystem)
+void ROSColconStepWidget::updateBuildSystem(const ROSUtils::BuildSystem buildSystem)
 {
     m_makeStep->setEnabled((buildSystem == ROSUtils::Colcon));
 }

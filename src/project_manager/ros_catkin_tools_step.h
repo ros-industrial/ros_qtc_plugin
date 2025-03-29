@@ -63,7 +63,7 @@ public:
 
     ROSBuildConfiguration *rosBuildConfiguration() const;
     BuildTargets buildTarget() const;
-    void setBuildTarget(const BuildTargets &target);
+    void setBuildTarget(const BuildTargets target);
 
     QString activeProfile() const;
     void setActiveProfile(const QString &profileName);
@@ -104,7 +104,7 @@ public:
 
 private slots:
     void updateDetails();
-    void updateBuildSystem(const ROSUtils::BuildSystem &buildSystem);
+    void updateBuildSystem(const ROSUtils::BuildSystem buildSystem);
     void enabledChanged();
 
 private:
@@ -123,7 +123,7 @@ private:
     void removeProfile(const QString profileName);
     void editProfile(const QString profileName);
 
-    QString uniqueName(const QString &name, const bool &isRename);
+    QString uniqueName(const QString &name, const bool isRename);
 };
 
 class ROSCatkinToolsProfileEditorDialog : public QDialog

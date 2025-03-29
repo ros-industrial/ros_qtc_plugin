@@ -167,7 +167,7 @@ public:
      * @param buildType ENUM BuildType
      * @return QString for ENUM BuildType
      */
-    static QString buildTypeName(const ROSUtils::BuildType &buildType);
+    static QString buildTypeName(const ROSUtils::BuildType buildType);
 
     /**
      * @brief Source ROS
@@ -279,7 +279,7 @@ public:
      * @return Workspace information
      */
     static WorkspaceInfo getWorkspaceInfo(const Utils::FilePath &workspaceDir,
-                                          const BuildSystem &buildSystem,
+                                          const BuildSystem buildSystem,
                                           const Utils::FilePath &rosDistribution);
 
     /**

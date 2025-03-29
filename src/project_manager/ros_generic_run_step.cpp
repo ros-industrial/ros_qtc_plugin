@@ -235,7 +235,7 @@ void ROSGenericRunStep::setArguments(const QString &arguments)
   m_arguments = arguments;
 }
 
-void ROSGenericRunStep::setDebugContinueOnAttach(const bool &contOnAttach)
+void ROSGenericRunStep::setDebugContinueOnAttach(const bool contOnAttach)
 {
   m_debugContinueOnAttach = contOnAttach;
 }
@@ -347,7 +347,7 @@ QString ROSGenericRunStepConfigWidget::summaryText() const
                m_rosGenericStep->getArguments());
 }
 
-void ROSGenericRunStepConfigWidget::debugCheckBox_toggled(const bool &arg1)
+void ROSGenericRunStepConfigWidget::debugCheckBox_toggled(const bool arg1)
 {
     m_rosGenericStep->setDebugContinueOnAttach(arg1);
 }

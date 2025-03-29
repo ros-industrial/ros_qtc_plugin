@@ -155,7 +155,7 @@ BuildSystem *ROSBuildConfiguration::buildSystem() const
     return m_build_system;
 }
 
-void ROSBuildConfiguration::setBuildSystem(const ROSUtils::BuildSystem &buildSystem)
+void ROSBuildConfiguration::setBuildSystem(const ROSUtils::BuildSystem buildSystem)
 {
     m_buildSystem = buildSystem;
     emit buildSystemChanged(buildSystem);
@@ -166,7 +166,7 @@ ROSUtils::BuildType ROSBuildConfiguration::cmakeBuildType() const
     return m_cmakeBuildType;
 }
 
-void ROSBuildConfiguration::setCMakeBuildType(const ROSUtils::BuildType &buildType)
+void ROSBuildConfiguration::setCMakeBuildType(const ROSUtils::BuildType buildType)
 {
     m_cmakeBuildType = buildType;
     emit cmakeBuildTypeChanged(buildType);
@@ -235,7 +235,7 @@ QList<BuildInfo> ROSBuildConfigurationFactory::availableBuilds(const Kit *k,
     return result;
 }
 
-ProjectExplorer::BuildInfo ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const
+ProjectExplorer::BuildInfo ROSBuildConfigurationFactory::createBuildInfo(const Kit *k, const ROSUtils::BuildSystem build_system, const ROSUtils::BuildType type) const
 {
     ProjectExplorer::BuildInfo info;
     info.kitId = k->id();
