@@ -124,7 +124,7 @@ ROSImportWizardPage::ROSImportWizardPage(QWidget *parent) :
     d->m_ui.setupUi(this);
     QStringList dist_list;
     dist_list.append(QString{});
-    for(auto entry : ROSUtils::installedDistributions())
+    for(const Utils::FilePath &entry : ROSUtils::installedDistributions())
     {
         dist_list.append(entry.toFSPathString());
     }
