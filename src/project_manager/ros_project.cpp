@@ -103,7 +103,7 @@ static FolderNode *recursiveFindOrCreateFolderNode(FolderNode *folder,
         parts[0].prepend('/');
 
     ProjectExplorer::FolderNode *parent = folder;
-    for (const QString &part : parts) {
+    for (const QString &part : std::as_const(parts)) {
         path = path.pathAppended(part);
         // Find folder in subFolders
         FolderNode *next = folderNode(parent, path);
@@ -519,7 +519,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
                     toolChainIncludes.insert(hp.path);
                 }
 
-                for (const QString &i : targetInfo->includes) {
+                for (const QString &i : std::as_const(targetInfo->includes)) {
                     if (!toolChainIncludes.contains(i) && !package_includes.contains(i)) {
                         packageHeaderPaths.append(ProjectExplorer::HeaderPath(i, ProjectExplorer::HeaderPathType::System));
                         package_includes.append(i);

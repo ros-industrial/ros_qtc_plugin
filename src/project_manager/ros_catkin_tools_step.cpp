@@ -400,7 +400,7 @@ void ROSCatkinToolsStepWidget::updateProfileButtonMenu()
     m_profileMenu->clear();
 
     QStringList profileNames = ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory());
-    for(const QString& profile : profileNames)
+    for(const QString& profile : std::as_const(profileNames))
     {
         QAction *action = m_profileMenu->addAction(profile);
         connect(action, &QAction::triggered, this, [this, profile] { setProfile(profile); });
@@ -484,7 +484,7 @@ QString ROSCatkinToolsStepWidget::uniqueName(const QString &name, const bool isR
         if(isRename)
         {
             QStringList pNames;
-            for (const QString& profile : profileNames) {
+            for (const QString& profile : std::as_const(profileNames)) {
                 if (profile == m_makeStep->activeProfile())
                     continue;
                 pNames.append(profile);
