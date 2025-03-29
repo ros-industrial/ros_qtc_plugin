@@ -272,7 +272,7 @@ void ROSProject::updateProjectTree()
   }
 }
 
-void ROSProject::buildProjectTree(const Utils::FilePath projectFilePath, const Utils::FilePath& sourcePath, QFutureInterface<FutureWatcherResults> &fi)
+void ROSProject::buildProjectTree(const Utils::FilePath &projectFilePath, const Utils::FilePath& sourcePath, QFutureInterface<FutureWatcherResults> &fi)
 {
     fi.reportStarted();
 
@@ -443,13 +443,13 @@ void ROSProject::asyncUpdateCppCodeModel(bool success)
     }
 }
 
-void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
-                                   const Utils::FilePath projectFilePath,
-                                   const QStringList /*workspaceFiles*/,
+void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
+                                   const Utils::FilePath &projectFilePath,
+                                   const QStringList &/*workspaceFiles*/,
                                    const Kit *k,
                                    const Utils::Environment &env,
-                                   const ROSUtils::PackageInfoMap wsPackageInfo,
-                                   const ROSUtils::PackageBuildInfoMap wsPackageBuildInfo,
+                                   const ROSUtils::PackageInfoMap &wsPackageInfo,
+                                   const ROSUtils::PackageBuildInfoMap &wsPackageBuildInfo,
                                    QFutureInterface<CppToolsFutureResults> &fi)
 {
     CppToolsFutureResults results;
