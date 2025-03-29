@@ -407,13 +407,13 @@ void ROSCatkinToolsStepWidget::updateProfileButtonMenu()
     }
 }
 
-void ROSCatkinToolsStepWidget::setProfile(const QString profileName)
+void ROSCatkinToolsStepWidget::setProfile(const QString &profileName)
 {
     m_makeStep->setActiveProfile(profileName);
     m_ui->profilePushButton->setText(QString(" %1").arg(profileName));
 }
 
-void ROSCatkinToolsStepWidget::cloneProfile(const QString profileName)
+void ROSCatkinToolsStepWidget::cloneProfile(const QString &profileName)
 {
     QString name = uniqueName(profileName, false);
     ROSUtils::cloneCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName, name);
@@ -440,7 +440,7 @@ void ROSCatkinToolsStepWidget::newProfile()
     setProfile(name);
 }
 
-void ROSCatkinToolsStepWidget::renameProfile(const QString profileName)
+void ROSCatkinToolsStepWidget::renameProfile(const QString &profileName)
 {
     bool ok;
     QString name = QInputDialog::getText(this, tr("Rename..."),
@@ -461,7 +461,7 @@ void ROSCatkinToolsStepWidget::renameProfile(const QString profileName)
     setProfile(name);
 }
 
-void ROSCatkinToolsStepWidget::editProfile(const QString profileName)
+void ROSCatkinToolsStepWidget::editProfile(const QString &profileName)
 {
     Utils::FilePath profile = ROSUtils::getCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
 
@@ -470,7 +470,7 @@ void ROSCatkinToolsStepWidget::editProfile(const QString profileName)
     editor->show();
 }
 
-void ROSCatkinToolsStepWidget::removeProfile(const QString profileName)
+void ROSCatkinToolsStepWidget::removeProfile(const QString &profileName)
 {
     ROSUtils::removeCatkinToolsProfile(m_makeStep->rosBuildConfiguration()->project()->projectDirectory(), profileName);
     setProfile(ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory()).constFirst());
@@ -696,7 +696,7 @@ ROSCatkinToolsConfigEditorWidget::~ROSCatkinToolsConfigEditorWidget()
     delete m_editor;
 }
 
-bool ROSCatkinToolsConfigEditorWidget::parseProfileConfig(Utils::FilePath filePath)
+bool ROSCatkinToolsConfigEditorWidget::parseProfileConfig(const Utils::FilePath &filePath)
 {
     m_profileConfigPath = filePath;
     if (!m_profileConfigPath.exists())
@@ -872,7 +872,7 @@ bool ROSCatkinToolsConfigEditorWidget::isValid() const
 // ROSCatkinToolsProfileEditorDialog
 //
 
-ROSCatkinToolsProfileEditorDialog::ROSCatkinToolsProfileEditorDialog(Utils::FilePath filePath) : QDialog()
+ROSCatkinToolsProfileEditorDialog::ROSCatkinToolsProfileEditorDialog(const Utils::FilePath &filePath) : QDialog()
 {
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::Dialog);
     QVBoxLayout *vlayout = new QVBoxLayout();

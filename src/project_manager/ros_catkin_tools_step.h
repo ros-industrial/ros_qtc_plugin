@@ -116,12 +116,12 @@ private:
 
     void updateAddProfileButtonMenu();
     void updateProfileButtonMenu();
-    void setProfile(const QString profileName);
+    void setProfile(const QString &profileName);
     void newProfile();
-    void cloneProfile(const QString profileName);
-    void renameProfile(const QString profileName);
-    void removeProfile(const QString profileName);
-    void editProfile(const QString profileName);
+    void cloneProfile(const QString &profileName);
+    void renameProfile(const QString &profileName);
+    void removeProfile(const QString &profileName);
+    void editProfile(const QString &profileName);
 
     QString uniqueName(const QString &name, const bool isRename);
 };
@@ -130,7 +130,7 @@ class ROSCatkinToolsProfileEditorDialog : public QDialog
 {
     Q_OBJECT
 public:
-    ROSCatkinToolsProfileEditorDialog(Utils::FilePath filePath);
+    ROSCatkinToolsProfileEditorDialog(const Utils::FilePath &filePath);
 
 };
 
@@ -186,7 +186,7 @@ public:
     ROSCatkinToolsConfigEditorWidget();
     ~ROSCatkinToolsConfigEditorWidget();
 
-    bool parseProfileConfig(Utils::FilePath filePath);
+    bool parseProfileConfig(const Utils::FilePath &filePath);
     bool saveProfileConfig();
     bool isModified() const;
     bool isValid() const;

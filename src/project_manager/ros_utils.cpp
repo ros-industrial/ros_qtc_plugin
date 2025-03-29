@@ -1040,7 +1040,7 @@ bool ROSUtils::renameCatkinToolsProfile(const Utils::FilePath &workspaceDir, con
     return createCatkinToolsProfile(workspaceDir, newProfileName, true);
 }
 
-bool ROSUtils::createCatkinToolsProfile(const Utils::FilePath &workspaceDir, const QString profileName, bool overwrite)
+bool ROSUtils::createCatkinToolsProfile(const Utils::FilePath &workspaceDir, const QString &profileName, bool overwrite)
 {
     Utils::FilePath config = getCatkinToolsProfileConfigFile(workspaceDir, profileName);
 

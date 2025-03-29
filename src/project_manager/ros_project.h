@@ -117,17 +117,17 @@ private:
     QFutureInterface<CppToolsFutureResults> *m_asyncBuildCodeModelFutureInterface;
     QFutureWatcher<CppToolsFutureResults> m_futureBuildCodeModelWatcher;
 
-    static void buildProjectTree(const Utils::FilePath projectFilePath,
+    static void buildProjectTree(const Utils::FilePath &projectFilePath,
                                  const Utils::FilePath& sourcePath,
                                  QFutureInterface<FutureWatcherResults> &fi);
 
-    static void buildCppCodeModel(const ROSUtils::WorkspaceInfo workspaceInfo,
-                                  const Utils::FilePath projectFilePath,
-                                  const QStringList workspaceFiles,
+    static void buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
+                                  const Utils::FilePath &projectFilePath,
+                                  const QStringList &workspaceFiles,
                                   const ProjectExplorer::Kit *k,
                                   const Utils::Environment &env,
-                                  const ROSUtils::PackageInfoMap wsPackageInfo,
-                                  const ROSUtils::PackageBuildInfoMap  wsPackageBuildInfo,
+                                  const ROSUtils::PackageInfoMap &wsPackageInfo,
+                                  const ROSUtils::PackageBuildInfoMap &wsPackageBuildInfo,
                                   QFutureInterface<CppToolsFutureResults> &fi);
 
 };

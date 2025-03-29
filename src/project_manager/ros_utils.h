@@ -136,7 +136,7 @@ public:
 
     /** @brief Contains a packages relavent build informations */
     struct PackageBuildInfo {
-        PackageBuildInfo(const PackageInfo packageInfo)
+        PackageBuildInfo(const PackageInfo &packageInfo)
         {
             parent = packageInfo;
         }
@@ -371,7 +371,7 @@ public:
      * @return True if successful, otherwise false
      */
     static bool createCatkinToolsProfile(const Utils::FilePath &workspaceDir,
-                                         const QString profileName,
+                                         const QString &profileName,
                                          bool overwrite);
 
     /**
