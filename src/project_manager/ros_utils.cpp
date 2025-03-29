@@ -43,7 +43,7 @@ ROSUtils::ROSUtils()
 
 }
 
-QString ROSUtils::buildTypeName(const ROSUtils::BuildType &buildType)
+QString ROSUtils::buildTypeName(const ROSUtils::BuildType buildType)
 {
     switch (buildType) {
     case ROSUtils::BuildTypeDebug:
@@ -1149,7 +1149,7 @@ QString ROSUtils::getCMakeBuildTypeArgument(ROSUtils::BuildType &buildType)
 }
 
 ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FilePath &workspaceDir,
-                                                   const BuildSystem &buildSystem,
+                                                   const BuildSystem buildSystem,
                                                    const Utils::FilePath &rosDistribution)
 {
     WorkspaceInfo space;

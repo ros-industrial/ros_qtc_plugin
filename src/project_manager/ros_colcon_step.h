@@ -55,7 +55,7 @@ public:
 
     ROSBuildConfiguration *rosBuildConfiguration() const;
     BuildTargets buildTarget() const;
-    void setBuildTarget(const BuildTargets &target);
+    void setBuildTarget(const BuildTargets target);
 
     QString allArguments(ROSUtils::BuildType buildType, bool includeDefault = true) const;
     Utils::CommandLine makeCommand(const QString &args) const;
@@ -89,7 +89,7 @@ public:
 
 private slots:
     void updateDetails();
-    void updateBuildSystem(const ROSUtils::BuildSystem &buildSystem);
+    void updateBuildSystem(const ROSUtils::BuildSystem buildSystem);
     void enabledChanged();
 
 private:

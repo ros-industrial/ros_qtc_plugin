@@ -248,7 +248,7 @@ ROSCatkinToolsStep::BuildTargets ROSCatkinToolsStep::buildTarget() const
     return m_target;
 }
 
-void ROSCatkinToolsStep::setBuildTarget(const BuildTargets &target)
+void ROSCatkinToolsStep::setBuildTarget(const BuildTargets target)
 {
     m_target = target;
 }
@@ -378,7 +378,7 @@ void ROSCatkinToolsStepWidget::updateDetails()
     m_summaryText = param.summary(displayName());
 }
 
-void ROSCatkinToolsStepWidget::updateBuildSystem(const ROSUtils::BuildSystem &buildSystem)
+void ROSCatkinToolsStepWidget::updateBuildSystem(const ROSUtils::BuildSystem buildSystem)
 {
     m_makeStep->setEnabled((buildSystem == ROSUtils::CatkinTools));
 }
@@ -476,7 +476,7 @@ void ROSCatkinToolsStepWidget::removeProfile(const QString profileName)
     setProfile(ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory()).constFirst());
 }
 
-QString ROSCatkinToolsStepWidget::uniqueName(const QString &name, const bool &isRename)
+QString ROSCatkinToolsStepWidget::uniqueName(const QString &name, const bool isRename)
 {
     QString result = name.trimmed();
     QStringList profileNames = ROSUtils::getCatkinToolsProfileNames(m_makeStep->rosBuildConfiguration()->project()->projectDirectory());

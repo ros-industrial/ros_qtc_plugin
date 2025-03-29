@@ -70,20 +70,20 @@ public:
     void toMap(Utils::Store &map) const override;
 
     ROSUtils::BuildSystem rosBuildSystem() const;
-    void setBuildSystem(const ROSUtils::BuildSystem &buildSystem);
+    void setBuildSystem(const ROSUtils::BuildSystem buildSystem);
 
     ProjectExplorer::BuildSystem *buildSystem() const override;
 
     ROSUtils::BuildType cmakeBuildType() const;
-    void setCMakeBuildType(const ROSUtils::BuildType &buildType);
+    void setCMakeBuildType(const ROSUtils::BuildType buildType);
 
     void updateQtEnvironment(const Utils::Environment &env);
 
     ROSProject *project();
 
 signals:
-    void buildSystemChanged(const ROSUtils::BuildSystem &buildSystem);
-    void cmakeBuildTypeChanged(const ROSUtils::BuildType &buildType);
+    void buildSystemChanged(const ROSUtils::BuildSystem buildSystem);
+    void cmakeBuildTypeChanged(const ROSUtils::BuildType buildType);
 
 protected:
     void fromMap(const Utils::Store &map) override;
@@ -109,7 +109,7 @@ public:
                                                       bool forSetup) const;
 
 private:
-    ProjectExplorer::BuildInfo createBuildInfo(const ProjectExplorer::Kit *k, const ROSUtils::BuildSystem &build_system, const ROSUtils::BuildType &type) const;
+    ProjectExplorer::BuildInfo createBuildInfo(const ProjectExplorer::Kit *k, const ROSUtils::BuildSystem build_system, const ROSUtils::BuildType type) const;
 };
 
 class ROSBuildSettingsWidget : public QWidget
