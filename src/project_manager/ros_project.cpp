@@ -470,7 +470,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
     // Get all of the workspace includes directories
     QStringList workspace_includes; // This should be the same as workspace_header_paths used for checking for duplicates
     ProjectExplorer::HeaderPaths workspace_header_paths;
-    for (const auto& package : qAsConst(results.wsPackageInfo)) {
+    for (const auto& package : std::as_const(results.wsPackageInfo)) {
       Utils::FilePath include_path = package.path;
       include_path = include_path.pathAppended("include");
       if (!workspace_includes.contains(include_path.toFSPathString())) {
@@ -487,7 +487,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
     {
         int cnt = 0;
         double max = results.wsPackageBuildInfo.size();
-        for (const ROSUtils::PackageBuildInfo& buildInfo : qAsConst(results.wsPackageBuildInfo))
+        for (const ROSUtils::PackageBuildInfo& buildInfo : std::as_const(results.wsPackageBuildInfo))
         {
             ProjectExplorer::HeaderPaths packageHeaderPaths = workspace_header_paths;
             QStringList package_includes = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
