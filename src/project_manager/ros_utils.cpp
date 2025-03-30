@@ -28,12 +28,16 @@
 #include <coreplugin/messagemanager.h>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
+#include <regex>
 #include <QDir>
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
 #include <QDirIterator>
 #include <QStandardPaths>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -546,6 +550,7 @@ ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const Works
         {
             // Get package's code block file
             buildInfo.cbpFile = buildInfo.path.pathAppended(QString("%1.cbp").arg(package.name));
+            buildInfo.apiReplyPath = buildInfo.path / ".cmake" / "api" / "v1" / "reply";
 
             // If does not exist for default Project.cbp file
             if (!buildInfo.cbpFile.exists())
@@ -555,8 +560,21 @@ ROSUtils::PackageBuildInfoMap ROSUtils::getWorkspacePackageBuildInfo(const Works
                   buildInfo.cbpFile = temp;
             }
 
-            if (buildInfo.cbpFile.exists())
+            if (buildInfo.apiReplyPath.isDir())
             {
+                if (ROSUtils::parseCMakeFileAPI(buildInfo))
+                {
+                    wsBuildInfo.insert(package.name, buildInfo);
+                    continue;
+                }
+                else
+                {
+                    Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Unable to parse build information for package: %1.").arg(package.name));
+                }
+            }
+            else if (buildInfo.cbpFile.exists())
+            {
+                Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] CodeBlocks project file parsing is deprecated and will be remove in future! (package: %1)").arg(package.name));
                 if (ROSUtils::parseCodeBlocksFile(workspaceInfo, buildInfo))
                 {
                     wsBuildInfo.insert(package.name, buildInfo);
@@ -803,6 +821,214 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
   }
 
   return true;
+}
+
+bool ROSUtils::parseCMakeFileAPI(PackageBuildInfo &package)
+{
+    // find "index-*.json"
+    const std::regex pattern(R"(index-.*\.json)");
+    const Utils::FilePaths files = package.apiReplyPath.dirEntries(QDir::Filter::Files);
+    const Utils::FilePaths::ConstIterator it = std::find_if(files.cbegin(), files.cend(), [&pattern](const Utils::FilePath &fp){ return std::regex_match(fp.fileName().toStdString(), pattern); });
+    if (it == files.cend()) {
+        Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] Unable to locate index file for package: '%1'").arg(package.parent.name));
+        return false;
+    }
+
+    // parse index
+    QFile index_file(it->toFSPathString());
+    if (!index_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] Unable to read index file: '%1'").arg(index_file.errorString()));
+        return false;
+    }
+    const QByteArray index_json_data = index_file.readAll();
+    index_file.close();
+
+    const QJsonDocument doc_index = QJsonDocument::fromJson(index_json_data);
+    if (doc_index.isNull() || !doc_index.isObject()) {
+        Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] Unable to parse index file"));
+        return false;
+    }
+
+    const QJsonObject obj_index = doc_index.object();
+
+    if (!obj_index.contains("objects") || !obj_index["objects"].isArray())
+        return false;
+
+    // find the codemodel filename
+    const QJsonArray &index_objs = obj_index["objects"].toArray();
+    QString codemodel_filename;
+    for (const QJsonValue &val : index_objs) {
+        if (val.isObject() &&
+            val.toObject().contains("kind") && val["kind"].isString() && val["kind"] == "codemodel" &&
+            val.toObject().contains("jsonFile") && val["jsonFile"].isString()) {
+            codemodel_filename = val["jsonFile"].toString();
+            break;
+        }
+    }
+
+    if (codemodel_filename.toStdString().empty())
+        return false;
+
+    const Utils::FilePath codemodel_filepath = package.apiReplyPath / codemodel_filename;
+
+    // parse codemodel
+    QFile codemodel_file(codemodel_filepath.toFSPathString());
+    if (!codemodel_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] Unable to read codemodel file: '%1'").arg(codemodel_file.errorString()));
+        return false;
+    }
+    const QByteArray codemodel_json_data = codemodel_file.readAll();
+    codemodel_file.close();
+
+    const QJsonDocument doc_codemodel = QJsonDocument::fromJson(codemodel_json_data);
+    if (doc_codemodel.isNull() || !doc_codemodel.isObject()) {
+        Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] Unable to parse codemodel file"));
+        return false;
+    }
+
+    const QJsonObject obj_codemodel = doc_codemodel.object();
+
+    if (!(obj_codemodel.contains("paths") && obj_codemodel["paths"].isObject() &&
+          obj_codemodel["paths"].toObject().contains("source")))
+        return false;
+
+    const Utils::FilePath source_toplevel_path = \
+        Utils::FilePath::fromString(obj_codemodel["paths"].toObject()["source"].toString());
+
+    if (!obj_codemodel.contains("configurations") || !obj_codemodel["configurations"].isArray())
+        return false;
+
+    const QJsonArray &cm_cfgs = obj_codemodel["configurations"].toArray();
+    QJsonArray targets;
+    for (const QJsonValue &val : cm_cfgs) {
+        if (val.isObject() && val.toObject().contains("targets") && val["targets"].isArray()) {
+            targets = val["targets"].toArray();
+            break;
+        }
+    }
+
+    if (targets.isEmpty()) {
+        Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] Package '%1' has no targets").arg(package.parent.name));
+        return false;
+    }
+
+    std::unordered_map<QString, QString> target_filenames;
+
+    for (const QJsonValue &val : std::as_const(targets)) {
+        if (!(val.toObject().contains("name") && val["name"].isString() &&
+              val.toObject().contains("jsonFile") && val["jsonFile"].isString()))
+            continue;
+        target_filenames[val["name"].toString()] = val["jsonFile"].toString();
+    }
+
+    // parse target files
+    for (const auto &[target_name, filename] : target_filenames) {
+        QFile target_file((package.apiReplyPath / filename).toFSPathString());
+        if (!target_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] Unable to read target file: '%1'").arg(target_file.errorString()));
+            return false;
+        }
+        const QByteArray target_json_data = target_file.readAll();
+        target_file.close();
+
+        const QJsonDocument doc_target = QJsonDocument::fromJson(target_json_data);
+        if (doc_target.isNull() || !doc_target.isObject()) {
+            Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] Unable to parse target file"));
+            return false;
+        }
+
+        const QJsonObject obj_target = doc_target.object();
+
+        if (!(obj_target.contains("type") && obj_target["type"].isString()))
+            continue;
+
+        PackageTargetInfoPtr targetInfo = std::make_shared<PackageTargetInfo>();
+
+        // only consider ELF files
+        const QString type = obj_target["type"].toString();
+        if (type == QString("EXECUTABLE"))
+            targetInfo->type = ROSUtils::TargetType::ExecutableType;
+        else if (type == QString("STATIC_LIBRARY"))
+            targetInfo->type = ROSUtils::TargetType::StaticLibraryType;
+        else if (type == QString("SHARED_LIBRARY"))
+            targetInfo->type = ROSUtils::TargetType::DynamicLibraryType;
+        else if (type == QString("UTILITY"))
+            targetInfo->type = ROSUtils::TargetType::UtilityType;
+        else
+            continue;
+
+        if (!(obj_target.contains("name") && obj_target["name"].isString()))
+            continue;
+
+        targetInfo->name = obj_target["name"].toString();
+
+        // source files
+        if (!(obj_target.contains("sources") && obj_target["sources"].isArray()))
+            continue;
+
+        const QJsonArray &target_sources = obj_target["sources"].toArray();
+        for (const QJsonValue &val : std::as_const(target_sources)) {
+            if (!val["path"].isString())
+                continue;
+            const Utils::FilePath source_path = Utils::FilePath::fromString(val["path"].toString());
+            if(source_path.isAbsolutePath())
+                targetInfo->source_files.append(source_path.toFSPathString());
+            else
+                targetInfo->source_files.append((source_toplevel_path / source_path.toFSPathString()).toFSPathString());
+        }
+
+        // compile settings
+        if (!(obj_target.contains("compileGroups") && obj_target["compileGroups"].isArray() &&
+              obj_target["compileGroups"].toArray().size() != 0 && obj_target["compileGroups"].toArray()[0].isObject()))
+            continue;
+
+        const QJsonArray &cgs = obj_target["compileGroups"].toArray();
+        for (const QJsonValue &val_cg : std::as_const(cgs)) {
+            if(!val_cg.isObject())
+                continue;
+
+            const QJsonObject &cg = val_cg.toObject();
+
+            // include paths
+            if (!(cg.contains("includes") && cg["includes"].isArray()))
+                continue;
+
+            const QJsonArray &target_includes = cg["includes"].toArray();
+            for (const QJsonValue &val : std::as_const(target_includes)) {
+                if (!val["path"].isString())
+                    continue;
+                targetInfo->includes.append(val["path"].toString());
+            }
+
+            // defines
+            if (!(cg.contains("defines") && cg["defines"].isArray()))
+                continue;
+
+            const QJsonArray &target_defines = cg["defines"].toArray();
+            for (const QJsonValue &val : std::as_const(target_defines)) {
+                if (!val["define"].isString())
+                    continue;
+                targetInfo->defines.append(val["define"].toString());
+            }
+
+            // flags
+            if (!(cg.contains("compileCommandFragments") && cg["compileCommandFragments"].isArray()))
+                continue;
+
+            const QJsonArray &target_flags = cg["compileCommandFragments"].toArray();
+            QStringList flags;
+            for (const QJsonValue &val : std::as_const(target_flags)) {
+                if (!val["fragment"].isString())
+                    continue;
+                flags.append(val["fragment"].toString());
+                targetInfo->flags.append(val["fragment"].toString());
+            }
+        }
+
+        package.targets.append(targetInfo);
+    }
+
+    return true;
 }
 
 QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)

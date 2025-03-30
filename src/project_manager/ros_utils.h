@@ -143,6 +143,7 @@ public:
 
         Utils::FilePath path;          /**< @brief Path to the Package's build directory */
         Utils::FilePath cbpFile;       /**< @brief Path to the Package's CodeBlocks file */
+        Utils::FilePath apiReplyPath;  /**< @brief Path to the Package's cmake-file-api reply file */
         PackageTargetInfoList targets; /**< @brief List of packages target's */
         PackageInfo parent;            /**< @brief Package information */
 
@@ -445,6 +446,8 @@ private:
      */
     static bool parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo,
                                     PackageBuildInfo &package);
+
+    static bool parseCMakeFileAPI(PackageBuildInfo &package);
 
     /**
      * @brief Get path to the profiles directory
