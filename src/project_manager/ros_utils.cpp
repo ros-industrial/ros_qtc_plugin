@@ -272,43 +272,29 @@ bool ROSUtils::buildWorkspace(QProcess &process, const WorkspaceInfo &workspaceI
 QList<Utils::FilePath> ROSUtils::installedDistributions()
 {
   QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
-  Utils::FilePath custom_ros_path = ros_settings->custom_dist_path;
+  const Utils::FilePath custom_ros_path = ros_settings->custom_dist_path;
   QList<Utils::FilePath> distributions;
   if(custom_ros_path.exists())
   {
-    QDir custom_dir(custom_ros_path.toFSPathString());
-
-    custom_dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    for (const auto &entry : custom_dir.entryList())
+    const Utils::FilePaths entries = custom_ros_path.dirEntries(QDir::NoDotAndDotDot | QDir::Dirs);
+    for (const Utils::FilePath &entry : entries)
     {
-      Utils::FilePath path(custom_ros_path);
-      path = path.pathAppended(entry);
-
-      Utils::FilePath setup_file = path.pathAppended(QLatin1String("setup.bash"));
-
-      if (setup_file.exists())
+      if ((entry / "setup.bash").exists())
       {
-        distributions.append(path);
+        distributions.append(custom_ros_path);
       }
     }
   }
 
-  Utils::FilePath default_ros_path = ros_settings->default_dist_path;
+  const Utils::FilePath default_ros_path = ros_settings->default_dist_path;
   if (default_ros_path.exists())
   {
-    QDir ros_opt(default_ros_path.toFSPathString());
-
-    ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    for (const auto &entry : ros_opt.entryList())
+    const Utils::FilePaths entries = default_ros_path.dirEntries(QDir::NoDotAndDotDot | QDir::Dirs);
+    for (const Utils::FilePath &entry : entries)
     {
-      Utils::FilePath path = Utils::FilePath::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
-      path = path.pathAppended(entry);
-
-      Utils::FilePath setup_file = path.pathAppended(QLatin1String("setup.bash"));
-
-      if (setup_file.exists())
+      if ((entry / "setup.bash").exists())
       {
-        distributions.append(path);
+        distributions.append(entry);
       }
     }
   }
@@ -781,7 +767,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
 //      workspace_includes.append(includePath);
 //  }
 
-  for (const PackageTargetInfoPtr &it : buildInfo.targets)
+  for (const PackageTargetInfoPtr &it : std::as_const(buildInfo.targets))
   {
       // Next need to parse flags.cmake for flags and defines
       if (it->flagsFile.exists())
@@ -839,7 +825,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
     static const QRegularExpression ex_newline("[\r\n]");
     QStringList package_list = output.split(ex_newline, Qt::SkipEmptyParts);
 
-    for (const QString& str : package_list)
+    for (const QString& str : std::as_const(package_list))
     {
         tmp = str.split(QLatin1String(" "));
         package_map.insert(tmp[0],tmp[1]);
