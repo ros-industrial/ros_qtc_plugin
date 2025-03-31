@@ -173,9 +173,9 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
         args << "--event-handlers status+ console_start_end+";
         if (includeDefault)
             if (buildType == ROSUtils::BuildTypeUserDefined)
-                args << QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1").arg(m_cmakeArguments);
+                args << QString("--cmake-args %1").arg(m_cmakeArguments);
             else
-                args << QString("--cmake-args -G \"CodeBlocks - Unix Makefiles\" %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments);
+                args << QString("--cmake-args %1 %2").arg(ROSUtils::getCMakeBuildTypeArgument(buildType), m_cmakeArguments);
         else
             if (!m_cmakeArguments.isEmpty())
                 args << QString("--cmake-args %1").arg(m_cmakeArguments);

@@ -260,7 +260,7 @@ bool ROSUtils::buildWorkspace(QProcess &process, const WorkspaceInfo &workspaceI
     case Colcon:
     {
         process.setWorkingDirectory(workspaceInfo.path.toFSPathString());
-        process.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("colcon build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("colcon build"));
         process.waitForFinished();
         break;
     }
