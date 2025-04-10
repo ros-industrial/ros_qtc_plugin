@@ -9,7 +9,7 @@ namespace Internal {
 // ROSBuildSystem:
 // --------------------------------------------------------------------
 
-ROSBuildSystem::ROSBuildSystem(ROSBuildConfiguration *bc)
+ROSBuildSystem::ROSBuildSystem(const ROSBuildConfiguration *const bc)
     : BuildSystem((BuildConfiguration*)bc), ros_build_system(bc->rosBuildSystem())
 {
     connect(((BuildConfiguration*)bc)->project(), &Project::activeTargetChanged, this, [this]() { triggerParsing(); });

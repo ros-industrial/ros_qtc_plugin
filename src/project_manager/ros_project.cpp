@@ -327,7 +327,7 @@ void ROSProject::buildProjectTree(const Utils::FilePath &projectFilePath, const 
 
 void ROSProject::updateEnvironment()
 {
-  if (ROSBuildConfiguration *bc = rosBuildConfiguration())
+  if (ROSBuildConfiguration *const bc = rosBuildConfiguration())
   {
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(projectDirectory(), bc->rosBuildSystem(), distribution());
     bc->updateQtEnvironment(Utils::Environment(ROSUtils::getWorkspaceEnvironment(workspaceInfo, bc->environment()).toStringList()));
@@ -366,7 +366,7 @@ void ROSProject::fileSystemChanged(const QString &path)
 
 void ROSProject::asyncUpdate()
 {
-  ROSBuildConfiguration *bc = rosBuildConfiguration();
+  const ROSBuildConfiguration *const bc = rosBuildConfiguration();
   if (!bc)
     return;
 

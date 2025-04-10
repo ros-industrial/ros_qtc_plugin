@@ -72,7 +72,7 @@ ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, const Utils::Id id
 
     m_percentProgress = QRegularExpression(QLatin1String(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
 
-    ROSBuildConfiguration *bc = rosBuildConfiguration();
+    const ROSBuildConfiguration *const bc = rosBuildConfiguration();
     if (bc->rosBuildSystem() != ROSUtils::CatkinTools)
         setEnabled(false);
 
@@ -102,7 +102,7 @@ bool ROSCatkinToolsStep::init()
     if (!bc)
         bc = targetsActiveBuildConfiguration();
 
-    Toolchain *tc = ToolchainKitAspect::toolchain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+    const Toolchain *const tc = ToolchainKitAspect::toolchain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
     if (!tc)
         emit addTask(Task::compilerMissingTask());
@@ -331,7 +331,7 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     connect(m_makeStep, SIGNAL(enabledChanged()),
             this, SLOT(enabledChanged()));
 
-    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    const ROSBuildConfiguration *const bc = m_makeStep->rosBuildConfiguration();
     connect(bc, SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
             this, SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
 
@@ -365,7 +365,7 @@ void ROSCatkinToolsStepWidget::updateDetails()
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
     m_makeStep->m_catkinToolsWorkingDir = m_ui->catkinToolsWorkingDirWidget->unexpandedFilePath().toFSPathString();
 
-    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    const ROSBuildConfiguration *const bc = m_makeStep->rosBuildConfiguration();
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
 
     m_ui->catkinToolsWorkingDirWidget->setEnvironment(bc->environment());
@@ -385,7 +385,7 @@ void ROSCatkinToolsStepWidget::updateBuildSystem(const ROSUtils::BuildSystem bui
 
 void ROSCatkinToolsStepWidget::enabledChanged()
 {
-    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    const ROSBuildConfiguration *const bc = m_makeStep->rosBuildConfiguration();
     if(m_makeStep->stepEnabled() && (bc->rosBuildSystem() != ROSUtils::CatkinTools))
         m_makeStep->setEnabled(false);
 }

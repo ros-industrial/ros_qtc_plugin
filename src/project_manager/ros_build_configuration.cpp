@@ -172,7 +172,7 @@ void ROSBuildConfiguration::setCMakeBuildType(const ROSUtils::BuildType buildTyp
     emit cmakeBuildTypeChanged(buildType);
 }
 
-ROSProject *ROSBuildConfiguration::project()
+ROSProject *ROSBuildConfiguration::project() const
 {
     return qobject_cast<ROSProject *>(target()->project());
 }
@@ -288,7 +288,7 @@ BuildConfiguration::BuildType ROSBuildConfiguration::buildType() const
 // ROSBuildSettingsWidget
 ////////////////////////////////////////////////////////////////////////////////////
 
-ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *bc)
+ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *const bc)
     : m_buildConfiguration(bc)
 {
     m_ui = new Ui::ROSBuildConfiguration;

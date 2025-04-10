@@ -77,7 +77,7 @@ void ROSGenericRunStep::run()
            m_arguments);
 
   ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(rp->projectDirectory(), rp->rosBuildConfiguration()->rosBuildSystem(), rp->distribution());
-  ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
+  const ROSBuildConfiguration *const bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
   Utils::Environment env = bc->environment();
   Utils::FilePath shell = Utils::FilePath::fromString(env.value("SHELL"));
   QString source_cmd;
@@ -323,7 +323,7 @@ void ROSGenericRunStepConfigWidget::updateAvailablePackages()
     QString cachePkgName = m_ui->packageComboBox->currentText();
     QString cachePkgTarget = m_ui->targetComboBox->currentText();
 
-    ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(m_rosGenericStep->target()->activeBuildConfiguration());
+    const ROSBuildConfiguration *const bc = qobject_cast<ROSBuildConfiguration *>(m_rosGenericStep->target()->activeBuildConfiguration());
     m_availablePackages = ROSUtils::getROSPackages(bc->environment().toStringList());
     m_packageNames->setStringList(m_availablePackages.keys());
 

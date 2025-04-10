@@ -79,7 +79,7 @@ public:
 
     void updateQtEnvironment(const Utils::Environment &env);
 
-    ROSProject *project();
+    ROSProject *project() const;
 
 signals:
     void buildSystemChanged(const ROSUtils::BuildSystem buildSystem);

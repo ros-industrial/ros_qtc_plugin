@@ -61,7 +61,7 @@ ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, const Utils::Id id) 
 
     m_percentProgress = QRegularExpression(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
 
-    ROSBuildConfiguration *bc = rosBuildConfiguration();
+    const ROSBuildConfiguration *const bc = rosBuildConfiguration();
     if (bc->rosBuildSystem() != ROSUtils::CatkinMake)
         setEnabled(false);
 
@@ -91,7 +91,7 @@ bool ROSCatkinMakeStep::init()
     if (!bc)
         bc = targetsActiveBuildConfiguration();
 
-    Toolchain *tc = ToolchainKitAspect::toolchain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
+    const Toolchain *const tc = ToolchainKitAspect::toolchain(target()->kit(), ProjectExplorer::Constants::CXX_LANGUAGE_ID);
 
     if (!tc)
         emit addTask(Task::compilerMissingTask());
@@ -254,7 +254,7 @@ ROSCatkinMakeStepWidget::ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep)
     connect(m_makeStep, SIGNAL(enabledChanged()),
             this, SLOT(enabledChanged()));
 
-    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    const ROSBuildConfiguration *const bc = m_makeStep->rosBuildConfiguration();
     connect(bc, SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
             this, SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
 
@@ -284,7 +284,7 @@ void ROSCatkinMakeStepWidget::updateDetails()
     m_makeStep->m_cmakeArguments = m_ui->cmakeArgumentsLineEdit->text();
     m_makeStep->m_makeArguments = m_ui->makeArgumentsLineEdit->text();
 
-    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    const ROSBuildConfiguration *const bc = m_makeStep->rosBuildConfiguration();
     ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(bc->project()->projectDirectory(), bc->rosBuildSystem(), bc->project()->distribution());
 
     ProcessParameters param;
@@ -302,7 +302,7 @@ void ROSCatkinMakeStepWidget::updateBuildSystem(const ROSUtils::BuildSystem buil
 
 void ROSCatkinMakeStepWidget::enabledChanged()
 {
-    ROSBuildConfiguration *bc = m_makeStep->rosBuildConfiguration();
+    const ROSBuildConfiguration *const bc = m_makeStep->rosBuildConfiguration();
     if(m_makeStep->stepEnabled() && (bc->rosBuildSystem() != ROSUtils::CatkinMake))
         m_makeStep->setEnabled(false);
 }
