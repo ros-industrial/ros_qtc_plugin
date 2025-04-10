@@ -94,17 +94,17 @@
      </property>
      <item>
       <property name="text">
-       <string>Colcon</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
        <string>CatkinMake</string>
       </property>
      </item>
      <item>
       <property name="text">
        <string>CatkinTools</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Colcon</string>
       </property>
      </item>
     </widget>
