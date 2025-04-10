@@ -48,7 +48,7 @@ RunStepConfigWidget *ROSRunStep::createConfigWidget()
 
 QMap<QString, QString> ROSRunStep::getAvailableTargets()
 {
-  ROSBuildConfiguration *bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
+  const ROSBuildConfiguration *const bc = qobject_cast<ROSBuildConfiguration *>(target()->activeBuildConfiguration());
   return ROSUtils::getROSPackageExecutables(getPackage(), bc->environment().toStringList());
 }
 

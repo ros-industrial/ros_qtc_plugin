@@ -238,7 +238,7 @@ Core::BaseFileWizard *ROSPackageWizard::create(const Core::WizardDialogParameter
     if(!rosProject )
         return nullptr;
 
-    ROSBuildConfiguration *bc = rosProject->rosBuildConfiguration();
+    const ROSBuildConfiguration *const bc = rosProject->rosBuildConfiguration();
 
     if( bc )
     {

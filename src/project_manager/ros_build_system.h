@@ -18,7 +18,7 @@ class ROSBuildSystem : public ProjectExplorer::BuildSystem
     Q_OBJECT
 
 public:
-    explicit ROSBuildSystem(ROSBuildConfiguration *bc);
+    explicit ROSBuildSystem(const ROSBuildConfiguration *bc);
 
     void triggerParsing() final;
 
