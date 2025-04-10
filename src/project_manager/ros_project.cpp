@@ -402,7 +402,7 @@ void ROSProject::asyncUpdateCppCodeModel(bool success)
 {
     if (success && !m_workspaceFiles.empty() && (rosBuildConfiguration() != nullptr))
     {
-        bool async = false;
+        constexpr bool async = false;
 
         m_cppCodeModelUpdater->cancel();
 
