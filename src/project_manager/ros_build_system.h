@@ -29,7 +29,6 @@ public:
     virtual bool renameFiles(ProjectExplorer::Node *context, const Utils::FilePairs &filesToRename, Utils::FilePaths *notRenamed) override final;
     virtual bool addDependencies(ProjectExplorer::Node *context, const QStringList &dependencies) override final;
     virtual bool supportsAction(ProjectExplorer::Node *context, ProjectExplorer::ProjectAction action, const ProjectExplorer::Node *node) const override final;
-    virtual QString name() const override final;
 
 private:
     const ROSUtils::BuildSystem ros_build_system;
