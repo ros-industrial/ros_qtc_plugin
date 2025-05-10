@@ -190,9 +190,9 @@ bool ROSProject::saveProjectFile()
       ROSUtils::generateQtCreatorWorkspaceFile(workspaceXml, m_projectFileContent);
       saver.setResult(&workspaceXml);
     }
-    bool result = saver.finalize(ICore::mainWindow());
+    const Utils::Result<> result = saver.finalize();
     DocumentManager::unexpectFileChange(projectFilePath());
-    return result;
+    return (result == Utils::ResultOk);
 }
 
 Utils::FilePath ROSProject::distribution() const
