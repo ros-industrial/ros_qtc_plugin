@@ -123,7 +123,8 @@ ROSPackageWizardDetailsPage::ROSPackageWizardDetailsPage(QWidget *parent) :
 {
     d->m_ui.setupUi(this);
 
-    std::function<bool(Utils::FancyLineEdit *, QString *)> fn = std::bind( &ROSPackageWizardDetailsPage::validateWithValidator, this, std::placeholders::_1, std::placeholders::_2);
+    Utils::FancyLineEdit::SynchronousValidationFunction fn = \
+        std::bind( &ROSPackageWizardDetailsPage::validateWithValidator, this, std::placeholders::_1 );
     d->m_ui.pathChooser->setValidationFunction(fn);
 
     connect(d->m_ui.pathChooser, &Utils::PathChooser::validChanged,
@@ -191,24 +192,19 @@ QStringList ROSPackageWizardDetailsPage::processList(const QString &text) const
     return text.split(ex, Qt::SkipEmptyParts);
 }
 
-bool ROSPackageWizardDetailsPage::validateWithValidator(Utils::FancyLineEdit *edit, QString *errorMessage)
+Utils::Result<> ROSPackageWizardDetailsPage::validateWithValidator(const Utils::FancyLineEdit &edit)
 {
-    const QString path = edit->text();
+    const QString path = edit.text();
     if (path.isEmpty()) {
-        if (errorMessage)
-            *errorMessage = tr("The path \"%1\" expanded to an empty string.").arg(QDir::toNativeSeparators(path));
-        return false;
+        return Utils::makeResult(false, tr("The path \"%1\" expanded to an empty string.").arg(QDir::toNativeSeparators(path)));
     }
 
-    if (!path.startsWith(edit->placeholderText()))
+    if (!path.startsWith(edit.placeholderText()))
     {
-        if (errorMessage)
-            *errorMessage = tr("The path \"%1\" is not in the workspace.").arg(QDir::toNativeSeparators(path));
-
-        return false;
+        return Utils::makeResult(false, tr("The path \"%1\" is not in the workspace.").arg(QDir::toNativeSeparators(path)));
     }
 
-    return true;
+    return Utils::ResultOk;
 }
 
 //////////////////////////////////////////////////////////////////////////////

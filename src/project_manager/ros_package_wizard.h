@@ -92,7 +92,7 @@ private slots:
     void slotActivated();
 
 private:
-    bool validateWithValidator(Utils::FancyLineEdit *edit, QString *errorMessage);
+    Utils::Result<> validateWithValidator(const Utils::FancyLineEdit &edit);
 
     QStringList processList(const QString &text) const;
     ROSPackageWizardDetailsPagePrivate *d;
