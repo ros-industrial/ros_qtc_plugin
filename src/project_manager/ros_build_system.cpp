@@ -66,19 +66,5 @@ bool ROSBuildSystem::supportsAction(ProjectExplorer::Node */*context*/, ProjectE
     return possible_actions.count(action);
 }
 
-QString ROSBuildSystem::name() const
-{
-    switch (ros_build_system) {
-    case ROSUtils::BuildSystem::CatkinMake:
-        return "catkin_make";
-    case ROSUtils::BuildSystem::CatkinTools:
-        return "catkin-tools";
-    case ROSUtils::BuildSystem::Colcon:
-        return "colcon";
-    default:
-        return QString{};
-    }
-}
-
 } // namespace Internal
 } // namespace ROSProjectManager
