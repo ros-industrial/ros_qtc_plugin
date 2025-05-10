@@ -217,7 +217,7 @@ bool ROSPackageWizardDetailsPage::validateWithValidator(Utils::FancyLineEdit *ed
 //
 //////////////////////////////////////////////////////////////////////////////
 
-ROSPackageWizard::ROSPackageWizard()
+ROSPackageWizard::ROSPackageWizard() : m_wizard(nullptr)
 {
     setSupportedProjectTypes({});
     setIcon(QIcon(QStringLiteral(":rosproject/folderpackage.png")));
