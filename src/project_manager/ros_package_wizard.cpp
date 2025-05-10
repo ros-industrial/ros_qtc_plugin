@@ -286,10 +286,9 @@ Core::GeneratedFiles ROSPackageWizard::generateFiles(const QWizard *w,
     return files;
 }
 
-bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *errorMessage) const
+Utils::Result<> ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files) const
 {
   Q_UNUSED(files);
-  Q_UNUSED(errorMessage);
 
   const ROSProject *project = static_cast<ROSProject *>(ProjectExplorer::ProjectTree::currentProject());
 
@@ -376,11 +375,11 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   create_pkg_proc.start("bash", {"-c", create_args.join(" ")});
   if (!create_pkg_proc.waitForStarted(-1)) {
       Core::MessageManager::writeFlashing(tr("[ROS Error] Failed to start catkin_create_pkg."));
-      return false;
+      return Utils::makeResult(false, "Failed to start catkin_create_pkg");
   }
   if (!create_pkg_proc.waitForFinished(-1)) {
       Core::MessageManager::writeFlashing(tr("[ROS Error] Failed to finish catkin_create_pkg."));
-      return false;
+      return Utils::makeResult(false, "Failed to finish catkin_create_pkg");
   }
   const QByteArray message_stdio = create_pkg_proc.readAllStandardOutput();
   if (!message_stdio.isEmpty()) {
@@ -388,24 +387,23 @@ bool ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files, QString *er
   }
   const QByteArray message_err = create_pkg_proc.readAllStandardError();
   if (!message_err.isEmpty()) {
-      Core::MessageManager::writeFlashing(QString::fromStdString(message_err.toStdString()));
-      return false;
+      const QString msg = QString::fromStdString(message_err.toStdString());
+      Core::MessageManager::writeFlashing(msg);
+      return Utils::makeResult(false, msg);
   }
   if (create_pkg_proc.exitStatus() != QProcess::NormalExit) {
       Core::MessageManager::writeFlashing(tr("[ROS Error] Failed to create catkin package."));
-      return false;
+      return Utils::makeResult(false, "Failed to create catkin package");
   }
-  return true;
+  return Utils::ResultOk;
 }
 
-bool ROSPackageWizard::postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l,
-                                             QString *errorMessage) const
+Utils::Result<> ROSPackageWizard::postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l) const
 {
     Q_UNUSED(w);
     Q_UNUSED(l);
-    Q_UNUSED(errorMessage);
 
-    return true;
+    return Utils::ResultOk;
 }
 
 } // namespace Internal
