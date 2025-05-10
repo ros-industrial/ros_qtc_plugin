@@ -214,11 +214,6 @@ void ROSImportWizardPage::slotActivated()
         emit activated();
 }
 
-bool ROSImportWizardPage::validateBaseName(const QString &name, QString *errorMessage /* = 0*/)
-{
-    return Utils::FileNameValidatingLineEdit::validateFileName(name, false, errorMessage);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 //

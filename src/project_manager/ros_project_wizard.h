@@ -69,9 +69,6 @@ public:
     ROSUtils::BuildSystem buildSystem() const;
     Utils::FilePath workspaceDirectory() const;
 
-    // Validate a base name entry field (potentially containing extension)
-    static bool validateBaseName(const QString &name, QString *errorMessage = 0);
-
 signals:
     void activated();
 
