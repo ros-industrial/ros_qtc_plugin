@@ -277,15 +277,17 @@ Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w, QString *
     return files;
 }
 
-bool ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l, QString *errorMessage) const
+Utils::Result<> ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l) const
 {
     Q_UNUSED(w);
 
-    bool success = ProjectExplorer::CustomProjectWizard::postGenerateOpen(l, errorMessage);
+    const Utils::Result<> ok = ProjectExplorer::CustomProjectWizard::postGenerateOpen(l);
+    if (!ok)
+        return ok;
 
     ProjectExplorer::Project *project = ProjectExplorer::ProjectTree::currentProject();
     if (!project)
-        return success;
+        return Utils::ResultOk;
 
     // Set the Cpp code style for the project.
     QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
@@ -300,7 +302,7 @@ bool ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core::Generated
         }
     }
 
-    return success;
+    return Utils::ResultOk;
 }
 
 } // namespace Internal

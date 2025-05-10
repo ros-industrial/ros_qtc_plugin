@@ -111,10 +111,9 @@ protected:
 
     Core::GeneratedFiles generateFiles(const QWizard *w, QString *errorMessage) const override;
 
-    bool writeFiles(const Core::GeneratedFiles &files, QString *errorMessage) const override;
+    Utils::Result<> writeFiles(const Core::GeneratedFiles &files) const override;
 
-    bool postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l,
-                           QString *errorMessage) const override;
+    Utils::Result<> postGenerateFiles(const QWizard *w, const Core::GeneratedFiles &l) const override;
 
 private:
     mutable ROSPackageWizardDialog *m_wizard;
