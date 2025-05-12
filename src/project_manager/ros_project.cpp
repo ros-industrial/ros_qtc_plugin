@@ -582,8 +582,12 @@ Project::RestoreResult ROSProject::fromMap(const Utils::Store &map, QString *err
               removeTarget(t);
               continue;
           }
-          if (!t->activeRunConfiguration())
-              t->addRunConfiguration(new ProjectExplorer::CustomExecutableRunConfiguration(t));
+          if (!t->activeRunConfiguration()) {
+              for (BuildConfiguration * const bc : t->buildConfigurations()) {
+                  if (!bc->activeRunConfiguration())
+                      bc->addRunConfiguration(new ProjectExplorer::CustomExecutableRunConfiguration(bc));
+              }
+          }
       }
 
       asyncUpdateCppCodeModel(true);
