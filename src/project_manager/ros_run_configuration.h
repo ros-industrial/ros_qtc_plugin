@@ -24,7 +24,7 @@
 #include "ros_run_step.h"
 #include "ros_project_constants.h"
 #include <projectexplorer/runconfiguration.h>
-#include <projectexplorer/buildstep.h>
+#include <projectexplorer/buildconfiguration.h>
 #include <utils/processinfo.h>
 
 #include <QPointer>
@@ -49,7 +49,7 @@ class ROSRunConfiguration : public ProjectExplorer::RunConfiguration
     friend class ROSRunConfigurationFactory;
 
 public:
-    ROSRunConfiguration(ProjectExplorer::Target *target, Utils::Id id);
+    ROSRunConfiguration(ProjectExplorer::BuildConfiguration *bc, Utils::Id id);
 
     // RunConfiguration
     QString disabledReason(Utils::Id runMode) const override;
@@ -69,7 +69,7 @@ public:
 
 protected:
     QList<ProjectExplorer::RunConfigurationCreationInfo>
-    availableCreators(ProjectExplorer::Target *parent) const override;
+    availableCreators(ProjectExplorer::BuildConfiguration *bc) const override;
 };
 
 } // namespace Internal
