@@ -26,7 +26,6 @@
 #include <projectexplorer/runconfiguration.h>
 #include <projectexplorer/buildstep.h>
 #include <utils/processinfo.h>
-#include <debugger/debuggerruncontrol.h>
 
 #include <QPointer>
 #include <QMenu>
