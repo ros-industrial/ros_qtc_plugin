@@ -1,4 +1,5 @@
 #include "ros_build_system.h"
+#include "ros_build_configuration.h"
 
 using namespace ProjectExplorer;
 
@@ -9,10 +10,10 @@ namespace Internal {
 // ROSBuildSystem:
 // --------------------------------------------------------------------
 
-ROSBuildSystem::ROSBuildSystem(const ROSBuildConfiguration *const bc)
-    : BuildSystem((BuildConfiguration*)bc), ros_build_system(bc->rosBuildSystem())
+ROSBuildSystem::ROSBuildSystem(BuildConfiguration *bc)
+    : BuildSystem(bc), ros_build_system(((ROSBuildConfiguration*)(bc))->rosBuildSystem())
 {
-    connect(((BuildConfiguration*)bc)->project(), &Project::activeTargetChanged, this, [this]() { triggerParsing(); });
+    connect((bc)->project(), &Project::activeTargetChanged, this, [this]() { triggerParsing(); });
 }
 
 void ROSBuildSystem::triggerParsing()
