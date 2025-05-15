@@ -2,7 +2,8 @@
 
 #include <projectexplorer/buildsystem.h>
 #include <projectexplorer/projectnodes.h>
-#include "ros_build_configuration.h"
+#include <projectexplorer/buildconfiguration.h>
+#include "ros_utils.h"
 
 namespace ROSProjectManager {
 namespace Internal {
@@ -18,7 +19,7 @@ class ROSBuildSystem : public ProjectExplorer::BuildSystem
     Q_OBJECT
 
 public:
-    explicit ROSBuildSystem(const ROSBuildConfiguration *bc);
+    explicit ROSBuildSystem(ProjectExplorer::BuildConfiguration *bc);
 
     void triggerParsing() final;
 

@@ -140,6 +140,8 @@ ROSProject::ROSProject(const Utils::FilePath &fileName) :
     m_asyncUpdateTimer.setInterval(UPDATE_INTERVAL);
     connect(&m_asyncUpdateTimer, &QTimer::timeout, this, &ROSProject::asyncUpdate);
 
+    setBuildSystemCreator<ROSBuildSystem>("ROS");
+
     refresh();
 
     // Setup signal/slot connections

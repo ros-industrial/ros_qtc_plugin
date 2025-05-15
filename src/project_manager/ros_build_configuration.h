@@ -45,7 +45,6 @@ namespace Internal {
 
 class ROSBuildConfigurationFactory;
 class ROSBuildSettingsWidget;
-class ROSBuildSystem;
 class ROSExtraBuildInfo;
 class ROSProject;
 namespace Ui { class ROSBuildConfiguration; }
@@ -58,8 +57,6 @@ class ROSBuildConfiguration : public ProjectExplorer::BuildConfiguration
 public:
     ROSBuildConfiguration(ProjectExplorer::Target *parent, Utils::Id id);
 
-    ~ROSBuildConfiguration();
-
     void initialize(const ProjectExplorer::BuildInfo &info);
 
     QWidget *createConfigWidget() override;
@@ -71,8 +68,6 @@ public:
 
     ROSUtils::BuildSystem rosBuildSystem() const;
     void setBuildSystem(const ROSUtils::BuildSystem buildSystem);
-
-    ProjectExplorer::BuildSystem *buildSystem() const override;
 
     ROSUtils::BuildType cmakeBuildType() const;
     void setCMakeBuildType(const ROSUtils::BuildType buildType);
@@ -92,7 +87,6 @@ protected:
 
 private:
     ROSUtils::BuildSystem m_buildSystem;
-    ROSBuildSystem *m_build_system;
     ROSUtils::BuildType m_cmakeBuildType;
     QWidget *m_buildEnvironmentWidget;
 
