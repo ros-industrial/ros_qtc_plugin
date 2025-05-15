@@ -32,6 +32,7 @@
 #include <projectexplorer/projectexplorericons.h>
 #include <projectexplorer/buildstepspage.h>
 #include <projectexplorer/projectexplorerconstants.h>
+#include <projectexplorer/buildsystem.h>
 #include <debugger/debuggerengine.h>
 
 #include <qtsupport/qtoutputformatter.h>
@@ -60,9 +61,9 @@ namespace Internal {
 
 const char ROS_RC_ID[] = "ROSProjectManager.ROSRunConfiguration";
 
-ROSRunConfiguration::ROSRunConfiguration(Target *target, Utils::Id id) :
-    RunConfiguration(target, id),
-    m_stepList(new RunStepList(target, Constants::ROS_RUN_STEP_LIST_ID))
+ROSRunConfiguration::ROSRunConfiguration(ProjectExplorer::BuildConfiguration *bc, Utils::Id id) :
+    RunConfiguration(bc, id),
+    m_stepList(new RunStepList(bc->buildSystem()->target(), Constants::ROS_RUN_STEP_LIST_ID))
 {
 }
 
@@ -103,7 +104,7 @@ ROSRunConfigurationFactory::~ROSRunConfigurationFactory()
 }
 
 QList<ProjectExplorer::RunConfigurationCreationInfo>
-ROSRunConfigurationFactory::availableCreators(ProjectExplorer::Target */*parent*/) const
+ROSRunConfigurationFactory::availableCreators(ProjectExplorer::BuildConfiguration */*bc*/) const
 {
   RunConfigurationCreationInfo rci;
   rci.factory = this;
