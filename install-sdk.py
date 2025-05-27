@@ -171,12 +171,17 @@ def qt_download_check_extract(cfg, dir_install):
         extra_package_names.append(f"qt.qt{ver_maj}.{ver_concat}.addons.{module}.{toolchain}")
 
     package_archives = dict()
+    archive_target_dir = dict()
     for package in metadata.iter("PackageUpdate"):
         if package.find("Name").text in [base_package_name] + extra_package_names:
             package_archives[package.find("Name").text] = {
                 "version": package.find("Version").text,
                 "archives": read_downloadable_archives(package)
                 }
+        for op in package.iter("Operation"):
+            if op.get("name") == "Extract":
+                op_args = [op_arg.text for op_arg in op.iter("Argument")]
+                archive_target_dir[op_args[1]] = op_args[0]
 
     archives_match = dict()
     for module_name in cfg['versions']['qt_modules']:
@@ -192,6 +197,8 @@ def qt_download_check_extract(cfg, dir_install):
     if not archives_match:
         raise RuntimeError(f"no matches for Qt modules ({cfg['versions']['qt_modules']}) found")
 
+    dir_install = os.path.join(dir_install, "Qt")
+
     for package_name, package_version, archive_name in archives_match.values():
         url_archive = base_url+'/'+package_name+'/'+package_version+archive_name
 
@@ -202,7 +209,12 @@ def qt_download_check_extract(cfg, dir_install):
         if sha1sum != hashlib.sha1(content).hexdigest():
             raise RuntimeError(archive_name+" SHA1 hash sum does not match")
 
-        extract_progress(content, archive_name, dir_install)
+        if archive_name in archive_target_dir:
+            archive_dir_install = archive_target_dir[archive_name].replace("@TargetDir@", dir_install)
+        else:
+            archive_dir_install = dir_install
+
+        extract_progress(content, archive_name, archive_dir_install)
 
     qt_path = os.path.join(dir_install, f"{ver_maj}.{ver_min}.0")
     qt_archs = os.listdir(qt_path)
