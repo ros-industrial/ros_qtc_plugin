@@ -226,7 +226,7 @@ if __name__ == "__main__":
     if cfg['os'] == "Darwin":
         cfg['arch'] = "x64"
 
-    with open("versions.yaml", 'r') as file:
+    with open("versions.yaml", 'r', encoding="utf-8") as file:
         cfg['versions'] = yaml.safe_load(file)
 
     dir_install = args.install_path
@@ -255,6 +255,6 @@ if __name__ == "__main__":
     print("\t" + cmd_compile)
 
     if args.export_variables:
-        with open("env", 'w') as f:
+        with open("env", 'w', encoding="utf-8") as f:
             f.write(f"QTC_PATH={dir_qtc}\n")
             f.write(f"QT_PATH={dir_qt}\n")
