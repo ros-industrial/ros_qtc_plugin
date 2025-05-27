@@ -215,6 +215,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--install_path', type=str, default=None)
     parser.add_argument('--export_variables', action="store_true")
+    parser.add_argument('--skip-qtc', action="store_true")
+    parser.add_argument('--skip-qt', action="store_true")
     args = parser.parse_args()
 
     cfg = {}
@@ -238,11 +240,16 @@ if __name__ == "__main__":
     os.makedirs(dir_install, exist_ok=True)
 
     prefix_paths = []
-    dir_qtc = qtc_download_check_extract(cfg, dir_install)
-    prefix_paths.append(dir_qtc)
+    dir_qtc = None
+    dir_qt = None
 
-    dir_qt = qt_download_check_extract(cfg, dir_install)
-    prefix_paths.append(dir_qt)
+    if not args.skip_qtc:
+        dir_qtc = qtc_download_check_extract(cfg, dir_install)
+        prefix_paths.append(dir_qtc)
+
+    if not args.skip_qt:
+        dir_qt = qt_download_check_extract(cfg, dir_install)
+        prefix_paths.append(dir_qt)
 
     cmd_setup = "cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=\"{prefix_paths}\""
     cmd_compile = "cmake --build build --target package"
@@ -256,5 +263,5 @@ if __name__ == "__main__":
 
     if args.export_variables:
         with open("env", 'w', encoding="utf-8") as f:
-            f.write(f"QTC_PATH={dir_qtc}\n")
-            f.write(f"QT_PATH={dir_qt}\n")
+            if dir_qtc: f.write(f"QTC_PATH={dir_qtc}\n")
+            if dir_qt: f.write(f"QT_PATH={dir_qt}\n")
