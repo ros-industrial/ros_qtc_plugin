@@ -9,26 +9,32 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:25.04
+      env:
+        DEBIAN_FRONTEND: noninteractive
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-
-      - name: install system dependencies
+      - name: install sudo
         run: |
-          sudo apt update
-          sudo apt install libgl1-mesa-dev ninja-build libutf8proc-dev libcups2-dev
-          sudo apt install clazy
+          apt update
+          apt -y install --no-install-recommends sudo
+
+      - uses: actions/checkout@v4
 
       - name: install Qt and Qt Creator
         run: |
-          pip install pyyaml requests py7zr==0.21 tqdm_loggable
-          python install-sdk.py --export_variables
+          sudo apt -y install --no-install-recommends python3 python3-pip gcc libpython3-dev
+          pip install --break-system-packages pyyaml requests py7zr==0.21 tqdm_loggable
+          ./install-sdk.py --export_variables
           cat env >> $GITHUB_ENV
+
+      - name: install system dependencies
+        run: |
+          sudo apt -y install --no-install-recommends cmake ninja-build libgio-2.0-dev
+          sudo apt -y install --no-install-recommends libgl1-mesa-dev ninja-build libutf8proc-dev libcups2-dev
+          sudo apt -y install --no-install-recommends clazy
 
       - name: build plugin
         env:
