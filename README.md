@@ -125,4 +125,8 @@ To debug the plugin with `gdb`, prefix the above command with `gdb --ex=r --args
 gdb --ex=r --args ~/Downloads/qtc-sdk/Tools/QtCreator/bin/qtcreator -pluginpath build/lib/qtcreator/plugins/
 ```
 
-To further debug the inner workings of Qt Creator, you have to install the Qt Creator "Debug Symbols". If you are using the online installer, those are available via the "Qt Maintenance Tool".
+To further debug the inner workings of Qt Creator, you have to install the Qt Creator "Debug Symbols". If you are using the `install-sdk.py` script, add `qtcreator-debug` to `qtc_modules` in file `versions.yaml`:
+```yaml
+qtc_modules: ["qtcreator", "qtcreator_dev", "qtcreator-debug"]
+```
+If you are using the online installer, those are available via the "Qt Maintenance Tool".
