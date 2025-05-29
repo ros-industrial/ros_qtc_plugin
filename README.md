@@ -24,16 +24,19 @@ The ROS Qt Creator Plug-in provides the following capabilities:
 
 ## Installation (Binary)
 
-### Snap with Qt Creator and Plugin
+### Option 1: Debian Package
 
-[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/qtcreator-ros)
-
-You can install Qt Creator with the ROS corresponding plugin via the [snap store](https://snapcraft.io/qtcreator-ros). This will make sure that the Qt Creator version and the ROS plugin version will use matching API and update automatically once a new version has been released. You can install the `qtcreator-ros` snap by searching in the software centre or from the command line:
-```bash
-sudo snap install qtcreator-ros --classic
+Install Qt Creator and the plugin via Debian packages:
+```sh
+# download Qt Creator and plugin Debian packages
+wget --directory-prefix=/tmp/qtcros $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*(qtcreator-plugin-ros.*_'$(dpkg --print-architecture)'|qtcreator-opensource-linux-('$(dpkg --print-architecture)'|'$(arch)')-*).*deb' | cut -d'"' -f 4)
+# install Debian packages
+sudo apt install /tmp/qtcros/*{.deb,.ddeb}
+# launch Qt Creator
+/opt/qt-creator/bin/qtcreator
 ```
 
-### Manual Qt Creator and Plugin Installation
+### Option 2: Manual Qt Creator and Plugin Installation
 
 Qt Creator can be installed via the official [online](https://www.qt.io/download-qt-installer-oss) and [offline](https://www.qt.io/offline-installers) installer.
 
@@ -47,16 +50,11 @@ curl -SL $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/re
 
 Note: Qt Creator from the online installer may notify you about available updates and install them when instructed to do so. The plugin API is only compatible with patch-level updates. A major or minor update will break the plugin API and Qt Creator will then refuse to load the plugin. Make sure that a compatible plugin version is available before updating Qt Creator as it is not possible to downgrade to an older Qt Creator version using the online installer. The offline installer installs a specific Qt Creator version and does not provide updates.
 
-### Debian Package
+### Option 3: Snap with Qt Creator and Plugin
 
-Install Qt Creator and the plugin via Debian packages:
-```sh
-# download Qt Creator and plugin Debian packages
-wget --directory-prefix=/tmp/qtcros $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/releases/latest | grep -E 'browser_download_url.*(qtcreator-plugin-ros.*_'$(dpkg --print-architecture)'|qtcreator-opensource-linux-('$(dpkg --print-architecture)'|'$(arch)')-*).*deb' | cut -d'"' -f 4)
-# install Debian packages
-sudo apt install /tmp/qtcros/*{.deb,.ddeb}
-# launch Qt Creator
-/opt/qt-creator/bin/qtcreator
+An older version of Qt Creator 13 with the ROS plugin is available on the [Snap Store](https://snapcraft.io/qtcreator-ros):
+```bash
+sudo snap install qtcreator-ros --classic
 ```
 
 ## Build (Source)
