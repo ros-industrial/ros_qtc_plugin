@@ -33,8 +33,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install libgl1-mesa-dev ninja-build libutf8proc-dev libcups2-dev
-          sudo apt install desktop-file-utils
+          sudo apt install --no-install-recommends libgl1-mesa-dev ninja-build libutf8proc-dev libcups2-dev
+          sudo apt install --no-install-recommends desktop-file-utils
 
       - name: install Windows system dependencies
         if: runner.os == 'Windows'
@@ -69,7 +69,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           wget $(./packaging/format-deb-url.py) --directory-prefix=${GITHUB_WORKSPACE}/build
-          sudo apt install ${GITHUB_WORKSPACE}/build/qtcreator-opensource-linux-*-*.deb
+          sudo apt install --no-install-recommends ${GITHUB_WORKSPACE}/build/qtcreator-opensource-linux-*-*.deb
 
       - name: generate plugin DEB package
         if: runner.os == 'Linux'
