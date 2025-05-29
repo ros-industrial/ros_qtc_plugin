@@ -88,7 +88,7 @@ The script will print the CMake commands for building the plugin and create an a
 
 If Qt Creator and the Plugin Development package are not installed in one of the default folders, you have to tell CMake via `CMAKE_PREFIX_PATH` where those can be found. With the `install-sdk.py` command above, this could be (adjust `CMAKE_PREFIX_PATH` and the Qt version if necessary):
 ```sh
-cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="~/Downloads/qtc-sdk/Tools/QtCreator;~/Downloads/qtc-sdk/6.8.0/gcc_64"
+cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="~/Downloads/qtc-sdk/Tools/QtCreator;~/Downloads/qtc-sdk/Qt/6.9.0/gcc_64"
 cmake --build build --target package
 ```
 This will create the plugin archive `qtcreator-plugin-ros-${version}-Linux-${arch}.zip` inside the build folder (`build` by default). This archive has to be extracted to the Qt Creator root path (e.g. `~/Qt/Tools/QtCreator/` for the online installer version).
@@ -111,7 +111,7 @@ sudo apt install ./qtcreator-plugin-ros_*_*.deb
 
 To develop on the plugin and test changes iteratively, build the plugin in `Debug` mode and skip creating the plugin archive:
 ```sh
-cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="~/Downloads/qtc-sdk/Tools/QtCreator;~/Downloads/qtc-sdk/6.8.0/gcc_64"
+cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH="~/Downloads/qtc-sdk/Tools/QtCreator;~/Downloads/qtc-sdk/Qt/6.9.0/gcc_64"
 cmake --build build
 ```
 This creates a shared plugin library at `build/lib/qtcreator/plugins/libROSProjectManager.so`.
