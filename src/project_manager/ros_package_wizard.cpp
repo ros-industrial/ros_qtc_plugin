@@ -255,7 +255,7 @@ Core::BaseFileWizard *ROSPackageWizard::create(const Core::WizardDialogParameter
     m_wizard->setProjectDirectory(rosProject->projectDirectory());
     m_wizard->setPath(defaultPath);
 
-    for (QWizardPage *p : m_wizard->extensionPages())
+    for (QWizardPage *p : m_wizard->extensionPages()) // clazy:exclude=range-loop-detach
         m_wizard->addPage(p);
 
     return m_wizard;
