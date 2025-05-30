@@ -77,7 +77,6 @@
 #include <QDebug>
 #include <QApplication>
 #include <QMessageBox>
-#include <QtWidgets>
 
 using namespace Core;
 using namespace ProjectExplorer;
