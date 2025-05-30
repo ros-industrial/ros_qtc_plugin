@@ -70,7 +70,7 @@ ROSCatkinToolsStep::ROSCatkinToolsStep(BuildStepList *parent, const Utils::Id id
     if (m_activeProfile.isEmpty())
         m_activeProfile = "default";
 
-    m_percentProgress = QRegularExpression(QLatin1String(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
+    m_percentProgress = QRegularExpression(QStringLiteral(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
 
     const ROSBuildConfiguration *const bc = rosBuildConfiguration();
     if (bc->rosBuildSystem() != ROSUtils::CatkinTools)
@@ -125,7 +125,7 @@ bool ROSCatkinToolsStep::init()
 
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
-    env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
+    env.set(QStringLiteral("LC_ALL"), QStringLiteral("C"));
     pp->setEnvironment(env);
     pp->setCommandLine(makeCommand(allArguments(bc->cmakeBuildType())));
 
@@ -192,7 +192,7 @@ QString ROSCatkinToolsStep::allArguments(ROSUtils::BuildType buildType, bool inc
 
     switch(m_target) {
     case BUILD:
-        args << QLatin1String("build");
+        args << QStringLiteral("build");
         args << m_catkinToolsArguments;
 
         if (!m_catkinMakeArguments.isEmpty())
@@ -206,8 +206,8 @@ QString ROSCatkinToolsStep::allArguments(ROSUtils::BuildType buildType, bool inc
 
         break;
     case CLEAN:
-        args << QLatin1String("clean");
-        args << QLatin1String("-y");
+        args << QStringLiteral("clean");
+        args << QStringLiteral("-y");
         args << m_catkinToolsArguments;
 
         if (!m_catkinMakeArguments.isEmpty())
@@ -426,7 +426,7 @@ void ROSCatkinToolsStepWidget::newProfile()
     QString name = QInputDialog::getText(this, tr("New Profile..."),
                                          tr("Pofile Name:"),
                                          QLineEdit::Normal,
-                                         QLatin1String("default"), &ok);
+                                         QStringLiteral("default"), &ok);
     if (!ok)
         return;
 
@@ -561,7 +561,7 @@ void ROSCatkinToolsListEditorWidget::listWidget_itemSelectionChanged()
 
 void ROSCatkinToolsListEditorWidget::addPushButton_clicked()
 {
-    addItem(QLatin1String("New Item"));
+    addItem(QStringLiteral("New Item"));
 
     listWidget_itemChanged();
 }
@@ -620,7 +620,7 @@ ROSCatkinToolsListWidget::ROSCatkinToolsListWidget(QWidget *parent) : QLineEdit(
     m_editor = new ROSCatkinToolsListEditorWidget(this);
 
     QAction *editor;
-    editor = this->addAction(QIcon(QLatin1String(":rosproject/pencil_icon.png")), QLineEdit::TrailingPosition);
+    editor = this->addAction(QIcon(QStringLiteral(":rosproject/pencil_icon.png")), QLineEdit::TrailingPosition);
     connect(editor, SIGNAL(triggered(bool)), this, SLOT(onActionEditListTriggered()));
 }
 
@@ -879,7 +879,7 @@ ROSCatkinToolsProfileEditorDialog::ROSCatkinToolsProfileEditorDialog(const Utils
     ROSCatkinToolsConfigEditorWidget *editorWidget = new ROSCatkinToolsConfigEditorWidget();
     vlayout->addWidget(editorWidget);
     setLayout(vlayout);
-    setWindowTitle(QLatin1String("Catkin Tools Configuration Editor"));
+    setWindowTitle(QStringLiteral("Catkin Tools Configuration Editor"));
     if(!editorWidget->parseProfileConfig(filePath))
         this->close();
 }

@@ -497,7 +497,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
                 ProjectExplorer::RawProjectPart rpp;
                 const QString defineArg
                         = Utils::transform(targetInfo->defines, [](const QString &s) -> QString {
-                            QString result = QString::fromLatin1("#define ") + s;
+                            QString result = QStringLiteral("#define ") + s;
                             int assignIndex = result.indexOf('=');
                             if (assignIndex != -1)
                                 result[assignIndex] = ' ';

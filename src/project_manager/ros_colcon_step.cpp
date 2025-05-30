@@ -58,7 +58,7 @@ ROSColconStep::ROSColconStep(BuildStepList *parent, const Utils::Id id) :
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSColconStep",
                                                       ROS_COLCON_STEP_DISPLAY_NAME));
 
-    m_percentProgress = QRegularExpression(QLatin1String(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
+    m_percentProgress = QRegularExpression(QStringLiteral(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
 
     const ROSBuildConfiguration *const bc = rosBuildConfiguration();
     if (bc->rosBuildSystem() != ROSUtils::Colcon)
@@ -112,7 +112,7 @@ bool ROSColconStep::init()
 
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
-    env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
+    env.set(QStringLiteral("LC_ALL"), QStringLiteral("C"));
     pp->setEnvironment(env);
     pp->setCommandLine(makeCommand(allArguments(bc->cmakeBuildType())));
 
@@ -168,7 +168,7 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
 
     switch(m_target) {
     case BUILD:
-        args << QLatin1String("build");
+        args << QStringLiteral("build");
         args << m_colconArguments;
         args << "--event-handlers status+ console_start_end+";
         if (includeDefault)
@@ -182,7 +182,7 @@ QString ROSColconStep::allArguments(ROSUtils::BuildType buildType, bool includeD
 
         break;
     case CLEAN:
-        args << QLatin1String("-r build/ install/ log/");
+        args << QStringLiteral("-r build/ install/ log/");
 
         break;
     }

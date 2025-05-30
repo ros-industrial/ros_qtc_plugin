@@ -77,7 +77,7 @@ QString ROSFolderNode::displayName() const
     if (m_repository)
     {
         const Utils::FilePath path = this->filePath();
-        return QString::fromLatin1("%1 [%2]").arg(path.fileName(), m_repository->vcsTopic(path));
+        return QStringLiteral("%1 [%2]").arg(path.fileName(), m_repository->vcsTopic(path));
     }
     else
     {

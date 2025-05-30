@@ -59,7 +59,7 @@ ROSCatkinMakeStep::ROSCatkinMakeStep(BuildStepList *parent, const Utils::Id id) 
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep",
                                                       ROS_CMS_DISPLAY_NAME));
 
-    m_percentProgress = QRegularExpression(QLatin1String("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
+    m_percentProgress = QRegularExpression(QStringLiteral("\\[\\s{0,2}(\\d{1,3})%\\]")); // Example: [ 82%] [ 82%] [ 87%]
 
     const ROSBuildConfiguration *const bc = rosBuildConfiguration();
     if (bc->rosBuildSystem() != ROSUtils::CatkinMake)
@@ -113,7 +113,7 @@ bool ROSCatkinMakeStep::init()
 
     // Force output to english for the parsers. Do this here and not in the toolchain's
     // addToEnvironment() to not screw up the users run environment.
-    env.set(QLatin1String("LC_ALL"), QLatin1String("C"));
+    env.set(QStringLiteral("LC_ALL"), QStringLiteral("C"));
     pp->setEnvironment(env);
     pp->setCommandLine(makeCommand(allArguments(bc->cmakeBuildType())));
 
@@ -183,7 +183,7 @@ QString ROSCatkinMakeStep::allArguments(ROSUtils::BuildType buildType, bool incl
 
         break;
     case CLEAN:
-        args << QLatin1String("clean");
+        args << QStringLiteral("clean");
         args << m_catkinMakeArguments;
         if (!m_cmakeArguments.isEmpty())
             args << QString("--cmake-args %1").arg(m_cmakeArguments);
