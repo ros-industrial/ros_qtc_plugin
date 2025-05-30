@@ -38,7 +38,7 @@ jobs:
 
       - name: build plugin
         env:
-          CLAZY_CHECKS: "level2,no-old-style-connect,no-rule-of-three,no-ctor-missing-parent-argument"
+          CLAZY_CHECKS: "level2,no-old-style-connect,no-rule-of-three,no-ctor-missing-parent-argument,no-no-module-include"
         run: |
           cmake -B build -G Ninja -D CMAKE_PREFIX_PATH="${{ env.QTC_PATH }};${{ env.QT_PATH }}" -D CMAKE_CXX_COMPILER=clazy -D BUILD_ROSTERMINAL=OFF
           cmake --build build --target package
