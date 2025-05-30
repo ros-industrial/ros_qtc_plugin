@@ -223,7 +223,7 @@ public:
      * @brief Gets a list of installed ROS Distributions
      * @return QStringList List of installed ROS distribution names
      */
-    static QList<Utils::FilePath> installedDistributions();
+    static const QList<Utils::FilePath> installedDistributions();
 
     /**
      * @brief Generates/Updates the Qt ROS Project File

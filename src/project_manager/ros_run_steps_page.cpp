@@ -227,7 +227,7 @@ void RunStepListWidget::updateEnabledState()
 {
     RunStep *step = qobject_cast<RunStep *>(sender());
     if (step) {
-        for (const RunStepsWidgetData *s : m_runStepsData) {
+        for (const RunStepsWidgetData *s : std::as_const(m_runStepsData)) {
             if (s->step == step) {
                 s->toolWidget->setRunStepEnabled(step->enabled());
                 break;
