@@ -82,23 +82,6 @@ public:
     void start() override;
 };
 
-class ROSDebugRunWorker : public Debugger::DebuggerRunTool
-{
-    Q_OBJECT
-
-public:
-    explicit ROSDebugRunWorker(ProjectExplorer::RunControl *runControl);
-    void start() override;
-
-private:
-    void findProcess();
-    void pidFound(const Utils::ProcessInfo &process);
-    QTimer m_timer;
-    int m_timeElapsed;
-    QString m_debugTargetPath;
-    bool m_debugContinueOnAttach;
-};
-
 } // namespace Internal
 
 } // namespace ROSProjectManager
