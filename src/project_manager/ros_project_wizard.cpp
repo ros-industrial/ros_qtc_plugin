@@ -243,7 +243,7 @@ Core::BaseFileWizard *ROSProjectWizard::create(const Core::WizardDialogParameter
     Q_UNUSED(parameters);
     ROSProjectWizardDialog *wizard = new ROSProjectWizardDialog(this);
 
-    for (QWizardPage *p : wizard->extensionPages())
+    for (QWizardPage *p : wizard->extensionPages()) // clazy:exclude=range-loop-detach
         wizard->addPage(p);
 
     return wizard;
@@ -291,7 +291,7 @@ bool ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core::Generated
     QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
     TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
 
-    for (const auto& code_style : code_style_pool->codeStyles()) {
+    for (const auto& code_style : code_style_pool->codeStyles()) { // clazy:exclude=range-loop-detach
         if (ros_settings->default_code_style == code_style->displayName()) {
             ProjectExplorer::EditorConfiguration *editorConfiguration = project->editorConfiguration();
             TextEditor::ICodeStylePreferences *codeStylePreferences = editorConfiguration->codeStyle(CppEditor::Constants::CPP_SETTINGS_ID);

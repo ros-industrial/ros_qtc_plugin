@@ -54,7 +54,7 @@ ROSSettings::ROSSettings()
   {
     QDir ros_opt(ros_path.toFSPathString());
     ros_opt.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    for (const QString &entry : ros_opt.entryList())
+    for (const QString &entry : ros_opt.entryList()) // clazy:exclude=range-loop-detach
     {
       Utils::FilePath path = Utils::FilePath::fromString(QLatin1String(ROSProjectManager::Constants::ROS_INSTALL_DIRECTORY));
       path = path.pathAppended(entry);
@@ -131,12 +131,12 @@ ROSSettingsWidget::ROSSettingsWidget() :
     // TODO: Add python support
     TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
 
-    for (const auto& code_style : code_style_pool->builtInCodeStyles()) {
+    for (const auto& code_style : code_style_pool->builtInCodeStyles()) { // clazy:exclude=range-loop-detach
         QString name = code_style->displayName() + " [built-in]";
         m_available_code_styles[name] = code_style->displayName();
     }
 
-    for (const auto& code_style : code_style_pool->customCodeStyles()) {
+    for (const auto& code_style : code_style_pool->customCodeStyles()) { // clazy:exclude=range-loop-detach
         QString name = code_style->displayName();
         if (name != "Global")
             m_available_code_styles[name] = name;

@@ -125,7 +125,7 @@ ROSRunWorker::ROSRunWorker(RunControl *runControl) : RunWorker(runControl)
 
 void ROSRunWorker::start()
 {
-    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->target()->activeRunConfiguration())->stepList()->steps())
+    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->target()->activeRunConfiguration())->stepList()->steps()) // clazy:exclude=range-loop-detach
     {
         if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
         {
@@ -152,7 +152,7 @@ ROSDebugRunWorker::ROSDebugRunWorker(RunControl *runControl) : Debugger::Debugge
 void ROSDebugRunWorker::start()
 {
     bool found = false;
-    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->target()->activeRunConfiguration())->stepList()->steps())
+    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->target()->activeRunConfiguration())->stepList()->steps()) // clazy:exclude=range-loop-detach
     {
         if (rs->enabled() == true && rs->id() == Constants::ROS_ATTACH_TO_NODE_ID)
         {
@@ -181,7 +181,7 @@ void ROSDebugRunWorker::start()
     if (found)
     {
         // Now that the watcher is started run all of the other steps
-        for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->target()->activeRunConfiguration())->stepList()->steps())
+        for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->target()->activeRunConfiguration())->stepList()->steps()) // clazy:exclude=range-loop-detach
         {
             if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
             {
@@ -219,7 +219,7 @@ void ROSDebugRunWorker::findProcess()
     m_timeElapsed += 10;
     const QString &appName = Utils::FileUtils::normalizedPathName(m_debugTargetPath);
     Utils::ProcessInfo fallback;
-    for (const Utils::ProcessInfo &p : Utils::ProcessInfo::processInfoList()) {
+    for (const Utils::ProcessInfo &p : Utils::ProcessInfo::processInfoList()) { // clazy:exclude=range-loop-detach
         if (Utils::FileUtils::normalizedPathName(p.executable) == appName) {
             Core::MessageManager::writeSilently(tr("[ROS] Attaching to process: %1.").arg(appName));
             pidFound(p);
