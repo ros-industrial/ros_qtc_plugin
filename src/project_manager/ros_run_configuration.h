@@ -72,15 +72,6 @@ protected:
     availableCreators(ProjectExplorer::Target *parent) const override;
 };
 
-class ROSRunWorker : public ProjectExplorer::RunWorker
-{
-    Q_OBJECT
-
-public:
-    explicit ROSRunWorker(ProjectExplorer::RunControl *runControl);
-    void start() override;
-};
-
 } // namespace Internal
 
 } // namespace ROSProjectManager
