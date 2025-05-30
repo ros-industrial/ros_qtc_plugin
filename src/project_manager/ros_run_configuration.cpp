@@ -115,25 +115,6 @@ ROSRunConfigurationFactory::availableCreators(ProjectExplorer::Target */*parent*
   return {rci};
 }
 
-////////////////////////////////////
-/// ROSRunWorker
-////////////////////////////////////
-ROSRunWorker::ROSRunWorker(RunControl *runControl) : RunWorker(runControl)
-{
-    setId("RosRunWorker");
-}
-
-void ROSRunWorker::start()
-{
-    for (RunStep *rs : qobject_cast<ROSRunConfiguration *>(runControl()->target()->activeRunConfiguration())->stepList()->steps()) // clazy:exclude=range-loop-detach
-    {
-        if (rs->enabled() == true && rs->id() != ROSProjectManager::Constants::ROS_ATTACH_TO_NODE_ID)
-        {
-            rs->run();
-        }
-    }
-}
-
 } // namespace Internal
 } // namespace ROSProjectManager
 
