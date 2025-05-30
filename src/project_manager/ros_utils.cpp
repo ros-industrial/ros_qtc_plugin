@@ -51,21 +51,21 @@ QString ROSUtils::buildTypeName(const ROSUtils::BuildType buildType)
 {
     switch (buildType) {
     case ROSUtils::BuildTypeDebug:
-        return QLatin1String("Debug");
+        return QStringLiteral("Debug");
     case ROSUtils::BuildTypeMinSizeRel:
-        return QLatin1String("Minimum Size Release");
+        return QStringLiteral("Minimum Size Release");
     case ROSUtils::BuildTypeRelWithDebInfo:
-        return QLatin1String("Release with Debug Information");
+        return QStringLiteral("Release with Debug Information");
     case ROSUtils::BuildTypeRelease:
-        return QLatin1String("Release");
+        return QStringLiteral("Release");
     default:
-        return QLatin1String("User Defined");
+        return QStringLiteral("User Defined");
     }
 }
 
 bool ROSUtils::sourceROS(QProcessEnvironment &env, const Utils::FilePath &rosDistribution)
 {
-  sourceWorkspaceHelper(env, Utils::FilePath(rosDistribution).pathAppended(QLatin1String("setup.bash")).toFSPathString());
+  sourceWorkspaceHelper(env, Utils::FilePath(rosDistribution).pathAppended(QStringLiteral("setup.bash")).toFSPathString());
   return true;
 }
 
@@ -108,9 +108,9 @@ bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
     case ROSUtils::CatkinMake:
     {
         Utils::FilePath topCMake(workspaceInfo.sourcePath);
-        topCMake = topCMake.pathAppended(QLatin1String("CMakeLists.txt"));
+        topCMake = topCMake.pathAppended(QStringLiteral("CMakeLists.txt"));
         Utils::FilePath catkin_workspace(workspaceInfo.path);
-        catkin_workspace = catkin_workspace.pathAppended(QLatin1String(".catkin_workspace"));
+        catkin_workspace = catkin_workspace.pathAppended(QStringLiteral(".catkin_workspace"));
 
         if (topCMake.exists() && catkin_workspace.exists() && workspaceInfo.sourcePath.exists())
           return true;
@@ -120,7 +120,7 @@ bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
     case ROSUtils::CatkinTools:
     {
         Utils::FilePath catkin_tools(workspaceInfo.path);
-        catkin_tools = catkin_tools.pathAppended(QLatin1String(".catkin_tools"));
+        catkin_tools = catkin_tools.pathAppended(QStringLiteral(".catkin_tools"));
         if (catkin_tools.exists() && workspaceInfo.sourcePath.exists())
           return true;
 
@@ -190,7 +190,7 @@ bool ROSUtils::initializeWorkspace(QProcessEnvironment &env, const WorkspaceInfo
                     return false;
 
                 process.setWorkingDirectory(workspaceInfo.sourcePath.toFSPathString());
-                process.start(QLatin1String("bash"), QStringList() << QStringList() << QLatin1String("-c") << QLatin1String("catkin_init_workspace"));
+                process.start(QStringLiteral("bash"), QStringList() << QStringList() << QStringLiteral("-c") << QStringLiteral("catkin_init_workspace"));
 
                 if( !process.waitForFinished() )
                     return false;
@@ -209,7 +209,7 @@ bool ROSUtils::initializeWorkspace(QProcessEnvironment &env, const WorkspaceInfo
                     return false;
 
                 process.setWorkingDirectory(workspace.path.toFSPathString());
-                process.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin init"));
+                process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("catkin init"));
 
                 if( !process.waitForFinished() )
                     return false;
@@ -246,21 +246,21 @@ bool ROSUtils::buildWorkspace(QProcess &process, const WorkspaceInfo &workspaceI
     case CatkinMake:
     {
         process.setWorkingDirectory(workspaceInfo.path.toFSPathString());
-        process.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin_make --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("catkin_make --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
         process.waitForFinished();
         break;
     }
     case CatkinTools:
     {
         process.setWorkingDirectory(workspaceInfo.path.toFSPathString());
-        process.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
+        process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
         process.waitForFinished();
         break;
     }
     case Colcon:
     {
         process.setWorkingDirectory(workspaceInfo.path.toFSPathString());
-        process.start(QLatin1String("bash"), QStringList() << QLatin1String("-c") << QLatin1String("colcon build"));
+        process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("colcon build"));
         process.waitForFinished();
         break;
     }
@@ -316,8 +316,8 @@ void ROSUtils::sourceWorkspaceHelper(QProcessEnvironment &env, const QString &pa
 
     QProcess process;
 
-    const QString cmd = QLatin1String("source ") + path + QLatin1String(" && env");
-    process.start(QLatin1String("bash"), QStringList());
+    const QString cmd = QStringLiteral("source ") + path + QStringLiteral(" && env");
+    process.start(QStringLiteral("bash"), QStringList());
     process.waitForStarted();
     process.write(cmd.toLatin1());
     process.closeWriteChannel();
@@ -338,17 +338,17 @@ bool ROSUtils::generateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const R
 {
     xmlFile.setAutoFormatting(true);
     xmlFile.writeStartDocument();
-    xmlFile.writeStartElement(QLatin1String("Workspace"));
+    xmlFile.writeStartElement(QStringLiteral("Workspace"));
 
     if (!content.distribution.path().trimmed().isEmpty())
     {
-        xmlFile.writeStartElement(QLatin1String("Distribution"));
-        xmlFile.writeAttribute(QLatin1String("path"), content.distribution.toFSPathString());
+        xmlFile.writeStartElement(QStringLiteral("Distribution"));
+        xmlFile.writeAttribute(QStringLiteral("path"), content.distribution.toFSPathString());
         xmlFile.writeEndElement();
     }
 
-    xmlFile.writeStartElement(QLatin1String("DefaultBuildSystem"));
-    xmlFile.writeAttribute(QLatin1String("value"), QString::number(content.defaultBuildSystem));
+    xmlFile.writeStartElement(QStringLiteral("DefaultBuildSystem"));
+    xmlFile.writeAttribute(QStringLiteral("value"), QString::number(content.defaultBuildSystem));
     xmlFile.writeEndElement();
 
     xmlFile.writeEndElement();
@@ -365,13 +365,13 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FilePath &filePath, ROSP
         workspaceXml.setDevice(&workspaceFile);
         while(workspaceXml.readNextStartElement())
         {
-            if (workspaceXml.name() == QLatin1String("Distribution"))
+            if (workspaceXml.name() == QStringLiteral("Distribution"))
             {
                 QList<Utils::FilePath> distributions = ROSUtils::installedDistributions();
                 QXmlStreamAttributes attributes = workspaceXml.attributes();
-                if (attributes.hasAttribute(QLatin1String("path")))
+                if (attributes.hasAttribute(QStringLiteral("path")))
                 {
-                    content.distribution = Utils::FilePath::fromString(attributes.value(QLatin1String("path")).toString());
+                    content.distribution = Utils::FilePath::fromString(attributes.value(QStringLiteral("path")).toString());
                     if (!distributions.empty() && !distributions.contains(content.distribution))
                     {
                         Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Project file distribution [%1] is not installed. Setting to [%2], if incorrect modify project file [%3].").arg(content.distribution.toFSPathString(), distributions.first().toFSPathString(), filePath.fileName()));
@@ -393,12 +393,12 @@ bool ROSUtils::parseQtCreatorWorkspaceFile(const Utils::FilePath &filePath, ROSP
 
                 workspaceXml.readNextStartElement();
             }
-            else if (workspaceXml.name() == QLatin1String("DefaultBuildSystem"))
+            else if (workspaceXml.name() == QStringLiteral("DefaultBuildSystem"))
             {
                 QXmlStreamAttributes attributes = workspaceXml.attributes();
-                if (attributes.hasAttribute(QLatin1String("value")))
+                if (attributes.hasAttribute(QStringLiteral("value")))
                 {
-                    content.defaultBuildSystem = (ROSUtils::BuildSystem)attributes.value(QLatin1String("value")).toInt();
+                    content.defaultBuildSystem = (ROSUtils::BuildSystem)attributes.value(QStringLiteral("value")).toInt();
                 }
                 else
                 {
@@ -636,7 +636,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
   if (workspaceInfo.install)
     buildtimeInclude = Utils::FilePath(workspaceInfo.installPath);
 
-  buildtimeInclude = buildtimeInclude.pathAppended(QLatin1String("include"));
+  buildtimeInclude = buildtimeInclude.pathAppended(QStringLiteral("include"));
 
   cbpXml.setDevice(&cbpFile);
   cbpXml.readNext();
@@ -644,7 +644,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
   {
     if(cbpXml.isStartElement())
     {
-      if(cbpXml.name() == QLatin1String("Target"))
+      if(cbpXml.name() == QStringLiteral("Target"))
       {
         QString targetName;
         QString targetWorkingDir = buildInfo.path.toFSPathString();
@@ -654,7 +654,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
         if (cbpXml.attributes().hasAttribute("title"))
         {
           QString title =cbpXml.attributes().value("title").toString();
-          if (!title.endsWith(QLatin1String("/fast")) && !title.endsWith(QLatin1String("_automoc")) && !title.startsWith(QLatin1String("gtest")))
+          if (!title.endsWith(QStringLiteral("/fast")) && !title.endsWith(QStringLiteral("_automoc")) && !title.startsWith(QStringLiteral("gtest")))
           {
             targetName = title;
           }
@@ -671,11 +671,11 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
         }
 
         cbpXml.readNext();
-        while (cbpXml.name() != QLatin1String("Target"))
+        while (cbpXml.name() != QStringLiteral("Target"))
         {
             if(cbpXml.isStartElement())
             {
-                if(cbpXml.name() == QLatin1String("Option"))
+                if(cbpXml.name() == QStringLiteral("Option"))
                 {
                     if (cbpXml.attributes().hasAttribute("type"))
                     {
@@ -696,7 +696,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
                     }
                 }
 
-                if(cbpXml.name() == QLatin1String("Add"))
+                if(cbpXml.name() == QStringLiteral("Add"))
                 {
                     if (cbpXml.attributes().hasAttribute("directory"))
                     {
@@ -747,7 +747,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
             targetMap[targetName] = targetInfo;
         }
       }
-      else if(cbpXml.name() == QLatin1String("Unit"))
+      else if(cbpXml.name() == QStringLiteral("Unit"))
       {
         QString filename;
         if (cbpXml.attributes().hasAttribute("filename"))
@@ -755,11 +755,11 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
             filename = cbpXml.attributes().value("filename").toString();
         }
         cbpXml.readNext();
-        while (cbpXml.name() != QLatin1String("Unit"))
+        while (cbpXml.name() != QStringLiteral("Unit"))
         {
             if(cbpXml.isStartElement())
             {
-                if(cbpXml.name() == QLatin1String("Option"))
+                if(cbpXml.name() == QStringLiteral("Option"))
                 {
                     if (cbpXml.attributes().hasAttribute("target"))
                     {
@@ -779,7 +779,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
 
 //  Next search the package directory for any missed include folders
 //  QString includePath;
-//  QDirIterator itPackage(package.path, QStringList() << QLatin1String("include"), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+//  QDirIterator itPackage(package.path, QStringList() << QStringLiteral("include"), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 //  while (itPackage.hasNext())
 //  {
 //    includePath = itPackage.next();
@@ -796,7 +796,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
           if (!flagsFile.open(QFile::ReadOnly | QFile::Text))
           {
             Core::MessageManager::writeFlashing(QObject::tr("[ROS Error] Error opening flags file: %1.").arg(it->flagsFile.toFSPathString()));
-            it->flags.append(QLatin1String("-std=c++11"));
+            it->flags.append(QStringLiteral("-std=c++11"));
             continue;
           }
 
@@ -818,7 +818,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
       else
       {
           Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Flags file does not exist: %1.").arg(it->flagsFile.toFSPathString()));
-          it->flags.append(QLatin1String("-std=c++11"));
+          it->flags.append(QStringLiteral("-std=c++11"));
       }
   }
 
@@ -1040,9 +1040,9 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
   QStringList tmp;
 
   process.setEnvironment(env);
-  process.start(QLatin1String("bash"), QStringList());
+  process.start(QStringLiteral("bash"), QStringList());
   process.waitForStarted();
-  QString cmd = QLatin1String("rospack list"); // TODO: for ROS2 do 'ros2 pkg list'
+  QString cmd = QStringLiteral("rospack list"); // TODO: for ROS2 do 'ros2 pkg list'
   process.write(cmd.toLatin1());
   process.closeWriteChannel();
   process.waitForFinished();
@@ -1055,7 +1055,7 @@ QMap<QString, QString> ROSUtils::getROSPackages(const QStringList &env)
 
     for (const QString& str : std::as_const(package_list))
     {
-        tmp = str.split(QLatin1String(" "));
+        tmp = str.split(QStringLiteral(" "));
         package_map.insert(tmp[0],tmp[1]);
     }
 
@@ -1071,7 +1071,7 @@ QMap<QString, QString> ROSUtils::getWorkspacePackagePaths(const WorkspaceInfo &w
     const QDir srcDir(workspaceInfo.sourcePath.toFSPathString());
     if(srcDir.exists())
     {
-      QDirIterator it(srcDir.absolutePath(),QStringList() << QLatin1String("package.xml"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
+      QDirIterator it(srcDir.absolutePath(),QStringList() << QStringLiteral("package.xml"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
       while (it.hasNext())
       {
         QFileInfo packageFile(it.next());
@@ -1092,7 +1092,7 @@ QMap<QString, QString> ROSUtils::getROSPackageLaunchFiles(const QString &package
   if(!packagePath.isEmpty())
   {
     const QDir srcDir(packagePath);
-    QDirIterator it(srcDir.absolutePath(),QStringList() << QLatin1String("*.launch"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
+    QDirIterator it(srcDir.absolutePath(),QStringList() << QStringLiteral("*.launch"), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::Subdirectories | QDirIterator::FollowSymlinks);
 
     while (it.hasNext())
     {
@@ -1111,9 +1111,9 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
   QMap<QString, QString> package_executables;
 
   process.setEnvironment(env);
-  process.start(QLatin1String("bash"), QStringList());
+  process.start(QStringLiteral("bash"), QStringList());
   process.waitForStarted();
-  QString cmd = QLatin1String("catkin_find --without-underlays --libexec ") + packageName;
+  QString cmd = QStringLiteral("catkin_find --without-underlays --libexec ") + packageName;
   process.write(cmd.toLatin1());
   process.closeWriteChannel();
   process.waitForFinished();
@@ -1145,15 +1145,15 @@ QMap<QString, QString> ROSUtils::getROSPackageExecutables(const QString &package
 Utils::FilePath ROSUtils::getCatkinToolsProfilesPath(const Utils::FilePath &workspaceDir)
 {
     Utils::FilePath profiles(workspaceDir);
-    profiles = profiles.pathAppended(QLatin1String(".catkin_tools"));
-    profiles = profiles.pathAppended(QLatin1String("profiles"));
+    profiles = profiles.pathAppended(QStringLiteral(".catkin_tools"));
+    profiles = profiles.pathAppended(QStringLiteral("profiles"));
     return profiles;
 }
 
 Utils::FilePath ROSUtils::getCatkinToolsProfilesYamlFile(const Utils::FilePath &workspaceDir)
 {
     Utils::FilePath profiles = getCatkinToolsProfilesPath(workspaceDir);
-    profiles = profiles.pathAppended(QLatin1String("profiles.yaml"));
+    profiles = profiles.pathAppended(QStringLiteral("profiles.yaml"));
     return profiles;
 }
 
@@ -1237,7 +1237,7 @@ bool ROSUtils::removeCatkinToolsProfile(const Utils::FilePath &workspaceDir, con
                 return false;
 
             if (activeProfile == profileName)
-                setCatkinToolsActiveProfile(workspaceDir, QLatin1String("default"));
+                setCatkinToolsActiveProfile(workspaceDir, QStringLiteral("default"));
         }
     }
 
@@ -1333,8 +1333,8 @@ QStringList ROSUtils::getCatkinToolsProfileNames(const Utils::FilePath &workspac
     }
 
     // If there are currently no profiles, create a default profile.
-    createCatkinToolsProfile(workspaceDir, QLatin1String("default"), true);
-    return QStringList() << QLatin1String("default");
+    createCatkinToolsProfile(workspaceDir, QStringLiteral("default"), true);
+    return QStringList() << QStringLiteral("default");
 }
 
 Utils::FilePath ROSUtils::getCatkinToolsProfile(const Utils::FilePath &workspaceDir, const QString &profileName)
@@ -1350,15 +1350,15 @@ QString ROSUtils::getCMakeBuildTypeArgument(ROSUtils::BuildType &buildType)
 {
     switch (buildType) {
     case ROSUtils::BuildTypeDebug:
-        return QLatin1String("-DCMAKE_BUILD_TYPE=Debug");
+        return QStringLiteral("-DCMAKE_BUILD_TYPE=Debug");
     case ROSUtils::BuildTypeMinSizeRel:
-        return QLatin1String("-DCMAKE_BUILD_TYPE=MinSizeRel");
+        return QStringLiteral("-DCMAKE_BUILD_TYPE=MinSizeRel");
     case ROSUtils::BuildTypeRelWithDebInfo:
-        return QLatin1String("-DCMAKE_BUILD_TYPE=RelWithDebInfo");
+        return QStringLiteral("-DCMAKE_BUILD_TYPE=RelWithDebInfo");
     case ROSUtils::BuildTypeRelease:
-        return QLatin1String("-DCMAKE_BUILD_TYPE=Release");
+        return QStringLiteral("-DCMAKE_BUILD_TYPE=Release");
     default:
-        return QLatin1String("");
+        return QString();
     }
 }
 

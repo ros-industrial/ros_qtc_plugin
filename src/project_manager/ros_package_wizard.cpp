@@ -220,7 +220,7 @@ bool ROSPackageWizardDetailsPage::validateWithValidator(Utils::FancyLineEdit *ed
 ROSPackageWizard::ROSPackageWizard()
 {
     setSupportedProjectTypes({});
-    setIcon(QIcon(QLatin1String(":rosproject/folderpackage.png")));
+    setIcon(QIcon(QStringLiteral(":rosproject/folderpackage.png")));
     setDisplayName(tr("Package"));
     setId("A.ROS");
     setDescription(tr("Create a ROS package."));
@@ -270,8 +270,8 @@ Core::GeneratedFiles ROSPackageWizard::generateFiles(const QWizard *w,
     Utils::FilePath packagePath = m_wizard->packagePath();
     Utils::FilePath cmakelistPath = m_wizard->packagePath();
 
-    packagePath = packagePath.pathAppended(m_wizard->packageName()).pathAppended(QLatin1String("package.xml"));
-    cmakelistPath = cmakelistPath.pathAppended(m_wizard->packageName()).pathAppended(QLatin1String("CMakeLists.txt"));
+    packagePath = packagePath.pathAppended(m_wizard->packageName()).pathAppended(QStringLiteral("package.xml"));
+    cmakelistPath = cmakelistPath.pathAppended(m_wizard->packageName()).pathAppended(QStringLiteral("CMakeLists.txt"));
 
     Core::GeneratedFile generatedPackageFile(packagePath);
     generatedPackageFile.setAttributes(Core::GeneratedFile::CustomGeneratorAttribute);
