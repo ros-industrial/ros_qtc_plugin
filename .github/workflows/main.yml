@@ -16,8 +16,8 @@ jobs:
         config:
           - { name: "Linux", os: ubuntu-22.04, build: "RelWithDebInfo" }
           - { name: "Linux-arm64", os: ubuntu-24.04-arm, build: "RelWithDebInfo" }
-          - { name: "Windows", os: windows-latest, build: "Release" }
-          - { name: "Windows-arm64", os: windows-11-arm, build: "Release" }
+          - { name: "Windows", os: windows-latest, msvc_arch: amd64, build: "Release" }
+          - { name: "Windows-arm64", os: windows-11-arm, msvc_arch: arm64, build: "Release" }
           - { name: "macOS", os: macos-14, build: "Release" }
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +29,8 @@ jobs:
       - name: install Microsoft Visual C++ (Windows)
         uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
+        with:
+          arch: ${{ matrix.config.msvc_arch }}
 
       - name: install Linux system dependencies
         if: runner.os == 'Linux'
