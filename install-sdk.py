@@ -232,6 +232,8 @@ if __name__ == "__main__":
     parser.add_argument('--skip-qt', action="store_true")
     args = parser.parse_args()
 
+    print(f"system: {platform.system()}, machine: {platform.machine()}", flush=True)
+
     cfg = {}
 
     cfg['os'] = platform.system()
