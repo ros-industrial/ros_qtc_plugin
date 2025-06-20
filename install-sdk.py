@@ -144,7 +144,7 @@ def qt_download_check_extract(cfg, dir_install):
     sys_arch = arch_map[cfg['arch']]
 
     # the windows repo stores 32bit and 64bit binaries under the same 32bit directory
-    if cfg['os'] == "Windows":
+    if cfg['os'] == "Windows" and cfg['arch'] == "AMD64":
         url_arch = "x86"
     else:
         url_arch = sys_arch
