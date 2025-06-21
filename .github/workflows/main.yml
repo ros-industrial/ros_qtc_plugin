@@ -60,6 +60,15 @@ jobs:
           cmake -B build -GNinja -DCMAKE_BUILD_TYPE=${{ matrix.config.build }} -DCMAKE_PREFIX_PATH="${{ env.QTC_PATH }};${{ env.QT_PATH }}" -DBUILD_ROSTERMINAL=OFF
           cmake --build build --target package
 
+      - name: upload plugin spec
+        if: ${{ matrix.config.name == 'Linux' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin_archive_artifact_spec
+          if-no-files-found: error
+          path: |
+            ./build/src/project_manager/ROSProjectManager.json
+
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -105,7 +114,17 @@ jobs:
           path: ./
 
       - name: create release
-        uses: ncipollo/release-action@v1
+        id: release
+        uses: softprops/action-gh-release@v2
         with:
-          artifacts: qtcreator-opensource-linux-*-*.deb,qtcreator-plugin-ros-*-*-*.zip,qtcreator-plugin-ros_*_*.deb,qtcreator-plugin-ros-dbgsym_*_*.ddeb
-          artifactErrorsFailBuild: true
+          files: |
+            qtcreator-opensource-linux-*-*.deb
+            qtcreator-plugin-ros_*_*.deb
+            qtcreator-plugin-ros-dbgsym_*_*.ddeb
+            qtcreator-plugin-ros-*-Linux-x86_64.zip
+            qtcreator-plugin-ros-*-Linux-aarch64.zip
+            qtcreator-plugin-ros-*-Darwin-arm64.zip
+            qtcreator-plugin-ros-*-Windows-AMD64.zip
+            qtcreator-plugin-ros-*-Windows-ARM64.zip
+          fail_on_unmatched_files: true
+          generate_release_notes: true
