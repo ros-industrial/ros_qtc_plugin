@@ -20,6 +20,7 @@
  */
 #include "ros_generic_run_step.h"
 #include "ros_project.h"
+#include "ros_project_constants.h"
 #include "ros_build_configuration.h"
 #include "ui_ros_generic_configuration.h"
 
@@ -86,9 +87,9 @@ void ROSGenericRunStep::run()
   if (workspaceInfo.install)
     sourcePath = Utils::FilePath(workspaceInfo.installPath);
 
-  Utils::FilePath source_bash_file = sourcePath.pathAppended("setup.bash");
-  Utils::FilePath source_shell_file = sourcePath.pathAppended("setup.sh");
-  Utils::FilePath source_zshell_file = sourcePath.pathAppended("setup.zsh");
+  const Utils::FilePath source_bash_file = sourcePath.pathAppended(Constants::ROS_SOURCE_FILE_BASH);
+  const Utils::FilePath source_shell_file = sourcePath.pathAppended(Constants::ROS_SOURCE_FILE_SHELL);
+  const Utils::FilePath source_zshell_file = sourcePath.pathAppended(Constants::ROS_SOURCE_FILE_ZSH);
 
   if (shell.fileName() == "bash")
   {
