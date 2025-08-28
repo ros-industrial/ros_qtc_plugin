@@ -39,7 +39,20 @@ static constexpr char ROS_READING_PROJECT[] = "ROSProjectManager.ReadingProject"
 static constexpr char ROS_RELOADING_BUILD_INFO[] = "ROSProjectManager.ReloadingBuildInfo";
 
 // ROS default install directory
+static const QString ROS_SOURCE_FILE_SHELL = "setup.sh";
+static const QString ROS_SOURCE_FILE_BASH = "setup.bash";
+static const QString ROS_SOURCE_FILE_ZSH = "setup.zsh";
+static const QString ROS_SOURCE_FILE_BAT = "setup.bat";
+#if defined(Q_OS_WIN)
+static constexpr char ROS_INSTALL_DIRECTORY[] = "C:/ros";
+static const QString ROS_SOURCE_FILE = ROS_SOURCE_FILE_BAT;
+#elif defined(Q_OS_MAC)
+static constexpr char ROS_INSTALL_DIRECTORY[] = "/usr/local/opt/ros";
+static const QString ROS_SOURCE_FILE = ROS_SOURCE_FILE_ZSH;
+#else
 static constexpr char ROS_INSTALL_DIRECTORY[] = "/opt/ros";
+static const QString ROS_SOURCE_FILE = ROS_SOURCE_FILE_BASH;
+#endif
 
 // Context menu actions
 static constexpr char ROS_RELOAD_BUILD_INFO[] = "ROSProjectManager.reloadProjectBuildInfo";

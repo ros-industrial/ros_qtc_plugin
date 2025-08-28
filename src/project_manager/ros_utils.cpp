@@ -65,7 +65,7 @@ QString ROSUtils::buildTypeName(const ROSUtils::BuildType buildType)
 
 bool ROSUtils::sourceROS(QProcessEnvironment &env, const Utils::FilePath &rosDistribution)
 {
-  sourceWorkspaceHelper(env, Utils::FilePath(rosDistribution).pathAppended(QStringLiteral("setup.bash")).toFSPathString());
+  sourceWorkspaceHelper(env, Utils::FilePath(rosDistribution).pathAppended(Constants::ROS_SOURCE_FILE_BASH).toFSPathString());
   return true;
 }
 
@@ -78,8 +78,8 @@ bool ROSUtils::sourceWorkspace(QProcessEnvironment &env, const WorkspaceInfo &wo
     if (workspaceInfo.install)
       sourcePath = Utils::FilePath(workspaceInfo.installPath);
 
-    Utils::FilePath source_bash_file = sourcePath.pathAppended("setup.bash");
-    Utils::FilePath source_shell_file = sourcePath.pathAppended("setup.sh");
+    const Utils::FilePath source_bash_file = sourcePath.pathAppended(Constants::ROS_SOURCE_FILE_BASH);
+    const Utils::FilePath source_shell_file = sourcePath.pathAppended(Constants::ROS_SOURCE_FILE_SHELL);
     QString source_path;
     if (source_bash_file.exists())
     {
@@ -283,7 +283,7 @@ const QList<Utils::FilePath> ROSUtils::installedDistributions()
     const Utils::FilePaths entries = custom_ros_path.dirEntries(QDir::NoDotAndDotDot | QDir::Dirs);
     for (const Utils::FilePath &entry : entries)
     {
-      if ((entry / "setup.bash").exists())
+      if ((entry / Constants::ROS_SOURCE_FILE).exists())
       {
         distributions.append(custom_ros_path);
       }
@@ -296,7 +296,7 @@ const QList<Utils::FilePath> ROSUtils::installedDistributions()
     const Utils::FilePaths entries = default_ros_path.dirEntries(QDir::NoDotAndDotDot | QDir::Dirs);
     for (const Utils::FilePath &entry : entries)
     {
-      if ((entry / "setup.bash").exists())
+      if ((entry / Constants::ROS_SOURCE_FILE).exists())
       {
         distributions.append(entry);
       }
