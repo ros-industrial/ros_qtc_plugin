@@ -36,7 +36,6 @@
 #include <qtsupport/qtparser.h>
 #include <utils/stringutils.h>
 #include <utils/qtcassert.h>
-#include <cmakeprojectmanager/cmakeoutputparser.h>
 #include <utils/variablechooser.h>
 #include <coreplugin/messagemanager.h>
 
@@ -140,7 +139,6 @@ bool ROSCatkinToolsStep::init()
 void ROSCatkinToolsStep::setupOutputFormatter(Utils::OutputFormatter *formatter)
 {
     formatter->addLineParser(new GnuMakeParser);
-    formatter->addLineParser(new CMakeProjectManager::CMakeOutputParser);
 
     QList<Utils::OutputLineParser *> parsers = target()->kit()->createOutputParsers();
 
