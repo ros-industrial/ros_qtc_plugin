@@ -60,7 +60,7 @@ public:
     void initialize(const ProjectExplorer::BuildInfo &info);
 
     QWidget *createConfigWidget() override;
-    void addSubConfigWidgets(const BuildConfiguration::WidgetAdder &adder) override;
+    QList<QWidget *> createSubConfigWidgets() override;
 
     BuildType buildType() const override;
 
