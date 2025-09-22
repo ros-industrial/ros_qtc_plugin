@@ -648,8 +648,8 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
       {
         QString targetName;
         QString targetWorkingDir = buildInfo.path.toFSPathString();
-        QStringList targetLocalIncludes;
-        QStringList targetSystemIncludes;
+        Utils::FilePaths targetLocalIncludes;
+        Utils::FilePaths targetSystemIncludes;
         TargetType targetType = UtilityType;
         if (cbpXml.attributes().hasAttribute("title"))
         {
@@ -700,8 +700,8 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
                 {
                     if (cbpXml.attributes().hasAttribute("directory"))
                     {
-                        QString attribute_value = cbpXml.attributes().value("directory").toString();
-                        if (attribute_value.startsWith(workspaceInfo.path.toFSPathString()))
+                        Utils::FilePath attribute_value = Utils::FilePath::fromString(cbpXml.attributes().value("directory").toString());
+                        if (attribute_value.toFSPathString().startsWith(workspaceInfo.path.toFSPathString()))
                         {
                             if (!targetLocalIncludes.contains(attribute_value))
                               targetLocalIncludes.append(attribute_value);
@@ -719,7 +719,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
         // Only need to add target types ExecutableType and StaticLibraryType to the code model
         if (targetType != UtilityType)
         {
-            targetLocalIncludes.append(buildtimeInclude.toFSPathString());
+            targetLocalIncludes.append(buildtimeInclude);
 
             PackageTargetInfoPtr targetInfo = std::make_shared<PackageTargetInfo>();
             targetInfo->name = targetName;
@@ -766,7 +766,7 @@ bool ROSUtils::parseCodeBlocksFile(const WorkspaceInfo &workspaceInfo, ROSUtils:
                         QString temp = cbpXml.attributes().value("target").toString();
                         auto it = targetMap.find(temp);
                         if (it != targetMap.end())
-                          it.value()->source_files.append(filename);
+                          it.value()->source_files.append(Utils::FilePath::fromString(filename));
                     }
                 }
             }
@@ -974,9 +974,9 @@ bool ROSUtils::parseCMakeFileAPI(PackageBuildInfo &package)
                 continue;
             const Utils::FilePath source_path = Utils::FilePath::fromString(val["path"].toString());
             if(source_path.isAbsolutePath())
-                targetInfo->source_files.append(source_path.toFSPathString());
+                targetInfo->source_files.append(source_path);
             else
-                targetInfo->source_files.append((source_toplevel_path / source_path.toFSPathString()).toFSPathString());
+                targetInfo->source_files.append(source_toplevel_path / source_path.toFSPathString());
         }
 
         // compile settings
@@ -999,7 +999,7 @@ bool ROSUtils::parseCMakeFileAPI(PackageBuildInfo &package)
             for (const QJsonValue &val : std::as_const(target_includes)) {
                 if (!val["path"].isString())
                     continue;
-                targetInfo->includes.append(val["path"].toString());
+                targetInfo->includes.append(Utils::FilePath::fromString(val["path"].toString()));
             }
 
             // defines
