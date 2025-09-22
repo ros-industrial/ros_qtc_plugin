@@ -177,10 +177,11 @@ QWidget *ROSBuildConfiguration::createConfigWidget()
     return new ROSBuildSettingsWidget(this);
 }
 
-void ROSBuildConfiguration::addSubConfigWidgets(const BuildConfiguration::WidgetAdder &adder)
+QList<QWidget *> ROSBuildConfiguration::createSubConfigWidgets()
 {
-    adder(new ROSBuildEnvironmentWidget(this), tr("Build Environment"));
-    ProjectExplorer::BuildConfiguration::addSubConfigWidgets(adder);
+    return {
+        new ROSBuildEnvironmentWidget(this)
+    };
 }
 
 /*!
