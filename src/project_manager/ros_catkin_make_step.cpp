@@ -34,7 +34,6 @@
 #include <qtsupport/qtparser.h>
 #include <utils/stringutils.h>
 #include <utils/qtcassert.h>
-#include <cmakeprojectmanager/cmakeoutputparser.h>
 
 #include <QDir>
 #include <QComboBox>
@@ -128,7 +127,6 @@ bool ROSCatkinMakeStep::init()
 void ROSCatkinMakeStep::setupOutputFormatter(Utils::OutputFormatter *formatter)
 {
     formatter->addLineParser(new GnuMakeParser);
-    formatter->addLineParser(new CMakeProjectManager::CMakeOutputParser);
 
     QList<Utils::OutputLineParser *> parsers = target()->kit()->createOutputParsers();
 
