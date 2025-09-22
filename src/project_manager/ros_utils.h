@@ -97,8 +97,8 @@ public:
         QString name;              /**< @brief Target name */
         TargetType type;           /**< @brief Target type */
         Utils::FilePath flagsFile; /**< @brief Path to the Target's flags.cmake file */
-        QStringList includes;      /**< @brief Target's include directories */
-        QStringList source_files;  /**< @brief Target's source files */
+        Utils::FilePaths includes;      /**< @brief Target's include directories */
+        Utils::FilePaths source_files;  /**< @brief Target's source files */
         QStringList flags;         /**< @brief Target's cxx build flags */
         QStringList defines;       /**< @brief Target's defines build flags */
     };

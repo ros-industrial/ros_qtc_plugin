@@ -470,14 +470,14 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
     }
 
     // Get all of the workspace includes directories
-    QStringList workspace_includes; // This should be the same as workspace_header_paths used for checking for duplicates
+    Utils::FilePaths workspace_includes; // This should be the same as workspace_header_paths used for checking for duplicates
     ProjectExplorer::HeaderPaths workspace_header_paths;
     for (const auto& package : std::as_const(results.wsPackageInfo)) {
       Utils::FilePath include_path = package.path;
       include_path = include_path.pathAppended("include");
-      if (!workspace_includes.contains(include_path.toFSPathString())) {
-        workspace_includes.append(include_path.toFSPathString());
-        workspace_header_paths.append(ProjectExplorer::HeaderPath(include_path.toFSPathString(), ProjectExplorer::HeaderPathType::User));
+      if (!workspace_includes.contains(include_path)) {
+        workspace_includes.append(include_path);
+        workspace_header_paths.append(ProjectExplorer::HeaderPath(include_path, ProjectExplorer::HeaderPathType::User));
       }
     }
 
@@ -492,7 +492,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
         for (const ROSUtils::PackageBuildInfo& buildInfo : std::as_const(results.wsPackageBuildInfo))
         {
             ProjectExplorer::HeaderPaths packageHeaderPaths = workspace_header_paths;
-            QStringList package_includes = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
+            Utils::FilePaths package_includes = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
 
             for (const ROSUtils::PackageTargetInfoPtr& targetInfo : buildInfo.targets)
             {
@@ -512,7 +512,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
                 rpp.setQtVersion(activeQtVersion);
                 rpp.setMacros(ProjectExplorer::Macro::toMacros(defineArg.toUtf8()));
 
-                QSet<QString> toolChainIncludes;
+                QSet<Utils::FilePath> toolChainIncludes;
                 const HeaderPaths header_paths = \
                         cxxToolChain->createBuiltInHeaderPathsRunner(env)\
                         (targetInfo->flags, sysRoot, QString());
@@ -520,7 +520,7 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
                     toolChainIncludes.insert(hp.path);
                 }
 
-                for (const QString &i : std::as_const(targetInfo->includes)) {
+                for (const Utils::FilePath &i : std::as_const(targetInfo->includes)) {
                     if (!toolChainIncludes.contains(i) && !package_includes.contains(i)) {
                         packageHeaderPaths.append(ProjectExplorer::HeaderPath(i, ProjectExplorer::HeaderPathType::System));
                         package_includes.append(i);
