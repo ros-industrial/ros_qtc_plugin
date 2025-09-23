@@ -132,7 +132,7 @@ ROSProject::ROSProject(const Utils::FilePath &fileName) :
     m_asyncUpdateFutureInterface(nullptr),
     m_asyncBuildCodeModelFutureInterface(nullptr)
 {
-    setId(Constants::ROS_PROJECT_ID);
+    setType(Constants::ROS_PROJECT_ID);
     setProjectLanguages(Context(ProjectExplorer::Constants::CXX_LANGUAGE_ID));
     setDisplayName(projectFilePath().toFileInfo().completeBaseName());
 

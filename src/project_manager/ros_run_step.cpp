@@ -72,7 +72,7 @@ bool RunStepFactory::canHandle(RunStepList *rsl) const
     if (m_supportedProjectType.isValid()) {
         if (!config)
             return false;
-        Utils::Id projectId = config->project()->id();
+        Utils::Id projectId = config->project()->type();
         if (projectId != m_supportedProjectType)
             return false;
     }
