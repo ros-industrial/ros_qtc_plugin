@@ -229,7 +229,7 @@ ROSProjectWizard::ROSProjectWizard()
     setId("Z.ROSIndustrial");
     setDescription(tr("Create ROS Workspace"));
     setCategory(QLatin1String(ProjectExplorer::Constants::QT_PROJECT_WIZARD_CATEGORY));
-    setDisplayCategory(QLatin1String(ProjectExplorer::Constants::QT_PROJECT_WIZARD_CATEGORY_DISPLAY));
+    setDisplayCategory(Core::msgWizardDisplayCategoryOther());
     setFlags(Core::IWizardFactory::PlatformIndependent);
 }
 
