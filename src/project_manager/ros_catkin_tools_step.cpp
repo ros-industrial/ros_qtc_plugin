@@ -342,7 +342,7 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
             this, SLOT(updateDetails()));
 
-    Utils::VariableChooser::addSupportForChildWidgets(this, makeStep->rosBuildConfiguration()->macroExpander());
+    Utils::VariableChooser::addSupportForChildWidgets(this, { makeStep, makeStep->rosBuildConfiguration()->macroExpander() });
 }
 
 ROSCatkinToolsStepWidget::~ROSCatkinToolsStepWidget()
