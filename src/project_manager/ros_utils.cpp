@@ -1018,11 +1018,9 @@ bool ROSUtils::parseCMakeFileAPI(PackageBuildInfo &package)
                 continue;
 
             const QJsonArray &target_flags = cg["compileCommandFragments"].toArray();
-            QStringList flags;
             for (const QJsonValue &val : std::as_const(target_flags)) {
                 if (!val["fragment"].isString())
                     continue;
-                flags.append(val["fragment"].toString());
                 targetInfo->flags.append(val["fragment"].toString());
             }
         }
