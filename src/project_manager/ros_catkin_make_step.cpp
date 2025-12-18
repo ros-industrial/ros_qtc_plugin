@@ -30,6 +30,7 @@
 #include <projectexplorer/processparameters.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>
+#include <projectexplorer/projectexplorersettings.h>
 #include <projectexplorer/toolchain.h>
 #include <qtsupport/qtparser.h>
 #include <utils/stringutils.h>
@@ -262,8 +263,8 @@ ROSCatkinMakeStepWidget::ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep)
     connect(bc, &ROSBuildConfiguration::environmentChanged,
             this, &ROSCatkinMakeStepWidget::updateDetails);
 
-    connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
-            this, SLOT(updateDetails()));
+    m_makeStep->project()->projectExplorerSettings().addOnChanged(
+        this, std::bind(&ROSCatkinMakeStepWidget::updateDetails, this));
 }
 
 ROSCatkinMakeStepWidget::~ROSCatkinMakeStepWidget()
