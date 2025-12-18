@@ -32,6 +32,7 @@
 #include <projectexplorer/processparameters.h>
 #include <projectexplorer/projectexplorer.h>
 #include <projectexplorer/projectexplorerconstants.h>
+#include <projectexplorer/projectexplorersettings.h>
 #include <projectexplorer/toolchain.h>
 #include <qtsupport/qtparser.h>
 #include <utils/stringutils.h>
@@ -339,8 +340,8 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     connect(bc, &ROSBuildConfiguration::environmentChanged,
             this, &ROSCatkinToolsStepWidget::updateDetails);
 
-    connect(ProjectExplorerPlugin::instance(), SIGNAL(settingsChanged()),
-            this, SLOT(updateDetails()));
+    m_makeStep->project()->projectExplorerSettings().addOnChanged(
+        this, std::bind(&ROSCatkinToolsStepWidget::updateDetails, this));
 
     Utils::VariableChooser::addSupportForChildWidgets(this, { makeStep, makeStep->rosBuildConfiguration()->macroExpander() });
 }
