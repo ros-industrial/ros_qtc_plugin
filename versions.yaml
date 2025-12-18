@@ -16,4 +16,4 @@ qtc_modules: ["qtcreator", "qtcreator_dev"]
 # qtc_dev_tag:
 
 qt_version: "6.10"
-qt_modules: ['qtbase', 'qtdeclarative', 'icu', 'qttools', 'qt5compat']
+qt_modules: ['qtbase', 'qtdeclarative', 'icu']
