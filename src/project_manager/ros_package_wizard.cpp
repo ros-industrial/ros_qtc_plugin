@@ -257,11 +257,9 @@ Core::BaseFileWizard *ROSPackageWizard::create(const Core::WizardDialogParameter
     return m_wizard;
 }
 
-Core::GeneratedFiles ROSPackageWizard::generateFiles(const QWizard *w,
-                                                         QString *errorMessage) const
+Utils::Result<Core::GeneratedFiles> ROSPackageWizard::generateFiles(const QWizard *w) const
 {
     Q_UNUSED(w);
-    Q_UNUSED(errorMessage);
 
     Utils::FilePath packagePath = m_wizard->packagePath();
     Utils::FilePath cmakelistPath = m_wizard->packagePath();

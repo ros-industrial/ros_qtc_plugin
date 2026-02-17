@@ -244,10 +244,8 @@ Core::BaseFileWizard *ROSProjectWizard::create(const Core::WizardDialogParameter
     return wizard;
 }
 
-Core::GeneratedFiles ROSProjectWizard::generateFiles(const QWizard *w, QString *errorMessage) const
+Utils::Result<Core::GeneratedFiles> ROSProjectWizard::generateFiles(const QWizard *w) const
 {
-    Q_UNUSED(errorMessage);
-
     const ROSProjectWizardDialog *wizard = qobject_cast<const ROSProjectWizardDialog *>(w);
     const QDir wsDir(wizard->workspaceDirectory().toFSPathString());
 
