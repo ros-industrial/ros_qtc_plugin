@@ -21,6 +21,8 @@ class ROSBuildSystem : public ProjectExplorer::BuildSystem
 public:
     explicit ROSBuildSystem(ProjectExplorer::BuildConfiguration *bc);
 
+    static QString name() { return "ROS"; }
+
     void triggerParsing() final;
 
     virtual bool addFiles(ProjectExplorer::Node *context, const Utils::FilePaths &filePaths, Utils::FilePaths *notAdded = nullptr) override final;
