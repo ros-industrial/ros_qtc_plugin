@@ -142,9 +142,26 @@ ROSSettingsWidget::ROSSettingsWidget() :
             m_available_code_styles[name] = name;
     }
 
+    setOnApply([this]{
+        const ROSSettings newSettings = settings();
+        *m_settings = newSettings;
+        m_settings->toSettings(Core::ICore::settings());
+    });
+
+    setDirtyChecker([this]{
+        const ROSSettings newSettings = settings();
+        return newSettings != *m_settings;
+    });
+
     m_available_code_style_names->setStringList(m_available_code_styles.keys());
     m_ui->codeStyleComboBox->setModel(m_available_code_style_names);
     m_ui->defaultDistributionPathChooser->setPath(Constants::ROS_INSTALL_DIRECTORY);
+
+    Utils::installCheckSettingsDirtyTrigger(m_ui->distributionComboBox);
+    Utils::installCheckSettingsDirtyTrigger(m_ui->buildSystemComboBox);
+    Utils::installCheckSettingsDirtyTrigger(m_ui->codeStyleComboBox);
+    Utils::installCheckSettingsDirtyTrigger(m_ui->defaultDistributionPathChooser->lineEdit());
+    Utils::installCheckSettingsDirtyTrigger(m_ui->customDistributionPathChooser->lineEdit());
 }
 
 ROSSettingsWidget::~ROSSettingsWidget()
@@ -167,62 +184,42 @@ ROSSettings ROSSettingsWidget::settings() const
     return rc;
 }
 
-void ROSSettingsWidget::setSettings(const ROSSettings &s)
+void ROSSettingsWidget::setSettings(ROSSettings *const s)
 {
-    int idx = m_ui->distributionComboBox->findText(s.default_distribution, Qt::MatchExactly);
+    m_settings = s;
+
+    int idx = m_ui->distributionComboBox->findText(s->default_distribution, Qt::MatchExactly);
     m_ui->distributionComboBox->setCurrentIndex(idx);
 
-    m_ui->buildSystemComboBox->setCurrentIndex(static_cast<int>(s.default_build_system));
+    m_ui->buildSystemComboBox->setCurrentIndex(static_cast<int>(s->default_build_system));
 
     for (const auto& [key, value] : m_available_code_styles.asKeyValueRange()) {
-        if (value == s.default_code_style) {
+        if (value == s->default_code_style) {
             idx = m_ui->codeStyleComboBox->findText(key, Qt::MatchExactly);
             m_ui->codeStyleComboBox->setCurrentIndex(idx);
             break;
         }
     }
 
-    if (s.default_dist_path.isEmpty())
+    if (s->default_dist_path.isEmpty())
       m_ui->defaultDistributionPathChooser->setPath(Constants::ROS_INSTALL_DIRECTORY);
     else
-      m_ui->defaultDistributionPathChooser->setFilePath(s.default_dist_path);
+      m_ui->defaultDistributionPathChooser->setFilePath(s->default_dist_path);
 
-    m_ui->customDistributionPathChooser->setFilePath(s.custom_dist_path);
+    m_ui->customDistributionPathChooser->setFilePath(s->custom_dist_path);
 }
 
 // --------------- ROSSettingsPage
-ROSSettingsPage::ROSSettingsPage(QSharedPointer<ROSSettings> &settings) :
-    m_settings(settings)
+ROSSettingsPage::ROSSettingsPage(QSharedPointer<ROSSettings> &settings)
 {
     setId(Constants::ROS_SETTINGS_MAIN_PAGE_ID);
     setDisplayName(QCoreApplication::translate(Constants::ROS_SETTINGS_MAIN_PAGE_NAME_ID, "ROS Main Settings"));
     setCategory(Constants::ROS_SETTINGS_CATEGORY_ID);
-}
-
-QWidget *ROSSettingsPage::widget()
-{
-
-    if (!m_widget) {
-        m_widget = new ROSSettingsWidget;
-        m_widget->setSettings(*m_settings);
-    }
-    return m_widget;
-}
-
-void ROSSettingsPage::apply()
-{
-    if (m_widget) {
-        const ROSSettings newSettings = m_widget->settings();
-        if (newSettings != *m_settings) {
-            *m_settings = newSettings;
-            m_settings->toSettings(Core::ICore::settings());
-        }
-    }
-}
-
-void ROSSettingsPage::finish()
-{
-    delete m_widget;
+    setWidgetCreator([&settings] {
+        ROSSettingsWidget *settings_widget = new ROSSettingsWidget;
+        settings_widget->setSettings(settings.get());
+        return settings_widget;
+    });
 }
 
 } // namespace Internal
