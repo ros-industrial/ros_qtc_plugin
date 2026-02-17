@@ -255,8 +255,6 @@ Utils::Result<Core::GeneratedFiles> ROSProjectWizard::generateFiles(const QWizar
     projectFileContent.defaultBuildSystem = wizard->buildSystem();
     projectFileContent.distribution = wizard->distribution();
 
-    ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(wizard->workspaceDirectory(), projectFileContent.defaultBuildSystem, wizard->distribution());
-
     Core::GeneratedFile generatedWorkspaceFile(workspaceFileName);
     QString content;
     QXmlStreamWriter workspaceXml(&content);
