@@ -112,8 +112,8 @@ public:
     ROSTerminalPane terminalPane;
 #endif
 
-    QSharedPointer<ROSSettings> settings;
-    QSharedPointer<ROSSettingsPage> settingsPage;
+    std::shared_ptr<ROSSettings> settings;
+    std::shared_ptr<ROSSettingsPage> settingsPage;
 };
 
 ROSProjectPlugin::ROSProjectPlugin() : ExtensionSystem::IPlugin()
@@ -203,7 +203,7 @@ QTermWidget &ROSProjectPlugin::startTerminal(int startnow, const QString name)
 }
 #endif
 
-QSharedPointer<ROSSettings> ROSProjectPlugin::settings() const
+std::shared_ptr<ROSSettings> ROSProjectPlugin::settings() const
 {
     return d->settings;
 }

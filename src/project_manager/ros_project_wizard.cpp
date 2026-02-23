@@ -130,7 +130,7 @@ ROSImportWizardPage::ROSImportWizardPage(QWidget *parent) :
     }
     d->m_ui.distributionComboBox->addItems(dist_list);
 
-    QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
+    std::shared_ptr<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
     int index = d->m_ui.distributionComboBox->findText(ros_settings->default_distribution, Qt::MatchExactly);
     d->m_ui.distributionComboBox->setCurrentIndex(index);
 
@@ -281,7 +281,7 @@ Utils::Result<> ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core
         return Utils::ResultOk;
 
     // Set the Cpp code style for the project.
-    QSharedPointer<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
+    std::shared_ptr<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
     TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
 
     for (const auto& code_style : code_style_pool->codeStyles()) { // clazy:exclude=range-loop-detach
