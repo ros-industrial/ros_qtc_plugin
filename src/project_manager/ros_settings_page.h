@@ -70,19 +70,19 @@ public:
   ~ROSSettingsWidget();
 
   ROSSettings settings() const;
-  void setSettings(ROSSettings *const settings);
+  void setSettings(std::shared_ptr<ROSSettings> settings);
 
 private:
   Ui::ROSSettingsPage *m_ui;
   QStringListModel *m_available_code_style_names;
   QMap<QString, QString> m_available_code_styles;
-  ROSSettings *m_settings;
+  std::shared_ptr<ROSSettings> m_settings;
 };
 
 class ROSSettingsPage : public Core::IOptionsPage
 {
 public:
-    explicit ROSSettingsPage(QSharedPointer<ROSSettings> &settings);
+    explicit ROSSettingsPage(std::shared_ptr<ROSSettings> &settings);
 };
 
 } // namespace Internal

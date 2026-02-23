@@ -64,7 +64,7 @@ public:
      * @brief Get ROS Main settings
      * @return ROS Settings
      */
-    QSharedPointer<ROSSettings> settings() const;
+    std::shared_ptr<ROSSettings> settings() const;
 
 private slots:
 

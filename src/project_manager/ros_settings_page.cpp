@@ -184,7 +184,7 @@ ROSSettings ROSSettingsWidget::settings() const
     return rc;
 }
 
-void ROSSettingsWidget::setSettings(ROSSettings *const s)
+void ROSSettingsWidget::setSettings(std::shared_ptr<ROSSettings> s)
 {
     m_settings = s;
 
@@ -210,14 +210,14 @@ void ROSSettingsWidget::setSettings(ROSSettings *const s)
 }
 
 // --------------- ROSSettingsPage
-ROSSettingsPage::ROSSettingsPage(QSharedPointer<ROSSettings> &settings)
+ROSSettingsPage::ROSSettingsPage(std::shared_ptr<ROSSettings> &settings)
 {
     setId(Constants::ROS_SETTINGS_MAIN_PAGE_ID);
     setDisplayName(QCoreApplication::translate(Constants::ROS_SETTINGS_MAIN_PAGE_NAME_ID, "ROS Main Settings"));
     setCategory(Constants::ROS_SETTINGS_CATEGORY_ID);
     setWidgetCreator([&settings] {
         ROSSettingsWidget *settings_widget = new ROSSettingsWidget;
-        settings_widget->setSettings(settings.get());
+        settings_widget->setSettings(settings);
         return settings_widget;
     });
 }
