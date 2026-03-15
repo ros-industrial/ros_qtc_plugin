@@ -121,6 +121,11 @@ bool ROSColconStep::init()
     // That is mostly so that rebuild works on an already clean project
     setIgnoreReturnValue(m_target == CLEAN);
 
+    // set working directory to the project directory for the whole process step
+    setWorkingDirectoryProvider([bc]() {
+        return bc->project()->projectDirectory();
+    });
+
     return AbstractProcessStep::init();
 }
 
