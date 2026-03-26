@@ -25,6 +25,7 @@
 #include <QProcessEnvironment>
 #include <QXmlStreamWriter>
 #include <QRegularExpression>
+#include <QFutureInterface>
 #include <utils/fileutils.h>
 #include <utils/environment.h>
 #include "ros_project_constants.h"
@@ -271,7 +272,8 @@ public:
      */
     static QHash<QString, FolderContent> getFolderContentRecursive(const Utils::FilePath &folderPath,
                                                                    QStringList &fileList,
-                                                                   QStringList &directoryList);
+                                                                   QStringList &directoryList,
+                                                                   QFutureInterfaceBase *fi = nullptr);
 
     /**
      * @brief Get relevant workspace information
