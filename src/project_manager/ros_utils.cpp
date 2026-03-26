@@ -437,7 +437,7 @@ ROSUtils::FolderContent ROSUtils::getFolderContent(const QString &folder, const 
   return content;
 }
 
-QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContentRecursive(const Utils::FilePath &folderPath, QStringList &fileList, QStringList& directoryList)
+QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContentRecursive(const Utils::FilePath &folderPath, QStringList &fileList, QStringList& directoryList, QFutureInterfaceBase *fi)
 {
     QHash<QString, ROSUtils::FolderContent> workspaceFiles;
 
@@ -463,6 +463,9 @@ QHash<QString, ROSUtils::FolderContent> ROSUtils::getFolderContentRecursive(cons
     QList<QString> excludeDir;
     while (itSrc.hasNext())
     {
+        if (fi && fi->isCanceled())
+            return workspaceFiles;
+
         folder = itSrc.next();
 
         QString folder_name = Utils::FilePath::fromString(folder).fileName();

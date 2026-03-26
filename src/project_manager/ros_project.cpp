@@ -279,7 +279,12 @@ void ROSProject::buildProjectTree(const Utils::FilePath &projectFilePath, const 
 
     FutureWatcherResults results;
 
-    results.workspaceContent = ROSUtils::getFolderContentRecursive(sourcePath, results.files, results.directories);
+    results.workspaceContent = ROSUtils::getFolderContentRecursive(sourcePath, results.files, results.directories, &fi);
+
+    if (fi.isCanceled()) {
+        fi.reportFinished();
+        return;
+    }
 
     ROSProjectNode* project_node(new ROSProjectNode(projectFilePath.parentDir()));
     std::unique_ptr<FileNode> root_node(new FileNode(projectFilePath, ProjectExplorer::FileType::Project));
@@ -293,6 +298,11 @@ void ROSProject::buildProjectTree(const Utils::FilePath &projectFilePath, const 
     double max = results.workspaceContent.size();
     while(item != results.workspaceContent.constEnd())
     {
+      if (fi.isCanceled()) {
+          fi.reportFinished();
+          return;
+      }
+
       if (item.value().files.empty()) {
         // This is required so empty directories show up in project tree
         Utils::FilePath empty_directory = Utils::FilePath::fromString(item.key());
@@ -374,7 +384,13 @@ void ROSProject::asyncUpdate()
 
   bc->buildSystem()->requestParse();
 
+  m_futureWatcher.cancel();
   m_futureWatcher.waitForFinished();
+
+  if (m_asyncUpdateFutureInterface) {
+    delete m_asyncUpdateFutureInterface;
+    m_asyncUpdateFutureInterface = nullptr;
+  }
 
   Q_ASSERT(!m_asyncUpdateFutureInterface);
 
@@ -408,7 +424,13 @@ void ROSProject::asyncUpdateCppCodeModel(bool success)
 
         m_cppCodeModelUpdater->cancel();
 
+        m_futureBuildCodeModelWatcher.cancel();
         m_futureBuildCodeModelWatcher.waitForFinished();
+
+        if (m_asyncBuildCodeModelFutureInterface) {
+          delete m_asyncBuildCodeModelFutureInterface;
+          m_asyncBuildCodeModelFutureInterface = nullptr;
+        }
 
         Q_ASSERT(!m_asyncBuildCodeModelFutureInterface);
         m_asyncBuildCodeModelFutureInterface = new QFutureInterface<CppToolsFutureResults>();
@@ -491,6 +513,11 @@ void ROSProject::buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
         double max = results.wsPackageBuildInfo.size();
         for (const ROSUtils::PackageBuildInfo& buildInfo : std::as_const(results.wsPackageBuildInfo))
         {
+            if (fi.isCanceled()) {
+                fi.reportFinished();
+                return;
+            }
+
             ProjectExplorer::HeaderPaths packageHeaderPaths = workspace_header_paths;
             Utils::FilePaths package_includes = workspace_includes; // This should be the same as packageHeaderPaths and is used to check for duplicates
 
