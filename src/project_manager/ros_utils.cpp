@@ -42,6 +42,13 @@
 namespace ROSProjectManager {
 namespace Internal {
 
+static Utils::FilePath safePathAppended(const Utils::FilePath &base, const QString &path)
+{
+    if (Utils::FilePath::fromString(path).isAbsolutePath())
+        return Utils::FilePath::fromString(path);
+    return base.pathAppended(path);
+}
+
 ROSUtils::ROSUtils()
 {
 
@@ -1398,11 +1405,11 @@ ROSUtils::WorkspaceInfo ROSUtils::getWorkspaceInfo(const Utils::FilePath &worksp
               createCatkinToolsProfile(workspaceDir, activeProfile, true);
 
             config = YAML::LoadFile(configPath.toFSPathString().toStdString());
-            space.sourcePath = Utils::FilePath(workspaceDir).pathAppended(QString::fromStdString(config["source_space"].as<std::string>()));
-            space.buildPath = Utils::FilePath(workspaceDir).pathAppended(QString::fromStdString(config["build_space"].as<std::string>()));
-            space.develPath = Utils::FilePath(workspaceDir).pathAppended(QString::fromStdString(config["devel_space"].as<std::string>()));
-            space.installPath = Utils::FilePath(workspaceDir).pathAppended(QString::fromStdString(config["install_space"].as<std::string>()));
-            space.logPath = Utils::FilePath(workspaceDir).pathAppended(QString::fromStdString(config["log_space"].as<std::string>()));
+            space.sourcePath = safePathAppended(workspaceDir, QString::fromStdString(config["source_space"].as<std::string>()));
+            space.buildPath = safePathAppended(workspaceDir, QString::fromStdString(config["build_space"].as<std::string>()));
+            space.develPath = safePathAppended(workspaceDir, QString::fromStdString(config["devel_space"].as<std::string>()));
+            space.installPath = safePathAppended(workspaceDir, QString::fromStdString(config["install_space"].as<std::string>()));
+            space.logPath = safePathAppended(workspaceDir, QString::fromStdString(config["log_space"].as<std::string>()));
             space.install = config["install"].as<bool>();
         }
         else
