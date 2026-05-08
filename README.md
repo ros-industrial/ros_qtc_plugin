@@ -50,12 +50,6 @@ curl -SL $(curl -s https://api.github.com/repos/ros-industrial/ros_qtc_plugin/re
 
 Note: Qt Creator from the online installer may notify you about available updates and install them when instructed to do so. The plugin API is only compatible with patch-level updates. A major or minor update will break the plugin API and Qt Creator will then refuse to load the plugin. Make sure that a compatible plugin version is available before updating Qt Creator as it is not possible to downgrade to an older Qt Creator version using the online installer. The offline installer installs a specific Qt Creator version and does not provide updates.
 
-### Option 3: Snap with Qt Creator and Plugin
-
-An older version of Qt Creator 13 with the ROS plugin is available on the [Snap Store](https://snapcraft.io/qtcreator-ros):
-```bash
-sudo snap install qtcreator-ros --classic
-```
 
 ## Build (Source)
 
