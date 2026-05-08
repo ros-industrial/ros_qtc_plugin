@@ -168,8 +168,11 @@ ROSProject *ROSBuildConfiguration::project() const
 void ROSBuildConfiguration::updateQtEnvironment(const Utils::Environment &env)
 {
     const Utils::EnvironmentItems diff = baseEnvironment().diff(env);
-    if (!diff.isEmpty())
-      setUserEnvironmentChanges(diff);
+    if (!diff.isEmpty()) {
+        Utils::EnvironmentChanges changes;
+        changes.setItemsFromUser(diff);
+        setUserEnvironmentChanges(changes);
+    }
 }
 
 QWidget *ROSBuildConfiguration::createConfigWidget()
@@ -336,12 +339,12 @@ ROSBuildEnvironmentWidget::ROSBuildEnvironmentWidget(BuildConfiguration *bc)
     m_clearSystemEnvironmentCheckBox->setChecked(!m_buildConfiguration->useSystemEnvironment());
     m_buildEnvironmentWidget->setBaseEnvironment(m_buildConfiguration->baseEnvironment());
     m_buildEnvironmentWidget->setBaseEnvironmentText(m_buildConfiguration->baseEnvironmentText());
-    m_buildEnvironmentWidget->setUserChanges(m_buildConfiguration->userEnvironmentChanges());
+    m_buildEnvironmentWidget->setChanges(m_buildConfiguration->userEnvironmentChanges());
 }
 
 void ROSBuildEnvironmentWidget::environmentModelUserChangesChanged()
 {
-    m_buildConfiguration->setUserEnvironmentChanges(m_buildEnvironmentWidget->userChanges());
+    m_buildConfiguration->setUserEnvironmentChanges(m_buildEnvironmentWidget->changes());
 }
 
 void ROSBuildEnvironmentWidget::clearSystemEnvironmentCheckBoxClicked(bool checked)
@@ -355,7 +358,7 @@ void ROSBuildEnvironmentWidget::environmentChanged()
 {
     m_buildEnvironmentWidget->setBaseEnvironment(m_buildConfiguration->baseEnvironment());
     m_buildEnvironmentWidget->setBaseEnvironmentText(m_buildConfiguration->baseEnvironmentText());
-    m_buildEnvironmentWidget->setUserChanges(m_buildConfiguration->userEnvironmentChanges());
+    m_buildEnvironmentWidget->setChanges(m_buildConfiguration->userEnvironmentChanges());
 }
 
 void ROSBuildSettingsWidget::buildSourceWorkspaceButtonClicked()
