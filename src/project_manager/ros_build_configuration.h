@@ -77,8 +77,8 @@ public:
     ROSProject *project() const;
 
 signals:
-    void buildSystemChanged(const ROSUtils::BuildSystem buildSystem);
-    void cmakeBuildTypeChanged(const ROSUtils::BuildType buildType);
+    void buildSystemChanged(const ROSProjectManager::Internal::ROSUtils::BuildSystem buildSystem);
+    void cmakeBuildTypeChanged(const ROSProjectManager::Internal::ROSUtils::BuildType buildType);
 
 protected:
     void fromMap(const Utils::Store &map) override;
