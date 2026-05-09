@@ -104,7 +104,7 @@ public:
 
 private slots:
     void updateDetails();
-    void updateBuildSystem(const ROSUtils::BuildSystem buildSystem);
+    void updateBuildSystem(const ROSProjectManager::Internal::ROSUtils::BuildSystem buildSystem);
     void enabledChanged();
 
 private:
