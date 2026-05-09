@@ -905,7 +905,7 @@ bool ROSUtils::parseCMakeFileAPI(PackageBuildInfo &package)
         return false;
 
     const Utils::FilePath source_toplevel_path = \
-        Utils::FilePath::fromString(obj_codemodel["paths"].toObject()["source"].toString());
+        Utils::FilePath::fromString(obj_codemodel["paths"].toObject().value("source").toString());
 
     if (!obj_codemodel.contains("configurations") || !obj_codemodel["configurations"].isArray())
         return false;
