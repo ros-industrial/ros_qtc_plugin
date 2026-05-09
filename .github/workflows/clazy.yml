@@ -21,7 +21,7 @@ jobs:
           apt update
           apt -y install --no-install-recommends sudo
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: install Qt and Qt Creator
         run: |

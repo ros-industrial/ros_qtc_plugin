@@ -20,9 +20,9 @@ jobs:
           - { name: "Windows-arm64", os: windows-11-arm, msvc_arch: arm64, build: "Release" }
           - { name: "macOS", os: macos-14, build: "Release" }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -62,7 +62,7 @@ jobs:
 
       - name: upload plugin spec
         if: ${{ matrix.config.name == 'Linux' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: plugin_archive_artifact_spec
           if-no-files-found: error
@@ -70,7 +70,7 @@ jobs:
             ./build/src/project_manager/ROSProjectManager.json
 
       - name: upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: plugin_archive_artifact_${{ matrix.config.name }}
           if-no-files-found: error
@@ -91,7 +91,7 @@ jobs:
 
       - name: upload artifact (DEB)
         if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: plugin_archive_artifact_${{ matrix.config.name }}_deb
           if-no-files-found: error
@@ -107,7 +107,7 @@ jobs:
     needs: build
     steps:
       - name: download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: plugin_archive_artifact_*
           merge-multiple: true
@@ -115,7 +115,7 @@ jobs:
 
       - name: create release
         id: release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             qtcreator-opensource-linux-*-*.deb
