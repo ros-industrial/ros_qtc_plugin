@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(LANGUAGES CXX)
+project(ROSProjectManager LANGUAGES CXX)
 
 # get Qt Creator major version
 find_package(QtCreator REQUIRED)
