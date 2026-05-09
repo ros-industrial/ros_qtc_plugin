@@ -141,7 +141,7 @@ def qtc_download_check_extract(cfg, dir_install):
         extract_progress(content, archive_name, dir_install_qt)
 
     if cfg['os'] == "Darwin":
-        dir_install_qt = os.path.join(dir_install_qt, "Qt Creator.app", "Contents", "Resources")
+        dir_install_qt = os.path.join(dir_install_qt, "Qt Creator.sdk")
 
     return dir_install_qt
 
