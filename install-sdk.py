@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 
 url_repo_qtc_fmt = "https://download.qt.io/{release_type}_releases/qtcreator/{qtcv_maj}/{qtcv_full}/installer_source/{os}_{arch}/"
 
-url_repo_qt_fmt = "https://download.qt.io/online/qtsdkrepository/{os}_{arch}/desktop/qt{ver_maj}_{ver_concat}/qt{ver_maj}_{ver_concat}/"
+url_repo_qt_fmt = "https://download.qt.io/online/qtsdkrepository/{os}_{arch}/desktop/qt{ver_maj}_{ver_concat}/qt{ver_maj}_{qt_arch}/"
 
 os_map = {
     "Linux": "linux",
@@ -49,6 +49,12 @@ os_arch_toolchain = {
     },
     "mac": {
         "x64": "clang_64",
+    },
+}
+
+qt_toolchain_suffix = {
+    "windows": {
+        "x64": "msvc2022_64",
     },
 }
 
@@ -153,10 +159,19 @@ def qt_download_check_extract(cfg, dir_install):
     ver_maj, ver_min = qt_ver.split('.')
     ver_concat = f"{ver_maj}{ver_min}0"
 
+    # OSes will store Qt version with a toolchain suffix
+    if sys_os in qt_toolchain_suffix and sys_arch in qt_toolchain_suffix[sys_os]:
+        sfx = qt_toolchain_suffix[sys_os][sys_arch]
+        qt_arch = f"{ver_concat}_{sfx}"
+    else:
+        qt_arch = ver_concat
+
     base_url = url_repo_qt_fmt.format(
                         os = sys_os, arch = url_arch,
                         ver_maj = ver_maj,
-                        ver_concat = ver_concat)
+                        ver_concat = ver_concat,
+                        qt_arch = qt_arch,
+    )
 
     # fetch meta data
     r = download_check_fail(base_url+"/Updates.xml", "application/xml")
