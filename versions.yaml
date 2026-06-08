@@ -16,4 +16,4 @@ qtc_modules: ["qtcreator", "qtcreator_dev"]
 # qtc_dev_tag:
 
 qt_version: "6.11"
-qt_modules: ['qtbase', 'qtdeclarative', 'icu']
+qt_modules: ['qtbase', 'qtdeclarative', 'icu', 'qttasktree']
