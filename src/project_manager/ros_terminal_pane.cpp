@@ -90,7 +90,7 @@ ROSTerminalPane::ROSTerminalPane() :
     connect(m_newTerminalButton, &QToolButton::clicked,
             this, &ROSTerminalPane::startTerminalButton);
 
-    connect(m_tabWidget,SIGNAL(tabCloseRequested(int)), this, SLOT(closeTerminal(int)));
+    connect(m_tabWidget, &QTabWidget::tabCloseRequested, this, &ROSTerminalPane::closeTerminal);
 }
 
 ROSTerminalPane::~ROSTerminalPane()
@@ -196,7 +196,7 @@ QTermWidget &ROSTerminalPane::startTerminal(int startnow, const QString name)
   widget->setScrollBarPosition(QTermWidget::ScrollBarRight);
 
   // This is to capture copy and paste key events
-  connect(widget, SIGNAL(termKeyPressed(QKeyEvent*)), this, SLOT(termKeyPressed(QKeyEvent*)));
+  connect(widget, &QTermWidget::termKeyPressed, this, &ROSTerminalPane::termKeyPressed);
 
   QSettings *s = Core::ICore::settings();
   s->beginGroup(QLatin1String("ROSTerminal"));

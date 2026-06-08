@@ -250,12 +250,12 @@ ROSCatkinMakeStepWidget::ROSCatkinMakeStepWidget(ROSCatkinMakeStep *makeStep)
     connect(m_ui->makeArgumentsLineEdit, &QLineEdit::textEdited,
             this, &ROSCatkinMakeStepWidget::updateDetails);
 
-    connect(m_makeStep, SIGNAL(enabledChanged()),
-            this, SLOT(enabledChanged()));
+    connect(m_makeStep, &BuildStep::enabledChanged,
+            this, &ROSCatkinMakeStepWidget::enabledChanged);
 
     const ROSBuildConfiguration *const bc = m_makeStep->rosBuildConfiguration();
-    connect(bc, SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
-            this, SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
+    connect(bc, &ROSBuildConfiguration::buildSystemChanged,
+            this, &ROSCatkinMakeStepWidget::updateBuildSystem);
 
     connect(bc, &ROSBuildConfiguration::cmakeBuildTypeChanged,
             this, &ROSCatkinMakeStepWidget::updateDetails);

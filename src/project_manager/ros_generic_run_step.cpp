@@ -278,11 +278,11 @@ ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *
       idx = m_ui->targetComboBox->findText(genericStep->getTarget(), Qt::MatchExactly);
       m_ui->targetComboBox->setCurrentIndex(idx);
 
-      connect(m_ui->packageComboBox, SIGNAL(currentIndexChanged(QString)),
-              this, SLOT(packageComboBox_currentIndexChanged(QString)));
+      connect(m_ui->packageComboBox, &QComboBox::currentTextChanged,
+              this, &ROSGenericRunStepConfigWidget::packageComboBox_currentIndexChanged);
 
-      connect(m_ui->targetComboBox, SIGNAL(currentIndexChanged(QString)),
-              this, SLOT(targetComboBox_currentIndexChanged(QString)));
+      connect(m_ui->targetComboBox, &QComboBox::currentTextChanged,
+              this, &ROSGenericRunStepConfigWidget::targetComboBox_currentIndexChanged);
     }
 
     if (!args_show)
@@ -294,8 +294,8 @@ ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *
     {
         m_ui->argumentsLineEdit->setText(genericStep->getArguments());
 
-        connect(m_ui->argumentsLineEdit, SIGNAL(textChanged(QString)),
-                this, SLOT(argumentsLineEdit_textChanged(QString)));
+        connect(m_ui->argumentsLineEdit, &QLineEdit::textChanged,
+                this, &ROSGenericRunStepConfigWidget::argumentsLineEdit_textChanged);
     }
 
     if (!debug_show) //Note this only used for Attach to Node Run Step
@@ -306,8 +306,8 @@ ROSGenericRunStepConfigWidget::ROSGenericRunStepConfigWidget(ROSGenericRunStep *
     else
     {
         m_ui->debugCheckBox->setChecked(genericStep->getDebugContinueOnAttach());
-        connect(m_ui->debugCheckBox, SIGNAL(toggled(bool)),
-                this, SLOT(debugCheckBox_toggled(bool)));
+        connect(m_ui->debugCheckBox, &QCheckBox::toggled,
+                this, &ROSGenericRunStepConfigWidget::debugCheckBox_toggled);
     }
 
     connect(ProjectExplorer::BuildManager::instance(), &ProjectExplorer::BuildManager::buildQueueFinished,

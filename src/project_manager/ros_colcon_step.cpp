@@ -257,12 +257,12 @@ ROSColconStepWidget::ROSColconStepWidget(ROSColconStep *makeStep)
     connect(m_ui->cmakeArgumentsLineEdit, &QLineEdit::textEdited,
             this, &ROSColconStepWidget::updateDetails);
 
-    connect(m_makeStep, SIGNAL(enabledChanged()),
-            this, SLOT(enabledChanged()));
+    connect(m_makeStep, &BuildStep::enabledChanged,
+            this, &ROSColconStepWidget::enabledChanged);
 
     const ROSBuildConfiguration *const bc = m_makeStep->rosBuildConfiguration();
-    connect(bc, SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
-            this, SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
+    connect(bc, &ROSBuildConfiguration::buildSystemChanged,
+            this, &ROSColconStepWidget::updateBuildSystem);
 
     connect(bc, &ROSBuildConfiguration::cmakeBuildTypeChanged,
             this, &ROSColconStepWidget::updateDetails);

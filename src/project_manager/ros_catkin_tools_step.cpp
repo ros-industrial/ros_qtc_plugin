@@ -327,12 +327,12 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
     connect(m_ui->catkinToolsWorkingDirWidget, &Utils::PathChooser::rawPathChanged,
             this, &ROSCatkinToolsStepWidget::updateDetails);
 
-    connect(m_makeStep, SIGNAL(enabledChanged()),
-            this, SLOT(enabledChanged()));
+    connect(m_makeStep, &BuildStep::enabledChanged,
+            this, &ROSCatkinToolsStepWidget::enabledChanged);
 
     const ROSBuildConfiguration *const bc = m_makeStep->rosBuildConfiguration();
-    connect(bc, SIGNAL(buildSystemChanged(ROSUtils::BuildSystem)),
-            this, SLOT(updateBuildSystem(ROSUtils::BuildSystem)));
+    connect(bc, &ROSBuildConfiguration::buildSystemChanged,
+            this, &ROSCatkinToolsStepWidget::updateBuildSystem);
 
     connect(bc, &ROSBuildConfiguration::cmakeBuildTypeChanged,
             this, &ROSCatkinToolsStepWidget::updateDetails);
@@ -620,7 +620,7 @@ ROSCatkinToolsListWidget::ROSCatkinToolsListWidget(QWidget *parent) : QLineEdit(
 
     QAction *editor;
     editor = this->addAction(QIcon(QStringLiteral(":rosproject/pencil_icon.png")), QLineEdit::TrailingPosition);
-    connect(editor, SIGNAL(triggered(bool)), this, SLOT(onActionEditListTriggered()));
+    connect(editor, &QAction::triggered, this, &ROSCatkinToolsListWidget::onActionEditListTriggered);
 }
 
 ROSCatkinToolsListWidget::~ROSCatkinToolsListWidget()
