@@ -156,8 +156,14 @@ def qt_download_check_extract(cfg, dir_install):
         url_arch = sys_arch
 
     qt_ver = cfg['versions']['qt_version']
-    ver_maj, ver_min = qt_ver.split('.')
-    ver_concat = f"{ver_maj}{ver_min}0"
+    qt_semver = qt_ver.split('.')
+    ver_maj = qt_semver[0]
+    ver_min = qt_semver[1]
+    if len(qt_semver) == 3:
+        ver_patch = qt_semver[2]
+    else:
+        ver_patch = 0
+    ver_concat = f"{ver_maj}{ver_min}{ver_patch}"
 
     # OSes will store Qt version with a toolchain suffix
     if sys_os in qt_toolchain_suffix and sys_arch in qt_toolchain_suffix[sys_os]:
@@ -232,7 +238,7 @@ def qt_download_check_extract(cfg, dir_install):
 
         extract_progress(content, archive_name, archive_dir_install)
 
-    qt_path = os.path.join(dir_install, f"{ver_maj}.{ver_min}.0")
+    qt_path = os.path.join(dir_install, f"{ver_maj}.{ver_min}.{ver_patch}")
     qt_archs = os.listdir(qt_path)
     if len(qt_archs) > 1:
         raise RuntimeWarning(f"more than one architecture found in {qt_path}, will use first: {qt_archs[0]}")
