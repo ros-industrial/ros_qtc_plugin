@@ -145,15 +145,15 @@ ROSProject::ROSProject(const Utils::FilePath &fileName) :
     refresh();
 
     // Setup signal/slot connections
-    connect(ProjectExplorer::BuildManager::instance(), SIGNAL(buildQueueFinished(bool)),
-            this, SLOT(buildQueueFinished(bool)));
+    connect(ProjectExplorer::BuildManager::instance(), &ProjectExplorer::BuildManager::buildQueueFinished,
+            this, &ROSProject::buildQueueFinished);
 
     connect(&m_futureWatcher, &QFutureWatcher<FutureWatcherResults>::finished, this, &ROSProject::updateProjectTree);
 
     connect(&m_futureBuildCodeModelWatcher, &QFutureWatcher<CppToolsFutureResults>::finished, this, &ROSProject::updateCppCodeModel);
 
-    connect(&m_watcher, SIGNAL(directoryChanged(QString)),
-            this, SLOT(fileSystemChanged(QString)));
+    connect(&m_watcher, &QFileSystemWatcher::directoryChanged,
+            this, &ROSProject::fileSystemChanged);
 }
 
 ROSProject::~ROSProject()
@@ -262,8 +262,8 @@ void ROSProject::updateProjectTree()
     m_asyncUpdateFutureInterface = nullptr;
     m_watcher.addPaths(m_workspaceDirectories);
 
-    connect(&m_watcher, SIGNAL(directoryChanged(QString)),
-            this, SLOT(fileSystemChanged(QString)));
+    connect(&m_watcher, &QFileSystemWatcher::directoryChanged,
+            this, &ROSProject::fileSystemChanged);
 
     if (!m_project_loaded)
     {
@@ -396,8 +396,8 @@ void ROSProject::asyncUpdate()
 
   m_asyncUpdateFutureInterface = new QFutureInterface<FutureWatcherResults>();
 
-  disconnect(&m_watcher, SIGNAL(directoryChanged(QString)),
-             this, SLOT(fileSystemChanged(QString)));
+  disconnect(&m_watcher, &QFileSystemWatcher::directoryChanged,
+             this, &ROSProject::fileSystemChanged);
 
   if (!m_watcher.directories().empty())
     m_watcher.removePaths(m_watcher.directories());

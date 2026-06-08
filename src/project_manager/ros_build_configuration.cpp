@@ -288,14 +288,14 @@ ROSBuildSettingsWidget::ROSBuildSettingsWidget(ROSBuildConfiguration *const bc)
     m_ui->buildSystemComboBox->setCurrentIndex(bc->rosBuildSystem());
     m_ui->buildTypeComboBox->setCurrentIndex(bc->cmakeBuildType());
 
-    connect(m_ui->buildSystemComboBox, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(buildSystemChanged(int)));
+    connect(m_ui->buildSystemComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+            this, &ROSBuildSettingsWidget::buildSystemChanged);
 
-    connect(m_ui->buildTypeComboBox, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(buildTypeChanged(int)));
+    connect(m_ui->buildTypeComboBox, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+            this, &ROSBuildSettingsWidget::buildTypeChanged);
 
-    connect(m_ui->buildSourceWorkspaceButton, SIGNAL(clicked()),
-            this, SLOT(buildSourceWorkspaceButtonClicked()));
+    connect(m_ui->buildSourceWorkspaceButton, &QAbstractButton::clicked,
+            this, &ROSBuildSettingsWidget::buildSourceWorkspaceButtonClicked);
 }
 
 ROSBuildSettingsWidget::~ROSBuildSettingsWidget()
@@ -326,10 +326,10 @@ ROSBuildEnvironmentWidget::ROSBuildEnvironmentWidget(BuildConfiguration *bc)
     m_buildEnvironmentWidget = new EnvironmentWidget(this, ProjectExplorer::EnvironmentWidget::TypeLocal, m_clearSystemEnvironmentCheckBox);
     vbox->addWidget(m_buildEnvironmentWidget);
 
-    connect(m_buildEnvironmentWidget, SIGNAL(userChangesChanged()),
-            this, SLOT(environmentModelUserChangesChanged()));
-    connect(m_clearSystemEnvironmentCheckBox, SIGNAL(toggled(bool)),
-            this, SLOT(clearSystemEnvironmentCheckBoxClicked(bool)));
+    connect(m_buildEnvironmentWidget, &ProjectExplorer::EnvironmentWidget::userChangesChanged,
+            this, &ROSBuildEnvironmentWidget::environmentModelUserChangesChanged);
+    connect(m_clearSystemEnvironmentCheckBox, &QCheckBox::toggled,
+            this, &ROSBuildEnvironmentWidget::clearSystemEnvironmentCheckBoxClicked);
 
     m_buildConfiguration = bc;
 
