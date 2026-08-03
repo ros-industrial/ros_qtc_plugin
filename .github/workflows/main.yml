@@ -128,3 +128,5 @@ jobs:
             qtcreator-plugin-ros-*-Windows-ARM64.zip
           fail_on_unmatched_files: true
           generate_release_notes: true
+          append_body: false
+          make_latest: true
