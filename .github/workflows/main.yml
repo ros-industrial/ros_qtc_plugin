@@ -81,6 +81,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           wget $(./packaging/format-deb-url.py) --directory-prefix=${GITHUB_WORKSPACE}/build
+          ./packaging/repack_deb.sh ${GITHUB_WORKSPACE}/build/qtcreator-opensource-linux-*-*.deb
           sudo apt install --no-install-recommends ${GITHUB_WORKSPACE}/build/qtcreator-opensource-linux-*-*.deb
 
       - name: generate plugin DEB package
