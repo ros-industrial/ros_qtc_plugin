@@ -13,7 +13,7 @@ qtc_modules: ["qtcreator", "qtcreator_dev"]
 
 # To use a "development" version, set the 'qtc_dev_tag' to a valid
 # "development" suffix, starting with "beta" or "rc".
-# qtc_dev_tag:
+qtc_dev_tag: "rc1"
 
 qt_version: "6.12"
 qt_modules: ['qtbase', 'qtdeclarative', 'icu', 'qttasktree']
