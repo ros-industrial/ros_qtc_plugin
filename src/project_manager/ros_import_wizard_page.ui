@@ -97,7 +97,7 @@
   <customwidget>
    <class>Utils::FileNameValidatingLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>utils/filenamevalidatinglineedit.h</header>
+   <header>utils/fancylineedit.h</header>
   </customwidget>
   <customwidget>
    <class>Utils::PathChooser</class>

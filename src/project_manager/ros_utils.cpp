@@ -287,7 +287,8 @@ const QList<Utils::FilePath> ROSUtils::installedDistributions()
   QList<Utils::FilePath> distributions;
   if(custom_ros_path.exists())
   {
-    const Utils::FilePaths entries = custom_ros_path.dirEntries(QDir::NoDotAndDotDot | QDir::Dirs);
+    const Utils::FilePaths entries = custom_ros_path.dirEntries(
+        Utils::DirFilterFlag::NoDotAndDotDot | Utils::DirFilterFlag::Dirs);
     for (const Utils::FilePath &entry : entries)
     {
       if ((entry / Constants::ROS_SOURCE_FILE).exists())
@@ -300,7 +301,8 @@ const QList<Utils::FilePath> ROSUtils::installedDistributions()
   const Utils::FilePath default_ros_path = ros_settings->default_dist_path;
   if (default_ros_path.exists())
   {
-    const Utils::FilePaths entries = default_ros_path.dirEntries(QDir::NoDotAndDotDot | QDir::Dirs);
+    const Utils::FilePaths entries = default_ros_path.dirEntries(
+        Utils::DirFilterFlag::NoDotAndDotDot | Utils::DirFilterFlag::Dirs);
     for (const Utils::FilePath &entry : entries)
     {
       if ((entry / Constants::ROS_SOURCE_FILE).exists())
@@ -839,7 +841,7 @@ bool ROSUtils::parseCMakeFileAPI(PackageBuildInfo &package)
 {
     // find "index-*.json"
     const std::regex pattern(R"(index-.*\.json)");
-    const Utils::FilePaths files = package.apiReplyPath.dirEntries(QDir::Filter::Files);
+    const Utils::FilePaths files = package.apiReplyPath.dirEntries(Utils::DirFilterFlag::Files);
     const Utils::FilePaths::ConstIterator it = std::find_if(files.cbegin(), files.cend(), [&pattern](const Utils::FilePath &fp){ return std::regex_match(fp.fileName().toStdString(), pattern); });
     if (it == files.cend()) {
         Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] Unable to locate index file for package: '%1'").arg(package.parent.name));

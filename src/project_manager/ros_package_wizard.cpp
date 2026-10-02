@@ -32,7 +32,6 @@
 #include <projectexplorer/customwizard/customwizard.h>
 #include <projectexplorer/projecttree.h>
 
-#include <utils/filewizardpage.h>
 #include <utils/wizard.h>
 
 #include <QApplication>
