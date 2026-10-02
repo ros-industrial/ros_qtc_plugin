@@ -318,7 +318,7 @@ QString ROSCatkinMakeStepWidget::summaryText() const
 ROSCatkinMakeStepFactory::ROSCatkinMakeStepFactory() : BuildStepFactory()
 {
   registerStep<ROSCatkinMakeStep>(ROS_CMS_ID);
-  setFlags(BuildStep::Flags::UniqueStep);
+  setFlags(BuildStep::UniqueStep);
   setDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinMakeStep", ROS_CMS_DISPLAY_NAME));
   setSupportedProjectType(Constants::ROS_PROJECT_ID);
   setSupportedStepLists(QList<Utils::Id>({ProjectExplorer::Constants::BUILDSTEPS_BUILD, ProjectExplorer::Constants::BUILDSTEPS_CLEAN}));

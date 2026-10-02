@@ -39,7 +39,6 @@
 #include <aggregation/aggregate.h>
 #include <cstring>
 
-#include <texteditor/texteditorsettings.h>
 #include <texteditor/fontsettings.h>
 #include <texteditor/behaviorsettings.h>
 
@@ -74,8 +73,8 @@ ROSTerminalPane::ROSTerminalPane() :
 
     updateToolBarButtonsEnabled();
 
-    connect(TextEditor::TextEditorSettings::instance(),
-                &TextEditor::TextEditorSettings::behaviorSettingsChanged,
+    connect(&TextEditor::globalBehaviorSettings(),
+                &Utils::AspectContainer::changed,
                 this, &ROSTerminalPane::updateToolBarButtonsEnabled);
 
     connect(m_zoomInButton, &QToolButton::clicked,
@@ -104,8 +103,8 @@ ROSTerminalPane::~ROSTerminalPane()
 
 void ROSTerminalPane::updateToolBarButtonsEnabled()
 {
-  const TextEditor::BehaviorSettings &settings
-          = TextEditor::TextEditorSettings::behaviorSettings();
+  const TextEditor::BehaviorSettingsData settings
+          = TextEditor::globalBehaviorSettings().data();
 
   bool hasTerminal = (m_terminals.count() > 0);
   bool zoomEnabled  = settings.m_scrollWheelZooming && hasTerminal;

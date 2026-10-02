@@ -414,7 +414,7 @@ void RunStepListWidget::updateRunStepButtonsState()
         connect(s->toolWidget, &ToolWidget::removeClicked,
                 this, [this, i] {
             if (!m_runStepList->removeStep(i)) {
-                QMessageBox::warning(Core::ICore::mainWindow(),
+                QMessageBox::warning(Core::ICore::dialogParent(),
                                      tr("Removing Step failed"),
                                      tr("Cannot remove run step"),
                                      QMessageBox::Ok, QMessageBox::Ok);
