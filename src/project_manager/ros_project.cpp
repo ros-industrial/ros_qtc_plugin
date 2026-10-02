@@ -53,6 +53,8 @@
 #include <utils/qtcassert.h>
 #include <utils/algorithm.h>
 
+#include <map>
+
 #include <QDir>
 #include <QProcessEnvironment>
 #include <QtXml/QDomDocument>
@@ -273,13 +275,13 @@ void ROSProject::updateProjectTree()
   }
 }
 
-void ROSProject::buildProjectTree(const Utils::FilePath &projectFilePath, const Utils::FilePath& sourcePath, QFutureInterface<FutureWatcherResults> &fi)
+void ROSProject::buildProjectTree(const Utils::FilePath &projectFilePath, const ROSUtils::WorkspaceInfo &workspaceInfo, QFutureInterface<FutureWatcherResults> &fi)
 {
     fi.reportStarted();
 
     FutureWatcherResults results;
 
-    results.workspaceContent = ROSUtils::getFolderContentRecursive(sourcePath, results.files, results.directories, &fi);
+    results.workspaceContent = ROSUtils::getFolderContentRecursive(workspaceInfo.sourcePath, results.files, results.directories, &fi);
 
     if (fi.isCanceled()) {
         fi.reportFinished();
@@ -292,44 +294,77 @@ void ROSProject::buildProjectTree(const Utils::FilePath &projectFilePath, const 
 
     const ProjectExplorer::FolderNode::FolderNodeFactory &factory = [](const Utils::FilePath &fn) { return std::make_unique<ROSFolderNode>(fn); };
 
-    std::vector<std::unique_ptr<ProjectExplorer::FileNode>> childNodes;
-    QHash<QString, ROSUtils::FolderContent>::const_iterator item = results.workspaceContent.constBegin();
+    // Only directories recognised as ROS packages by the plugin become top-level nodes
+    QSet<QString> packageDirs;
+    const ROSUtils::PackageInfoMap packageInfo = ROSUtils::getWorkspacePackageInfo(workspaceInfo);
+    for (const ROSUtils::PackageInfo &package : packageInfo)
+      packageDirs.insert(QDir::cleanPath(package.path.toFSPathString()));
+
+    auto findPackage = [&packageDirs](const QString &dir) {
+      QString d = QDir::cleanPath(dir);
+      while (!d.isEmpty()) {
+        if (packageDirs.contains(d))
+          return d;
+        const int idx = d.lastIndexOf('/');
+        if (idx <= 0)
+          break;
+        d.truncate(idx);
+      }
+      return QString();
+    };
+
+    QHash<QString, ROSFolderNode*> packageNodes;
+    std::map<QString, std::vector<std::unique_ptr<ProjectExplorer::FileNode>>> packageFiles;
+    QStringList sortedPackages(packageDirs.begin(), packageDirs.end());
+    sortedPackages.sort();
+    for (const QString &pkg : std::as_const(sortedPackages))
+      packageNodes.insert(pkg, new ROSFolderNode(Utils::FilePath::fromString(pkg)));
+
     int cnt = 0;
     double max = results.workspaceContent.size();
-    while(item != results.workspaceContent.constEnd())
+    for (auto item = results.workspaceContent.constBegin(); item != results.workspaceContent.constEnd(); ++item)
     {
       if (fi.isCanceled()) {
           fi.reportFinished();
+          qDeleteAll(packageNodes);
+          delete project_node;
           return;
       }
 
-      if (item.value().files.empty()) {
-        // This is required so empty directories show up in project tree
-        Utils::FilePath empty_directory = Utils::FilePath::fromString(item.key());
-        recursiveFindOrCreateFolderNode(project_node, empty_directory, Utils::FilePath(), factory);
-      }
-      else {
-        // Add all files in the directory node
-        for (const QString& file : item.value().files)
-        {
-          QFileInfo fileInfo(QDir(item.key()), file);
+      const QString pkg = findPackage(item.key());
+      if (!pkg.isEmpty())
+      {
+        ROSFolderNode *pkgNode = packageNodes.value(pkg);
+        if (item.value().files.empty()) {
+          // This is required so empty directories show up in project tree
+          recursiveFindOrCreateFolderNode(pkgNode, Utils::FilePath::fromString(item.key()), Utils::FilePath(), factory);
+        }
+        else {
+          for (const QString& file : item.value().files)
+          {
+            QFileInfo fileInfo(QDir(item.key()), file);
 
-          ProjectExplorer::FileType fileType = ProjectExplorer::FileType::Source;
+            ProjectExplorer::FileType fileType = ProjectExplorer::FileType::Source;
 
-          if (Constants::HEADER_FILE_EXTENSIONS.contains(fileInfo.suffix()))
-            fileType = ProjectExplorer::FileType::Header;
+            if (Constants::HEADER_FILE_EXTENSIONS.contains(fileInfo.suffix()))
+              fileType = ProjectExplorer::FileType::Header;
 
-          std::unique_ptr<ProjectExplorer::FileNode> fileNode(new ProjectExplorer::FileNode(Utils::FilePath::fromString(fileInfo.absoluteFilePath()), fileType));
-          childNodes.emplace_back(std::move(fileNode));
+            packageFiles[pkg].emplace_back(new ProjectExplorer::FileNode(Utils::FilePath::fromString(fileInfo.absoluteFilePath()), fileType));
+          }
         }
       }
 
       cnt += 1;
       fi.setProgressValue(static_cast<int>(100.0 * static_cast<double>(cnt) / max));
-      ++item;
     }
 
-    project_node->addNestedNodes(std::move(childNodes), Utils::FilePath(), factory);
+    for (const QString &pkg : std::as_const(sortedPackages))
+    {
+      ROSFolderNode *pkgNode = packageNodes.value(pkg);
+      pkgNode->setDisplayName(QFileInfo(pkg).fileName());
+      pkgNode->addNestedNodes(std::move(packageFiles[pkg]), Utils::FilePath(), factory);
+      project_node->addNode(std::unique_ptr<ProjectExplorer::FolderNode>(pkgNode));
+    }
     results.node = project_node;
 
     fi.setProgressValue(fi.progressMaximum());
@@ -411,8 +446,8 @@ void ROSProject::asyncUpdate()
 
   Utils::asyncRun(ProjectExplorer::ProjectExplorerPlugin::sharedThreadPool(), QThread::LowestPriority,
     [this, bc]() {
-      Utils::FilePath sourcePath = ROSUtils::getWorkspaceInfo(projectDirectory(), bc->rosBuildSystem(), distribution()).sourcePath;
-      ROSProject::buildProjectTree(projectFilePath(), sourcePath, *m_asyncUpdateFutureInterface);
+      const ROSUtils::WorkspaceInfo workspaceInfo = ROSUtils::getWorkspaceInfo(projectDirectory(), bc->rosBuildSystem(), distribution());
+      ROSProject::buildProjectTree(projectFilePath(), workspaceInfo, *m_asyncUpdateFutureInterface);
     });
 }
 
