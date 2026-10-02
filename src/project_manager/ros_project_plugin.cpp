@@ -50,7 +50,7 @@
 
 #include <texteditor/codestylepool.h>
 #include <texteditor/tabsettings.h>
-#include <texteditor/texteditorsettings.h>
+#include <texteditor/codestylepool.h>
 
 #include <projectexplorer/projectmanager.h>
 #include <projectexplorer/projectexplorerconstants.h>
@@ -70,8 +70,8 @@
 
 #include <utils/algorithm.h>
 #include <utils/fileutils.h>
-#include <utils/removefiledialog.h>
 #include <utils/mimeutils.h>
+#include <utils/widgets.h>
 
 #include <QtPlugin>
 #include <QDebug>
@@ -210,7 +210,7 @@ std::shared_ptr<ROSSettings> ROSProjectPlugin::settings() const
 
 void ROSProjectPlugin::createCppCodeStyle()
 {
-  TextEditor::CodeStylePool *pool = TextEditor::TextEditorSettings::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
+  TextEditor::CodeStylePool *pool = TextEditor::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
 
   // ROS style
   CppEditor::CppCodeStylePreferences *rosCodeStyle = new CppEditor::CppCodeStylePreferences();
@@ -218,11 +218,11 @@ void ROSProjectPlugin::createCppCodeStyle()
   rosCodeStyle->setDisplayName(tr("ROS"));
   rosCodeStyle->setReadOnly(true);
 
-  TextEditor::TabSettings rosTabSettings;
-  rosTabSettings.m_tabPolicy = TextEditor::TabSettings::SpacesOnlyTabPolicy;
+  TextEditor::TabSettingsData rosTabSettings;
+  rosTabSettings.m_tabPolicy = TextEditor::TabSettingsData::SpacesOnlyTabPolicy;
   rosTabSettings.m_tabSize = 2;
   rosTabSettings.m_indentSize = 2;
-  rosTabSettings.m_continuationAlignBehavior = TextEditor::TabSettings::ContinuationAlignWithIndent;
+  rosTabSettings.m_continuationAlignBehavior = TextEditor::TabSettingsData::ContinuationAlignWithIndent;
   rosCodeStyle->setTabSettings(rosTabSettings);
 
   CppEditor::CppCodeStyleSettings rosCodeStyleSettings;
@@ -252,7 +252,7 @@ void ROSProjectPlugin::createCppCodeStyle()
 
   // Since the ROS Cpp code style can not be added until after the CppToolsSettings instance is create
   // the Cpp code style must be reloaded from settings to capture if it is set ROS Cpp code style.
-  CppEditor::CppCodeStylePreferences *originalCppCodeStylePreferences = CppEditor::CppToolsSettings::cppCodeStyle();
+  CppEditor::CppCodeStylePreferences *originalCppCodeStylePreferences = CppEditor::cppCodeStyle();
   originalCppCodeStylePreferences->fromSettings(CppEditor::Constants::CPP_SETTINGS_ID);
 }
 
@@ -269,7 +269,7 @@ void ROSProjectPlugin::removeProjectDirectory()
   QTC_ASSERT(currentNode && currentNode->isFolderNodeType(), return);
 
   QString filePath = currentNode->filePath().toFSPathString();
-  RemoveDirectoryDialog removeDirectoryDialog(filePath, ICore::mainWindow());
+  RemoveDirectoryDialog removeDirectoryDialog(filePath, ICore::dialogParent());
 
   if (removeDirectoryDialog.exec() == QDialog::Accepted)
   {

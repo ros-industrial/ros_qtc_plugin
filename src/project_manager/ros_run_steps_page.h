@@ -25,7 +25,7 @@
 #include "ros_run_configuration.h"
 
 #include <projectexplorer/buildstep.h>
-#include <utils/detailsbutton.h>
+#include <utils/widgets.h>
 
 QT_BEGIN_NAMESPACE
 class QPushButton;

@@ -24,7 +24,6 @@
 #include <coreplugin/basefilewizard.h>
 #include <coreplugin/basefilewizardfactory.h>
 #include <utils/wizard.h>
-#include <utils/wizardpage.h>
 #include <utils/fileutils.h>
 #include <utils/fancylineedit.h>
 
