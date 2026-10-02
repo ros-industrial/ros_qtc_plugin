@@ -118,7 +118,7 @@ private:
     QFutureWatcher<CppToolsFutureResults> m_futureBuildCodeModelWatcher;
 
     static void buildProjectTree(const Utils::FilePath &projectFilePath,
-                                 const Utils::FilePath& sourcePath,
+                                 const ROSUtils::WorkspaceInfo &workspaceInfo,
                                  QFutureInterface<FutureWatcherResults> &fi);
 
     static void buildCppCodeModel(const ROSUtils::WorkspaceInfo &workspaceInfo,
