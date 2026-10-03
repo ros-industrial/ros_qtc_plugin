@@ -101,7 +101,7 @@ void ROSGenericRunStep::run()
   }
   else if (shell.fileName() == "sh")
   {
-      source_cmd = QString("source %1\n").arg(source_shell_file.toFSPathString());
+      source_cmd = QString(". %1\n").arg(source_shell_file.toFSPathString());
   }
   else if (shell.fileName() == "zsh")
   {
