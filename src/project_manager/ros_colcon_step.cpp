@@ -58,7 +58,7 @@ ROSColconStep::ROSColconStep(BuildStepList *parent, const Utils::Id id) :
     setDefaultDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSColconStep",
                                                       ROS_COLCON_STEP_DISPLAY_NAME));
 
-    m_percentProgress = QRegularExpression(QStringLiteral(".+\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
+    m_percentProgress = QRegularExpression(QStringLiteral("\\[(\\d+)/(\\d+) complete\\]")); // Example: [0/24 complete]
 
     const ROSBuildConfiguration *const bc = rosBuildConfiguration();
     if (bc->rosBuildSystem() != ROSUtils::Colcon)
@@ -86,6 +86,9 @@ ROSColconStep::~ROSColconStep()
 
 bool ROSColconStep::init()
 {
+    m_completed = 0;
+    m_total = 0;
+    m_finishedLines = 0;
     ROSBuildConfiguration *bc = rosBuildConfiguration();
     if (!bc)
         bc = targetsActiveBuildConfiguration();
@@ -214,16 +217,37 @@ Utils::CommandLine ROSColconStep::makeCommand(const QString &args) const
     return cmd;
 }
 
-void ROSColconStep::stdOutput(const QString &line)
+void ROSColconStep::stdOutput(const QString &output)
 {
-    QRegularExpressionMatchIterator i = m_percentProgress.globalMatch(line);
-    while (i.hasNext()) {
-        QRegularExpressionMatch match = i.next();
-        bool ok = false;
-        const int percent = (match.captured(1).toDouble(&ok)/match.captured(2).toDouble(&ok)) * 100.0;
-        if (ok)
-          emit progress(percent, QString());
+    static const QRegularExpression ansi(QStringLiteral("\\x1b\\[[0-9;]*[A-Za-z]"));
+    static const QRegularExpression finished(QStringLiteral("^\\s*(Finished|Failed|Aborted)\\s+<<<\\s"));
+    static const QRegularExpression lineSeparator(QStringLiteral("[\\r\\n]"));
+
+    QString text = output;
+    text.remove(ansi);
+
+    int percent = -1;
+    const QStringList segments = text.split(lineSeparator, Qt::SkipEmptyParts);
+    for (const QString &segment : segments) {
+        QRegularExpressionMatch match = m_percentProgress.match(segment);
+        if (match.hasMatch()) {
+            const int done = match.captured(1).toInt();
+            const int total = match.captured(2).toInt();
+            if (total <= 0)
+                continue;
+            m_completed = qMax(m_completed, done);
+            m_total = qMax(m_total, total);
+        } else if (finished.match(segment).hasMatch()) {
+            ++m_finishedLines;
+            m_completed = qMax(m_completed, m_finishedLines);
+        } else {
+            continue;
+        }
+        if (m_total > 0)
+            percent = qMin(100, m_completed * 100 / m_total);
     }
+    if (percent >= 0)
+        emit progress(percent, QString());
 }
 
 ROSColconStep::BuildTargets ROSColconStep::buildTarget() const
