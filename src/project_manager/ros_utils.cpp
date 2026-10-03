@@ -293,7 +293,7 @@ const QList<Utils::FilePath> ROSUtils::installedDistributions()
     {
       if ((entry / Constants::ROS_SOURCE_FILE).exists())
       {
-        distributions.append(custom_ros_path);
+        distributions.append(entry);
       }
     }
   }
