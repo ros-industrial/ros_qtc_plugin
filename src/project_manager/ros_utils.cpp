@@ -201,8 +201,12 @@ bool ROSUtils::initializeWorkspace(QProcessEnvironment &env, const WorkspaceInfo
                 process.setWorkingDirectory(workspaceInfo.sourcePath.toFSPathString());
                 process.start(QStringLiteral("bash"), QStringList() << QStringList() << QStringLiteral("-c") << QStringLiteral("catkin_init_workspace"));
 
-                if( !process.waitForFinished() )
+                if( !process.waitForFinished(-1) ) {
+                    Core::MessageManager::writeSilently(
+                        QObject::tr("[ROS Warning] Failed to initialise workspace: %1.")
+                            .arg(workspace.path.toFSPathString()));
                     return false;
+                }
 
                 break;
             }
@@ -220,8 +224,12 @@ bool ROSUtils::initializeWorkspace(QProcessEnvironment &env, const WorkspaceInfo
                 process.setWorkingDirectory(workspace.path.toFSPathString());
                 process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("catkin init"));
 
-                if( !process.waitForFinished() )
+                if( !process.waitForFinished(-1) ) {
+                    Core::MessageManager::writeSilently(
+                        QObject::tr("[ROS Warning] Failed to initialise workspace: %1.")
+                            .arg(workspace.path.toFSPathString()));
                     return false;
+                }
 
                 break;
             }
@@ -238,11 +246,16 @@ bool ROSUtils::initializeWorkspace(QProcessEnvironment &env, const WorkspaceInfo
             }
             } // switch
 
-            if (process.exitStatus() != QProcess::CrashExit)
-                return buildWorkspace(process, workspace);
+            if (workspaceInfo.buildSystem != Colcon
+                && (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0)) {
+                Core::MessageManager::writeSilently(
+                    QObject::tr("[ROS Warning] Failed to initialise workspace: %1. %2")
+                        .arg(workspace.path.toFSPathString(),
+                             QString::fromLocal8Bit(process.readAllStandardError())));
+                return false;
+            }
 
-            Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to initialize workspace: %1.").arg(workspace.path.toFSPathString()));
-            return false;
+            return buildWorkspace(process, workspace);
         } // if
 
     return true;
@@ -255,29 +268,47 @@ bool ROSUtils::buildWorkspace(QProcess &process, const WorkspaceInfo &workspaceI
     {
         process.setWorkingDirectory(workspaceInfo.path.toFSPathString());
         process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("catkin_make --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
-        process.waitForFinished();
+        if (!process.waitForFinished(-1)) {
+            Core::MessageManager::writeSilently(
+                QObject::tr("[ROS Warning] Failed to build workspace: %1.")
+                    .arg(workspaceInfo.path.toFSPathString()));
+            return false;
+        }
         break;
     }
     case CatkinTools:
     {
         process.setWorkingDirectory(workspaceInfo.path.toFSPathString());
         process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
-        process.waitForFinished();
+        if (!process.waitForFinished(-1)) {
+            Core::MessageManager::writeSilently(
+                QObject::tr("[ROS Warning] Failed to build workspace: %1.")
+                    .arg(workspaceInfo.path.toFSPathString()));
+            return false;
+        }
         break;
     }
     case Colcon:
     {
         process.setWorkingDirectory(workspaceInfo.path.toFSPathString());
         process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("colcon build"));
-        process.waitForFinished();
+        if (!process.waitForFinished(-1)) {
+            Core::MessageManager::writeSilently(
+                QObject::tr("[ROS Warning] Failed to build workspace: %1.")
+                    .arg(workspaceInfo.path.toFSPathString()));
+            return false;
+        }
         break;
     }
     }
 
-    if (process.exitStatus() != QProcess::CrashExit)
+    if (process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0)
         return true;
 
-    Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to build workspace: %1.").arg(workspaceInfo.path.toFSPathString()));
+    Core::MessageManager::writeSilently(
+        QObject::tr("[ROS Warning] Failed to build workspace: %1. %2")
+            .arg(workspaceInfo.path.toFSPathString(),
+                 QString::fromLocal8Bit(process.readAllStandardError())));
     return false;
 }
 
