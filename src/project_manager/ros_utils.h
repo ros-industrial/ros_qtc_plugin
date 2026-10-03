@@ -437,7 +437,7 @@ private:
      * @param env - environment to create from sourcing workspaces
      * @param path - Path to workspace setup.bash
      */
-    static void sourceWorkspaceHelper(QProcessEnvironment &env, const QString &path);
+    static bool sourceWorkspaceHelper(QProcessEnvironment &env, const QString &path);
 
     /**
      * @brief This will parse the CodeBlock file and get the build info (incudes, Cxx Flags, etc.)
