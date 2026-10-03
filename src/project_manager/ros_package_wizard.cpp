@@ -363,7 +363,8 @@ Utils::Result<> ROSPackageWizard::writeFiles(const Core::GeneratedFiles &files) 
   create_pkg_proc.setWorkingDirectory(packagePath.path());
 
   QProcessEnvironment env;
-  ROSUtils::sourceROS(env, project->distribution());
+  if (!ROSUtils::sourceROS(env, project->distribution()))
+      return Utils::makeResult(false, "Failed to source ROS environment");
   create_pkg_proc.setProcessEnvironment(env);
   create_pkg_proc.start("bash", {"-c", create_args.join(" ")});
   if (!create_pkg_proc.waitForStarted(-1)) {
