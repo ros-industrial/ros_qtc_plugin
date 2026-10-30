@@ -75,6 +75,9 @@ private:
     QString m_colconArguments;
     QString m_cmakeArguments;
     QRegularExpression m_percentProgress;
+    int m_completed = 0;
+    int m_total = 0;
+    int m_finishedLines = 0;
 };
 
 class ROSColconStepWidget : public QWidget

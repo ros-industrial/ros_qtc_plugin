@@ -29,6 +29,8 @@
 #include <QPointer>
 #include <QStringListModel>
 
+namespace Utils { class QtcSettings; }
+
 namespace ROSProjectManager {
 namespace Internal {
 

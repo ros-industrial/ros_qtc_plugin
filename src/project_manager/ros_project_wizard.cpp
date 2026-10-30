@@ -34,10 +34,9 @@
 #include <cppeditor/cppeditorconstants.h>
 
 #include <texteditor/icodestylepreferences.h>
-#include <texteditor/texteditorsettings.h>
+#include <texteditor/codestylepool.h>
 #include <texteditor/codestylepool.h>
 
-#include <utils/filewizardpage.h>
 #include <utils/wizard.h>
 #include <utils/icon.h>
 
@@ -282,7 +281,7 @@ Utils::Result<> ROSProjectWizard::postGenerateFiles(const QWizard *w, const Core
 
     // Set the Cpp code style for the project.
     std::shared_ptr<ROSSettings> ros_settings = ROSProjectPlugin::instance()->settings();
-    TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
+    TextEditor::CodeStylePool *code_style_pool = TextEditor::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
 
     for (const auto& code_style : code_style_pool->codeStyles()) { // clazy:exclude=range-loop-detach
         if (ros_settings->default_code_style == code_style->displayName()) {

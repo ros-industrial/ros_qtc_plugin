@@ -28,10 +28,10 @@
 
 #include <texteditor/icodestylepreferences.h>
 #include <texteditor/icodestylepreferencesfactory.h>
-#include <texteditor/texteditorsettings.h>
 #include <texteditor/codestylepool.h>
 
 #include <utils/theme/theme.h>
+#include <utils/guiutils.h>
 
 #include <cppeditor/cppeditorconstants.h>
 
@@ -129,7 +129,7 @@ ROSSettingsWidget::ROSSettingsWidget() :
 
     // See ProjectExplorer::CodeStyleSettingsWidget and ProjectExplorer::EditorConfiguration as an example
     // TODO: Add python support
-    TextEditor::CodeStylePool *code_style_pool = TextEditor::TextEditorSettings::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
+    TextEditor::CodeStylePool *code_style_pool = TextEditor::codeStylePool(CppEditor::Constants::CPP_SETTINGS_ID);
 
     for (const auto& code_style : code_style_pool->builtInCodeStyles()) { // clazy:exclude=range-loop-detach
         QString name = code_style->displayName() + " [built-in]";

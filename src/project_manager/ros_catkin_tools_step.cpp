@@ -279,7 +279,7 @@ ROSCatkinToolsStepWidget::ROSCatkinToolsStepWidget(ROSCatkinToolsStep *makeStep)
 
     m_ui->catkinToolsWorkingDirWidget->setPath(m_makeStep->m_catkinToolsWorkingDir);
     m_ui->catkinToolsWorkingDirWidget->setHistoryCompleter("Qt.WorkingDir.History");
-    m_ui->catkinToolsWorkingDirWidget->setExpectedKind(Utils::PathChooser::Directory);
+    m_ui->catkinToolsWorkingDirWidget->setExpectedKind(Utils::PathChooserKind::Directory);
     m_ui->catkinToolsWorkingDirWidget->setFilePath(makeStep->rosBuildConfiguration()->project()->projectDirectory());
 
     setProfile(m_makeStep->m_activeProfile);
@@ -890,7 +890,7 @@ ROSCatkinToolsProfileEditorDialog::ROSCatkinToolsProfileEditorDialog(const Utils
 ROSCatkinToolsStepFactory::ROSCatkinToolsStepFactory() : BuildStepFactory()
 {
   registerStep<ROSCatkinToolsStep>(ROS_CTS_ID);
-  setFlags(BuildStep::Flags::UniqueStep);
+  setFlags(BuildStep::UniqueStep);
   setDisplayName(QCoreApplication::translate("ROSProjectManager::Internal::ROSCatkinToolsConfigStep", ROS_CTS_DISPLAY_NAME));
   setSupportedProjectType(Constants::ROS_PROJECT_ID);
   setSupportedStepLists({ProjectExplorer::Constants::BUILDSTEPS_BUILD, ProjectExplorer::Constants::BUILDSTEPS_CLEAN});

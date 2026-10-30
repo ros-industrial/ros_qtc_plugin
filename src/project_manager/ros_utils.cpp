@@ -72,8 +72,9 @@ QString ROSUtils::buildTypeName(const ROSUtils::BuildType buildType)
 
 bool ROSUtils::sourceROS(QProcessEnvironment &env, const Utils::FilePath &rosDistribution)
 {
-  sourceWorkspaceHelper(env, Utils::FilePath(rosDistribution).pathAppended(Constants::ROS_SOURCE_FILE_BASH).toFSPathString());
-  return true;
+  return sourceWorkspaceHelper(
+      env,
+      rosDistribution.pathAppended(Constants::ROS_SOURCE_FILE_BASH).toFSPathString());
 }
 
 bool ROSUtils::sourceWorkspace(QProcessEnvironment &env, const WorkspaceInfo &workspaceInfo)
@@ -102,11 +103,10 @@ bool ROSUtils::sourceWorkspace(QProcessEnvironment &env, const WorkspaceInfo &wo
     else
     {
         Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to source workspace because either of these files do not exist: %1 or %2.").arg(source_bash_file.toFSPathString(), source_shell_file.toFSPathString()));
-        source_path = QString{};
+        return false;
     }
 
-    sourceWorkspaceHelper(env, source_path);
-    return true;
+    return sourceWorkspaceHelper(env, source_path);
 }
 
 bool ROSUtils::isWorkspaceInitialized(const WorkspaceInfo &workspaceInfo)
@@ -184,8 +184,10 @@ bool ROSUtils::initializeWorkspace(QProcessEnvironment &env, const WorkspaceInfo
 {
     WorkspaceInfo workspace = workspaceInfo;
 
-    if (sourceROS(env, workspaceInfo.rosDistribution)) {
-        if (!isWorkspaceInitialized(workspaceInfo))
+    if (!sourceROS(env, workspaceInfo.rosDistribution))
+        return false;
+
+    if (!isWorkspaceInitialized(workspaceInfo))
         {
             QProcess process;
             process.setProcessEnvironment(env);
@@ -199,8 +201,12 @@ bool ROSUtils::initializeWorkspace(QProcessEnvironment &env, const WorkspaceInfo
                 process.setWorkingDirectory(workspaceInfo.sourcePath.toFSPathString());
                 process.start(QStringLiteral("bash"), QStringList() << QStringList() << QStringLiteral("-c") << QStringLiteral("catkin_init_workspace"));
 
-                if( !process.waitForFinished() )
+                if( !process.waitForFinished(-1) ) {
+                    Core::MessageManager::writeSilently(
+                        QObject::tr("[ROS Warning] Failed to initialise workspace: %1.")
+                            .arg(workspace.path.toFSPathString()));
                     return false;
+                }
 
                 break;
             }
@@ -218,8 +224,12 @@ bool ROSUtils::initializeWorkspace(QProcessEnvironment &env, const WorkspaceInfo
                 process.setWorkingDirectory(workspace.path.toFSPathString());
                 process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("catkin init"));
 
-                if( !process.waitForFinished() )
+                if( !process.waitForFinished(-1) ) {
+                    Core::MessageManager::writeSilently(
+                        QObject::tr("[ROS Warning] Failed to initialise workspace: %1.")
+                            .arg(workspace.path.toFSPathString()));
                     return false;
+                }
 
                 break;
             }
@@ -236,13 +246,17 @@ bool ROSUtils::initializeWorkspace(QProcessEnvironment &env, const WorkspaceInfo
             }
             } // switch
 
-            if (process.exitStatus() != QProcess::CrashExit)
-                return buildWorkspace(process, workspace);
+            if (workspaceInfo.buildSystem != Colcon
+                && (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0)) {
+                Core::MessageManager::writeSilently(
+                    QObject::tr("[ROS Warning] Failed to initialise workspace: %1. %2")
+                        .arg(workspace.path.toFSPathString(),
+                             QString::fromLocal8Bit(process.readAllStandardError())));
+                return false;
+            }
 
-            Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to initialize workspace: %1.").arg(workspace.path.toFSPathString()));
-            return false;
+            return buildWorkspace(process, workspace);
         } // if
-    }
 
     return true;
 }
@@ -254,29 +268,47 @@ bool ROSUtils::buildWorkspace(QProcess &process, const WorkspaceInfo &workspaceI
     {
         process.setWorkingDirectory(workspaceInfo.path.toFSPathString());
         process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("catkin_make --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
-        process.waitForFinished();
+        if (!process.waitForFinished(-1)) {
+            Core::MessageManager::writeSilently(
+                QObject::tr("[ROS Warning] Failed to build workspace: %1.")
+                    .arg(workspaceInfo.path.toFSPathString()));
+            return false;
+        }
         break;
     }
     case CatkinTools:
     {
         process.setWorkingDirectory(workspaceInfo.path.toFSPathString());
         process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("catkin build --cmake-args -G \"CodeBlocks - Unix Makefiles\""));
-        process.waitForFinished();
+        if (!process.waitForFinished(-1)) {
+            Core::MessageManager::writeSilently(
+                QObject::tr("[ROS Warning] Failed to build workspace: %1.")
+                    .arg(workspaceInfo.path.toFSPathString()));
+            return false;
+        }
         break;
     }
     case Colcon:
     {
         process.setWorkingDirectory(workspaceInfo.path.toFSPathString());
         process.start(QStringLiteral("bash"), QStringList() << QStringLiteral("-c") << QStringLiteral("colcon build"));
-        process.waitForFinished();
+        if (!process.waitForFinished(-1)) {
+            Core::MessageManager::writeSilently(
+                QObject::tr("[ROS Warning] Failed to build workspace: %1.")
+                    .arg(workspaceInfo.path.toFSPathString()));
+            return false;
+        }
         break;
     }
     }
 
-    if (process.exitStatus() != QProcess::CrashExit)
+    if (process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0)
         return true;
 
-    Core::MessageManager::writeSilently(QObject::tr("[ROS Warning] Failed to build workspace: %1.").arg(workspaceInfo.path.toFSPathString()));
+    Core::MessageManager::writeSilently(
+        QObject::tr("[ROS Warning] Failed to build workspace: %1. %2")
+            .arg(workspaceInfo.path.toFSPathString(),
+                 QString::fromLocal8Bit(process.readAllStandardError())));
     return false;
 }
 
@@ -287,12 +319,13 @@ const QList<Utils::FilePath> ROSUtils::installedDistributions()
   QList<Utils::FilePath> distributions;
   if(custom_ros_path.exists())
   {
-    const Utils::FilePaths entries = custom_ros_path.dirEntries(QDir::NoDotAndDotDot | QDir::Dirs);
+    const Utils::FilePaths entries = custom_ros_path.dirEntries(
+        Utils::DirFilterFlag::NoDotAndDotDot | Utils::DirFilterFlag::Dirs);
     for (const Utils::FilePath &entry : entries)
     {
       if ((entry / Constants::ROS_SOURCE_FILE).exists())
       {
-        distributions.append(custom_ros_path);
+        distributions.append(entry);
       }
     }
   }
@@ -300,7 +333,8 @@ const QList<Utils::FilePath> ROSUtils::installedDistributions()
   const Utils::FilePath default_ros_path = ros_settings->default_dist_path;
   if (default_ros_path.exists())
   {
-    const Utils::FilePaths entries = default_ros_path.dirEntries(QDir::NoDotAndDotDot | QDir::Dirs);
+    const Utils::FilePaths entries = default_ros_path.dirEntries(
+        Utils::DirFilterFlag::NoDotAndDotDot | Utils::DirFilterFlag::Dirs);
     for (const Utils::FilePath &entry : entries)
     {
       if ((entry / Constants::ROS_SOURCE_FILE).exists())
@@ -316,22 +350,33 @@ const QList<Utils::FilePath> ROSUtils::installedDistributions()
   return distributions;
 }
 
-void ROSUtils::sourceWorkspaceHelper(QProcessEnvironment &env, const QString &path)
+bool ROSUtils::sourceWorkspaceHelper(QProcessEnvironment &env, const QString &path)
 {
-    if (path.isEmpty())
-        return;
+    if (path.isEmpty() || !Utils::FilePath::fromString(path).exists()) {
+        Core::MessageManager::writeSilently(
+            QObject::tr("[ROS Warning] ROS setup file does not exist: %1.").arg(path));
+        return false;
+    }
 
     QProcess process;
 
-    const QString cmd = QStringLiteral("source ") + path + QStringLiteral(" && env");
-    process.start(QStringLiteral("bash"), QStringList());
-    process.waitForStarted();
-    process.write(cmd.toLatin1());
-    process.closeWriteChannel();
-    process.waitForFinished();
+    process.start(QStringLiteral("bash"),
+                  QStringList() << QStringLiteral("-c")
+                                << QStringLiteral("source \"$1\" && env")
+                                << QStringLiteral("sourceWorkspaceHelper")
+                                << path);
+    if (!process.waitForStarted() || !process.waitForFinished()) {
+        Core::MessageManager::writeSilently(
+            QObject::tr("[ROS Warning] Failed to run ROS setup file: %1.").arg(path));
+        return false;
+    }
 
-    if (process.exitStatus() == QProcess::CrashExit)
-        return;
+    if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
+        Core::MessageManager::writeSilently(
+            QObject::tr("[ROS Warning] Failed to source ROS setup file: %1. %2")
+                .arg(path, QString::fromLocal8Bit(process.readAllStandardError())));
+        return false;
+    }
 
     while (process.canReadLine()) {
         const QStringList env_kv = QString::fromLocal8Bit(process.readLine().trimmed()).split('=');
@@ -339,6 +384,7 @@ void ROSUtils::sourceWorkspaceHelper(QProcessEnvironment &env, const QString &pa
             env.insert(env_kv[0], env_kv[1]);
         }
     }
+    return true;
 }
 
 bool ROSUtils::generateQtCreatorWorkspaceFile(QXmlStreamWriter &xmlFile, const ROSProjectFileContent &content)
@@ -839,7 +885,7 @@ bool ROSUtils::parseCMakeFileAPI(PackageBuildInfo &package)
 {
     // find "index-*.json"
     const std::regex pattern(R"(index-.*\.json)");
-    const Utils::FilePaths files = package.apiReplyPath.dirEntries(QDir::Filter::Files);
+    const Utils::FilePaths files = package.apiReplyPath.dirEntries(Utils::DirFilterFlag::Files);
     const Utils::FilePaths::ConstIterator it = std::find_if(files.cbegin(), files.cend(), [&pattern](const Utils::FilePath &fp){ return std::regex_match(fp.fileName().toStdString(), pattern); });
     if (it == files.cend()) {
         Core::MessageManager::writeFlashing(QObject::tr("[ROS Warning] Unable to locate index file for package: '%1'").arg(package.parent.name));
