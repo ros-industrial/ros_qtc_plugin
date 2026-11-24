@@ -46,7 +46,7 @@ static const QString ROS_SOURCE_FILE_BAT = "setup.bat";
 #if defined(Q_OS_WIN)
 static constexpr char ROS_INSTALL_DIRECTORY[] = "C:/ros";
 static const QString ROS_SOURCE_FILE = ROS_SOURCE_FILE_BAT;
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
 static constexpr char ROS_INSTALL_DIRECTORY[] = "/usr/local/opt/ros";
 static const QString ROS_SOURCE_FILE = ROS_SOURCE_FILE_ZSH;
 #else
