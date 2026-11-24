@@ -18,7 +18,7 @@ jobs:
           - { name: "Linux-arm64", os: ubuntu-24.04-arm, build: "RelWithDebInfo" }
           - { name: "Windows", os: windows-latest, msvc_arch: amd64, build: "Release" }
           - { name: "Windows-arm64", os: windows-11-arm, msvc_arch: arm64, build: "Release" }
-          - { name: "macOS", os: macos-14, build: "Release" }
+          - { name: "macOS", os: macos-latest, build: "Release" }
     steps:
       - uses: actions/checkout@v6
 
